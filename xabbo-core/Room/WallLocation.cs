@@ -69,6 +69,15 @@ namespace Xabbo.Core
             Orientation = orientation;
         }
 
+        public void OffsetTile(int offsetX, int offsetY, int scale)
+        {
+            int halfTileWidth = scale / 2;
+            WallX += offsetX;
+            WallY += offsetY;
+            X += (offsetX - offsetY) * halfTileWidth;
+            Y += (offsetY + offsetY) * halfTileWidth / 2;
+        }
+
         public override string ToString() => ToString(WallX, WallY, X, Y, Orientation);
 
         public override int GetHashCode() => (WallX, WallY, X, Y, Orientation).GetHashCode();
