@@ -6,22 +6,25 @@ using Xabbo.Core.Metadata;
 
 namespace Xabbo.Core
 {
-    public static class XabboExtensions
+    public static class XabboCoreExtensions
     {
         #region - Item -
         public static IEnumerable<FloorItem> GetFloorItems<T>(this IEnumerable<T> furni) where T : IItem => furni.OfType<FloorItem>();
         public static IEnumerable<WallItem> GetWallItems<T>(this IEnumerable<T> furni) where T : IItem => furni.OfType<WallItem>();
         public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, FurniInfo furniInfo) where T : IItem
-            => items.OfKind(furniInfo.Type, furniInfo.Id);
+            => OfKind(items, furniInfo.Type, furniInfo.Id);
         public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, FurniType type, int kind) where T : IItem
             => items.Where(item => item.Type == type && item.Kind == kind);
         #endregion
 
         #region - Furni -
-        public static IEnumerable<FloorItem> OfKind(this IEnumerable<FloorItem> items, int kind)
+        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, int kind) where T : Furni
             => items.Where(item => item.Kind == kind);
-        public static IEnumerable<WallItem> OfKind(this IEnumerable<WallItem> items, int kind)
-            => items.Where(item => item.Kind == kind);
+        public static IEnumerable<T> OwnedBy<T>(this IEnumerable<T> items, int ownerId) where T : Furni
+            => items.Where(item => item.OwnerId == ownerId);
+        public static IEnumerable<T> OwnedBy<T>(this IEnumerable<T> items, string ownerName) where T : Furni
+            => items.Where(item => string.Equals(item.OwnerName, ownerName, StringComparison.InvariantCultureIgnoreCase));
+
         public static IEnumerable<FloorItem> At(this IEnumerable<FloorItem> items,
             int? x = null, int? y = null, double? z = null, int? dir = null, double epsilon = 0.001)
         {
@@ -34,8 +37,12 @@ namespace Xabbo.Core
                 yield return item;
             }
         }
+        public static IEnumerable<FloorItem> At(this IEnumerable<FloorItem> items, Tile tile)
+            => At(items, tile.X, tile.Y, tile.Z);
         public static bool AnyAt(this IEnumerable<FloorItem> items, int? x = null, int? y = null, double? z = null, int? dir = null)
-            => items.At(x, y, z, dir).Any();
+            => At(items, x, y, z, dir).Any();
+        public static bool AnyAt(this IEnumerable<FloorItem> items, Tile tile)
+            => AnyAt(items, tile.X, tile.Y, tile.Z);
         public static IEnumerable<WallItem> At(this IEnumerable<WallItem> items,
             int? wallX = null, int? wallY = null, int? x = null, int? y = null, WallOrientation? orientation = null)
         {
@@ -49,8 +56,12 @@ namespace Xabbo.Core
                 yield return item;
             }
         }
+        public static IEnumerable<WallItem> At(this IEnumerable<WallItem> items, WallLocation location)
+            => At(items, location.WallX, location.WallY, location.X, location.Y, location.Orientation);
         public static bool AnyAt(this IEnumerable<WallItem> items, int? wallX = null, int? wallY = null, int? x = null, int? y = null, WallOrientation? orientation = null)
-            => items.At(wallX, wallY, x, y, orientation).Any();
+            => At(items, wallX, wallY, x, y, orientation).Any();
+        public static bool AnyAt(this IEnumerable<WallItem> items, WallLocation location)
+            => AnyAt(items, location.WallX, location.WallY, location.X, location.Y, location.Orientation);
         #endregion
 
         #region - Inventory -
@@ -122,7 +133,8 @@ namespace Xabbo.Core
                 yield return currentItems.ToArray();
         }*/
         #endregion
-        
+
+        #region - Rooms -
         public static IEnumerable<RoomInfo> Find(
             this IEnumerable<RoomInfo> rooms,
             string name = null,
@@ -149,5 +161,6 @@ namespace Xabbo.Core
                 yield return roomInfo;
             }
         }
+        #endregion
     }
 }

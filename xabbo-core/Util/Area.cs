@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Xabbo.Core
 {
@@ -13,10 +9,11 @@ namespace Xabbo.Core
         public int X2 { get; }
         public int Y2 { get; }
 
-        public int Width => PointA.X - PointB.X + 1;
-
         public Point PointA => new Point(X1, Y1);
         public Point PointB => new Point(X2, Y2);
+
+        public int Width => X2 - X1 + 1;
+        public int Length => Y2 - Y1 + 1;
 
         public Area(int x1, int y1, int x2, int y2)
         {
@@ -39,31 +36,16 @@ namespace Xabbo.Core
         }
 
         public Area(Point a, Point b)
-        {
-            if (a.X > b.X)
-            {
-                int temp = a.X;
-                a.X = b.X;
-                b.X = temp;
-            }
-
-            if (a.Y > b.Y)
-            {
-                int temp = a.Y;
-                a.Y = b.Y;
-                b.Y = temp;
-            }
-
-            X1 = a.X; Y1 = a.Y;
-            X2 = b.X; Y2 = b.Y;
-        }
+            : this(a.X, a.Y, b.X, b.Y)
+        { }
 
         public Area(Point point, int width, int length)
         {
             if (width < 1) throw new ArgumentOutOfRangeException("width");
             if (length < 1) throw new ArgumentOutOfRangeException("length");
 
-            X1 = point.X; Y1 = point.Y;
+            X1 = point.X;
+            Y1 = point.Y;
             X2 = X1 + width - 1;
             Y2 = Y1 + length - 1;
         }
@@ -74,9 +56,18 @@ namespace Xabbo.Core
                 PointA.X <= x && y <= PointB.X &&
                 PointA.Y <= y && y <= PointB.Y;
         }
-
         public bool Contains(Point p) => Contains(p.X, p.Y);
-
         public bool Contains(Tile t) => Contains(t.X, t.Y);
+
+        public override int GetHashCode() => (X1, Y1, X2, Y2).GetHashCode();
+
+        public override bool Equals(object obj)
+        {
+            return obj is Area other &&
+                other.X1 == X1 &&
+                other.Y1 == Y1 &&
+                other.X2 == X2 &&
+                other.Y2 == Y2;
+        }
     }
 }

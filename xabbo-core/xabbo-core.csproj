@@ -218,9 +218,9 @@
     <Compile Include="Room\Furni\WallItem.cs" />
     <Compile Include="Util\Area.cs" />
     <Compile Include="Util\EnumerableExtensions.cs" />
-    <Compile Include="Util\Pos.cs" />
+    <Compile Include="Util\Point.cs" />
     <Compile Include="Util\ReflectionExtensions.cs" />
-    <Compile Include="Util\XabboExtensions.cs" />
+    <Compile Include="Util\XabboCoreExtensions.cs" />
     <Compile Include="Web\AccountSettings.cs" />
     <Compile Include="Web\AvatarInfo.cs" />
     <Compile Include="Web\BadgeInfo.cs" />

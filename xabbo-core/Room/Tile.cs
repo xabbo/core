@@ -5,7 +5,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class Tile
+    public class Tile : IWritable
     {
         public int X { get; set; }
         public int Y { get; set; }
@@ -23,6 +23,24 @@ namespace Xabbo.Core
             packet.WriteInteger(X);
             packet.WriteInteger(Y);
             packet.WriteString(Z.ToString());
+        }
+
+        public override int GetHashCode() => (X, Y, Z).GetHashCode();
+
+        public override bool Equals(object obj)
+        {
+            return obj is Tile other && Equals(other);
+        }
+
+        public bool Equals(Tile other, double epsilon = 0.001)
+        {
+            if (other is null)
+                return false;
+
+            return
+                X == other.X &&
+                Y == other.Y &&
+                Math.Abs(Z - other.Z) < epsilon;
         }
 
         public static Tile Parse(Packet packet) => new Tile(
@@ -50,12 +68,13 @@ namespace Xabbo.Core
             return new Tile(x, y, z);
         }
 
-        public bool Equals(Tile other, double threshold = 0.001)
+        public static bool operator ==(Tile a, Tile b)
         {
-            return
-                X == other.X &&
-                Y == other.Y &&
-                Math.Abs(Z - other.Z) < threshold;
+            if (a is null)
+                return b is null;
+            else
+                return a.Equals(b);
         }
+        public static bool operator !=(Tile a, Tile b) => !(a == b);
     }
 }
