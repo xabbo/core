@@ -6,7 +6,7 @@ namespace Xabbo.Core
 {
     public class FloorPlan
     {
-        public bool HighResWallPositioning { get; set; }
+        public int Scale { get; set; }
         public int WallHeight { get; set; }
         public int Width { get; set; }
         public int Length { get; set; }
@@ -27,7 +27,11 @@ namespace Xabbo.Core
 
         protected FloorPlan(Packet packet)
         {
-            HighResWallPositioning = packet.ReadBoolean();
+            if (packet.ReadBoolean())
+                Scale = 32;
+            else
+                Scale = 64;
+
             WallHeight = packet.ReadInteger();
             string map = packet.ReadString();
 
