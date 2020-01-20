@@ -95,6 +95,7 @@
     <Compile Include="Groups\GroupMemberSearchType.cs" />
     <Compile Include="Groups\GroupMemberType.cs" />
     <Compile Include="Handlers\IRoom.cs" />
+    <Compile Include="Interceptor\IInterceptor.cs" />
     <Compile Include="Inventory\Item.cs" />
     <Compile Include="Messages\Attributes\InterceptAttribute.cs" />
     <Compile Include="Messages\Header.cs" />
