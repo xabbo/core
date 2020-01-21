@@ -18,7 +18,7 @@ namespace Xabbo.Core
         public int CreationDay { get; set; }
         public int CreationMonth { get; set; }
         public int CreationYear { get; set; }
-        public int LinkedItemId { get; set; }
+        public int Extra { get; set; }
 
         public TradeItem() { }
 
@@ -35,9 +35,9 @@ namespace Xabbo.Core
             CreationMonth = packet.ReadInteger();
             CreationYear = packet.ReadInteger();
             if (Type == FurniType.Floor)
-                LinkedItemId = packet.ReadInteger();
+                Extra = packet.ReadInteger();
             else
-                LinkedItemId = -1;
+                Extra = -1;
         }
     }
 }
