@@ -1,11 +1,14 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
+using Newtonsoft.Json;
+
 using Xabbo.Core.Web;
+
+using static Xabbo.Core.XabboConst;
 
 namespace Xabbo.Core
 {
@@ -118,13 +121,7 @@ namespace Xabbo.Core
         #endregion
 
         #region - Web API -
-        public static string USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36";
-        private const string
-            URL_EXTERNAL_VARIABLES = "https://www.habbo.com/gamedata/external_variables/1",
-            API_USER_LOOKUP = "https://www.habbo.com/api/public/users?name=$name",
-            API_USER_PROFILE = "https://www.habbo.com/api/public/users/$uniqueId/profile",
-            API_FIGURE_IMAGE = "https://www.habbo.com/habbo-imaging/avatarimage?size=$size&figure=$figure&direction=$dir&head_direction=$headdir",
-            API_FURNI_EXTRADATA = "https://extradata.habbo.com/public/furni/$id";
+        public static string USER_AGENT = DEFAULT_USER_AGENT;
 
         private static async Task<string> DownloadStringAsync(string url, string referer = "https://www.habbo.com/")
         {

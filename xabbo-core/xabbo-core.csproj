@@ -222,6 +222,7 @@
     <Compile Include="Util\EnumerableExtensions.cs" />
     <Compile Include="Util\Point.cs" />
     <Compile Include="Util\ReflectionExtensions.cs" />
+    <Compile Include="Util\XabboConst.cs" />
     <Compile Include="Util\XabboCoreExtensions.cs" />
     <Compile Include="Web\AccountSettings.cs" />
     <Compile Include="Web\AvatarInfo.cs" />
