@@ -63,7 +63,7 @@ namespace Xabbo.Core
         [JsonIgnore] public int State { get; private set; }
 
         public int SecondsToExpiration { get; set; }
-        public int UseType { get; set; }
+        public FurniUsage Usage { get; set; }
 
         public string UnknownStringA { get; set; }
 
@@ -87,7 +87,7 @@ namespace Xabbo.Core
             Data = StuffData.Parse(packet);
 
             SecondsToExpiration = packet.ReadInteger();
-            UseType = packet.ReadInteger();
+            Usage = (FurniUsage)packet.ReadInteger();
             OwnerId = packet.ReadInteger();
 
             if (Kind < 0) // TODO ??
@@ -112,7 +112,7 @@ namespace Xabbo.Core
                 Extra,
                 Data,
                 SecondsToExpiration,
-                UseType,
+                (int)Usage,
                 OwnerId
             );
             if (Kind < 0) packet.WriteString(UnknownStringA);

@@ -34,7 +34,7 @@ namespace Xabbo.Core
 
         public string Data { get; set; }
         public int SecondsToExpiration { get; set; }
-        public int UnknownIntA { get; set; }
+        public FurniUsage Usage { get; set; }
 
         public WallLocation Location { get; set; }
 
@@ -87,7 +87,7 @@ namespace Xabbo.Core
             Location = WallLocation.Parse(packet.ReadString());
             Data = packet.ReadString();
             SecondsToExpiration = packet.ReadInteger();
-            UnknownIntA = packet.ReadInteger();
+            Usage = (FurniUsage)packet.ReadInteger();
             OwnerId = packet.ReadInteger();
 
             if (readName && packet.CanReadString())
@@ -103,9 +103,10 @@ namespace Xabbo.Core
             packet.WriteString(Location.ToString());
             packet.WriteString(Data);
             packet.WriteInteger(SecondsToExpiration);
-            packet.WriteInteger(UnknownIntA);
+            packet.WriteInteger((int)Usage);
             packet.WriteInteger(OwnerId);
-            if (writeName) packet.WriteString(OwnerName);
+            if (writeName)
+                packet.WriteString(OwnerName);
         }
     }
 }
