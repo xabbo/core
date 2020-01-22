@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -46,8 +47,28 @@ namespace Xabbo.Core
             }
         }
 
-        protected virtual void Hook() => Dispatcher.AttachListener(this);
-        protected virtual void Unhook() => Dispatcher.DetachListener(this);
+        protected virtual void Hook()
+        {
+            if (Dispatcher.AttachListener(this).Length > 0)
+            {
+                Debug.WriteLine($"[{GetType().Name}.Hook] attached listener");
+            }
+            else
+            {
+                Debug.WriteLine($"[{GetType().Name}.Hook] no listener methods were attached");
+            }
+        }
+        protected virtual void Unhook()
+        {
+            if (Dispatcher.DetachListener(this))
+            {
+                Debug.WriteLine($"[{GetType().Name}.Unhook] detached listener");
+            }
+            else
+            {
+                Debug.WriteLine($"[{GetType().Name}.Unhook] failed to detach listener");
+            }
+        }
 
         protected virtual async Task<TResult> ExecuteAsync()
         {
@@ -57,9 +78,9 @@ namespace Xabbo.Core
 
         protected abstract Task OnExecuteAsync();
 
-        protected void SetResult(TResult result) => completion.TrySetResult(result);
-        protected void SetCanceled() => completion.TrySetCanceled();
-        protected void SetException(Exception ex) => completion.TrySetException(ex);
+        protected bool SetResult(TResult result) => completion.TrySetResult(result);
+        protected bool SetCanceled() => completion.TrySetCanceled();
+        protected bool SetException(Exception ex) => completion.TrySetException(ex);
 
         protected Task<bool> SendAsync(short header, params object[] values) => interceptor.SendToServerAsync(header, values);
         protected Task<bool> SendAsync(Packet packet) => interceptor.SendToServerAsync(packet);
