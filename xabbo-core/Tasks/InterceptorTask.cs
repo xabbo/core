@@ -22,6 +22,8 @@ namespace Xabbo.Core
             completion = new TaskCompletionSource<TResult>();
         }
 
+        public TResult Execute(int timeout, CancellationToken token) => ExecuteAsync(timeout, token).GetAwaiter().GetResult();
+
         public async Task<TResult> ExecuteAsync(int timeout, CancellationToken token)
         {
             CancellationTokenSource cts = null;
@@ -34,8 +36,6 @@ namespace Xabbo.Core
 
                 Hook();
 
-                await OnExecuteAsync();
-
                 return await completion.Task;
             }
             finally
@@ -47,8 +47,6 @@ namespace Xabbo.Core
 
         protected virtual void Hook() => Dispatcher.AttachListener(this);
         protected virtual void Unhook() => Dispatcher.DetachListener(this);
-
-        public TResult Execute() => ExecuteAsync().GetAwaiter().GetResult();
 
         protected virtual async Task<TResult> ExecuteAsync()
         {
