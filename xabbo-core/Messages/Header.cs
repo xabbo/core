@@ -14,7 +14,7 @@ namespace Xabbo.Core.Messages
 
         public override int GetHashCode()
         {
-            throw new NotImplementedException();
+            return base.GetHashCode() + (Value * 43003);
         }
 
         public override bool Equals(object obj)
