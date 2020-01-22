@@ -36,10 +36,11 @@ namespace Xabbo.Core
 
                 Hook();
 
-                return await completion.Task;
+                return await ExecuteAsync();
             }
             finally
             {
+                Unhook();
                 cts?.Cancel();
                 cts?.Dispose();
             }
