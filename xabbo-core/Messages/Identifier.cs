@@ -26,8 +26,13 @@ namespace Xabbo.Core.Messages
 
         public override bool Equals(object obj)
         {
-            Identifier other = obj as Identifier;
-            if (other == null) return false;
+            return
+                obj is Identifier other &&
+                Equals(other);
+        }
+
+        public bool Equals(Identifier other)
+        {
             return
                 Destination.Equals(other.Destination) &&
                 string.Equals(Name, other.Name);
