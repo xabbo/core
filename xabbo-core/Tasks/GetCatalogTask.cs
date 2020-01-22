@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
-    internal class GetCatalogTask : InterceptorTask<Catalog>
+    public class GetCatalogTask : InterceptorTask<Catalog>
     {
         private readonly string mode;
 

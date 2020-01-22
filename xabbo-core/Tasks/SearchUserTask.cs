@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
-    internal class SearchUserTask : InterceptorTask<UserSearchResults>
+    public class SearchUserTask : InterceptorTask<UserSearchResults>
     {
         private readonly string searchName;
 

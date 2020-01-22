@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
-    internal class GetRoomSettingsTask : InterceptorTask<RoomSettings>
+    public class GetRoomSettingsTask : InterceptorTask<RoomSettings>
     {
         private readonly int roomId;
 

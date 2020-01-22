@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
-    internal class GetGroupInfoTask : InterceptorTask<GroupInfo>
+    public class GetGroupInfoTask : InterceptorTask<GroupInfo>
     {
         private readonly int groupId;
 

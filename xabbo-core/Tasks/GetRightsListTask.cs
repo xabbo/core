@@ -6,7 +6,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
-    internal class GetRightsListTask : InterceptorTask<List<(int Id, string Name)>>
+    public class GetRightsListTask : InterceptorTask<List<(int Id, string Name)>>
     {
         private readonly int roomId;
 

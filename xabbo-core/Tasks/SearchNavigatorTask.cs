@@ -6,7 +6,7 @@ using Xabbo.Core.Messages;
 namespace Xabbo.Core
 {
     [RequiredOut("RequestNewNavigatorRooms")]
-    internal class SearchNavigatorTask : InterceptorTask<NavigatorSearchResults>
+    public class SearchNavigatorTask : InterceptorTask<NavigatorSearchResults>
     {
         private readonly string category;
         private readonly string filter;

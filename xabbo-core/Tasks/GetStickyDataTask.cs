@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
-    internal class GetStickyDataTask : InterceptorTask<Sticky>
+    public class GetStickyDataTask : InterceptorTask<Sticky>
     {
         private readonly int stickyId;
 

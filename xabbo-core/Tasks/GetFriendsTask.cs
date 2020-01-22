@@ -6,7 +6,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
-    internal class GetFriendsTask : InterceptorTask<List<FriendInfo>>
+    public class GetFriendsTask : InterceptorTask<List<FriendInfo>>
     {
         private int totalExpected = -1, currentIndex = 0;
         private readonly List<FriendInfo> friends = new List<FriendInfo>();

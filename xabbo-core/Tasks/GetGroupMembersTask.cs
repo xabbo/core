@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
-    internal class GetGroupMembersTask : InterceptorTask<GroupMembers>
+    public class GetGroupMembersTask : InterceptorTask<GroupMembers>
     {
         private readonly int groupId;
         private readonly int page;

@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
-    internal class GetProfileTask : InterceptorTask<UserProfile>
+    public class GetProfileTask : InterceptorTask<UserProfile>
     {
         private readonly int userId;
 

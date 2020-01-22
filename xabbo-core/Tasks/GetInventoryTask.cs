@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
-    internal class GetInventoryTask : InterceptorTask<Inventory>
+    public class GetInventoryTask : InterceptorTask<Inventory>
     {
         private int totalExpected = -1, currentIndex = 0;
         private readonly Inventory inventory = new Inventory();

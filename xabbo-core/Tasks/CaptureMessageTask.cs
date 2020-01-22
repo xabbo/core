@@ -7,7 +7,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
-    internal class CaptureMessageTask : InterceptorTask<Packet>
+    public class CaptureMessageTask : InterceptorTask<Packet>
     {
         private readonly Destination destination;
         private readonly short[] targetHeaders;

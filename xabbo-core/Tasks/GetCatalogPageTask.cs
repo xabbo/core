@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
-    internal class GetCatalogPageTask : InterceptorTask<CatalogPage>
+    public class GetCatalogPageTask : InterceptorTask<CatalogPage>
     {
         private readonly int pageId;
         private readonly string mode;
