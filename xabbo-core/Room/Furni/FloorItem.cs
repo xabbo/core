@@ -33,7 +33,7 @@ namespace Xabbo.Core
             return items;
         }
 
-        [JsonIgnore] public override FurniType Type => Core.FurniType.Floor;
+        [JsonIgnore] public override FurniType Type => FurniType.Floor;
 
         public Tile Tile { get; set; }
         [JsonIgnore] public int X => Tile.X;
