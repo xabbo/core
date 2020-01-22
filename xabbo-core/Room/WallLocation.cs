@@ -60,7 +60,7 @@ namespace Xabbo.Core
 
         public WallLocation() { }
 
-        public WallLocation(int wallX, int wallY, int x, int y, WallOrientation orientation)
+        public WallLocation(int wallX, int wallY, int x, int y, WallOrientation orientation = WallOrientation.Left)
         {
             WallX = wallX;
             WallY = wallY;
@@ -74,8 +74,8 @@ namespace Xabbo.Core
             int halfTileWidth = scale / 2;
             WallX += offsetX;
             WallY += offsetY;
-            X += (offsetX - offsetY) * halfTileWidth;
-            Y += (offsetY + offsetY) * halfTileWidth / 2;
+            X -= (offsetX - offsetY) * halfTileWidth;
+            Y -= (offsetX + offsetY) * halfTileWidth / 2;
         }
 
         public override string ToString() => ToString(WallX, WallY, X, Y, Orientation);
