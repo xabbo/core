@@ -32,11 +32,8 @@ namespace Xabbo.Core
             return obj is Tile other && Equals(other);
         }
 
-        public bool Equals(Tile other, double epsilon = 0.001)
+        public bool Equals(Tile other, double epsilon = XabboConst.DEFAULT_EPSILON)
         {
-            if (other is null)
-                return false;
-
             return
                 X == other.X &&
                 Y == other.Y &&
@@ -46,7 +43,7 @@ namespace Xabbo.Core
         public static Tile Parse(Packet packet) => new Tile(
             packet.ReadInteger(),
             packet.ReadInteger(),
-            double.Parse(packet.ReadString(), CultureInfo.InvariantCulture)
+            packet.ReadDouble()
         );
 
         public static Tile Parse(string format)
