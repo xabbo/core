@@ -254,8 +254,7 @@ namespace Xabbo.Core.Messages
             var listenerType = listener.GetType();
             var methodInfos = listenerType.FindAllMethods();
 
-            var receiveCallbackList = new List<ReceiveCallback<TSender>>();
-            var interceptCallbackList = new List<InterceptCallback>();
+            var callbackList = new List<ListenerCallback>();
 
             var unresolvedIdentifiers = new Identifiers();
 
@@ -364,12 +363,12 @@ namespace Xabbo.Core.Messages
                             short header = Headers[identifier];
                             if (!uniqueHeaders.Add(header)) continue;
 
-                            receiveCallbackList.Add(CreateCallback(header, listener, groups, methodInfo));
+                            callbackList.Add(CreateCallback(header, listener, groups, methodInfo));
                         }
                     }
                     else
                     {
-                        receiveCallbackList.Add(CreateCallback(-1, listener, groups, methodInfo));
+                        callbackList.Add(CreateCallback(-1, listener, groups, methodInfo));
                     }
                 }
 
@@ -397,26 +396,26 @@ namespace Xabbo.Core.Messages
                             short header = Headers[identifier];
                             if (!uniqueHeaders.Add(header)) continue;
 
-                            interceptCallbackList.Add(CreateInterceptCallback(identifier.Destination, header, listener, groups, methodInfo));
+                            callbackList.Add(CreateInterceptCallback(identifier.Destination, header, listener, groups, methodInfo));
                         }
                     }
                     else
                     {
                         var destination = (interceptAttribute is InterceptOutAttribute) ? Destination.Server : Destination.Client;
-                        interceptCallbackList.Add(CreateInterceptCallback(destination, -1, listener, groups, methodInfo));
+                        callbackList.Add(CreateInterceptCallback(destination, -1, listener, groups, methodInfo));
                     }
                 }
             }
 
             // If no listener callbacks and no intercept callbacks are left
-            if (!receiveCallbackList.Any() && !interceptCallbackList.Any())
+            if (!callbackList.Any())
                 return new object[0]; // Return no groups succeeded
 
-            if (!listeners.TryAdd(listener, receiveCallbackList))
+            if (!listeners.TryAdd(listener, callbackList))
                 throw new InvalidOperationException($"Listener '{listenerType.FullName}' is already attached");
 
             // Add receive callbacks
-            foreach (var callbackGroup in receiveCallbackList.GroupBy(x => x.Header))
+            foreach (var callbackGroup in callbackList.OfType<ReceiveCallback<TSender>>().GroupBy(x => x.Header))
             {
                 short header = callbackGroup.Key;
 
@@ -433,7 +432,7 @@ namespace Xabbo.Core.Messages
             }
             
             // Add intercept callbacks
-            foreach (var callbackGroup in interceptCallbackList.GroupBy(x => (x.Destination, x.Header)))
+            foreach (var callbackGroup in callbackList.OfType<InterceptCallback>().GroupBy(x => (x.Destination, x.Header)))
             {
                 short header = callbackGroup.Key.Header;
 
