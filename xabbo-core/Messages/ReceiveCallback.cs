@@ -6,8 +6,6 @@ namespace Xabbo.Core.Messages
 {
     internal abstract class ReceiveCallback<TSender> : ListenerCallback
     {
-        private volatile bool isUnsubscribed = false;
-
         protected ReceiveCallback(short header, object target, object[] tags, Delegate @delegate)
             : base(header, target, @delegate.Method, tags, @delegate)
         { }
@@ -16,11 +14,6 @@ namespace Xabbo.Core.Messages
         {
             if (isUnsubscribed) return;
             OnInvoked(sender, packet);
-        }
-
-        public void Unsubscribe()
-        {
-            isUnsubscribed = true;
         }
 
         protected abstract void OnInvoked(TSender sender, Packet packet);

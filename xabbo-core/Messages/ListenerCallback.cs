@@ -5,7 +5,7 @@ namespace Xabbo.Core.Messages
 {
     public abstract class ListenerCallback
     {
-        private volatile bool isUnsubscribed = false;
+        protected volatile bool isUnsubscribed = false;
 
         public short Header { get; }
         public object Target { get; }
