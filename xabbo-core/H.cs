@@ -51,8 +51,12 @@ namespace Xabbo.Core
         {
             switch (s.ToLower())
             {
-                case "s": return FurniType.Floor;
-                case "i": return FurniType.Wall;
+                case "s":
+                case "floor":
+                    return FurniType.Floor;
+                case "i":
+                case "wall":
+                    return FurniType.Wall;
                 default: throw new FormatException($"Unknown furni type: {s}");
             }
         }
