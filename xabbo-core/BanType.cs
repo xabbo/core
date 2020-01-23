@@ -13,7 +13,7 @@ namespace Xabbo.Core
         Permanent
     }
 
-    public static partial class EnumExtensions
+    public static partial class XabboEnumExtensions
     {
         public static string GetValue(this BanType banType)
         {

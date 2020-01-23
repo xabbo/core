@@ -16,7 +16,7 @@ namespace Xabbo.Core
         HelpCenters = 0x06
     }
 
-    public static partial class EnumExtensions
+    public static partial class XabboEnumExtensions
     {
         public static string ToFriendlyName(this RoomCategory category)
         {

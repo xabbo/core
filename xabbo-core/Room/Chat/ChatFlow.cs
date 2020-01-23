@@ -11,7 +11,7 @@ namespace Xabbo.Core
         LineByLine = 1
     }
 
-    public static partial class EnumExtensions
+    public static partial class XabboEnumExtensions
     {
         public static string ToFriendlyString(this ChatFlow chatFlow)
         {

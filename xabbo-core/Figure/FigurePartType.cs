@@ -19,7 +19,7 @@ namespace Xabbo.Core
         ChestPrint
     }
 
-    public static partial class EnumExtensions
+    public static partial class XabboEnumExtensions
     {
         public static string ToShortString(this FigurePartType figurePartType)
         {

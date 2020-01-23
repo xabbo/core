@@ -9,7 +9,7 @@ namespace Xabbo.Core
         Allowed = 2
     }
 
-    public static partial class EnumExtensions
+    public static partial class XabboEnumExtensions
     {
         public static string ToFriendlyName(this TradePermissions tradePermissions)
         {
