@@ -2,15 +2,14 @@
 
 namespace Xabbo.Core
 {
-    // this enum is a bit field
     public enum Gender
     {
-        Male = 1,
-        Female = 2,
-        Unisex = 3
+        Male = 0x01,
+        Female = 0x02,
+        Unisex = Male | Female
     }
 
-    public static partial class EnumExtensions
+    public static partial class XabboEnumExtensions
     {
         public static string ToShortString(this Gender gender)
         {
