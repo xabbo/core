@@ -59,8 +59,10 @@ namespace Xabbo.Core.Metadata
                 .Where(x => x.Name.ToLower().Contains(name))
                 .OrderBy(x => Math.Abs(x.Name.Length - name.Length));
         }
+        public IEnumerable<FurniInfo> FindItems(string name) => FindItems(this, name);
         public IEnumerable<FurniInfo> FindFloorItems(string name) => FindItems(FloorItems, name);
         public IEnumerable<FurniInfo> FindWallItems(string name) => FindItems(WallItems, name);
+        public FurniInfo FindItem(string name) => FindItems(this, name).FirstOrDefault();
         public FurniInfo FindFloorItem(string name) => FindItems(FloorItems, name).FirstOrDefault();
         public FurniInfo FindWallItem(string name) => FindItems(WallItems, name).FirstOrDefault();
 
