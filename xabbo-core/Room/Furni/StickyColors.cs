@@ -4,18 +4,18 @@ using System.Collections.Generic;
 
 namespace Xabbo.Core
 {
-    public sealed class StickyColors : IReadOnlyList<string>
+    public sealed class StickyColors : IReadOnlyList<StickyColor>
     {
-        public const string Blue = "9CCEFF";
-        public const string Pink = "FF9CFF";
-        public const string Green = "9CFF9C";
-        public const string Yellow = "FFFF33";
+        public static readonly StickyColor Blue = new StickyColor("Blue", "9CCEFF");
+        public static readonly StickyColor Pink = new StickyColor("Pink", "FF9CFF");
+        public static readonly StickyColor Green = new StickyColor("Green", "9CFF9C");
+        public static readonly StickyColor Yellow = new StickyColor("Yellow", "FFFF33");
 
-        private readonly List<string> colors;
+        private readonly List<StickyColor> colors;
 
         internal StickyColors()
         {
-            colors = new List<string>()
+            colors = new List<StickyColor>()
             {
                 Blue,
                 Pink,
@@ -24,9 +24,9 @@ namespace Xabbo.Core
             };
         }
 
-        public string this[int index] => colors[index];
+        public StickyColor this[int index] => colors[index];
         public int Count => colors.Count;
-        public IEnumerator<string> GetEnumerator() => colors.GetEnumerator();
+        public IEnumerator<StickyColor> GetEnumerator() => colors.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
