@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 using Xabbo.Core.Protocol;
 
@@ -37,17 +38,26 @@ namespace Xabbo.Core
 
             string[] lines = map.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             Length = lines.Length;
-            Width = Length > 0 ? lines[0].Length : 0;
+            Width = 0;
             for (int i = 0; i < Length; i++)
-                if (lines[i].Length != Width)
-                    throw new FormatException("Inconsistent width in floor plan string.");
+            {
+                if (lines[i].Length > Width)
+                    Width = lines[i].Length;
+            }
 
             tiles = new int[Width * Length];
-            for (int y = 0; y < Length; y++)
+            for (int i = 0; i < tiles.Length; i++)
+                tiles[i] = -1;
+
+            for (int y = 0; y < lines.Length; y++)
             {
-                for (int x = 0; x < Width; x++)
+                for (int x = 0; x < lines[y].Length; x++)
                 {
-                    tiles[y * Width + x] = H.GetHeightFromCharacter(lines[y][x]);
+                    char c = lines[y][x];
+                    if (c != 'x' && c != 'X')
+                    {
+                        tiles[y * Width + x] = H.GetHeightFromCharacter(lines[y][x]);
+                    }
                 }
             }
         }
@@ -72,6 +82,22 @@ namespace Xabbo.Core
             if (x < 0 || x >= Width || y < 0 || y >= Length)
                 return false;
             return GetHeight(x, y) >= 0;
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+
+            for (int y = 0; y < Length; y++)
+            {
+                if (y > 0) sb.Append('\n');
+                for (int x = 0; x < Width; x++)
+                {
+                    sb.Append(H.GetCharFromHeight(tiles[y * Width + x]));
+                }
+            }
+
+            return sb.ToString();
         }
 
         public static FloorPlan Parse(Packet packet) => new FloorPlan(packet);

@@ -117,10 +117,20 @@ namespace Xabbo.Core
         {
             if ('0' <= c && c <= '9')
                 return c - '0';
-            else if ('a' <= c && c < 'x')
+            else if ('a' <= c && c != 'x' && c <= 'z')
                 return 10 + (c - 'a');
             else
                 return -1;
+        }
+
+        public static char GetCharFromHeight(int height)
+        {
+            if (0 <= height && height < 10)
+                return (char)('0' + height);
+            else if (10 <= height && height < 36)
+                return (char)('a' + (height - 10));
+            else
+                return 'x';
         }
         #endregion
 
