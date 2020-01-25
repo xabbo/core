@@ -6,10 +6,9 @@ namespace Xabbo.Core
 {
     public class HeightMap
     {
-        public int Width { get; set; }
-        public int Length { get; set; }
-
-        public short[] Values { get; set; }
+        public int Width { get; }
+        public int Length { get; }
+        public short[] Values { get; }
 
         public static double GetHeight(short value)
         {
@@ -28,7 +27,23 @@ namespace Xabbo.Core
             return value >= 0;
         }
 
-        public HeightMap() { }
+        public HeightMap(int width, int length)
+        {
+            Width = width;
+            Length = length;
+            Values = new short[width * length];
+        }
+
+        private HeightMap(Packet packet)
+        {
+            Width = packet.ReadInteger();
+            int n = packet.ReadInteger();
+            Length = n / Width;
+
+            Values = new short[n];
+            for (int i = 0; i < n; i++)
+                Values[i] = packet.ReadShort();
+        }
 
         public double GetHeight(int x, int y)
         {
@@ -49,17 +64,6 @@ namespace Xabbo.Core
             if (x < 0 || x >= Width || y < 0 || y >= Length)
                 return false;
             return IsTile(Values[y * Width + x]);
-        }
-
-        private HeightMap(Packet packet)
-        {
-            Width = packet.ReadInteger();
-            int n = packet.ReadInteger();
-            Length = n / Width;
-
-            Values = new short[n];
-            for (int i = 0; i < n; i++)
-                Values[i] = packet.ReadShort();
         }
 
         public static HeightMap Parse(Packet packet) => new HeightMap(packet);
