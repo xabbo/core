@@ -28,7 +28,7 @@ namespace Xabbo.Core
         bool IsRingingDoorbell { get; }
         bool IsInQueue { get; }
         int QueuePosition { get; }
-        bool IsEnteringRoom { get; }
+        bool IsLoadingRoom { get; }
         bool IsInRoom { get; }
 
         Tile DoorTile { get; }
