@@ -4,7 +4,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public abstract class Entity
+    public abstract class Entity : IWritable
     {
         public bool IsRemoved { get; set; }
 
@@ -51,6 +51,20 @@ namespace Xabbo.Core
         }
 
         protected virtual void OnUpdate(EntityUpdate update) { }
+
+        public virtual void Write(Packet packet)
+        {
+            packet.WriteValues(
+                Id,
+                Name,
+                Motto,
+                Figure,
+                Index,
+                Tile,
+                (int)Direction,
+                (int)Type
+            );
+        }
 
         public static Entity Parse(Packet packet)
         {

@@ -10,12 +10,12 @@ namespace Xabbo.Core
         public int OwnerId { get; set; }
         public string OwnerName { get; set; }
         public int RarityLevel { get; set; }
-        public bool UnknownBool1 { get; set; }
-        public bool UnknownBool2 { get; set; }
-        public bool UnknownBool3 { get; set; }
-        public bool UnknownBool4 { get; set; }
-        public bool UnknownBool5 { get; set; }
-        public bool UnknownBool6 { get; set; }
+        public bool UnknownBoolA { get; set; }
+        public bool UnknownBoolB { get; set; }
+        public bool UnknownBoolC { get; set; }
+        public bool UnknownBoolD { get; set; }
+        public bool UnknownBoolE { get; set; }
+        public bool UnknownBoolF { get; set; }
         public int Level { get; set; }
         public string Stance { get; set; }
 
@@ -30,14 +30,34 @@ namespace Xabbo.Core
             OwnerId = packet.ReadInteger();
             OwnerName = packet.ReadString();
             RarityLevel = packet.ReadInteger();
-            UnknownBool1 = packet.ReadBoolean();
-            UnknownBool2 = packet.ReadBoolean();
-            UnknownBool3 = packet.ReadBoolean();
-            UnknownBool4 = packet.ReadBoolean();
-            UnknownBool5 = packet.ReadBoolean();
-            UnknownBool6 = packet.ReadBoolean();
+            UnknownBoolA = packet.ReadBoolean();
+            UnknownBoolB = packet.ReadBoolean();
+            UnknownBoolC = packet.ReadBoolean();
+            UnknownBoolD = packet.ReadBoolean();
+            UnknownBoolE = packet.ReadBoolean();
+            UnknownBoolF = packet.ReadBoolean();
             Level = packet.ReadInteger();
             Stance = packet.ReadString();
+        }
+
+        public override void Write(Packet packet)
+        {
+            base.Write(packet);
+
+            packet.WriteValues(
+                Breed,
+                OwnerId,
+                OwnerName,
+                RarityLevel,
+                UnknownBoolA,
+                UnknownBoolB,
+                UnknownBoolC,
+                UnknownBoolD,
+                UnknownBoolE,
+                UnknownBoolF,
+                Level,
+                Stance
+            );
         }
     }
 }

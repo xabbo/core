@@ -8,14 +8,24 @@ namespace Xabbo.Core
     {
         public Gender Gender { get; set; }
         public int GroupId { get; set; }
-        public int Unknown1 { get; set; }
+        public int UnknownIntA { get; set; }
         public string GroupName { get; set; } 
         public string FigureExtra { get; set; }
         public int AchievementScore { get; set; }
-        public bool Unknown2 { get; set; }
+        public bool UnknownBoolA { get; set; }
 
         // Extra state
-        public int RightsLevel { get; set; }
+        public int RightsLevel
+        {
+            get
+            {
+                var update = CurrentUpdate;
+                if (update != null)
+                    return update.ControlLevel;
+                else
+                    return 0;
+            }
+        }
         public bool HasRights => RightsLevel > 0;
 
         public RoomUser(int id, int index)
@@ -27,19 +37,28 @@ namespace Xabbo.Core
         {
             Gender = H.ToGender(packet.ReadString());
             GroupId = packet.ReadInteger();
-            Unknown1 = packet.ReadInteger();
+            UnknownIntA = packet.ReadInteger();
             GroupName = packet.ReadString();
             FigureExtra = packet.ReadString();
             AchievementScore = packet.ReadInteger();
-            Unknown2 = packet.ReadBoolean();
+            UnknownBoolA = packet.ReadBoolean();
         }
 
-        protected override void OnUpdate(EntityUpdate update)
+        protected override void OnUpdate(EntityUpdate update) { }
+
+        public override void Write(Packet packet)
         {
-            if (update.IsController && (RightsLevel != update.ControlLevel))
-                RightsLevel = update.ControlLevel;
-            else if (!update.IsController && RightsLevel != 0)
-                RightsLevel = 0;
+            base.Write(packet);
+
+            packet.WriteValues(
+                Gender.ToShortString(),
+                GroupId,
+                UnknownIntA,
+                GroupName,
+                FigureExtra,
+                AchievementScore,
+                UnknownBoolA
+            );
         }
     }
 }

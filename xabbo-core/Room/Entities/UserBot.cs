@@ -10,12 +10,12 @@ namespace Xabbo.Core
         public Gender Gender { get; set; }
         public int OwnerId { get; set; }
         public string OwnerName { get; set; }
-        public List<short> Unknown1 { get; set; }
+        public List<short> UnknownShortsA { get; set; }
 
         public UserBot(int id, int index)
             : base(EntityType.UserBot, id, index)
         {
-            Unknown1 = new List<short>();
+            UnknownShortsA = new List<short>();
         }
 
         internal UserBot(int id, int index, Packet packet)
@@ -27,7 +27,19 @@ namespace Xabbo.Core
 
             int n = packet.ReadInteger();
             for (int i = 0; i < n; i++)
-                Unknown1.Add(packet.ReadShort());
+                UnknownShortsA.Add(packet.ReadShort());
+        }
+
+        public override void Write(Packet packet)
+        {
+            base.Write(packet);
+
+            packet.WriteValues(
+                Gender.ToShortString(),
+                OwnerId,
+                OwnerName,
+                UnknownShortsA
+            );
         }
     }
 }

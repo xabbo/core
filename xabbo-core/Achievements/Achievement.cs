@@ -29,21 +29,21 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class Achievement
+    public class Achievement : IWritable
     {
         public int Id { get; set; }
         public int Level { get; set; }
         public string BadgeName { get; set; }
         public int BaseProgress { get; set; }
         public int MaxProgress { get; set; }
-        public int IntA { get; set; }
-        public int IntB { get; set; }
+        public int UnknownIntA { get; set; }
+        public int UnknownIntB { get; set; }
         public int CurrentProgress { get; set; }
         public bool IsCompleted { get; set; }
         public string Category { get; set; }
-        public string StringA { get; set; }
+        public string UnknownStringA { get; set; }
         public int MaxLevel { get; set; }
-        public int IntC { get; set; }
+        public int UnknownIntC { get; set; }
 
         public Achievement() { }
 
@@ -54,14 +54,33 @@ namespace Xabbo.Core
             BadgeName = packet.ReadString();
             BaseProgress = packet.ReadInteger();
             MaxProgress = packet.ReadInteger();
-            IntA = packet.ReadInteger();
-            IntB = packet.ReadInteger();
+            UnknownIntA = packet.ReadInteger();
+            UnknownIntB = packet.ReadInteger();
             CurrentProgress = packet.ReadInteger();
             IsCompleted = packet.ReadBoolean();
             Category = packet.ReadString();
-            StringA = packet.ReadString();
+            UnknownStringA = packet.ReadString();
             MaxLevel = packet.ReadInteger();
-            IntC = packet.ReadInteger();
+            UnknownIntC = packet.ReadInteger();
+        }
+
+        public void Write(Packet packet)
+        {
+            packet.WriteValues(
+                Id,
+                Level,
+                BadgeName,
+                BaseProgress,
+                MaxProgress,
+                UnknownIntA,
+                UnknownIntB,
+                CurrentProgress,
+                IsCompleted,
+                Category,
+                UnknownStringA,
+                MaxLevel,
+                UnknownIntC
+            );
         }
 
         public static Achievement Parse(Packet packet) => new Achievement(packet);
