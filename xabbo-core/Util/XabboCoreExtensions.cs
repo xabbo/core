@@ -20,6 +20,8 @@ namespace Xabbo.Core
         #region - Furni -
         public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, int kind) where T : Furni
             => items.Where(item => item.Kind == kind);
+        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, IEnumerable<int> kinds) where T : Furni
+            => items.Where(item => kinds.Contains(item.Kind));
         public static IEnumerable<T> OwnedBy<T>(this IEnumerable<T> items, int ownerId) where T : Furni
             => items.Where(item => item.OwnerId == ownerId);
         public static IEnumerable<T> OwnedBy<T>(this IEnumerable<T> items, string ownerName) where T : Furni
@@ -65,6 +67,8 @@ namespace Xabbo.Core
         #endregion
 
         #region - Inventory -
+        public static IEnumerable<InventoryItem> OfCategory(this IEnumerable<InventoryItem> items, FurniCategory category)
+            => items.Where(item => item.Category == category);
         public static IEnumerable<InventoryItem> GetGroupable(this IEnumerable<InventoryItem> items)
             => items.Where(item => item.IsGroupable);
         public static IEnumerable<InventoryItem> GetTradeable(this IEnumerable<InventoryItem> items)
