@@ -37,10 +37,12 @@ namespace Xabbo.Core
         #endregion
 
         #region - Room permissions -
+        bool IsRoomOwner { get; }
+        bool HasRights { get; }
+        int RightsLevel { get; }
         bool CanMute { get; }
         bool CanKick { get; }
         bool CanBan { get; }
-        bool IsRoomOwner { get; }
         #endregion
 
         #region - Furni -
