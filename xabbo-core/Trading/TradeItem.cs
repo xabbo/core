@@ -4,11 +4,11 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class TradeItem : IItem
+    public class TradeItem : IInventoryItem
     {
         public static TradeItem Parse(Packet packet) => new TradeItem(packet);
 
-        public int InverseId { get; set; }
+        public int ItemId { get; set; }
         public FurniType Type { get; set; }
         public int Id { get; set; }
         public int Kind { get; set; }
@@ -24,7 +24,7 @@ namespace Xabbo.Core
 
         protected TradeItem(Packet packet)
         {
-            InverseId = packet.ReadInteger();
+            ItemId = packet.ReadInteger();
             Type = (FurniType)packet.ReadInteger();
             Id = packet.ReadInteger();
             Kind = packet.ReadInteger();

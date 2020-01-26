@@ -4,14 +4,11 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class InventoryItem : IItem
+    public class InventoryItem : IInventoryItem
     {
         public static InventoryItem Parse(Packet packet) => new InventoryItem(packet);
 
-        // No idea why there are inverse ids, but it
-        // looks like it uses InverseId when placing/trading items,
-        // and Id when moving/picking up items
-        public int InverseId { get; set; }
+        public int ItemId { get; set; }
         public FurniType Type { get; set; }
         public int Id { get; set; }
         public int Kind { get; set; }
@@ -34,7 +31,7 @@ namespace Xabbo.Core
 
         private InventoryItem(Packet packet)
         {
-            InverseId = packet.ReadInteger();
+            ItemId = packet.ReadInteger();
             Type = H.ToFurniType(packet.ReadString());
             Id = packet.ReadInteger();
             Kind = packet.ReadInteger();
