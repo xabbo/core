@@ -38,5 +38,29 @@ namespace Xabbo.Core.Messages
             foreach (string name in names)
                 Add(destination, name);
         }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+
+            if (Unknown.Any())
+                sb.Append(string.Join(", ", Unknown));
+
+            if (Incoming.Any())
+            {
+                if (sb.Length > 0) sb.Append("; ");
+                sb.Append("Incoming: ");
+                sb.Append(string.Join(", ", Incoming));
+            }
+
+            if (Outgoing.Any())
+            {
+                if (sb.Length > 0) sb.Append("; ");
+                sb.Append("Outgoing: ");
+                sb.Append(string.Join(", ", Outgoing));
+            }
+
+            return sb.ToString();
+        }
     }
 }
