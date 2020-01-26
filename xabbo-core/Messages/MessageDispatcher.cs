@@ -237,7 +237,7 @@ namespace Xabbo.Core.Messages
         }
         #endregion
 
-        #region - Receivers -
+        #region - Listeners -
         public bool IsListenerAttached(IListener receiver) => listeners.ContainsKey(receiver);
 
         /// <summary>
@@ -248,18 +248,14 @@ namespace Xabbo.Core.Messages
         /// attached if <paramref name="requireAll"/> is <c>false</c>.
         /// </summary>
         /// <param name="listener">The listener to attach</param>
-        /// <param name="requireAll">Whether all message groups must succesfully be attached or not.</param>
+        /// <param name="requireAll">Whether all message groups must successfully be attached or not.</param>
         public object[] AttachListener(IListener listener, bool requireAll = true)
         {
             var listenerType = listener.GetType();
             var methodInfos = listenerType.FindAllMethods();
 
-            var callbackList = new List<ListenerCallback>();
-
             var unresolvedIdentifiers = new Identifiers();
-
             var faultedGroups = new List<object>();
-            var successfulGroups = new List<object>();
 
             /*
                 Pass 1
@@ -314,7 +310,12 @@ namespace Xabbo.Core.Messages
             }
 
             if (requireAll && faultedGroups.Any())
-                throw new Exception($"Failed to attach message groups for listener {listenerType.Name}: {string.Join(", ", faultedGroups)}");
+            {
+                throw new ListenerAttachFailedException(listener, faultedGroups);
+            }
+
+            var callbackList = new List<ListenerCallback>();
+            var successfulGroups = new List<object>();
 
             /*
                 Pass 2
@@ -455,9 +456,9 @@ namespace Xabbo.Core.Messages
             return successfulGroups.ToArray();
         }
 
-        public bool DetachListener(IListener handler)
+        public bool DetachListener(IListener listener)
         {
-            if (!listeners.TryRemove(handler, out IReadOnlyList<ListenerCallback> callbacks))
+            if (!listeners.TryRemove(listener, out IReadOnlyList<ListenerCallback> callbacks))
                 return false;
 
             foreach (var callback in callbacks)
@@ -574,142 +575,6 @@ namespace Xabbo.Core.Messages
 
             return result;
         }
-        #endregion
-
-        #region - Interceptors -
-        /*public bool AttachInterceptor(IInterceptor interceptor)
-        {
-            var interceptorType = interceptor.GetType();
-            var methodInfos = interceptorType.FindAllMethods();
-
-            var interceptorCallbacks = new List<InterceptCallback>();
-
-            var methodGroups = methodInfos
-                .Where(method => method.GetCustomAttributes<InterceptAttribute>().Any())
-                .GroupBy(x => x.GetCustomAttribute<GroupAttribute>()?.Tag);
-
-            if (!methodGroups.Any()) return false;
-
-            foreach (var methodGroup in methodGroups)
-            {
-                bool groupFaulted = false;
-                var groupCallbacks = new List<InterceptCallback>();
-
-                foreach (var methodInfo in methodGroup)
-                {
-                    if (!CheckInterceptorMethodSignature(methodInfo))
-                    {
-                        throw new Exception(
-                            $"{interceptorType.Name}.{methodInfo.Name} has a " +
-                            $"method signature incompatible with {typeof(InterceptAttribute).Name}"
-                        );
-                    }
-
-                    // TODO Check required out, required in
-
-                    var inHeaders = new HashSet<short>();
-                    var outHeaders = new HashSet<short>();
-                    var attributes = methodInfo.GetCustomAttributes<InterceptAttribute>();
-                    if (attributes.Count() > 1)
-                    {
-                        throw new Exception(
-                            $"Defining multiple intercept attributes is not supported " +
-                            $"({interceptorType.FullName}.{methodInfo.Name})"
-                        );
-                    }
-                    var attribute = attributes.FirstOrDefault();
-
-                    if (attribute.Identifiers.Count == 0)
-                    {
-                        throw new NotImplementedException("Non-targeted interceptors are not yet implemented");
-                    }
-
-                    var duplicate = attribute.Identifiers.FindDuplicate();
-                    if (duplicate != null)
-                    {
-                        throw new Exception(
-                            $"Duplicate identifier '{duplicate.Name}' defined in " +
-                            $"{attribute.GetType().Name} for method " +
-                            $"{methodInfo.DeclaringType.FullName}.{methodInfo.Name}"
-                        );
-                    }
-
-                    foreach (var identifier in attribute.Identifiers)
-                    {
-                        if (!Headers.HasIdentifier(identifier))
-                            throw new UnknownIdentifierException(identifier, methodInfo);
-
-                        if (!Headers.TryGetHeader(identifier, out short header) || header < 0)
-                        {
-                            groupFaulted = true;
-                            break;
-                        }
-
-                        if ((identifier.IsOutgoing ? outHeaders : inHeaders).Add(header))
-                        {
-                            groupCallbacks.Add(CreateInterceptCallback(identifier.Destination, header, interceptor, methodGroup.Key, methodInfo));
-                        }
-                    }
-
-                    if (groupFaulted) break;
-                }
-
-                if (!groupFaulted) interceptorCallbacks.AddRange(groupCallbacks);
-            }
-
-            if (interceptorCallbacks.Count == 0) return false;
-            if (!interceptors.TryAdd(interceptor, interceptorCallbacks)) return false;
-
-            IReadOnlyList<InterceptCallback> previousList, newList;
-            foreach (Destination destination in typeof(Destination).GetEnumValues())
-            {
-                var dict = GetInterceptCallbackDictionary(destination);
-                foreach (var callbackGroup in interceptorCallbacks
-                    .Where(x => x.Destination == destination)
-                    .GroupBy(x => x.Header))
-                {
-                    do
-                    {
-                        previousList = dict.GetOrAdd(callbackGroup.Key, InterceptCallbackListFactory);
-
-                        var list = previousList.ToList();
-                        list.AddRange(callbackGroup);
-                        newList = list;
-                    }
-                    while (!dict.TryUpdate(callbackGroup.Key, newList, previousList));
-                }
-            }
-
-            return true;
-        }
-
-        public bool DetachInterceptor(IInterceptor interceptor)
-        {
-            if (interceptors.TryRemove(interceptor, out IReadOnlyList<InterceptCallback> callbacks)) return false;
-
-            foreach (Destination destination in typeof(Destination).GetEnumValues())
-            {
-                foreach (var callbackGroup in callbacks
-                    .Where(x => x.Destination == destination)
-                    .GroupBy(x => x.Header))
-                {
-                    short header = callbackGroup.Key;
-                    var dict = GetInterceptCallbackDictionary(destination);
-                    IReadOnlyList<InterceptCallback> previousList, newList;
-                    do
-                    {
-                        if (!dict.TryGetValue(header, out previousList)) break;
-                        var list = previousList.ToList();
-                        foreach (var callback in callbackGroup)
-                            list.Remove(callback);
-                        newList = list;
-                    }
-                    while (!dict.TryUpdate(header, newList, previousList));
-                }
-            }
-
-            return true;
-        }*/
         #endregion
     }
 
