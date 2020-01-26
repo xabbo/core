@@ -33,5 +33,12 @@ namespace Xabbo.Core
                 results.Add(UserSearchResult.Parse(packet));
             Others = results.AsReadOnly();
         }
+
+        public UserSearchResult GetResult(string name)
+        {
+            return this.FirstOrDefault(result =>
+                string.Equals(result.Name, name, StringComparison.InvariantCultureIgnoreCase)
+            );
+        }
     }
 }
