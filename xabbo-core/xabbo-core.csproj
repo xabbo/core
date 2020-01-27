@@ -122,7 +122,7 @@
     <Compile Include="Tasks\GetCatalogPageTask.cs" />
     <Compile Include="Tasks\GetCatalogTask.cs" />
     <Compile Include="Tasks\GetFriendsTask.cs" />
-    <Compile Include="Tasks\GetGroupInfoTask.cs" />
+    <Compile Include="Tasks\GetGroupDataTask.cs" />
     <Compile Include="Tasks\GetGroupMembersTask.cs" />
     <Compile Include="Tasks\GetInventoryTask.cs" />
     <Compile Include="Tasks\GetProfileTask.cs" />

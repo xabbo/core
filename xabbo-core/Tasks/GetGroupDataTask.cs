@@ -5,11 +5,11 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
-    public class GetGroupInfoTask : InterceptorTask<GroupInfo>
+    public class GetGroupDataTask : InterceptorTask<GroupData>
     {
         private readonly int groupId;
 
-        public GetGroupInfoTask(IInterceptor interceptor, int groupId)
+        public GetGroupDataTask(IInterceptor interceptor, int groupId)
             : base(interceptor)
         {
             this.groupId = groupId;
@@ -22,11 +22,11 @@ namespace Xabbo.Core
         {
             try
             {
-                var groupInfo = GroupInfo.Parse(e.Packet);
-                if (groupInfo.Id == groupId)
+                var groupData = GroupData.Parse(e.Packet);
+                if (groupData.Id == groupId)
                 {
                     e.Block();
-                    SetResult(groupInfo);
+                    SetResult(groupData);
                 }
             }
             catch (Exception ex) { SetException(ex); }
