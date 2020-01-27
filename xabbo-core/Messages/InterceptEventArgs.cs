@@ -9,6 +9,7 @@ namespace Xabbo.Core.Messages
         private readonly short originalHeader = -1;
         private readonly byte[] originalData;
 
+        public DateTime Time { get; }
         public Destination Destination { get; }
         public bool IsOutgoing => Destination == Destination.Server;
         public bool IsIncoming => Destination == Destination.Client;
@@ -50,6 +51,8 @@ namespace Xabbo.Core.Messages
 
         public InterceptEventArgs(Destination destination, Packet packet)
         {
+            Time = DateTime.Now;
+
             Destination = destination;
             this.packet = packet;
 
