@@ -23,9 +23,8 @@ namespace Xabbo.Core
         {
             switch (gender)
             {
-                // TODO Check this (from friend info)
+                case 0: return Gender.Female;
                 case 1: return Gender.Male;
-                case 2: return Gender.Female;
                 default: return Gender.Unisex;
             }
         }

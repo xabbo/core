@@ -30,18 +30,18 @@ namespace Xabbo.Core
 
         public int Id { get; set; }
         public string Name { get; set; }
-        public int Gender { get; set; }
+        public Gender Gender { get; set; }
         public bool IsOnline { get; set; }
-        public bool CanFollow { get; set; } // @Sulakore
+        public bool CanFollow { get; set; }
         public string FigureString { get; set; }
-        public int UnknownIntA { get; set; } // CategoryId @Sulakore
+        public int Category { get; set; }
         public string Motto { get; set; }
         public string RealName { get; set; }
         public string UnknownStringA { get; set; }
-        public bool UnknownBoolB { get; set; } // IsPersisted @Sulakore
+        public bool IsAcceptingOfflineMessages { get; set; }
         public bool UnknownBoolC { get; set; }
         public bool IsPocketHabboUser { get; set; }
-        public Relation Relation { get; set; } // @Sulakore
+        public Relation Relation { get; set; }
 
         public FriendInfo() { }
 
@@ -49,15 +49,15 @@ namespace Xabbo.Core
         {
             Id = packet.ReadInteger();
             Name = packet.ReadString();
-            Gender = packet.ReadInteger(); // H.ToGender(packet.ReadInteger());
+            Gender = H.ToGender(packet.ReadInteger());
             IsOnline = packet.ReadBoolean();
             CanFollow = packet.ReadBoolean();
             FigureString = packet.ReadString();
-            UnknownIntA = packet.ReadInteger();
+            Category = packet.ReadInteger();
             Motto = packet.ReadString();
             RealName = packet.ReadString();
             UnknownStringA = packet.ReadString();
-            UnknownBoolB = packet.ReadBoolean();
+            IsAcceptingOfflineMessages = packet.ReadBoolean();
             UnknownBoolC = packet.ReadBoolean();
             IsPocketHabboUser = packet.ReadBoolean();
             Relation = (Relation)packet.ReadShort();
@@ -68,18 +68,18 @@ namespace Xabbo.Core
             packet.WriteValues(
                 Id,
                 Name,
-                Gender,
+                Gender.GetValue(),
                 IsOnline,
                 CanFollow,
                 FigureString,
-                UnknownIntA,
+                Category,
                 Motto,
                 RealName,
                 UnknownStringA,
-                UnknownBoolB,
+                IsAcceptingOfflineMessages,
                 UnknownBoolC,
                 IsPocketHabboUser,
-                (int)Relation
+                (short)Relation
             );
         }
     }

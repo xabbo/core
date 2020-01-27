@@ -21,5 +21,16 @@ namespace Xabbo.Core
                 default: throw new Exception($"Unknown gender '{gender}'.");
             }
         }
+
+        public static int GetValue(this Gender gender)
+        {
+            switch (gender)
+            {
+                case Gender.Male: return 1;
+                case Gender.Female: return 0;
+                case Gender.Unisex: return 2;
+                default: return -1;
+            }
+        }
     }
 }
