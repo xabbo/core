@@ -6,6 +6,86 @@ namespace Xabbo.Core
 {
     public class WallLocation : IWritable
     {
+        public int WallX { get; set; }
+        public int WallY { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public WallOrientation Orientation { get; set; }
+
+        public WallLocation() { }
+
+        public WallLocation(int wallX, int wallY, int x, int y, WallOrientation orientation = WallOrientation.Left)
+        {
+            WallX = wallX;
+            WallY = wallY;
+            X = x;
+            Y = y;
+            Orientation = orientation;
+        }
+
+        public WallLocation(int wallX, int wallY, int x, int y, char orientation)
+            : this(wallX, wallY, x, y)
+        {
+            switch (orientation)
+            {
+                case 'l': Orientation = WallOrientation.Left; break;
+                case 'r': Orientation = WallOrientation.Right; break;
+                default: throw new ArgumentException($"Invalid wall orientation '{orientation}', must be 'l' or 'r'");
+            }
+        }
+
+        public void OffsetTile(int offsetX, int offsetY, int scale)
+        {
+            int halfTileWidth = scale / 2;
+            WallX += offsetX;
+            WallY += offsetY;
+            X -= (offsetX - offsetY) * halfTileWidth;
+            Y -= (offsetX + offsetY) * halfTileWidth / 2;
+        }
+
+        public void AdjustWall(int scale)
+        {
+            while (X > (scale / 2))
+            {
+                X -= scale / 2;
+                if (Orientation == WallOrientation.Left)
+                {
+                    WallY--;
+                    Y += scale / 4;
+                }
+                else
+                {
+                    WallX++;
+                    Y -= scale / 4;
+                }
+            }
+        }
+
+        public WallLocation Clone() => new WallLocation(WallX, WallY, X, Y, Orientation);
+
+        public void Write(Packet packet)
+        {
+            packet.WriteString(ToString());
+        }
+
+        public override string ToString() => ToString(WallX, WallY, X, Y, Orientation);
+
+        public override int GetHashCode() => (WallX, WallY, X, Y, Orientation).GetHashCode();
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as WallLocation;
+            return
+                other != null &&
+                WallX == other.WallX &&
+                WallY == other.WallY &&
+                X == other.X &&
+                Y == other.Y &&
+                Orientation == other.Orientation;
+        }
+
+        public static string ToString(int wallX, int wallY, int x, int y, WallOrientation orientation) => $":w={wallX},{wallY} l={x},{y} {(char)orientation}";
+
         public static WallLocation Parse(string locationString)
         {
             if (!TryParse(locationString, out WallLocation wallLocation))
@@ -52,53 +132,6 @@ namespace Xabbo.Core
             return true;
         }
 
-        public int WallX { get; set; }
-        public int WallY { get; set; }
-        public int X { get; set; }
-        public int Y { get; set; }
-        public WallOrientation Orientation { get; set; }
-
-        public WallLocation() { }
-
-        public WallLocation(int wallX, int wallY, int x, int y, WallOrientation orientation = WallOrientation.Left)
-        {
-            WallX = wallX;
-            WallY = wallY;
-            X = x;
-            Y = y;
-            Orientation = orientation;
-        }
-
-        public void OffsetTile(int offsetX, int offsetY, int scale)
-        {
-            int halfTileWidth = scale / 2;
-            WallX += offsetX;
-            WallY += offsetY;
-            X -= (offsetX - offsetY) * halfTileWidth;
-            Y -= (offsetX + offsetY) * halfTileWidth / 2;
-        }
-
-        public override string ToString() => ToString(WallX, WallY, X, Y, Orientation);
-
-        public override int GetHashCode() => (WallX, WallY, X, Y, Orientation).GetHashCode();
-
-        public override bool Equals(object obj)
-        {
-            var other = obj as WallLocation;
-            return
-                other != null &&
-                WallX == other.WallX &&
-                WallY == other.WallY &&
-                X == other.X &&
-                Y == other.Y &&
-                Orientation == other.Orientation;
-        }
-
-        public void Write(Packet packet)
-        {
-            packet.WriteString(ToString());
-        }
-
         public static bool operator ==(WallLocation a, WallLocation b)
         {
             if (a is null) return b is null;
@@ -106,6 +139,7 @@ namespace Xabbo.Core
         }
         public static bool operator !=(WallLocation a, WallLocation b) => !(a == b);
 
-        public static string ToString(int wallX, int wallY, int x, int y, WallOrientation orientation) => $":w={wallX},{wallY} l={x},{y} {(char)orientation}";
+        public static implicit operator string(WallLocation location) => location.ToString();
+        public static implicit operator WallLocation(string s) => WallLocation.Parse(s);
     }
 }
