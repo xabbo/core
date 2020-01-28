@@ -110,6 +110,7 @@
     <Compile Include="Protocol\IWritable.cs" />
     <Compile Include="Room\Furni\FurniCategory.cs" />
     <Compile Include="Room\Furni\FurniUsage.cs" />
+    <Compile Include="Room\Furni\PhotoInfo.cs" />
     <Compile Include="Room\Furni\StickyColor.cs" />
     <Compile Include="Room\RollerInstanceUpdate.cs" />
     <Compile Include="Room\RollerUpdate.cs" />
