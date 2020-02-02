@@ -37,8 +37,8 @@ namespace Xabbo.Core
         public StuffDataType Type { get; }
 
         public int Flags { get; protected set; }
-        public int UniqueSerialNumber { get; private set; }
-        public int UnknownInt1 { get; private set; }
+        public int LimitedNumber { get; private set; }
+        public int LimitedTotal { get; private set; }
 
         public string LegacyString { get; protected set; }
 
@@ -51,8 +51,8 @@ namespace Xabbo.Core
         {
             if ((Flags & 256) > 0)
             {
-                UniqueSerialNumber = packet.ReadInteger();
-                UnknownInt1 = packet.ReadInteger(); // idk
+                LimitedNumber = packet.ReadInteger();
+                LimitedTotal = packet.ReadInteger();
             }
         }
 
@@ -66,8 +66,8 @@ namespace Xabbo.Core
         {
             if ((Flags & 256) > 0)
             {
-                packet.WriteInteger(UniqueSerialNumber);
-                packet.WriteInteger(UnknownInt1);
+                packet.WriteInteger(LimitedNumber);
+                packet.WriteInteger(LimitedTotal);
             }
         }
 
