@@ -2,12 +2,12 @@
 
 namespace Xabbo.Core
 {
-    public struct Point
+    public struct Position
     {
         public int X { get; set; }
         public int Y { get; set; }
 
-        public Point(int x, int y)
+        public Position(int x, int y)
         {
             X = x;
             Y = y;

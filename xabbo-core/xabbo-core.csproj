@@ -239,7 +239,7 @@
     <Compile Include="Room\Furni\WallItem.cs" />
     <Compile Include="Util\Area.cs" />
     <Compile Include="Util\EnumerableExtensions.cs" />
-    <Compile Include="Util\Point.cs" />
+    <Compile Include="Util\Position.cs" />
     <Compile Include="Util\ReflectionExtensions.cs" />
     <Compile Include="Util\XabboConst.cs" />
     <Compile Include="Util\XabboCoreExtensions.cs" />

@@ -9,8 +9,8 @@ namespace Xabbo.Core
         public int X2 { get; }
         public int Y2 { get; }
 
-        public Point PointA => new Point(X1, Y1);
-        public Point PointB => new Point(X2, Y2);
+        public Position PointA => new Position(X1, Y1);
+        public Position PointB => new Position(X2, Y2);
 
         public int Width => X2 - X1 + 1;
         public int Length => Y2 - Y1 + 1;
@@ -35,11 +35,11 @@ namespace Xabbo.Core
             X2 = x2; Y2 = y2;
         }
 
-        public Area(Point a, Point b)
+        public Area(Position a, Position b)
             : this(a.X, a.Y, b.X, b.Y)
         { }
 
-        public Area(Point point, int width, int length)
+        public Area(Position point, int width, int length)
         {
             if (width < 1) throw new ArgumentOutOfRangeException("width");
             if (length < 1) throw new ArgumentOutOfRangeException("length");
@@ -56,7 +56,7 @@ namespace Xabbo.Core
                 PointA.X <= x && y <= PointB.X &&
                 PointA.Y <= y && y <= PointB.Y;
         }
-        public bool Contains(Point p) => Contains(p.X, p.Y);
+        public bool Contains(Position p) => Contains(p.X, p.Y);
         public bool Contains(Tile t) => Contains(t.X, t.Y);
 
         public override int GetHashCode() => (X1, Y1, X2, Y2).GetHashCode();
