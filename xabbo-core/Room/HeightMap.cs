@@ -27,6 +27,23 @@ namespace Xabbo.Core
             return value >= 0;
         }
 
+        public short this[int x, int y]
+        {
+            get
+            {
+                if (x < 0 || x >= Width) throw new ArgumentOutOfRangeException("x");
+                if (y < 0 || y >= Length) throw new ArgumentOutOfRangeException("y");
+                return Values[y * Width + x];
+            }
+
+            set
+            {
+                if (x < 0 || x >= Width) throw new ArgumentOutOfRangeException("x");
+                if (y < 0 || y >= Length) throw new ArgumentOutOfRangeException("y");
+                Values[y * Width + x] = value;
+            }
+        }
+
         public HeightMap(int width, int length)
         {
             Width = width;
