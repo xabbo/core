@@ -14,24 +14,13 @@ namespace Xabbo.Core
 
         public WallLocation() { }
 
-        public WallLocation(int wallX, int wallY, int x, int y, WallOrientation orientation = WallOrientation.Left)
+        public WallLocation(int wallX, int wallY, int x, int y, WallOrientation orientation)
         {
             WallX = wallX;
             WallY = wallY;
             X = x;
             Y = y;
             Orientation = orientation;
-        }
-
-        public WallLocation(int wallX, int wallY, int x, int y, char orientation)
-            : this(wallX, wallY, x, y)
-        {
-            switch (orientation)
-            {
-                case 'l': Orientation = WallOrientation.Left; break;
-                case 'r': Orientation = WallOrientation.Right; break;
-                default: throw new ArgumentException($"Invalid wall orientation '{orientation}', must be 'l' or 'r'");
-            }
         }
 
         public void OffsetTile(int offsetX, int offsetY, int scale)
@@ -57,6 +46,21 @@ namespace Xabbo.Core
                 {
                     WallX++;
                     Y -= scale / 4;
+                }
+            }
+
+            while (X < (-scale / 2))
+            {
+                X += scale / 2;
+                if (Orientation == WallOrientation.Left)
+                {
+                    WallY++;
+                    Y -= scale / 4;
+                }
+                else
+                {
+                    WallX--;
+                    Y += scale / 4;
                 }
             }
         }
