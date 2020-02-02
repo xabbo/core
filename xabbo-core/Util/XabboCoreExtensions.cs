@@ -46,7 +46,7 @@ namespace Xabbo.Core
         public static bool AnyAt(this IEnumerable<FloorItem> items, Tile tile)
             => AnyAt(items, tile.X, tile.Y, tile.Z);
         public static IEnumerable<WallItem> At(this IEnumerable<WallItem> items,
-            int? wallX = null, int? wallY = null, int? x = null, int? y = null, WallOrientation? orientation = null)
+            int? wallX = null, int? wallY = null, int? x = null, int? y = null, WallOrientation orientation = null)
         {
             foreach (var item in items)
             {
@@ -54,13 +54,13 @@ namespace Xabbo.Core
                 if (wallY.HasValue && item.WallY != wallY) continue;
                 if (x.HasValue && item.X != x) continue;
                 if (y.HasValue && item.Y != y) continue;
-                if (orientation.HasValue && item.Orientation != orientation) continue;
+                if (orientation != null && item.Orientation != orientation) continue;
                 yield return item;
             }
         }
         public static IEnumerable<WallItem> At(this IEnumerable<WallItem> items, WallLocation location)
             => At(items, location.WallX, location.WallY, location.X, location.Y, location.Orientation);
-        public static bool AnyAt(this IEnumerable<WallItem> items, int? wallX = null, int? wallY = null, int? x = null, int? y = null, WallOrientation? orientation = null)
+        public static bool AnyAt(this IEnumerable<WallItem> items, int? wallX = null, int? wallY = null, int? x = null, int? y = null, WallOrientation orientation = null)
             => At(items, wallX, wallY, x, y, orientation).Any();
         public static bool AnyAt(this IEnumerable<WallItem> items, WallLocation location)
             => AnyAt(items, location.WallX, location.WallY, location.X, location.Y, location.Orientation);
