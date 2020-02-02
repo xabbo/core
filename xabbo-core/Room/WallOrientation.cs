@@ -2,9 +2,31 @@
 
 namespace Xabbo.Core
 {
-    public enum WallOrientation
+    public sealed class WallOrientation
     {
-        Left = 'l',
-        Right = 'r'
+        public static readonly WallOrientation Left = new WallOrientation('l');
+        public static readonly WallOrientation Right = new WallOrientation('r');
+
+        public char Value { get; }
+
+        public bool IsLeft => Value == 'l';
+        public bool IsRight => Value == 'r';
+
+        private WallOrientation(char value)
+        {
+            Value = value;
+        }
+
+        public static implicit operator WallOrientation(char c)
+        {
+            switch (c)
+            {
+                case 'l': return Left;
+                case 'r': return Right;
+                default: throw new InvalidCastException($"Invalid wall orientation '{c}', must be 'l' or 'r'");
+            }
+        }
+
+        public static implicit operator char(WallOrientation orientation) => orientation.Value;
     }
 }
