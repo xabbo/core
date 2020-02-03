@@ -37,10 +37,13 @@ namespace Xabbo.Core.Web
         public string Type { get; set; }
 
         [JsonProperty("time")]
-        public ulong Time { get; set; }
+        public long Time { get; set; }
 
         [JsonProperty("tags")]
         public List<string> Tags { get; set; }
+
+        [JsonProperty("room_id")]
+        public int RoomId { get; set; }
 
         [JsonProperty("creator_uniqueId")]
         public string CreatorUniqueId { get; set; }
