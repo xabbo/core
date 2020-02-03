@@ -107,6 +107,7 @@
     <Compile Include="Metadata\FigureDataXml.cs" />
     <Compile Include="Metadata\FurniDataXml.cs" />
     <Compile Include="Metadata\FurniInfo.cs" />
+    <Compile Include="Metadata\ProductData.cs" />
     <Compile Include="Protocol\IWritable.cs" />
     <Compile Include="Room\Furni\FurniCategory.cs" />
     <Compile Include="Room\Furni\FurniUsage.cs" />
