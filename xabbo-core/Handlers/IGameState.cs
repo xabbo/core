@@ -50,6 +50,8 @@ namespace Xabbo.Core
         IEnumerable<Furni> Furni { get; }
         IEnumerable<FloorItem> FloorItems { get; }
         IEnumerable<WallItem> WallItems { get; }
+        FloorItem GetFloorItem(int id);
+        WallItem GetWallItem(int id);
         #endregion
 
         #region - Entities -
