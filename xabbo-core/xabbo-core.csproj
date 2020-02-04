@@ -121,6 +121,7 @@
     <Compile Include="Room\WallLocation.cs" />
     <Compile Include="Room\WallOrientation.cs" />
     <Compile Include="Tasks\CaptureMessageTask.cs" />
+    <Compile Include="Tasks\GetBadgesTask.cs" />
     <Compile Include="Tasks\GetCatalogPageTask.cs" />
     <Compile Include="Tasks\GetCatalogTask.cs" />
     <Compile Include="Tasks\GetFriendsTask.cs" />
@@ -138,6 +139,7 @@
     <Compile Include="Trading\TradeItem.cs" />
     <Compile Include="Trading\TradeOffer.cs" />
     <Compile Include="Trading\TradeUpdate.cs" />
+    <Compile Include="Users\Badge.cs" />
     <Compile Include="Users\FriendInfo.cs" />
     <Compile Include="Users\Relation.cs" />
     <Compile Include="Users\UserSearchResults.cs" />
