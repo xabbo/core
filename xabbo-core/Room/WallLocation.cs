@@ -120,9 +120,8 @@ namespace Xabbo.Core
 
             WallOrientation orientation;
             if (a[2].Length != 1) return false;
-            orientation = (WallOrientation)a[2].ToLower()[0];
-            if (!Enum.IsDefined(typeof(WallOrientation), orientation))
-                return false;
+            try { orientation = WallOrientation.FromChar(a[2].ToLower()[0]); }
+            catch { return false; }
 
             location = new WallLocation()
             {

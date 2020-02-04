@@ -17,7 +17,7 @@ namespace Xabbo.Core
             Value = value;
         }
 
-        public static implicit operator WallOrientation(char c)
+        public static WallOrientation FromChar(char c)
         {
             switch (c)
             {
@@ -26,6 +26,8 @@ namespace Xabbo.Core
                 default: throw new InvalidCastException($"Invalid wall orientation '{c}', must be 'l' or 'r'");
             }
         }
+
+        public static implicit operator WallOrientation(char c) => FromChar(c);
 
         public static implicit operator char(WallOrientation orientation) => orientation.Value;
     }
