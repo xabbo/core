@@ -24,6 +24,7 @@ namespace Xabbo.Core
         #endregion
 
         #region - Room state -
+        RoomData RoomData { get; }
         int RoomId { get; }
         bool IsRingingDoorbell { get; }
         bool IsInQueue { get; }
