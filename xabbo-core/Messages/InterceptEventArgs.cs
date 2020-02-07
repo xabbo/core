@@ -16,20 +16,17 @@ namespace Xabbo.Core.Messages
 
         public bool IsBlocked { get; private set; }
 
-        // TODO packet can be written to without accessing the setter, so this doesn't work ...
         public bool IsModified
         {
             get
             {
                 if (packet.Header != originalHeader) return true;
                 if (packet.Length != originalData.Length) return true;
-                
-                // TODO Hashing packet content ?
 
-                byte[] newData = packet.ToBytes();
+                byte[] data = packet.ToBytes();
                 for (int i = 0; i < originalData.Length; i++)
                 {
-                    if (originalData[i] != newData[i])
+                    if (originalData[i] != data[i])
                         return true;
                 }
 
