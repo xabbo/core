@@ -12,7 +12,10 @@ namespace Xabbo.Core
         public int Y { get; set; }
         public WallOrientation Orientation { get; set; }
 
-        public WallLocation() { }
+        public WallLocation()
+        {
+            Orientation = WallOrientation.Left;
+        }
 
         public WallLocation(int wallX, int wallY, int x, int y, WallOrientation orientation)
         {
