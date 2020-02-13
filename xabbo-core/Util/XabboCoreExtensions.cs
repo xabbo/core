@@ -13,14 +13,23 @@ namespace Xabbo.Core
         public static IEnumerable<WallItem> GetWallItems<T>(this IEnumerable<T> furni) where T : IItem => furni.OfType<WallItem>();
         public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, FurniInfo furniInfo) where T : IItem
             => OfKind(items, furniInfo.Type, furniInfo.Id);
+        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, params FurniInfo[] furniInfo) where T : IItem
+        {
+            var hashSet = new HashSet<(FurniType, int)>(furniInfo.Select(info => ValueTuple.Create(info.Type, info.Id)));
+            return items.Where(item => hashSet.Contains(ValueTuple.Create(item.Type, item.Kind)));
+        }
         public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, FurniType type, int kind) where T : IItem
             => items.Where(item => item.Type == type && item.Kind == kind);
         #endregion
 
         #region - Furni -
-        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, int kind) where T : Furni
+        public static IEnumerable<FloorItem> OfKind(this IEnumerable<FloorItem> items, int kind)
             => items.Where(item => item.Kind == kind);
-        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, IEnumerable<int> kinds) where T : Furni
+        public static IEnumerable<WallItem> OfKind(this IEnumerable<WallItem> items, int kind)
+            => items.Where(item => item.Kind == kind);
+        public static IEnumerable<FloorItem> OfKind(this IEnumerable<FloorItem> items, params int[] kinds)
+            => items.Where(item => kinds.Contains(item.Kind));
+        public static IEnumerable<WallItem> OfKind(this IEnumerable<WallItem> items, params int[] kinds)
             => items.Where(item => kinds.Contains(item.Kind));
         public static IEnumerable<T> OwnedBy<T>(this IEnumerable<T> items, int ownerId) where T : Furni
             => items.Where(item => item.OwnerId == ownerId);
@@ -67,9 +76,9 @@ namespace Xabbo.Core
         #endregion
 
         #region - Inventory -
-        public static IEnumerable<InventoryItem> OfCategory(this IEnumerable<InventoryItem> items, FurniCategory category)
+        public static IEnumerable<T> OfCategory<T>(this IEnumerable<T> items, FurniCategory category) where T : IInventoryItem
             => items.Where(item => item.Category == category);
-        public static IEnumerable<InventoryItem> GetGroupable(this IEnumerable<InventoryItem> items)
+        public static IEnumerable<T> GetGroupable<T>(this IEnumerable<T> items) where T : IInventoryItem
             => items.Where(item => item.IsGroupable);
         public static IEnumerable<InventoryItem> GetTradeable(this IEnumerable<InventoryItem> items)
             => items.Where(item => item.IsTradeable);
