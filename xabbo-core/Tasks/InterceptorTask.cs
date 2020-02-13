@@ -49,7 +49,7 @@ namespace Xabbo.Core
 
         protected virtual void Hook()
         {
-            if (Dispatcher.AttachListener(this).Length > 0)
+            if (Dispatcher.AttachListener(this))
             {
                 Debug.WriteLine($"[{GetType().Name}.Hook] attached listener");
             }
@@ -58,6 +58,7 @@ namespace Xabbo.Core
                 Debug.WriteLine($"[{GetType().Name}.Hook] no listener methods were attached");
             }
         }
+
         protected virtual void Unhook()
         {
             if (Dispatcher.DetachListener(this))

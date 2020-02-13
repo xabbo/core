@@ -238,19 +238,39 @@ namespace Xabbo.Core.Messages
         #endregion
 
         #region - Listeners -
+        /// <summary>
+        /// Checks if the listener is attached to this message dispatcher.
+        /// </summary>
         public bool IsListenerAttached(IListener receiver) => listeners.ContainsKey(receiver);
 
         /// <summary>
-        /// Attempts to attach the specified listener and
-        /// throws if any of the message groups failed to be resolved and
-        /// <paramref name="requireAll"/> is <c>true</c>,
-        /// or returns the message groups that were successfully
-        /// attached if <paramref name="requireAll"/> is <c>false</c>.
+        /// Check if the message group for the specified listener is attached to this message dispatcher.
         /// </summary>
-        /// <param name="listener">The listener to attach</param>
-        /// <param name="requireAll">Whether all message groups must successfully be attached or not.</param>
-        public object[] AttachListener(IListener listener, bool requireAll = true)
+        public bool IsListenerAttached(IListener listener, object messageGroup)
         {
+            if (!listeners.TryGetValue(listener, out IReadOnlyList<ListenerCallback> callbacks))
+                return false;
+
+            return callbacks.Any(callback => callback.Tags.Contains(messageGroup));
+        }
+
+        /// <summary>
+        /// Attempts to attach the specified listener.
+        /// Throws if any of the identifiers in the default message group failed to be resolved.
+        /// </summary>
+        /// <param name="listener">The listener to attach.</param>
+        public bool AttachListener(IListener listener) => AttachListener(listener, out _);
+
+        /// <summary>
+        /// Attempts to attach the specified listener.
+        /// Throws if any of the identifiers in the default message group failed to be resolved.
+        /// </summary>
+        /// <param name="listener">The listener to attach.</param>
+        /// <param name="attachedGroups">The message groups that were successfully attached.</param>
+        public bool AttachListener(IListener listener, out object[] attachedGroups)
+        {
+            attachedGroups = null;
+
             var listenerType = listener.GetType();
             var methodInfos = listenerType.FindAllMethods();
 
@@ -309,7 +329,7 @@ namespace Xabbo.Core.Messages
                 }
             }
 
-            if (requireAll && faultedGroups.Any())
+            if (faultedGroups.Contains(MessageGroups.Default))
             {
                 throw new ListenerAttachFailedException(listener, faultedGroups);
             }
@@ -410,7 +430,7 @@ namespace Xabbo.Core.Messages
 
             // If no listener callbacks and no intercept callbacks are left
             if (!callbackList.Any())
-                return new object[0]; // Return no groups succeeded
+                return false;
 
             if (!listeners.TryAdd(listener, callbackList))
                 throw new InvalidOperationException($"Listener '{listenerType.FullName}' is already attached");
@@ -452,8 +472,8 @@ namespace Xabbo.Core.Messages
                 while (!map.TryUpdate(callbackGroup.Key.Header, updatedList, previousList));
             }
 
-            // Return successful groups
-            return successfulGroups.ToArray();
+            attachedGroups = successfulGroups.ToArray();
+            return true;
         }
 
         public bool DetachListener(IListener listener)
