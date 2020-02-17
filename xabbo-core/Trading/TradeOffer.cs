@@ -26,6 +26,8 @@ namespace Xabbo.Core
             int n = packet.ReadInteger();
             for (int i = 0; i < n; i++)
                 Items.Add(TradeItem.Parse(packet));
+            FurniCount = packet.ReadInteger();
+            CreditCount = packet.ReadInteger();
         }
     }
 }
