@@ -147,6 +147,7 @@ namespace Xabbo.Core.Components
             if (!IsTrading)
             {
                 DebugUtil.Log("IsTrading = false");
+                return;
             }
 
             int userId = packet.ReadInteger();
@@ -154,12 +155,12 @@ namespace Xabbo.Core.Components
 
             if (reason == 0)
             {
-                DebugUtil.Log("complete");
+                DebugUtil.Log($"complete ({userId})");
                 OnComplete(Self, Partner, CurrentUpdate);
             }
             else
             {
-                DebugUtil.Log($"stopped, reason = {reason}");
+                DebugUtil.Log($"stopped, reason = {reason} ({userId})");
                 OnStop(reason);
             }
 
