@@ -65,14 +65,17 @@ namespace Xabbo.Core.Messages
                 throw new UnknownIdentifierException(new Identifier(destination, identifier));
             return TryGetHeader(destination, identifier, out short header) && header >= 0;
         }
+
         public bool IsResolved(Identifier identifier)
         {
             if (!HasIdentifier(identifier))
                 throw new Exception($"Unknown {(identifier.IsOutgoing ? "outgoing" : "incoming")} identifier '{identifier.Name}'");
             return TryGetHeader(identifier, out short header) && header >= 0;
         }
+
         public bool AreResolved(IEnumerable<Identifier> identifiers)
             => identifiers.All(identifier => IsResolved(identifier));
+
         public bool AreResolved(Destination destination, IEnumerable<string> identifiers)
         {
             foreach (var identifier in identifiers)
@@ -84,17 +87,18 @@ namespace Xabbo.Core.Messages
 
             return true;
         }
-        public bool AreResolvedIn(IEnumerable<string> identifiers) => AreResolved(Destination.Client, identifiers);
-        public bool AreResolvedIn(params string[] identifiers) => AreResolved(Destination.Client, identifiers);
-        public bool AreResolvedOut(IEnumerable<string> identifiers) => AreResolved(Destination.Server, identifiers);
-        public bool AreResolvedOut(params string[] identifiers) => AreResolved(Destination.Server, identifiers);
 
-        public bool AreResolved<T>() where T : class => AreResolved<T>(MessageGroups.All);
-        public bool AreResolved<T>(object withTag) where T : class => !GetUnresolvedIdentifiers(typeof(T), withTag).Any();
-        public bool AreResolved(object target) => AreResolved(target, MessageGroups.All);
-        public bool AreResolved(object target, object withTag) => !GetUnresolvedIdentifiers(target.GetType(), withTag).Any();
-        public bool AreResolved(Type type) => AreResolved(type, MessageGroups.All);
-        public bool AreResolved(Type type, object withTag) => !GetUnresolvedIdentifiers(type, withTag).Any();
+        public bool AreResolvedIn(IEnumerable<string> identifiers) => AreResolved(Destination.Client, identifiers);
+        public bool AreResolvedOut(IEnumerable<string> identifiers) => AreResolved(Destination.Server, identifiers);
+
+        public bool AreResolved<T>(params object[] targetGroups) where T : class
+            => !GetUnresolvedIdentifiers(typeof(T), targetGroups).Any();
+
+        public bool AreResolved(object target, params object[] targetGroups)
+            => !GetUnresolvedIdentifiers(target.GetType(), targetGroups).Any();
+
+        public bool AreResolved(Type type, params object[] targetGroups)
+            => !GetUnresolvedIdentifiers(type, targetGroups).Any();
 
         public Identifiers GetUnresolvedIdentifiers(Identifiers identifiers)
         {
@@ -106,20 +110,21 @@ namespace Xabbo.Core.Messages
             }
             return unresolved;
         }
-        public Identifiers GetUnresolvedIdentifiers<T>() where T : class => GetUnresolvedIdentifiers<T>(MessageGroups.All);
-        public Identifiers GetUnresolvedIdentifiers<T>(object withTag) where T : class => GetUnresolvedIdentifiers(typeof(T), withTag);
-        public Identifiers GetUnresolvedIdentifiers(object target) => GetUnresolvedIdentifiers(target, MessageGroups.All);
-        public Identifiers GetUnresolvedIdentifiers(object target, object withTag) => GetUnresolvedIdentifiers(target.GetType(), withTag);
-        public Identifiers GetUnresolvedIdentifiers(Type type) => GetUnresolvedIdentifiers(type, MessageGroups.All);
 
-        public Identifiers GetUnresolvedIdentifiers(Type type, object withTag)
+        public Identifiers GetUnresolvedIdentifiers<T>(params object[] targetGroups) where T : class
+            => GetUnresolvedIdentifiers(typeof(T), targetGroups);
+
+        public Identifiers GetUnresolvedIdentifiers(object target, params object[] targetGroups)
+            => GetUnresolvedIdentifiers(target.GetType(), targetGroups);
+
+        public Identifiers GetUnresolvedIdentifiers(Type type, params object[] targetGroups)
         {
+            if (targetGroups != null && targetGroups.Length == 0)
+                targetGroups = null;
+
             var ids = new Identifiers();
 
-            bool searchAll = ReferenceEquals(withTag, MessageGroups.All);
-            bool searchClassAttributesOnly = ReferenceEquals(withTag, MessageGroups.ClassOnly);
-
-            // if (searchAll || searchClassAttributesOnly)
+            if (targetGroups == null || targetGroups.Contains(MessageGroups.Class))
             {
                 foreach (var attr in type.GetCustomAttributes<IdentifiersAttribute>())
                 {
@@ -135,9 +140,6 @@ namespace Xabbo.Core.Messages
                 }
             }
 
-            if (searchClassAttributesOnly)
-                return ids;
-
             foreach (var method in FindAllMethods(type))
             {
                 var groupAttribute = method.GetCustomAttribute<GroupAttribute>();
@@ -149,7 +151,9 @@ namespace Xabbo.Core.Messages
 
                 foreach (var attr in method.GetCustomAttributes<IdentifiersAttribute>())
                 {
-                    if (!searchAll && !tags.Any(tag => Equals(tag, withTag))) continue;
+                    if (targetGroups != null && !targetGroups.Any(group => tags.Contains(group)))
+                        continue;
+
                     foreach (var identifier in attr.Identifiers)
                     {
                         if (!CheckIdentifierDefined(identifier))
