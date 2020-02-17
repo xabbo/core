@@ -25,7 +25,7 @@ namespace Xabbo.Core
         protected TradeItem(Packet packet)
         {
             ItemId = packet.ReadInteger();
-            Type = (FurniType)packet.ReadInteger();
+            Type = H.ToFurniType(packet.ReadString());
             Id = packet.ReadInteger();
             Kind = packet.ReadInteger();
             Category = (FurniCategory)packet.ReadInteger();
