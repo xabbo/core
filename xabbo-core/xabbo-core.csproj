@@ -31,28 +31,6 @@
     <WarningLevel>4</WarningLevel>
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Dev|AnyCPU'">
-    <OutputPath>bin\Dev\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <Optimize>false</Optimize>
-    <DebugType>none</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Lite|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Lite\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\xabbots\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -76,25 +54,48 @@
     <Compile Include="Catalog\CatalogOffer.cs" />
     <Compile Include="Catalog\Catalog.cs" />
     <Compile Include="Catalog\CatalogProduct.cs" />
+    <Compile Include="Components\TradeManager.cs" />
+    <Compile Include="Events\RoomUserEventArgs.cs" />
+    <Compile Include="Events\TradeAcceptEventArgs.cs" />
+    <Compile Include="Events\TradeCompleteEventArgs.cs" />
+    <Compile Include="Events\TradeStartEventArgs.cs" />
+    <Compile Include="Events\TradeStopEventArgs.cs" />
+    <Compile Include="Events\TradeUpdateEventArgs.cs" />
+    <Compile Include="Events\UserDataUpdatedEventArgs.cs" />
+    <Compile Include="Events\EntityHandItemEventArgs.cs" />
+    <Compile Include="Events\EntitySlideEventArgs.cs" />
+    <Compile Include="Events\FloorItemSlideEventArgs.cs" />
+    <Compile Include="Events\FloorItemUpdatedEventArgs.cs" />
     <Compile Include="Events\RoomItemEventArgs.cs" />
     <Compile Include="Events\RoomItemsEventArgs.cs" />
-    <Compile Include="Events\RoomUserActionEventArgs.cs" />
-    <Compile Include="Events\RoomUserEffectEventArgs.cs" />
-    <Compile Include="Events\RoomUserIdleEventArgs.cs" />
+    <Compile Include="Events\EntityActionEventArgs.cs" />
+    <Compile Include="Events\EntityEffectEventArgs.cs" />
+    <Compile Include="Events\EntityIdleEventArgs.cs" />
     <Compile Include="Events\FloorItemEventArgs.cs" />
     <Compile Include="Events\FloorItemsEventArgs.cs" />
     <Compile Include="Events\HeightMapEventArgs.cs" />
     <Compile Include="Events\RelativeMapEventArgs.cs" />
-    <Compile Include="Events\RoomUserDanceEventArgs.cs" />
-    <Compile Include="Events\RoomUserEventArgs.cs" />
-    <Compile Include="Events\RoomUserUpdateEventArgs.cs" />
+    <Compile Include="Events\EntityDanceEventArgs.cs" />
+    <Compile Include="Events\EntityUpdateEventArgs.cs" />
+    <Compile Include="Events\FloorItemDataUpdatedEventArgs.cs" />
+    <Compile Include="Events\WallItemEventArgs.cs" />
+    <Compile Include="Events\WallItemsEventArgs.cs" />
+    <Compile Include="Events\WallItemUpdatedEventArgs.cs" />
+    <Compile Include="Components\DependenciesAttribute.cs" />
+    <Compile Include="Components\XabboComponent.cs" />
+    <Compile Include="Components\ComponentManager.cs" />
+    <Compile Include="Components\Room\ChatManager.cs" />
+    <Compile Include="Components\Room\FurniManager.cs" />
+    <Compile Include="Components\Room\RoomManager.cs" />
+    <Compile Include="Components\Room\EntityManager.cs" />
+    <Compile Include="Components\ProfileManager.cs" />
+    <Compile Include="Components\XabboMessageGroups.cs" />
     <Compile Include="Groups\GroupData.cs" />
     <Compile Include="Groups\GroupInfo.cs" />
     <Compile Include="Groups\GroupMember.cs" />
     <Compile Include="Groups\GroupMembers.cs" />
     <Compile Include="Groups\GroupMemberSearchType.cs" />
     <Compile Include="Groups\GroupMemberType.cs" />
-    <Compile Include="Handlers\IRoom.cs" />
     <Compile Include="Interceptor\IInterceptor.cs" />
     <Compile Include="Inventory\IInventoryItem.cs" />
     <Compile Include="Inventory\IItem.cs" />
@@ -145,10 +146,9 @@
     <Compile Include="Users\UserSearchResults.cs" />
     <Compile Include="Room\Furni\FurniType.cs" />
     <Compile Include="Room\RoomInfo.cs" />
-    <Compile Include="Game\NavigatorSearchResultList.cs" />
-    <Compile Include="Game\NavigatorSearchResults.cs" />
-    <Compile Include="Game\UserData.cs" />
-    <Compile Include="Handlers\IGameState.cs" />
+    <Compile Include="Navigator\NavigatorSearchResultList.cs" />
+    <Compile Include="Navigator\NavigatorSearchResults.cs" />
+    <Compile Include="Users\UserData.cs" />
     <Compile Include="Inventory\ActivityPoints.cs" />
     <Compile Include="Inventory\ActivityPointType.cs" />
     <Compile Include="Messages\InterceptCallback.cs" />
@@ -241,6 +241,7 @@
     <Compile Include="Users\UserSearchResult.cs" />
     <Compile Include="Room\Furni\WallItem.cs" />
     <Compile Include="Util\Area.cs" />
+    <Compile Include="Util\DebugUtil.cs" />
     <Compile Include="Util\EnumerableExtensions.cs" />
     <Compile Include="Util\Position.cs" />
     <Compile Include="Util\ReflectionExtensions.cs" />
@@ -267,7 +268,9 @@
     <Compile Include="Web\UserProfile.cs" />
     <Compile Include="Web\UserInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Components\Attributes\" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

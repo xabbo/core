@@ -2,12 +2,12 @@
 
 namespace Xabbo.Core.Events
 {
-    public class RoomUserEffectEventArgs : RoomUserEventArgs
+    public class EntityEffectEventArgs : EntityEventArgs
     {
         public int PreviousEffect { get; }
 
-        public RoomUserEffectEventArgs(RoomUser user, int previousEffect)
-            : base(user)
+        public EntityEffectEventArgs(Entity entity, int previousEffect)
+            : base(entity)
         {
             PreviousEffect = previousEffect;
         }

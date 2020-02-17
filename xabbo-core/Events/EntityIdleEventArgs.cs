@@ -2,12 +2,12 @@
 
 namespace Xabbo.Core.Events
 {
-    public class RoomUserIdleEventArgs : RoomUserEventArgs
+    public class EntityIdleEventArgs : EntityEventArgs
     {
         public bool WasIdle { get; }
 
-        public RoomUserIdleEventArgs(RoomUser user, bool wasIdle)
-            : base(user)
+        public EntityIdleEventArgs(Entity entity, bool wasIdle)
+            : base(entity)
         {
             WasIdle = wasIdle;
         }

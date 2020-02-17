@@ -4,7 +4,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class UserData
+    public class UserData : IWritable
     {/*
 		    int userId
 		    string userName
@@ -60,5 +60,25 @@ namespace Xabbo.Core
         }
 
         public static UserData Parse(Packet packet) => new UserData(packet);
+
+        public void Write(Packet packet)
+        {
+            packet.WriteValues(
+                Id,
+                Name,
+                Figure,
+                Gender.ToShortString(),
+                Motto,
+                StringA,
+                BoolA,
+                IntA,
+                RespectsLeft,
+                ScratchesLeft,
+                BoolB,
+                LastLogin,
+                NameChangeable,
+                BoolC
+            );
+        }
     }
 }

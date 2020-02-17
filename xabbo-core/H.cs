@@ -143,10 +143,10 @@ namespace Xabbo.Core
             req.Host = "www.habbo.com";
             req.Referer = referer;
 
-            using (var res = await req.GetResponseAsync())
+            using (var res = await req.GetResponseAsync().ConfigureAwait(false))
             using (var reader = new StreamReader(res.GetResponseStream()))
             {
-                return await reader.ReadToEndAsync();
+                return await reader.ReadToEndAsync().ConfigureAwait(false);
             }
         }
 
@@ -157,7 +157,7 @@ namespace Xabbo.Core
 
             if (referer != null) req.Referer = referer;
 
-            using (var res = await req.GetResponseAsync())
+            using (var res = await req.GetResponseAsync().ConfigureAwait(false))
             {
                 int len = (int)res.ContentLength;
                 byte[] data = new byte[len];
@@ -166,7 +166,7 @@ namespace Xabbo.Core
                     int totalRead = 0;
                     while (totalRead < len)
                     {
-                        int bytesRead = await ins.ReadAsync(data, totalRead, len - totalRead);
+                        int bytesRead = await ins.ReadAsync(data, totalRead, len - totalRead).ConfigureAwait(false);
                         if (bytesRead <= 0) throw new EndOfStreamException();
                         totalRead += bytesRead;
                     }
@@ -179,7 +179,7 @@ namespace Xabbo.Core
 
         public static async Task<UserInfo> FindUserAsync(string name)
         {
-            string json = await DownloadStringAsync(API_USER_LOOKUP.Replace("$name", WebUtility.UrlEncode(name)));
+            string json = await DownloadStringAsync(API_USER_LOOKUP.Replace("$name", WebUtility.UrlEncode(name))).ConfigureAwait(false);
 
             var userInfo = JsonConvert.DeserializeObject<UserInfo>(json);
             if (userInfo.UniqueId == null) return null;
@@ -189,7 +189,7 @@ namespace Xabbo.Core
 
         public static async Task<Web.UserProfile> GetProfileAsync(string uniqueId)
         {
-            string json = await DownloadStringAsync(API_USER_PROFILE.Replace("$uniqueId", uniqueId));
+            string json = await DownloadStringAsync(API_USER_PROFILE.Replace("$uniqueId", uniqueId)).ConfigureAwait(false);
 
             var userProfile = JsonConvert.DeserializeObject<Web.UserProfile>(json);
             if (userProfile.UniqueId == null) return null;
@@ -211,14 +211,14 @@ namespace Xabbo.Core
         // https://habbo-stories-content.s3.amazonaws.com/servercamera/purchased/hhus/106070019-58678495-1562585848630_small.png
         public static async Task<PhotoData> GetPhotoDataAsync(string id)
         {
-            string json = await DownloadStringAsync(API_FURNI_EXTRADATA.Replace("$id", id));
+            string json = await DownloadStringAsync(API_FURNI_EXTRADATA.Replace("$id", id)).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<PhotoData>(json);
         }
 
         public static async Task<byte[]> DownloadPhotoAsync(string id)
         {
-            var photoData = await GetPhotoDataAsync(id);
-            return await DownloadPhotoAsync(photoData);
+            var photoData = await GetPhotoDataAsync(id).ConfigureAwait(false);
+            return await DownloadPhotoAsync(photoData).ConfigureAwait(false);
         }
 
         public static Task<byte[]> DownloadPhotoAsync(PhotoData photoData)

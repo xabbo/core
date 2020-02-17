@@ -26,7 +26,7 @@ namespace Xabbo.Core
             Orientation = orientation;
         }
 
-        public void OffsetTile(int offsetX, int offsetY, int scale)
+        public void OffsetWall(int offsetX, int offsetY, int scale)
         {
             int halfTileWidth = scale / 2;
             WallX += offsetX;

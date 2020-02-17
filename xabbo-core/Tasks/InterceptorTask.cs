@@ -37,7 +37,7 @@ namespace Xabbo.Core
 
                 Hook();
 
-                return await ExecuteAsync();
+                return await ExecuteAsync().ConfigureAwait(false);
             }
             finally
             {
@@ -73,8 +73,8 @@ namespace Xabbo.Core
 
         protected virtual async Task<TResult> ExecuteAsync()
         {
-            await OnExecuteAsync();
-            return await completion.Task;
+            await OnExecuteAsync().ConfigureAwait(false);
+            return await completion.Task.ConfigureAwait(false);
         }
 
         protected abstract Task OnExecuteAsync();
