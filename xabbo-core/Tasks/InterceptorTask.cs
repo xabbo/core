@@ -49,7 +49,7 @@ namespace Xabbo.Core
 
         protected virtual void Hook()
         {
-            if (Dispatcher.AttachListener(this))
+            if (Dispatcher.Attach(this))
             {
                 Debug.WriteLine($"[{GetType().Name}.Hook] attached listener");
             }
@@ -61,7 +61,7 @@ namespace Xabbo.Core
 
         protected virtual void Unhook()
         {
-            if (Dispatcher.DetachListener(this))
+            if (Dispatcher.Detach(this))
             {
                 Debug.WriteLine($"[{GetType().Name}.Unhook] detached listener");
             }

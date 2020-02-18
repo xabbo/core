@@ -29,6 +29,7 @@ namespace Xabbo.Core.Messages
         
         private static IReadOnlyList<ReceiveCallback<TSender>> ReceiverCallbackListFactory(short _)
             => new List<ReceiveCallback<TSender>>();
+
         private static IReadOnlyList<InterceptCallback> InterceptCallbackListFactory(short _)
             => new List<InterceptCallback>();
 
@@ -239,49 +240,72 @@ namespace Xabbo.Core.Messages
 
         #region - Listeners -
         /// <summary>
-        /// Checks if the listener is attached to this message dispatcher.
+        /// Checks if all specified message groups for the listener is attached to this message dispatcher.
+        /// If no target groups are specified, returns whether the listener is attached or not.
         /// </summary>
-        public bool IsListenerAttached(IListener receiver) => listeners.ContainsKey(receiver);
-
-        /// <summary>
-        /// Check if the message group for the specified listener is attached to this message dispatcher.
-        /// </summary>
-        public bool IsListenerAttached(IListener listener, object messageGroup)
+        public bool IsAttached(IListener listener, params object[] targetGroups)
         {
-            if (!listeners.TryGetValue(listener, out IReadOnlyList<ListenerCallback> callbacks))
-                return false;
-
-            return callbacks.Any(callback => callback.Tags.Contains(messageGroup));
+            if (targetGroups == null || targetGroups.Length == 0)
+            {
+                return listeners.ContainsKey(listener);
+            }
+            else
+            {
+                if (!listeners.TryGetValue(listener, out IReadOnlyList<ListenerCallback> callbacks))
+                    return false;
+                return targetGroups.All(group => callbacks.Any(callback => callback.Tags.Contains(group)));
+            }
         }
 
         /// <summary>
         /// Attempts to attach the specified listener.
-        /// Throws if any of the identifiers in the default message group failed to be resolved.
+        /// Returns true if any of the message groups were successfully attached.
         /// </summary>
         /// <param name="listener">The listener to attach.</param>
-        public bool AttachListener(IListener listener) => AttachListener(listener, out _);
+        public bool TryAttach(IListener listener) => Attach(listener, null);
 
         /// <summary>
         /// Attempts to attach the specified listener.
-        /// Throws if any of the identifiers in the default message group failed to be resolved.
+        /// Throws if any of the identifiers in the required message groups fail to be resolved.
+        /// See <see cref="IsAttached(IListener, object[])"/> to check if a certain message group was attached.
         /// </summary>
         /// <param name="listener">The listener to attach.</param>
-        /// <param name="attachedGroups">The message groups that were successfully attached.</param>
-        public bool AttachListener(IListener listener, out object[] attachedGroups)
+        /// <param name="requiredGroups">The required message groups.</param>
+        public bool Attach(IListener listener, params object[] requiredGroups)
         {
-            attachedGroups = null;
+            if (requiredGroups != null && requiredGroups.Length == 0)
+                requiredGroups = new[] { MessageGroups.Default };
 
             var listenerType = listener.GetType();
             var methodInfos = listenerType.FindAllMethods();
 
+            bool requiredGroupFaulted = false;
+            var faultedGroups = new HashSet<object>();
             var unresolvedIdentifiers = new Identifiers();
-            var faultedGroups = new List<object>();
 
             /*
                 Pass 1
-                    Detect duplicate, unknown, invalid identifiers
+                    Detect unknown, invalid identifiers
                     Create a list of faulted groups
             */
+            {
+                var classIdentifiersAttributes = listenerType.GetCustomAttributes<IdentifiersAttribute>();
+                foreach (var attribute in classIdentifiersAttributes)
+                {
+                    foreach (var identifier in attribute.Identifiers)
+                    {
+                        if (!Headers.HasIdentifier(identifier))
+                            throw new UnknownIdentifierException(identifier, listenerType);
+
+                        if (!Headers.TryGetHeader(identifier, out short header) || header < 0)
+                        {
+                            requiredGroupFaulted = true;
+                            unresolvedIdentifiers.Add(identifier);
+                        }
+                    }
+                }
+            }
+
             foreach (var methodInfo in methodInfos)
             {
                 var identifiersAttributes = methodInfo.GetCustomAttributes<IdentifiersAttribute>();
@@ -296,21 +320,6 @@ namespace Xabbo.Core.Messages
 
                 foreach (var identifiersAttribute in identifiersAttributes)
                 {
-                    var duplicateIdentifier = identifiersAttribute.Identifiers
-                        .GroupBy(x => x)
-                        .Where(x => x.Count() > 1)
-                        .Select(x => x.Key)
-                        .FirstOrDefault();
-
-                    if (duplicateIdentifier != null)
-                    {
-                        throw new Exception(
-                            $"Duplicate identifier '{duplicateIdentifier}' defined in " +
-                            $"{identifiersAttribute.GetType().Name} for method " +
-                            $"{listenerType.FullName}.{methodInfo.Name}"
-                        );
-                    }
-
                     foreach (var identifier in identifiersAttribute.Identifiers)
                     {
                         if (!Headers.HasIdentifier(identifier))
@@ -318,24 +327,24 @@ namespace Xabbo.Core.Messages
 
                         if (!Headers.TryGetHeader(identifier, out short header) || header < 0)
                         {
-                            unresolvedIdentifiers.Add(identifier);
-                            foreach (var group in groups)
+                            foreach (var group in groups) faultedGroups.Add(group);
+
+                            if (groups.Any(group => requiredGroups.Contains(group)))
                             {
-                                if (!faultedGroups.Contains(group))
-                                    faultedGroups.Add(group);
+                                unresolvedIdentifiers.Add(identifier);
+                                requiredGroupFaulted = true;                                
                             }
                         }
                     }
                 }
             }
 
-            if (faultedGroups.Contains(MessageGroups.Default))
+            if (requiredGroupFaulted)
             {
-                throw new ListenerAttachFailedException(listener, faultedGroups);
+                throw new ListenerAttachFailedException(listener, unresolvedIdentifiers);
             }
 
             var callbackList = new List<ListenerCallback>();
-            var successfulGroups = new List<object>();
 
             /*
                 Pass 2
@@ -353,16 +362,6 @@ namespace Xabbo.Core.Messages
                 // If all groups are faulted, skip this method
                 if (groups.All(group => faultedGroups.Contains(group)))
                     continue;
-
-                // Add group to successful list
-                foreach (var group in groups)
-                {
-                    if (!faultedGroups.Contains(group) &&
-                        !successfulGroups.Contains(group))
-                    {
-                        successfulGroups.Add(group);
-                    }
-                }
 
                 // Receive
                 var receiveAttribute = methodInfo.GetCustomAttribute<ReceiveAttribute>();
@@ -472,11 +471,10 @@ namespace Xabbo.Core.Messages
                 while (!map.TryUpdate(callbackGroup.Key.Header, updatedList, previousList));
             }
 
-            attachedGroups = successfulGroups.ToArray();
             return true;
         }
 
-        public bool DetachListener(IListener listener)
+        public bool Detach(IListener listener)
         {
             if (!listeners.TryRemove(listener, out IReadOnlyList<ListenerCallback> callbacks))
                 return false;
@@ -534,8 +532,10 @@ namespace Xabbo.Core.Messages
         #region - Intercepts -
         public bool AddInterceptIn(short header, Action<InterceptEventArgs> callback)
             => AddIntercept(Destination.Client, header, callback);
+
         public bool AddInterceptOut(short header, Action<InterceptEventArgs> callback)
             => AddIntercept(Destination.Server, header, callback);
+
         public bool AddIntercept(Destination destination, short header, Action<InterceptEventArgs> callback)
         {
             bool result;
@@ -566,8 +566,10 @@ namespace Xabbo.Core.Messages
 
         public bool RemoveInterceptIn(short header, Action<InterceptEventArgs> action)
             => RemoveIntercept(Destination.Client, header, action);
+
         public bool RemoveInterceptOut(short header, Action<InterceptEventArgs> action)
             => RemoveIntercept(Destination.Server, header, action);
+
         public bool RemoveIntercept(Destination destination, short header, Action<InterceptEventArgs> action)
         {
             bool result;

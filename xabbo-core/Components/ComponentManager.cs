@@ -52,14 +52,14 @@ namespace Xabbo.Core.Components
             return components.ContainsKey(componentType);
         }
 
-        public bool IsAvailable<T>(object messageGroup) where T : XabboComponent => IsAvailable(typeof(T), messageGroup);
-        public bool IsAvailable(Type componentType, object messageGroup)
+        public bool IsAvailable<T>(params object[] messageGroups) where T : XabboComponent => IsAvailable(typeof(T), messageGroups);
+        public bool IsAvailable(Type componentType, params object[] messageGroups)
         {
             EnsureIsComponent(componentType);
             return
                 components.ContainsKey(componentType) &&
                 components.TryGetValue(componentType, out XabboComponent component) &&
-                Interceptor.Dispatcher.IsListenerAttached(component, messageGroup);
+                Interceptor.Dispatcher.IsAttached(component, messageGroups);
         }
 
         public bool LoadComponent<T>() where T : XabboComponent => LoadComponent(typeof(T));
@@ -108,10 +108,10 @@ namespace Xabbo.Core.Components
 
             constructor.Invoke(c, null);
 
-            Interceptor.Dispatcher.AttachListener(c);
+            Interceptor.Dispatcher.Attach(c);
             if (!components.TryAdd(componentType, c))
             {
-                Interceptor.Dispatcher.DetachListener(c);
+                Interceptor.Dispatcher.Detach(c);
                 return false;
             }
 
