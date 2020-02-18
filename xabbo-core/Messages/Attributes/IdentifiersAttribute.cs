@@ -13,7 +13,7 @@ namespace Xabbo.Core.Messages
             if (identifiers == null || identifiers.Length == 0)
                 throw new ArgumentException("At least one identifier must be defined");
 
-            Identifiers = identifiers.Select(name => new Identifier(destination, name)).ToList().AsReadOnly();
+            Identifiers = identifiers.Select(name => new Identifier(destination, name)).Distinct().ToList().AsReadOnly();
         }
     }
 }
