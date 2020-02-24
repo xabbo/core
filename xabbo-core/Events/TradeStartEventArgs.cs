@@ -4,13 +4,20 @@ namespace Xabbo.Core.Events
 {
     public class TradeStartEventArgs : EventArgs
     {
-        public RoomUser Self { get; }
-        public RoomUser Partner { get; }
+        /// <summary>
+        /// Gets the user who started the trade.
+        /// </summary>
+        public RoomUser Trader { get; }
 
-        public TradeStartEventArgs(RoomUser self, RoomUser partner)
+        /// <summary>
+        /// Gets the user who was traded.
+        /// </summary>
+        public RoomUser Tradee { get; }
+
+        public TradeStartEventArgs(RoomUser trader, RoomUser tradee)
         {
-            Self = self;
-            Partner = partner;
+            Trader = trader;
+            Tradee = tradee;
         }
     }
 }

@@ -9,6 +9,14 @@ namespace Xabbo.Core.Protocol
 {
     public class Packet
     {
+        public static readonly Type
+            Byte = typeof(byte),
+            Bool = typeof(bool),
+            Short = typeof(short),
+            Int = typeof(int),
+            ByteArray = typeof(byte[]),
+            String = typeof(string);
+
         private MemoryStream _ms;
 
         /// <summary>
@@ -348,7 +356,10 @@ namespace Xabbo.Core.Protocol
                     case short x: WriteShort(x); break;
                     case ushort x: WriteShort((short)x); break;
                     case int x: WriteInteger(x); break;
-                    case byte[] x: WriteBytes(x); break;
+                    case byte[] x:
+                        WriteInteger(x.Length);
+                        WriteBytes(x);
+                        break;
                     case string x: WriteString(x); break;
                     case double x: WriteString(x.ToString()); break;
                     case IWritable x: x.Write(this); break;
@@ -357,6 +368,20 @@ namespace Xabbo.Core.Protocol
                             WriteInteger(x.Count);
                             foreach (object o in x)
                                 WriteValues(o);
+                        }
+                        break;
+                    case IEnumerable x:
+                        {
+                            int count = 0, startPosition = Position;
+                            WriteInteger(-1);
+                            foreach (object o in x)
+                            {
+                                WriteValues(o);
+                                count++;
+                            }
+                            int endPosition = Position;
+                            WriteInteger(count, startPosition);
+                            Position = endPosition;
                         }
                         break;
                     default: throw new Exception($"Invalid value type: {value.GetType().Name}");
@@ -408,17 +433,16 @@ namespace Xabbo.Core.Protocol
                     case string x: ReplaceString(x); break;
                     case Type t:
                         {
-                            if (t == typeof(byte)) ReadByte();
-                            else if (t == typeof(bool)) ReadBoolean();
-                            else if (t == typeof(short)) ReadShort();
-                            else if (t == typeof(ushort)) ReadShort();
-                            else if (t == typeof(int)) ReadInteger();
-                            else if (t == typeof(byte[])) throw new NotSupportedException();
-                            else if (t == typeof(string)) ReadString();
-                            else throw new Exception($"Invalid type: {t.FullName}");
+                            if (t == Byte) ReadByte();
+                            else if (t == Bool) ReadBoolean();
+                            else if (t == Short) ReadShort();
+                            else if (t == Int) ReadInteger();
+                            else if (t == ByteArray) throw new NotSupportedException();
+                            else if (t == String) ReadString();
+                            else throw new Exception($"Invalid type specified: {t.FullName}");
                         }
                         break;
-                    default: throw new Exception($"Invalid value type: {value.GetType().Name}");
+                    default: throw new Exception($"Value is of invalid type: {value.GetType().Name}");
                 }
             }
         }

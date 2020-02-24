@@ -55,12 +55,13 @@
     <Compile Include="Catalog\Catalog.cs" />
     <Compile Include="Catalog\CatalogProduct.cs" />
     <Compile Include="Components\TradeManager.cs" />
+    <Compile Include="Events\DoorbellEventArgs.cs" />
     <Compile Include="Events\RoomUserEventArgs.cs" />
     <Compile Include="Events\TradeAcceptEventArgs.cs" />
-    <Compile Include="Events\TradeCompleteEventArgs.cs" />
+    <Compile Include="Events\TradeOfferEventArgs.cs" />
     <Compile Include="Events\TradeStartEventArgs.cs" />
+    <Compile Include="Events\TradeStartFailEventArgs.cs" />
     <Compile Include="Events\TradeStopEventArgs.cs" />
-    <Compile Include="Events\TradeUpdateEventArgs.cs" />
     <Compile Include="Events\UserDataUpdatedEventArgs.cs" />
     <Compile Include="Events\EntityHandItemEventArgs.cs" />
     <Compile Include="Events\EntitySlideEventArgs.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="Messages\Header.cs" />
     <Compile Include="Messages\IListener.cs" />
     <Compile Include="Messages\ListenerAttachFailedException.cs" />
+    <Compile Include="Messages\ListenerAttachment.cs" />
     <Compile Include="Messages\ListenerCallback.cs" />
     <Compile Include="Messages\UnresolvedIdentifiersException.cs" />
     <Compile Include="Metadata\FigureDataXml.cs" />
@@ -139,7 +141,6 @@
     <Compile Include="Tasks\InterceptorTask.cs" />
     <Compile Include="Trading\TradeItem.cs" />
     <Compile Include="Trading\TradeOffer.cs" />
-    <Compile Include="Trading\TradeUpdate.cs" />
     <Compile Include="Users\Badge.cs" />
     <Compile Include="Users\FriendInfo.cs" />
     <Compile Include="Users\Relation.cs" />

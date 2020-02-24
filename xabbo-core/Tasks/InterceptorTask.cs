@@ -25,7 +25,7 @@ namespace Xabbo.Core
 
         public TResult Execute(int timeout, CancellationToken token) => ExecuteAsync(timeout, token).GetAwaiter().GetResult();
 
-        public async Task<TResult> ExecuteAsync(int timeout, CancellationToken token)
+        public async Task<TResult> ExecuteAsync(int timeout, CancellationToken token = default)
         {
             CancellationTokenSource cts = null;
 

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Xabbo.Core.Messages;
@@ -8,27 +10,35 @@ namespace Xabbo.Core.Components
 {
     public class ProfileManager : XabboComponent
     {
-        public enum Features { UserData, Friends, Achievements }
+        public enum Features { Autoload, UserData, Friends, Achievements }
 
-        private bool loadedUserData;
+        private Task<List<FriendInfo>> getFriendsTask;
+
+        private bool loadedUserData, isLoadingUserData;
+        private bool hasLoadedFriends, isLoadingFriends;
 
         public UserData UserData { get; private set; }
 
         protected override void OnInitialize()
         {
-            if (In.LatencyResponse >= 0)
+
+        }
+
+        [Group(Features.Autoload), Receive("LatencyResponse")]
+        private async void HandleLatencyResponse(object sender, Packet packet)
+        {
+            Dispatcher.RemoveHandler(In.LatencyResponse, HandleLatencyResponse);
+
+            await Task.Yield();
+
+            try
+            {
+
+            }
+            catch
             {
                 Dispatcher.AddHandler(In.LatencyResponse, HandleLatencyResponse);
             }
-        }
-
-        private async void HandleLatencyResponse(object sender, Packet packet)
-        {
-            await Task.Yield();
-
-            Dispatcher.RemoveHandler(In.LatencyResponse, HandleLatencyResponse);
-
-            if (!loadedUserData) await Interceptor.SendToServerAsync(Out.RequestUserData);
         }
 
         [Group(Features.UserData), Receive("UserData")]
@@ -38,6 +48,10 @@ namespace Xabbo.Core.Components
             loadedUserData = true;
         }
 
-
+        [Group(Features.Friends), Receive("Friends")]
+        private void HandleFriends(object sender, Packet packet)
+        {
+            Dispatcher.RemoveHandler(packet.Header, HandleFriends);
+        }
     }
 }

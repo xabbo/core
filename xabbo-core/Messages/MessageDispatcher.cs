@@ -33,7 +33,7 @@ namespace Xabbo.Core.Messages
         private static IReadOnlyList<InterceptCallback> InterceptCallbackListFactory(short _)
             => new List<InterceptCallback>();
 
-        private ConcurrentDictionary<IListener, IReadOnlyList<ListenerCallback>> listeners;
+        private ConcurrentDictionary<IListener, ListenerAttachment> listeners;
         private ConcurrentDictionary<short, IReadOnlyList<ReceiveCallback<TSender>>> receiveCallbacks;
         private ConcurrentDictionary<short, IReadOnlyList<InterceptCallback>> incomingInterceptCallbacks;
         private ConcurrentDictionary<short, IReadOnlyList<InterceptCallback>> outgoingInterceptCallbacks;
@@ -47,7 +47,7 @@ namespace Xabbo.Core.Messages
         {
             Headers = headers;
 
-            listeners = new ConcurrentDictionary<IListener, IReadOnlyList<ListenerCallback>>();
+            listeners = new ConcurrentDictionary<IListener, ListenerAttachment>();
             receiveCallbacks = new ConcurrentDictionary<short, IReadOnlyList<ReceiveCallback<TSender>>>();
             incomingInterceptCallbacks = new ConcurrentDictionary<short, IReadOnlyList<InterceptCallback>>();
             outgoingInterceptCallbacks = new ConcurrentDictionary<short, IReadOnlyList<InterceptCallback>>();
@@ -240,41 +240,67 @@ namespace Xabbo.Core.Messages
 
         #region - Listeners -
         /// <summary>
-        /// Checks if all specified message groups for the listener is attached to this message dispatcher.
+        /// Checks if all specified message groups of the listener are attached to this message dispatcher.
         /// If no target groups are specified, returns whether the listener is attached or not.
         /// </summary>
         public bool IsAttached(IListener listener, params object[] targetGroups)
         {
-            if (targetGroups == null || targetGroups.Length == 0)
+            if (targetGroups == null)
+                throw new ArgumentNullException(nameof(targetGroups));
+
+            if (targetGroups.Length == 0)
             {
                 return listeners.ContainsKey(listener);
             }
             else
             {
-                if (!listeners.TryGetValue(listener, out IReadOnlyList<ListenerCallback> callbacks))
+                if (!listeners.TryGetValue(listener, out ListenerAttachment attachment))
                     return false;
-                return targetGroups.All(group => callbacks.Any(callback => callback.Tags.Contains(group)));
+
+                if (targetGroups.Length == 1)
+                {
+                    if (targetGroups[0] == MessageGroups.All)
+                    {
+                        return !attachment.FaultedGroups.Any();
+                    }
+                }
+
+                return targetGroups.All(group => attachment.AttachedGroups.Contains(group));
             }
         }
 
         /// <summary>
         /// Attempts to attach the specified listener.
-        /// Returns true if any of the message groups were successfully attached.
+        /// Throws if any of the identifiers in the required message groups are unresolved.
+        /// See <see cref="IsAttached(IListener, object[])"/> to check if certain message groups were attached.
         /// </summary>
         /// <param name="listener">The listener to attach.</param>
-        public bool TryAttach(IListener listener) => Attach(listener, null);
-
-        /// <summary>
-        /// Attempts to attach the specified listener.
-        /// Throws if any of the identifiers in the required message groups fail to be resolved.
-        /// See <see cref="IsAttached(IListener, object[])"/> to check if a certain message group was attached.
-        /// </summary>
-        /// <param name="listener">The listener to attach.</param>
-        /// <param name="requiredGroups">The required message groups.</param>
+        /// <param name="requiredGroups">
+        /// The required message groups.
+        /// Use <see cref="MessageGroups.All"/> to require all message groups,
+        /// <see cref="MessageGroups.None"/> to require no message groups, and
+        /// <see cref="MessageGroups.Default"/> to require the default message group 
+        /// (identifier attributes with no group specified).
+        /// If no message groups are specified, only the default message group will be required.
+        /// </param>
         public bool Attach(IListener listener, params object[] requiredGroups)
         {
-            if (requiredGroups != null && requiredGroups.Length == 0)
+            if (requiredGroups == null)
+                throw new ArgumentNullException("requiredGroups");
+
+            if (requiredGroups.Length == 0)
                 requiredGroups = new[] { MessageGroups.Default };
+
+            bool requireAll = requiredGroups.Contains(MessageGroups.All);
+            bool requireNone = requiredGroups.Contains(MessageGroups.None);
+
+            if (requiredGroups.Length > 1)
+            {
+                if (requireAll)
+                    throw new InvalidOperationException("MessageGroups.All cannot be specified with other groups.");
+                if (requireNone)
+                    throw new InvalidOperationException("MessageGroups.None cannot be specified with other groups.");
+            }
 
             var listenerType = listener.GetType();
             var methodInfos = listenerType.FindAllMethods();
@@ -299,8 +325,8 @@ namespace Xabbo.Core.Messages
 
                         if (!Headers.TryGetHeader(identifier, out short header) || header < 0)
                         {
-                            requiredGroupFaulted = true;
                             unresolvedIdentifiers.Add(identifier);
+                            requiredGroupFaulted = true;
                         }
                     }
                 }
@@ -329,10 +355,10 @@ namespace Xabbo.Core.Messages
                         {
                             foreach (var group in groups) faultedGroups.Add(group);
 
-                            if (groups.Any(group => requiredGroups.Contains(group)))
+                            if (!requireNone && (requireAll || groups.Any(group => requiredGroups.Contains(group))))
                             {
                                 unresolvedIdentifiers.Add(identifier);
-                                requiredGroupFaulted = true;                                
+                                requiredGroupFaulted = true;
                             }
                         }
                     }
@@ -431,8 +457,22 @@ namespace Xabbo.Core.Messages
             if (!callbackList.Any())
                 return false;
 
-            if (!listeners.TryAdd(listener, callbackList))
-                throw new InvalidOperationException($"Listener '{listenerType.FullName}' is already attached");
+            var attachedGroups = new HashSet<object>(
+                callbackList
+                    .SelectMany(callback => callback.Tags)
+                    .Where(group => !faultedGroups.Contains(group))
+            );
+
+            if (!attachedGroups.Contains(MessageGroups.Default)
+                && !faultedGroups.Contains(MessageGroups.Default))
+            {
+                attachedGroups.Add(MessageGroups.Default);
+            }
+
+            var attachment = new ListenerAttachment(listener, callbackList, attachedGroups, faultedGroups);
+
+            if (!listeners.TryAdd(listener, attachment))
+                throw new InvalidOperationException($"Listener '{listenerType.FullName}' is already attached.");
 
             // Add receive callbacks
             foreach (var callbackGroup in callbackList.OfType<ReceiveCallback<TSender>>().GroupBy(x => x.Header))
@@ -476,14 +516,14 @@ namespace Xabbo.Core.Messages
 
         public bool Detach(IListener listener)
         {
-            if (!listeners.TryRemove(listener, out IReadOnlyList<ListenerCallback> callbacks))
+            if (!listeners.TryRemove(listener, out ListenerAttachment attachment))
                 return false;
 
-            foreach (var callback in callbacks)
+            foreach (var callback in attachment.Callbacks)
                 callback.Unsubscribe();
 
             // Receivers
-            foreach (var callbackGroup in callbacks.OfType<ReceiveCallback<TSender>>().GroupBy(x => x.Header))
+            foreach (var callbackGroup in attachment.Callbacks.OfType<ReceiveCallback<TSender>>().GroupBy(x => x.Header))
             {
                 short header = callbackGroup.Key;
 
@@ -503,7 +543,7 @@ namespace Xabbo.Core.Messages
             }
 
             // Interceptors
-            foreach (var callbackGroup in callbacks.OfType<InterceptCallback>().GroupBy(x => (x.Destination, x.Header)))
+            foreach (var callbackGroup in attachment.Callbacks.OfType<InterceptCallback>().GroupBy(x => (x.Destination, x.Header)))
             {
                 short header = callbackGroup.Key.Header;
 

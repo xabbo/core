@@ -9,6 +9,8 @@ namespace Xabbo.Core.Components
 {
     public class RoomManager : XabboComponent
     {
+        private const int ERROR_KICKED = 4008;
+
         public enum Features { Permissions, DoorTile, HeightMap, FloorPlan }
 
         private readonly Dictionary<int, RoomData> roomDataCache = new Dictionary<int, RoomData>();
@@ -38,10 +40,12 @@ namespace Xabbo.Core.Components
         public event EventHandler QueuePositionUpdated;
         public event EventHandler Entering;
         public event EventHandler Entered;
-        public event EventHandler Kicked;
         public event EventHandler Left;
+        public event EventHandler Kicked;
 
         public event EventHandler<RoomDataEventArgs> RoomDataUpdated;
+
+        public event EventHandler<DoorbellEventArgs> Doorbell;
 
         protected virtual void OnRingingDoorbell() => RingingDoorbell?.Invoke(this, EventArgs.Empty);
 
@@ -51,9 +55,12 @@ namespace Xabbo.Core.Components
         protected virtual void OnEnteringRoom() => Entering?.Invoke(this, EventArgs.Empty);
         protected virtual void OnEnteredRoom() => Entered?.Invoke(this, EventArgs.Empty);
         protected virtual void OnLeftRoom() => Left?.Invoke(this, EventArgs.Empty);
+        protected virtual void OnKicked() => Kicked?.Invoke(this, EventArgs.Empty);
 
         protected virtual void OnRoomDataUpdated(RoomData roomData)
             => RoomDataUpdated?.Invoke(this, new RoomDataEventArgs(roomData));
+
+        protected virtual void OnDoorbell(DoorbellEventArgs e) => Doorbell?.Invoke(this, e);
         #endregion
 
         protected override void OnInitialize() { }
@@ -112,16 +119,32 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Receive("DoorbellAddUser")]
-        private void HandleDoorbellAddUser(Packet packet)
+        [InterceptIn("DoorbellAddUser"), RequiredOut("HandleDoorbell")]
+        private async void HandleDoorbellAddUser(InterceptEventArgs e)
         {
-            string user = packet.ReadString();
-            if (string.IsNullOrEmpty(user))
+            string name = e.Packet.ReadString();
+            if (string.IsNullOrEmpty(name))
             {
                 DebugUtil.Log("ringing doorbell");
 
                 IsRingingDoorbell = true;
                 OnRingingDoorbell();
+            }
+            else
+            {
+                var doorbellArgs = new DoorbellEventArgs(name);
+                OnDoorbell(doorbellArgs);
+
+                if (doorbellArgs.Reject)
+                {
+                    e.Block();
+                    await Interceptor.SendToServerAsync(Out.HandleDoorbell, name, false);
+                }
+                else if (doorbellArgs.Accept)
+                {
+                    e.Block();
+                    await Interceptor.SendToServerAsync(Out.HandleDoorbell, name, true);
+                }
             }
         }
 
@@ -308,6 +331,16 @@ namespace Xabbo.Core.Components
                 DebugUtil.Log($"leaving current room ({Id})");
                 LeaveRoom();
             }
+        }
+
+        [Receive("GenericErrorMessages")]
+        private void HandleGenericErrorMessages(Packet packet)
+        {
+            if (!IsInRoom) return;
+
+            int errorCode = packet.ReadInteger();
+            if (errorCode == ERROR_KICKED)
+                OnKicked();
         }
     }
 }

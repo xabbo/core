@@ -19,14 +19,11 @@ namespace Xabbo.Core.Components
         public ComponentManager Manager { get; internal set; }
         public bool IsAvailable { get; internal set; }
 
-        protected IInterceptor Interceptor => Manager.Interceptor;
-        protected MessageDispatcher Dispatcher => Interceptor.Dispatcher;
-        protected Headers Headers => Dispatcher.Headers;
-        protected IncomingHeaders In => Headers.Incoming;
-        protected OutgoingHeaders Out => Headers.Outgoing;
-
-
-
+        public IInterceptor Interceptor => Manager.Interceptor;
+        public MessageDispatcher Dispatcher => Interceptor.Dispatcher;
+        public Headers Headers => Dispatcher.Headers;
+        public IncomingHeaders In => Headers.Incoming;
+        public OutgoingHeaders Out => Headers.Outgoing;
 
         protected T GetComponent<T>() where T : XabboComponent => Manager.GetComponent<T>();
 

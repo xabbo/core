@@ -53,7 +53,7 @@ namespace Xabbo.Core.Components
 
         #region - Events -
         public event EventHandler<EntitiesEventArgs> EntitiesAdded;
-        public event EventHandler<EntitiesEventArgs> EntitiesUpdated;
+        public event EventHandler<EntityEventArgs> EntityUpdated;
         public event EventHandler<EntitySlideEventArgs> EntitySlide;
         public event EventHandler<UserDataUpdatedEventArgs> UserDataUpdated;
         public event EventHandler<EntityIdleEventArgs> EntityIdle;
@@ -62,12 +62,11 @@ namespace Xabbo.Core.Components
         public event EventHandler<EntityEffectEventArgs> EntityEffect;
         public event EventHandler<EntityActionEventArgs> EntityAction;
         public event EventHandler<EntityEventArgs> EntityRemoved;
-        public event EventHandler EntitiesCleared;
 
         protected virtual void OnEntitiesAdded(IEnumerable<Entity> entities)
             => EntitiesAdded?.Invoke(this, new EntitiesEventArgs(entities));
-        protected virtual void OnEntitiesUpdated(IEnumerable<Entity> entities)
-            => EntitiesUpdated?.Invoke(this, new EntitiesEventArgs(entities));
+        protected virtual void OnEntityUpdated(Entity entity)
+            => EntityUpdated?.Invoke(this, new EntityEventArgs(entity));
         protected virtual void OnEntitySlide(Entity entity, Tile previousTile)
             => EntitySlide?.Invoke(this, new EntitySlideEventArgs(entity, previousTile));
         protected virtual void OnUserDataUpdated(RoomUser user,
@@ -89,8 +88,6 @@ namespace Xabbo.Core.Components
             => EntityAction?.Invoke(this, new EntityActionEventArgs(entity, action));
         protected virtual void OnEntityRemoved(Entity entity)
             => EntityRemoved?.Invoke(this, new EntityEventArgs(entity));
-        protected virtual void OnEntitiesCleared()
-            => EntitiesCleared?.Invoke(this, EventArgs.Empty);
         #endregion
 
         protected override void OnInitialize()
@@ -104,7 +101,6 @@ namespace Xabbo.Core.Components
             DebugUtil.Log("clearing entities");
 
             entities.Clear();
-            OnEntitiesCleared();
         }
 
         [Receive("RoomUsers")]
@@ -163,8 +159,6 @@ namespace Xabbo.Core.Components
         {
             if (!roomManager.IsInRoom) return;
 
-            var updatedEntities = new List<Entity>();
-
             int n = packet.ReadInteger();
             for (int i = 0; i < n; i++)
             {
@@ -176,11 +170,8 @@ namespace Xabbo.Core.Components
                 }
 
                 entity.Update(entityUpdate);
-                updatedEntities.Add(entity);
+                OnEntityUpdated(entity);
             }
-
-            if (updatedEntities.Count > 0)
-                OnEntitiesUpdated(updatedEntities);
         }
 
         [Group(Features.EntityUpdates), Receive("ObjectOnRoller")]

@@ -6,6 +6,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
+    [RequiredOut("RequestInitFriends")]
     public class GetFriendsTask : InterceptorTask<List<FriendInfo>>
     {
         private int totalExpected = -1, currentIndex = 0;

@@ -108,17 +108,35 @@ namespace Xabbo.Core.Components
 
             constructor.Invoke(c, null);
 
-            Interceptor.Dispatcher.Attach(c);
             if (!components.TryAdd(componentType, c))
-            {
-                Interceptor.Dispatcher.Detach(c);
                 return false;
+
+            try { Interceptor.Dispatcher.Attach(c); }
+            catch
+            {
+                components.TryRemove(componentType, out _);
+                c.Manager = null;
+                throw;
             }
 
             c.Initialize();
+            c.IsAvailable = true;
 
             component = c;
             return true;
+        }
+
+        public bool LoadComponent(XabboComponent component)
+        {
+            if (component.Manager != null)
+                return ReferenceEquals(component.Manager, this);
+
+            throw new NotImplementedException();
+        }
+
+        public void LoadComponents(IEnumerable<XabboComponent> component)
+        {
+
         }
 
         public T GetComponent<T>() where T : XabboComponent

@@ -119,12 +119,16 @@ namespace Xabbo.Core.Messages
 
         public Identifiers GetUnresolvedIdentifiers(Type type, params object[] targetGroups)
         {
-            if (targetGroups != null && targetGroups.Length == 0)
-                targetGroups = null;
+            if (targetGroups == null)
+                throw new ArgumentNullException("targetGroups");
+
+            bool checkAll = targetGroups.Length == 0 ||
+                (targetGroups.Length == 1 && targetGroups[0] == MessageGroups.All);
+            bool checkClass = targetGroups.Contains(MessageGroups.Class);
 
             var ids = new Identifiers();
 
-            if (targetGroups == null || targetGroups.Contains(MessageGroups.Class))
+            if (checkAll || checkClass)
             {
                 foreach (var attr in type.GetCustomAttributes<IdentifiersAttribute>())
                 {
@@ -151,7 +155,7 @@ namespace Xabbo.Core.Messages
 
                 foreach (var attr in method.GetCustomAttributes<IdentifiersAttribute>())
                 {
-                    if (targetGroups != null && !targetGroups.Any(group => tags.Contains(group)))
+                    if (!checkAll && !targetGroups.Any(group => tags.Contains(group)))
                         continue;
 
                     foreach (var identifier in attr.Identifiers)
