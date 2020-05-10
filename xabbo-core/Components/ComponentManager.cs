@@ -35,7 +35,7 @@ namespace Xabbo.Core.Components
                 if (faultedComponents.Contains(type))
                     return false;
 
-                if (!Interceptor.Dispatcher.Headers.AreResolved(type, MessageGroups.Default))
+                if (!Interceptor.Dispatcher.Headers.AreResolved(type, MessageGroups.Class, MessageGroups.Default))
                 {
                     faultedComponents.Add(type);
                     return false;
@@ -49,15 +49,16 @@ namespace Xabbo.Core.Components
         public bool IsAvailable(Type componentType)
         {
             EnsureIsComponent(componentType);
-            return components.ContainsKey(componentType);
+            return 
+                components.TryGetValue(componentType, out XabboComponent component) &&
+                component.IsAvailable;
         }
-
+        
         public bool IsAvailable<T>(params object[] messageGroups) where T : XabboComponent => IsAvailable(typeof(T), messageGroups);
         public bool IsAvailable(Type componentType, params object[] messageGroups)
         {
             EnsureIsComponent(componentType);
             return
-                components.ContainsKey(componentType) &&
                 components.TryGetValue(componentType, out XabboComponent component) &&
                 Interceptor.Dispatcher.IsAttached(component, messageGroups);
         }
@@ -86,7 +87,6 @@ namespace Xabbo.Core.Components
             EnsureIsComponent(componentType);
 
             if (IsAvailable(componentType)) return true;
-
             if (!CheckComponent(componentType)) return false;
 
             var dependsOnAttribute = componentType.GetCustomAttribute<DependenciesAttribute>();
@@ -99,24 +99,29 @@ namespace Xabbo.Core.Components
                 }
             }
 
-            var constructor = componentType.GetConstructor(Type.EmptyTypes);
-            if (constructor == null)
-                throw new InvalidOperationException($"The component {componentType.FullName} must have a parameterless constructor to be loaded.");
+            XabboComponent c;
+            
+            if (!components.TryGetValue(componentType, out c))
+            {
+                var constructor = componentType.GetConstructor(Type.EmptyTypes);
+                if (constructor == null)
+                    throw new InvalidOperationException($"The component {componentType.FullName} must have a parameterless constructor to be loaded.");
 
-            var c = (XabboComponent)FormatterServices.GetUninitializedObject(componentType);
-            c.Manager = this;
+                c = (XabboComponent)FormatterServices.GetUninitializedObject(componentType);
+                c.Manager = this;
 
-            constructor.Invoke(c, null);
+                constructor.Invoke(c, null);
 
-            if (!components.TryAdd(componentType, c))
-                return false;
+                if (!components.TryAdd(componentType, c))
+                    return false;
+            }
 
             try { Interceptor.Dispatcher.Attach(c); }
             catch
             {
                 components.TryRemove(componentType, out _);
                 c.Manager = null;
-                throw;
+                return false;
             }
 
             c.Initialize();
@@ -126,17 +131,40 @@ namespace Xabbo.Core.Components
             return true;
         }
 
-        public bool LoadComponent(XabboComponent component)
+        public void LoadComponents(IEnumerable<Type> componentTypes)
         {
-            if (component.Manager != null)
-                return ReferenceEquals(component.Manager, this);
-
-            throw new NotImplementedException();
+            foreach (var type in componentTypes)
+                LoadComponent(type);
         }
 
-        public void LoadComponents(IEnumerable<XabboComponent> component)
+        public bool LoadComponent(XabboComponent component)
         {
+            LoadComponents(new XabboComponent[] { component });
+            return component.IsAvailable;
+        }
 
+        public void LoadComponents(IEnumerable<XabboComponent> components)
+        {
+            // Ensure all components are attached to this manager
+            foreach (var component in components)
+            {
+                var type = component.GetType();
+                if (component.Manager == null)
+                {
+                    if (!this.components.TryAdd(component.GetType(), component))
+                        throw new Exception($"Unable to add component {type.FullName} to dictionary");
+                }
+                else
+                {
+                    if (!ReferenceEquals(component.Manager, this))
+                        throw new InvalidOperationException($"The component {type.FullName} belongs to another component manager.");
+                }
+            }
+
+            foreach (var component in components)
+            {
+                LoadComponent(component.GetType());
+            }
         }
 
         public T GetComponent<T>() where T : XabboComponent

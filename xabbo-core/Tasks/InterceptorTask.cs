@@ -10,9 +10,9 @@ namespace Xabbo.Core
 {
     public abstract class InterceptorTask<TResult> : IListener
     {
-        private readonly IInterceptor interceptor;
         private readonly TaskCompletionSource<TResult> completion;
 
+        private readonly IInterceptor interceptor;
         protected MessageDispatcher Dispatcher => interceptor.Dispatcher;
         protected IncomingHeaders In => Dispatcher.Headers.Incoming;
         protected OutgoingHeaders Out => Dispatcher.Headers.Outgoing;

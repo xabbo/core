@@ -56,6 +56,7 @@
     <Compile Include="Catalog\CatalogProduct.cs" />
     <Compile Include="Components\TradeManager.cs" />
     <Compile Include="Events\DoorbellEventArgs.cs" />
+    <Compile Include="Events\EntityTypingEventArgs.cs" />
     <Compile Include="Events\RoomUserEventArgs.cs" />
     <Compile Include="Events\TradeAcceptEventArgs.cs" />
     <Compile Include="Events\TradeOfferEventArgs.cs" />
@@ -94,7 +95,7 @@
     <Compile Include="Groups\GroupData.cs" />
     <Compile Include="Groups\GroupInfo.cs" />
     <Compile Include="Groups\GroupMember.cs" />
-    <Compile Include="Groups\GroupMembers.cs" />
+    <Compile Include="Groups\GroupMemberPage.cs" />
     <Compile Include="Groups\GroupMemberSearchType.cs" />
     <Compile Include="Groups\GroupMemberType.cs" />
     <Compile Include="Interceptor\IInterceptor.cs" />
@@ -136,6 +137,7 @@
     <Compile Include="Tasks\GetRoomDataTask.cs" />
     <Compile Include="Tasks\GetRoomSettingsTask.cs" />
     <Compile Include="Tasks\GetStickyDataTask.cs" />
+    <Compile Include="Tasks\GetUserDataTask.cs" />
     <Compile Include="Tasks\SearchNavigatorTask.cs" />
     <Compile Include="Tasks\SearchUserTask.cs" />
     <Compile Include="Tasks\InterceptorTask.cs" />

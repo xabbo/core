@@ -52,8 +52,10 @@ namespace Xabbo.Core.Components
             => (entity = GetEntityByName<T>(name)) != null;
 
         #region - Events -
+        public event EventHandler<EntityEventArgs> EntityAdded;
         public event EventHandler<EntitiesEventArgs> EntitiesAdded;
         public event EventHandler<EntityEventArgs> EntityUpdated;
+        public event EventHandler<EntitiesEventArgs> EntitiesUpdated;
         public event EventHandler<EntitySlideEventArgs> EntitySlide;
         public event EventHandler<UserDataUpdatedEventArgs> UserDataUpdated;
         public event EventHandler<EntityIdleEventArgs> EntityIdle;
@@ -61,12 +63,17 @@ namespace Xabbo.Core.Components
         public event EventHandler<EntityHandItemEventArgs> EntityHandItem;
         public event EventHandler<EntityEffectEventArgs> EntityEffect;
         public event EventHandler<EntityActionEventArgs> EntityAction;
+        public event EventHandler<EntityTypingEventArgs> EntityTyping;
         public event EventHandler<EntityEventArgs> EntityRemoved;
 
+        protected virtual void OnEntityAdded(Entity entity)
+            => EntityAdded?.Invoke(this, new EntityEventArgs(entity));
         protected virtual void OnEntitiesAdded(IEnumerable<Entity> entities)
             => EntitiesAdded?.Invoke(this, new EntitiesEventArgs(entities));
         protected virtual void OnEntityUpdated(Entity entity)
             => EntityUpdated?.Invoke(this, new EntityEventArgs(entity));
+        protected virtual void OnEntitiesUpdated(IEnumerable<Entity> entities)
+            => EntitiesUpdated?.Invoke(this, new EntitiesEventArgs(entities));
         protected virtual void OnEntitySlide(Entity entity, Tile previousTile)
             => EntitySlide?.Invoke(this, new EntitySlideEventArgs(entity, previousTile));
         protected virtual void OnUserDataUpdated(RoomUser user,
@@ -86,6 +93,8 @@ namespace Xabbo.Core.Components
             => EntityEffect?.Invoke(this, new EntityEffectEventArgs(entity, previousEffect));
         protected virtual void OnEntityAction(Entity entity, Actions action)
             => EntityAction?.Invoke(this, new EntityActionEventArgs(entity, action));
+        protected virtual void OnEntityTyping(Entity entity, bool wasTyping)
+            => EntityTyping?.Invoke(this, new EntityTypingEventArgs(entity, wasTyping));
         protected virtual void OnEntityRemoved(Entity entity)
             => EntityRemoved?.Invoke(this, new EntityEventArgs(entity));
         #endregion
@@ -104,7 +113,7 @@ namespace Xabbo.Core.Components
         }
 
         [Receive("RoomUsers")]
-        private void HandleRoomUsers(Packet packet)
+        protected void HandleRoomUsers(Packet packet)
         {
             if (!roomManager.IsEnteringRoom && !roomManager.IsInRoom)
             {
@@ -121,6 +130,7 @@ namespace Xabbo.Core.Components
                 if (entities.TryAdd(entity.Index, entity))
                 {
                     newEntities.Add(entity);
+                    OnEntityAdded(entity);
                 }
                 else
                 {
@@ -135,7 +145,7 @@ namespace Xabbo.Core.Components
         }
 
         [Receive("RoomUserRemove")]
-        private void HandleEntityRemove(Packet packet)
+        protected void HandleEntityRemove(Packet packet)
         {
             if (!roomManager.IsInRoom)
             {
@@ -155,9 +165,11 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.EntityUpdates), Receive("RoomUserStatus")]
-        private void HandleEntityUpdate(Packet packet)
+        protected void HandleEntityUpdate(Packet packet)
         {
             if (!roomManager.IsInRoom) return;
+
+            var updatedEntities = new List<Entity>();
 
             int n = packet.ReadInteger();
             for (int i = 0; i < n; i++)
@@ -170,12 +182,16 @@ namespace Xabbo.Core.Components
                 }
 
                 entity.Update(entityUpdate);
+                updatedEntities.Add(entity);
+
                 OnEntityUpdated(entity);
             }
+
+            OnEntitiesUpdated(updatedEntities);
         }
 
         [Group(Features.EntityUpdates), Receive("ObjectOnRoller")]
-        private void HandleObjectOnRoller(Packet packet)
+        protected void HandleObjectOnRoller(Packet packet)
         {
             if (!roomManager.IsInRoom) return;
 
@@ -199,7 +215,7 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.StateTracking), Receive("RoomUserData")]
-        private void HandleUserDataUpdated(Packet packet)
+        protected void HandleUserDataUpdated(Packet packet)
         {
             if (!roomManager.IsInRoom) return;
 
@@ -228,7 +244,7 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.StateTracking), Receive("RoomUnitIdle")]
-        private void HandleEntityIdle(Packet packet)
+        protected void HandleEntityIdle(Packet packet)
         {
             if (!roomManager.IsInRoom) return;
 
@@ -246,7 +262,7 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.StateTracking), Receive("RoomUserDance")]
-        private void HandleEntityDance(Packet packet)
+        protected void HandleEntityDance(Packet packet)
         {
             if (!roomManager.IsInRoom) return;
 
@@ -265,7 +281,7 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.StateTracking), Receive("RoomUserAction")]
-        private void HandleEntityAction(Packet packet)
+        protected void HandleEntityAction(Packet packet)
         {
             if (!roomManager.IsInRoom) return;
 
@@ -281,7 +297,7 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.StateTracking), Receive("RoomUserHandItem")]
-        private void HandleEntityHandItem(Packet packet)
+        protected void HandleEntityHandItem(Packet packet)
         {
             if (!roomManager.IsInRoom) return;
 
@@ -299,7 +315,7 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.StateTracking), Receive("RoomUserEffect")]
-        private void HandleEntityEffect(Packet packet)
+        protected void HandleEntityEffect(Packet packet)
         {
             if (!roomManager.IsInRoom) return;
 
@@ -309,6 +325,25 @@ namespace Xabbo.Core.Components
                 int previousEffect = entity.Effect;
                 entity.Effect = packet.ReadInteger();
                 OnEntityEffect(entity, previousEffect);
+            }
+            else
+            {
+                DebugUtil.Log($"failed to find entity {index} to update");
+            }
+        }
+
+        [Group(Features.StateTracking), Receive("RoomUserTyping")]
+        protected void HandleEntityTyping(Packet packet)
+        {
+            if (!roomManager.IsInRoom) return;
+
+            int index = packet.ReadInteger();
+
+            if (TryGetEntity(index, out Entity entity))
+            {
+                bool wasTyping = entity.IsTyping;
+                entity.IsTyping = packet.ReadInteger() != 0;
+                OnEntityTyping(entity, wasTyping);
             }
             else
             {

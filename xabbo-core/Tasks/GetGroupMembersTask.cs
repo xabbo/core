@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
-    public class GetGroupMembersTask : InterceptorTask<GroupMembers>
+    public class GetGroupMembersTask : InterceptorTask<GroupMemberPage>
     {
         private readonly int groupId;
         private readonly int page;
@@ -28,7 +28,7 @@ namespace Xabbo.Core
         {
             try
             {
-                var groupMembers = GroupMembers.Parse(e.Packet);
+                var groupMembers = GroupMemberPage.Parse(e.Packet);
                 if (groupMembers.GroupId == groupId &&
                     groupMembers.CurrentPage == page &&
                     groupMembers.Filter == filter &&

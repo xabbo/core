@@ -5,9 +5,9 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class GroupMembers : List<GroupMember>
+    public class GroupMemberPage : List<GroupMember>
     {
-        public static GroupMembers Parse(Packet packet) => new GroupMembers(packet);
+        public static GroupMemberPage Parse(Packet packet) => new GroupMemberPage(packet);
 
         public int GroupId { get; set; }
         public string GroupName { get; set; }
@@ -20,9 +20,9 @@ namespace Xabbo.Core
         public GroupMemberSearchType SearchType { get; set; }
         public string Filter { get; set; }
 
-        public GroupMembers() { }
+        public GroupMemberPage() { }
 
-        protected GroupMembers(Packet packet)
+        protected GroupMemberPage(Packet packet)
         {
             GroupId = packet.ReadInteger();
             GroupName = packet.ReadString();

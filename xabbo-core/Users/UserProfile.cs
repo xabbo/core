@@ -21,7 +21,7 @@ namespace Xabbo.Core
         public bool IsOnline { get; set; }
         public List<GroupInfo> Groups { get; set; }
         public TimeSpan LastLogin { get; set; }
-        public bool DisplayProfile { get; set; }
+        public bool DisplayInClient { get; set; }
 
         public UserProfile()
         {
@@ -50,7 +50,7 @@ namespace Xabbo.Core
             }
 
             profile.LastLogin = TimeSpan.FromSeconds(packet.ReadInteger());
-            profile.DisplayProfile = packet.ReadBoolean();
+            profile.DisplayInClient = packet.ReadBoolean();
 
             return profile;
         }

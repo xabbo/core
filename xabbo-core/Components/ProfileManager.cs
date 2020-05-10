@@ -14,10 +14,33 @@ namespace Xabbo.Core.Components
 
         private Task<List<FriendInfo>> getFriendsTask;
 
-        private bool loadedUserData, isLoadingUserData;
-        private bool hasLoadedFriends, isLoadingFriends;
+        private bool isInitialized;
+
+        private bool
+            hasLoadedUserData, forceLoadingUserData,
+            hasLoadedFriends, forceLoadingFriends,
+            hasLoadedAchievements;
+
+        private bool isForceLoading;
+
+        private SemaphoreSlim workingSemaphore = new SemaphoreSlim(1, 1);
+
+        private Task<UserData> userDataTask;
+        private Task<List<FriendInfo>> friendsTask;
+        private Task<Achievements> achievementsTask;
 
         public UserData UserData { get; private set; }
+        public IReadOnlyList<FriendInfo> Friends { get; private set; }
+        public IReadOnlyList<Achievement> Achievements { get; private set; }
+
+        #region - Events -
+        public event EventHandler LoadedUserData;
+        protected virtual void OnLoadedUserData() => LoadedUserData?.Invoke(this, EventArgs.Empty);
+
+
+        // LoadedFriends, FriendAdded, FriendRemoved, FriendUpdated
+        // LoadedAchievements, AchievementUpdated
+        #endregion
 
         protected override void OnInitialize()
         {
@@ -27,31 +50,39 @@ namespace Xabbo.Core.Components
         [Group(Features.Autoload), Receive("LatencyResponse")]
         private async void HandleLatencyResponse(object sender, Packet packet)
         {
-            Dispatcher.RemoveHandler(In.LatencyResponse, HandleLatencyResponse);
+            if (!await workingSemaphore.WaitAsync(0)) return;
 
             await Task.Yield();
 
             try
             {
+                if (!hasLoadedUserData && Dispatcher.IsAttached(this, Features.UserData))
+                {
+                    await new CaptureMessageTask(Interceptor, Destination.Client, In.UserData).ExecuteAsync(10000);
+                }
 
+                /*if (!hasLoadedFriends && Dispatcher.IsAttached(this, Features.Friends))
+                {
+                    var friends = await new GetFriendsTask(Interceptor).ExecuteAsync(10000);
+                    await Task.Delay(1000);
+                }
+
+                if (!hasLoadedAchievements && Dispatcher.IsAttached(this, Features.Achievements))
+                {
+                }*/
+
+                isInitialized = true;
             }
-            catch
-            {
-                Dispatcher.AddHandler(In.LatencyResponse, HandleLatencyResponse);
-            }
+            finally { workingSemaphore.Release(); }
         }
 
-        [Group(Features.UserData), Receive("UserData")]
-        private void HandleUserData(Packet packet)
+        [Group(Features.UserData), InterceptIn("UserData"), RequiredOut("RequestUserData")]
+        private void HandleUserData(InterceptEventArgs e)
         {
-            UserData = UserData.Parse(packet);
-            loadedUserData = true;
-        }
+            UserData = UserData.Parse(e.Packet);
+            hasLoadedUserData = true;
 
-        [Group(Features.Friends), Receive("Friends")]
-        private void HandleFriends(object sender, Packet packet)
-        {
-            Dispatcher.RemoveHandler(packet.Header, HandleFriends);
+            OnLoadedUserData();
         }
     }
 }

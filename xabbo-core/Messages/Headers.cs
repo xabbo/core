@@ -5,9 +5,7 @@ using System.Reflection;
 
 namespace Xabbo.Core.Messages
 {
-    public class Headers<TIncoming, TOutgoing>
-        where TIncoming : HeaderDictionary
-        where TOutgoing : HeaderDictionary
+    public class Headers
     {
         private static IEnumerable<MethodInfo> FindAllMethods(Type type)
         {
@@ -19,8 +17,8 @@ namespace Xabbo.Core.Messages
             return methods;
         }
 
-        public TIncoming Incoming { get; }
-        public TOutgoing Outgoing { get; }
+        public IncomingHeaders Incoming { get; }
+        public OutgoingHeaders Outgoing { get; }
 
         public short this[Identifier identifier]
         {
@@ -35,7 +33,13 @@ namespace Xabbo.Core.Messages
             }
         }
 
-        public Headers(TIncoming incoming, TOutgoing outgoing)
+        public Headers()
+        {
+            Incoming = new IncomingHeaders();
+            Outgoing = new OutgoingHeaders();
+        }
+
+        public Headers(IncomingHeaders incoming, OutgoingHeaders outgoing)
         {
             Incoming = incoming;
             Outgoing = outgoing;
@@ -170,10 +174,5 @@ namespace Xabbo.Core.Messages
 
             return ids;
         }
-    }
-
-    public class Headers : Headers<IncomingHeaders, OutgoingHeaders>
-    {
-        public Headers() : base(new IncomingHeaders(), new OutgoingHeaders()) { }
     }
 }

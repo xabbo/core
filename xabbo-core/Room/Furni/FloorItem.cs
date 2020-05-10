@@ -80,9 +80,9 @@ namespace Xabbo.Core
             Tile = new Tile(x, y, z);
             string heightString = packet.ReadString();
             Height = double.Parse(heightString, CultureInfo.InvariantCulture);
-            Extra = packet.ReadInteger(); // consumable state
-            // cabbage 0: full, 1, 2: eaten
-            // linked teleport id
+            Extra = packet.ReadInteger();
+            // - consumable state e.g. cabbage 0: full, 1: partly eaten, 2: mostly eaten
+            // - linked teleport id
 
             Data = StuffData.Parse(packet);
 
@@ -90,7 +90,7 @@ namespace Xabbo.Core
             Usage = (FurniUsage)packet.ReadInteger();
             OwnerId = packet.ReadInteger();
 
-            if (Kind < 0) // TODO ??
+            if (Kind < 0) // ?
                 UnknownStringA = packet.ReadString();
 
             if (readName && packet.CanReadString())

@@ -6,7 +6,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Messages
 {
-    internal static class ReceiveDelegateFactory<TSender>
+    internal static class ReceiveDelegateFactory
     {
         private static readonly ConcurrentDictionary<MethodInfo, Delegate> cache;
 
@@ -15,12 +15,12 @@ namespace Xabbo.Core.Messages
             cache = new ConcurrentDictionary<MethodInfo, Delegate>();
         }
 
-        public static Action<object, TSender, Packet> GetOpenDelegate(MethodInfo method)
+        public static Action<object, object, Packet> GetOpenDelegate(MethodInfo method)
         {
             if (!cache.TryGetValue(method, out Delegate del))
             {
                 var generator =
-                    typeof(ReceiveDelegateFactory<TSender>)
+                    typeof(ReceiveDelegateFactory)
                     .GetMethod(
                         "GenerateWeaklyTypedOpenDelegate",
                         BindingFlags.NonPublic | BindingFlags.Static
@@ -31,37 +31,37 @@ namespace Xabbo.Core.Messages
                 cache.TryAdd(method, del);
             }
 
-            return (Action<object, TSender, Packet>)del;
+            return (Action<object, object, Packet>)del;
         }
 
-        private static Action<object, TSender, Packet> GenerateWeaklyTypedOpenDelegate<TTarget>(MethodInfo method)
+        private static Action<object, object, Packet> GenerateWeaklyTypedOpenDelegate<TTarget>(MethodInfo method)
         {
             var param = method.GetParameters();
             if (param.Length == 0)
             {
                 var call = (Action<TTarget>)method.CreateDelegate(typeof(Action<TTarget>));
-                return new Action<object, TSender, Packet>((target, sender, packet) => call((TTarget)target));
+                return new Action<object, object, Packet>((target, sender, packet) => call((TTarget)target));
             }
             else if (param.Length == 1)
             {
-                if (param[0].ParameterType.IsAssignableFrom(typeof(TSender)))
+                if (param[0].ParameterType == typeof(object))
                 {
-                    var call = (Action<TTarget, TSender>)method.CreateDelegate(typeof(Action<TTarget, TSender>));
-                    return new Action<object, TSender, Packet>((target, sender, packet) => call((TTarget)target, sender));
+                    var call = (Action<TTarget, object>)method.CreateDelegate(typeof(Action<TTarget, object>));
+                    return new Action<object, object, Packet>((target, sender, packet) => call((TTarget)target, sender));
                 }
                 else if (param[0].ParameterType.IsAssignableFrom(typeof(Packet)))
                 {
                     var call = (Action<TTarget, Packet>)method.CreateDelegate(typeof(Action<TTarget, Packet>));
-                    return new Action<object, TSender, Packet>((target, sender, packet) => call((TTarget)target, packet));
+                    return new Action<object, object, Packet>((target, sender, packet) => call((TTarget)target, packet));
                 }
             }
             else if (param.Length == 2)
             {
-                if (param[0].ParameterType.IsAssignableFrom(typeof(TSender)) &&
+                if (param[0].ParameterType == typeof(object) &&
                     param[1].ParameterType.IsAssignableFrom(typeof(Packet)))
                 {
-                    var call = (Action<TTarget, TSender, Packet>)method.CreateDelegate(typeof(Action<TTarget, TSender, Packet>));
-                    return new Action<object, TSender, Packet>((target, sender, packet) => call((TTarget)target, sender, packet));
+                    var call = (Action<TTarget, object, Packet>)method.CreateDelegate(typeof(Action<TTarget, object, Packet>));
+                    return new Action<object, object, Packet>((target, sender, packet) => call((TTarget)target, sender, packet));
                 }
             }
 

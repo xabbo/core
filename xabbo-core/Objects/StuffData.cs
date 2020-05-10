@@ -37,6 +37,7 @@ namespace Xabbo.Core
         public StuffDataType Type { get; }
 
         public int Flags { get; protected set; }
+
         public int LimitedNumber { get; private set; }
         public int LimitedTotal { get; private set; }
 

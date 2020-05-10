@@ -4,50 +4,50 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Messages
 {
-    internal abstract class ReceiveCallback<TSender> : ListenerCallback
+    internal abstract class ReceiveCallback : ListenerCallback
     {
         protected ReceiveCallback(short header, object target, object[] tags, Delegate @delegate)
             : base(header, target, @delegate.Method, tags, @delegate)
         { }
 
-        public void Invoke(TSender sender, Packet packet)
+        public void Invoke(object sender, Packet packet)
         {
             if (isUnsubscribed) return;
             OnInvoked(sender, packet);
         }
 
-        protected abstract void OnInvoked(TSender sender, Packet packet);
+        protected abstract void OnInvoked(object sender, Packet packet);
     }
 
-    internal class OpenReceiverCallback<TSender> : ReceiveCallback<TSender>
+    internal class OpenReceiverCallback : ReceiveCallback
     {
-        private readonly Action<object, TSender, Packet> callback;
+        private readonly Action<object, object, Packet> callback;
 
-        public OpenReceiverCallback(short header, object target, object[] tags, Action<object, TSender, Packet> callback)
+        public OpenReceiverCallback(short header, object target, object[] tags, Action<object, object, Packet> callback)
             : base(header, target, tags, callback)
         {
             this.callback = callback;
         }
 
-        protected override void OnInvoked(TSender sender, Packet packet)
+        protected override void OnInvoked(object sender, Packet packet)
         {
             callback(Target, sender, packet);
         }
     }
 
-    internal sealed class SenderReceiverCallback<TSender> : ReceiveCallback<TSender>
+    internal sealed class SenderReceiverCallback : ReceiveCallback
     {
-        private Action<TSender, Packet> call;
+        private Action<object, Packet> call;
 
         public SenderReceiverCallback(short header, object target, object[] tags, Delegate @delegate)
             : base(header, target, tags, @delegate)
         {
-            call = @delegate as Action<TSender, Packet>;
+            call = @delegate as Action<object, Packet>;
             if (call == null)
                 throw new Exception($"Invalid delegate type {@delegate.GetType().Name} for {GetType().Name}");
         }
 
-        protected override void OnInvoked(TSender sender, Packet packet)
+        protected override void OnInvoked(object sender, Packet packet)
         {
             call(sender, packet);
         }

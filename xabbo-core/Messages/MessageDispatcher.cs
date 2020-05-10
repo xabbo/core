@@ -9,15 +9,12 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Messages
 {
-    public class MessageDispatcher<THeaders, TIn, TOut, TSender>
-        where THeaders : Headers<TIn, TOut>
-        where TIn : HeaderDictionary
-        where TOut : HeaderDictionary
+    public class MessageDispatcher
     {
-        private static ReceiveCallback<TSender> CreateCallback(short header, object target, object[] tags, MethodInfo method)
+        private static ReceiveCallback CreateCallback(short header, object target, object[] tags, MethodInfo method)
         {
-            var callback = ReceiveDelegateFactory<TSender>.GetOpenDelegate(method);
-            return new OpenReceiverCallback<TSender>(header, target, tags, callback);
+            var callback = ReceiveDelegateFactory.GetOpenDelegate(method);
+            return new OpenReceiverCallback(header, target, tags, callback);
         }
 
         private static InterceptCallback CreateInterceptCallback(Destination destination, short header,
@@ -27,28 +24,28 @@ namespace Xabbo.Core.Messages
             return new OpenInterceptCallback(destination, header, target, method, tags, callback);
         }
         
-        private static IReadOnlyList<ReceiveCallback<TSender>> ReceiverCallbackListFactory(short _)
-            => new List<ReceiveCallback<TSender>>();
+        private static IReadOnlyList<ReceiveCallback> ReceiverCallbackListFactory(short _)
+            => new List<ReceiveCallback>();
 
         private static IReadOnlyList<InterceptCallback> InterceptCallbackListFactory(short _)
             => new List<InterceptCallback>();
 
         private ConcurrentDictionary<IListener, ListenerAttachment> listeners;
-        private ConcurrentDictionary<short, IReadOnlyList<ReceiveCallback<TSender>>> receiveCallbacks;
+        private ConcurrentDictionary<short, IReadOnlyList<ReceiveCallback>> receiveCallbacks;
         private ConcurrentDictionary<short, IReadOnlyList<InterceptCallback>> incomingInterceptCallbacks;
         private ConcurrentDictionary<short, IReadOnlyList<InterceptCallback>> outgoingInterceptCallbacks;
 
         private ConcurrentDictionary<short, IReadOnlyList<InterceptCallback>> GetInterceptCallbackDictionary(Destination destination)
             => destination == Destination.Server ? outgoingInterceptCallbacks : incomingInterceptCallbacks;
 
-        public THeaders Headers { get; }
+        public Headers Headers { get; }
 
-        public MessageDispatcher(THeaders headers)
+        public MessageDispatcher(Headers headers)
         {
             Headers = headers;
 
             listeners = new ConcurrentDictionary<IListener, ListenerAttachment>();
-            receiveCallbacks = new ConcurrentDictionary<short, IReadOnlyList<ReceiveCallback<TSender>>>();
+            receiveCallbacks = new ConcurrentDictionary<short, IReadOnlyList<ReceiveCallback>>();
             incomingInterceptCallbacks = new ConcurrentDictionary<short, IReadOnlyList<InterceptCallback>>();
             outgoingInterceptCallbacks = new ConcurrentDictionary<short, IReadOnlyList<InterceptCallback>>();
         }
@@ -72,11 +69,11 @@ namespace Xabbo.Core.Messages
                 case 0: return true;
                 case 1:
                     return
-                        parameters[0].ParameterType.IsAssignableFrom(typeof(TSender)) ||
+                        parameters[0].ParameterType.Equals(typeof(object)) ||
                         parameters[0].ParameterType.Equals(typeof(Packet));
                 case 2:
                     return
-                        parameters[0].ParameterType.IsAssignableFrom(typeof(TSender)) &&
+                        parameters[0].ParameterType.Equals(typeof(object)) &&
                         parameters[1].ParameterType.Equals(typeof(Packet));
                 default: return false;
             }
@@ -94,9 +91,9 @@ namespace Xabbo.Core.Messages
                 parameters.All(param => IsValidParameter(param));
         }
 
-        public void DispatchMessage(TSender sender, Packet packet)
+        public void DispatchMessage(object sender, Packet packet)
         {
-            IReadOnlyList<ReceiveCallback<TSender>> list;
+            IReadOnlyList<ReceiveCallback> list;
 
             // global callbacks
             if (receiveCallbacks.TryGetValue(-1, out list))
@@ -107,7 +104,7 @@ namespace Xabbo.Core.Messages
                 InvokeReceiverCallbacks(list, sender, packet);
         }
 
-        private void InvokeReceiverCallbacks(IEnumerable<ReceiveCallback<TSender>> callbacks, TSender sender, Packet packet)
+        private void InvokeReceiverCallbacks(IEnumerable<ReceiveCallback> callbacks, object sender, Packet packet)
         {
             short header = packet.Header;
 
@@ -172,13 +169,13 @@ namespace Xabbo.Core.Messages
         }
 
         #region - Handlers -
-        public bool AddHandler(short header, Action<TSender, Packet> handler)
+        public bool AddHandler(short header, Action<object, Packet> handler)
         {
             if (handler == null)
                 throw new ArgumentNullException("handler");
 
             bool result;
-            IReadOnlyList<ReceiveCallback<TSender>> previousList, newList;
+            IReadOnlyList<ReceiveCallback> previousList, newList;
 
             do
             {
@@ -193,7 +190,7 @@ namespace Xabbo.Core.Messages
                 else
                 {
                     var list = previousList.ToList();
-                    list.Add(new SenderReceiverCallback<TSender>(header, handler.Target, null, handler));
+                    list.Add(new SenderReceiverCallback(header, handler.Target, null, handler));
                     newList = list;
 
                     result = true;
@@ -204,13 +201,13 @@ namespace Xabbo.Core.Messages
             return result;
         }
 
-        public bool RemoveHandler(short header, Action<TSender, Packet> handler)
+        public bool RemoveHandler(short header, Action<object, Packet> handler)
         {
             if (handler == null)
                 throw new ArgumentNullException("handler");
 
             bool result;
-            IReadOnlyList<ReceiveCallback<TSender>> previousList, newList;
+            IReadOnlyList<ReceiveCallback> previousList, newList;
 
             do
             {
@@ -272,7 +269,7 @@ namespace Xabbo.Core.Messages
         /// <summary>
         /// Attempts to attach the specified listener.
         /// Throws if any of the identifiers in the required message groups are unresolved.
-        /// See <see cref="IsAttached(IListener, object[])"/> to check if certain message groups were attached.
+        /// Use <see cref="IsAttached(IListener, object[])"/> to check if certain message groups were attached.
         /// </summary>
         /// <param name="listener">The listener to attach.</param>
         /// <param name="requiredGroups">
@@ -475,12 +472,12 @@ namespace Xabbo.Core.Messages
                 throw new InvalidOperationException($"Listener '{listenerType.FullName}' is already attached.");
 
             // Add receive callbacks
-            foreach (var callbackGroup in callbackList.OfType<ReceiveCallback<TSender>>().GroupBy(x => x.Header))
+            foreach (var callbackGroup in callbackList.OfType<ReceiveCallback>().GroupBy(x => x.Header))
             {
                 short header = callbackGroup.Key;
 
-                IReadOnlyList<ReceiveCallback<TSender>> previousList;
-                List<ReceiveCallback<TSender>> updatedList;
+                IReadOnlyList<ReceiveCallback> previousList;
+                List<ReceiveCallback> updatedList;
 
                 do
                 {
@@ -523,12 +520,12 @@ namespace Xabbo.Core.Messages
                 callback.Unsubscribe();
 
             // Receivers
-            foreach (var callbackGroup in attachment.Callbacks.OfType<ReceiveCallback<TSender>>().GroupBy(x => x.Header))
+            foreach (var callbackGroup in attachment.Callbacks.OfType<ReceiveCallback>().GroupBy(x => x.Header))
             {
                 short header = callbackGroup.Key;
 
-                IReadOnlyList<ReceiveCallback<TSender>> previousList;
-                List<ReceiveCallback<TSender>> newList;
+                IReadOnlyList<ReceiveCallback> previousList;
+                List<ReceiveCallback> newList;
 
                 do
                 {
@@ -638,15 +635,5 @@ namespace Xabbo.Core.Messages
             return result;
         }
         #endregion
-    }
-
-    public class MessageDispatcher<TSender> : MessageDispatcher<Headers, IncomingHeaders, OutgoingHeaders, TSender>
-    {
-        public MessageDispatcher(Headers headers) : base(headers) { }
-    }
-
-    public class MessageDispatcher : MessageDispatcher<object>
-    {
-        public MessageDispatcher(Headers headers) : base(headers) { }
     }
 }
