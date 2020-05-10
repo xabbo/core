@@ -35,6 +35,7 @@ namespace Xabbo.Core
         public bool Equals(Tile other, double epsilon = XabboConst.DEFAULT_EPSILON)
         {
             return
+                other != null &&
                 X == other.X &&
                 Y == other.Y &&
                 Math.Abs(Z - other.Z) < epsilon;
