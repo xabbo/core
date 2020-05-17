@@ -11,6 +11,8 @@ namespace Xabbo.Core
         public static readonly StickyColor Green = new StickyColor("Green", "9CFF9C");
         public static readonly StickyColor Yellow = new StickyColor("Yellow", "FFFF33");
 
+        public static readonly StickyColors All = new StickyColors();
+
         private readonly List<StickyColor> colors;
 
         internal StickyColors()
