@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
 using Xabbo.Core.Protocol;
