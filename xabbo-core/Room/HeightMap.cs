@@ -83,6 +83,8 @@ namespace Xabbo.Core
             return IsTile(Values[y * Width + x]);
         }
 
+        public bool IsFree(int x, int y) => IsTile(x, y) && !IsBlocked(x, y);
+
         public static HeightMap Parse(Packet packet) => new HeightMap(packet);
 
         public void Write(Packet packet)
