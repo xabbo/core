@@ -6,6 +6,8 @@ namespace Xabbo.Core
 {
     public class WallLocation : IWritable
     {
+        public static readonly WallLocation Zero = new WallLocation();
+
         public int WallX { get; set; }
         public int WallY { get; set; }
         public int X { get; set; }

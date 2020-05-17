@@ -8,7 +8,7 @@ namespace Xabbo.Core
 {
     public static class XabboCoreExtensions
     {
-        #region - Item -
+        #region - Items -
         public static IEnumerable<FloorItem> GetFloorItems<T>(this IEnumerable<T> furni) where T : IItem => furni.OfType<FloorItem>();
         public static IEnumerable<WallItem> GetWallItems<T>(this IEnumerable<T> furni) where T : IItem => furni.OfType<WallItem>();
         public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, FurniInfo furniInfo) where T : IItem
@@ -50,10 +50,6 @@ namespace Xabbo.Core
         }
         public static IEnumerable<FloorItem> At(this IEnumerable<FloorItem> items, Tile tile)
             => At(items, tile.X, tile.Y, tile.Z);
-        public static bool AnyAt(this IEnumerable<FloorItem> items, int? x = null, int? y = null, double? z = null, int? dir = null)
-            => At(items, x, y, z, dir).Any();
-        public static bool AnyAt(this IEnumerable<FloorItem> items, Tile tile)
-            => AnyAt(items, tile.X, tile.Y, tile.Z);
         public static IEnumerable<WallItem> At(this IEnumerable<WallItem> items,
             int? wallX = null, int? wallY = null, int? x = null, int? y = null, WallOrientation orientation = null)
         {
@@ -69,10 +65,6 @@ namespace Xabbo.Core
         }
         public static IEnumerable<WallItem> At(this IEnumerable<WallItem> items, WallLocation location)
             => At(items, location.WallX, location.WallY, location.X, location.Y, location.Orientation);
-        public static bool AnyAt(this IEnumerable<WallItem> items, int? wallX = null, int? wallY = null, int? x = null, int? y = null, WallOrientation orientation = null)
-            => At(items, wallX, wallY, x, y, orientation).Any();
-        public static bool AnyAt(this IEnumerable<WallItem> items, WallLocation location)
-            => AnyAt(items, location.WallX, location.WallY, location.X, location.Y, location.Orientation);
         #endregion
 
         #region - Inventory -
@@ -172,6 +164,43 @@ namespace Xabbo.Core
                 if (groupId.HasValue && (!roomInfo.IsGroupHomeRoom || roomInfo.GroupId != groupId)) continue;
                 if (group != null && (!roomInfo.IsGroupHomeRoom || !roomInfo.GroupName.ToLower().Contains(group.ToLower()))) continue;
                 yield return roomInfo;
+            }
+        }
+        #endregion
+
+        #region - Entities -
+        public static IEnumerable<T> At<T>(this IEnumerable<T> entities, int? x = null, int? y = null, double? z = null, double epsilon = XabboConst.DEFAULT_EPSILON)
+            where T : Entity
+        {
+            foreach (var e in entities)
+            {
+                if (e.Tile == null) continue;
+                if (x.HasValue && e.Tile.X != x) continue;
+                if (y.HasValue && e.Tile.Y != y) continue;
+                if (z.HasValue && Math.Abs(e.Tile.Z - z.Value) >= epsilon) continue;
+                yield return e;
+            }
+        }
+
+        public static IEnumerable<T> Inside<T>(this IEnumerable<T> entities, Area area)
+            where T : Entity
+        {
+            foreach (var e in entities)
+            {
+                if (e.Tile == null) continue;
+                if (area.Contains(e.Tile))
+                    yield return e;
+            }
+        }
+
+        public static IEnumerable<T> Outside<T>(this IEnumerable<T> entities, Area area)
+            where T : Entity
+        {
+            foreach (var e in entities)
+            {
+                if (e.Tile == null) continue;
+                if (!area.Contains(e.Tile))
+                    yield return e;
             }
         }
         #endregion

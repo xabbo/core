@@ -55,8 +55,13 @@
     <Compile Include="Catalog\Catalog.cs" />
     <Compile Include="Catalog\CatalogProduct.cs" />
     <Compile Include="Components\TradeManager.cs" />
+    <Compile Include="Components\User\AchievementManager.cs" />
+    <Compile Include="Components\User\FriendManager.cs" />
+    <Compile Include="Components\User\InventoryManager.cs" />
     <Compile Include="Events\DoorbellEventArgs.cs" />
     <Compile Include="Events\EntityTypingEventArgs.cs" />
+    <Compile Include="Events\FriendEventArgs.cs" />
+    <Compile Include="Events\FriendsEventArgs.cs" />
     <Compile Include="Events\RoomUserEventArgs.cs" />
     <Compile Include="Events\TradeAcceptEventArgs.cs" />
     <Compile Include="Events\TradeOfferEventArgs.cs" />
@@ -90,7 +95,7 @@
     <Compile Include="Components\Room\FurniManager.cs" />
     <Compile Include="Components\Room\RoomManager.cs" />
     <Compile Include="Components\Room\EntityManager.cs" />
-    <Compile Include="Components\ProfileManager.cs" />
+    <Compile Include="Components\User\ProfileManager.cs" />
     <Compile Include="Components\XabboMessageGroups.cs" />
     <Compile Include="Groups\GroupData.cs" />
     <Compile Include="Groups\GroupInfo.cs" />
@@ -112,6 +117,7 @@
     <Compile Include="Metadata\FurniDataXml.cs" />
     <Compile Include="Metadata\FurniInfo.cs" />
     <Compile Include="Metadata\ProductData.cs" />
+    <Compile Include="Pet\PetInfo.cs" />
     <Compile Include="Protocol\IWritable.cs" />
     <Compile Include="Room\Furni\FurniCategory.cs" />
     <Compile Include="Room\Furni\FurniUsage.cs" />

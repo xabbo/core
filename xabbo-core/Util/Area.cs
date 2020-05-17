@@ -53,10 +53,12 @@ namespace Xabbo.Core
         public bool Contains(int x, int y)
         {
             return
-                PointA.X <= x && y <= PointB.X &&
+                PointA.X <= x && x <= PointB.X &&
                 PointA.Y <= y && y <= PointB.Y;
         }
+
         public bool Contains(Position p) => Contains(p.X, p.Y);
+
         public bool Contains(Tile t) => Contains(t.X, t.Y);
 
         public override int GetHashCode() => (X1, Y1, X2, Y2).GetHashCode();

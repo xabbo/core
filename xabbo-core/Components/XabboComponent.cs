@@ -10,7 +10,7 @@ namespace Xabbo.Core.Components
     {
         public static IEnumerable<Type> GetCoreComponentTypes()
         {
-            foreach (var type in typeof(XabboComponent).Assembly.GetTypes())
+            foreach (var type in typeof(XabboComponent).Assembly.GetExportedTypes())
             {
                 if (type.IsSubclassOf(typeof(XabboComponent)))
                     yield return type;
@@ -21,11 +21,11 @@ namespace Xabbo.Core.Components
         public bool IsAvailable { get; internal set; }
         internal bool IsFaulted { get; set; }
 
-        public IInterceptor Interceptor => Manager.Interceptor;
-        public MessageDispatcher Dispatcher => Interceptor.Dispatcher;
-        public Headers Headers => Dispatcher.Headers;
-        public IncomingHeaders In => Headers.Incoming;
-        public OutgoingHeaders Out => Headers.Outgoing;
+        protected IInterceptor Interceptor => Manager.Interceptor;
+        protected MessageDispatcher Dispatcher => Interceptor.Dispatcher;
+        protected Headers Headers => Dispatcher.Headers;
+        protected IncomingHeaders In => Headers.Incoming;
+        protected OutgoingHeaders Out => Headers.Outgoing;
 
         protected T GetComponent<T>() where T : XabboComponent => Manager.GetComponent<T>();
 

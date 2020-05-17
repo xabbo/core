@@ -34,6 +34,10 @@ namespace Xabbo.Core.Components
         public bool HasRights => RightsLevel > 0;
         public bool IsOwner { get; private set; }
 
+        public bool CanMute => CheckPermission(Data?.Moderation.WhoCanMute);
+        public bool CanKick => CheckPermission(Data?.Moderation.WhoCanKick);
+        public bool CanBan => CheckPermission(Data?.Moderation.WhoCanBan);
+
         #region - Events -
         public event EventHandler RingingDoorbell;
         public event EventHandler EnteredQueue;
@@ -84,6 +88,19 @@ namespace Xabbo.Core.Components
             IsOwner = false;
 
             OnLeftRoom();
+        }
+
+        private bool CheckPermission(ModerationPermissions? permissions)
+        {
+            if (!IsInRoom) return false;
+
+            switch (permissions)
+            {
+                case ModerationPermissions.OwnerOnly: return IsOwner;
+                case ModerationPermissions.RightsHolders: return RightsLevel > 0;
+                case ModerationPermissions.AllUsers: return true;
+                default: return false;
+            }
         }
 
         [Receive("RoomData")]
