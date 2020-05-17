@@ -6,24 +6,26 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Components
 {
-    [Dependencies(typeof(RoomManager), typeof(EntityManager))]
+    [Dependencies(typeof(EntityManager))]
     public class ChatManager : XabboComponent
     {
         private EntityManager entities;
 
         public event EventHandler<EntityChatEventArgs> EntityChat;
 
-        protected virtual void OnEntityChat(Entity entity, ChatType chatType, string message, int bubbleStyle)
-            => EntityChat?.Invoke(this, new EntityChatEventArgs(entity, chatType, message, bubbleStyle));
+        protected virtual void OnEntityChat(EntityChatEventArgs e)
+            => EntityChat?.Invoke(this, e);
 
         protected override void OnInitialize()
         {
             entities = GetComponent<EntityManager>();
         }
 
-        [Receive("RoomUserWhisper", "RoomUserTalk", "RoomUserShout")]
-        private void HandleEntityChat(Packet packet)
+        [InterceptIn("RoomUserWhisper", "RoomUserTalk", "RoomUserShout")]
+        private void HandleEntityChat(InterceptEventArgs e)
         {
+            var packet = e.Packet;
+
             ChatType chatType;
             if (packet.Header == In.RoomUserWhisper)
                 chatType = ChatType.Whisper;
@@ -41,7 +43,10 @@ namespace Xabbo.Core.Components
             packet.ReadInteger();
             int bubbleStyle = packet.ReadInteger();
 
-            OnEntityChat(entity, chatType, message, bubbleStyle);
+            var eventArgs = new EntityChatEventArgs(entity, chatType, message, bubbleStyle);
+            OnEntityChat(eventArgs);
+
+            if (eventArgs.IsBlocked) e.Block();
         }
     }
 }
