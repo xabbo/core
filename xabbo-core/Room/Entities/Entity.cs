@@ -84,7 +84,7 @@ namespace Xabbo.Core
                 case EntityType.User: entity = new RoomUser(id, index, packet); break;
                 case EntityType.Pet: entity = new Pet(id, index, packet); break;
                 case EntityType.PublicBot: entity = new PublicBot(id, index); break;
-                case EntityType.UserBot: entity = new UserBot(id, index, packet); break;
+                case EntityType.PrivateBot: entity = new PrivateBot(id, index, packet); break;
                 default: throw new Exception($"Unknown entity type: {type}");
             }
 

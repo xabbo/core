@@ -5,20 +5,20 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class UserBot : Entity
+    public class PrivateBot : Entity
     {
         public Gender Gender { get; set; }
         public int OwnerId { get; set; }
         public string OwnerName { get; set; }
         public List<short> UnknownShortsA { get; set; }
 
-        public UserBot(int id, int index)
-            : base(EntityType.UserBot, id, index)
+        public PrivateBot(int id, int index)
+            : base(EntityType.PrivateBot, id, index)
         {
             UnknownShortsA = new List<short>();
         }
 
-        internal UserBot(int id, int index, Packet packet)
+        internal PrivateBot(int id, int index, Packet packet)
             : this(id, index)
         {
             Gender = H.ToGender(packet.ReadString());

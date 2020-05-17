@@ -7,6 +7,6 @@ namespace Xabbo.Core
         User = 1,
         Pet = 2,
         PublicBot = 3,
-        UserBot = 4
+        PrivateBot = 4
     }
 }

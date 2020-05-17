@@ -232,7 +232,7 @@
     <Compile Include="Room\Entities\RoomUser.cs" />
     <Compile Include="Room\Entities\Sign.cs" />
     <Compile Include="Room\Entities\Stance.cs" />
-    <Compile Include="Room\Entities\UserBot.cs" />
+    <Compile Include="Room\Entities\PrivateBot.cs" />
     <Compile Include="Room\FloorPlan.cs" />
     <Compile Include="Room\HeightMap.cs" />
     <Compile Include="Room\RoomData.cs" />

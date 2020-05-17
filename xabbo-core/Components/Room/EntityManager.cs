@@ -21,7 +21,7 @@ namespace Xabbo.Core.Components
         public IEnumerable<Entity> Entities => entities.Select(x => x.Value);
         public IEnumerable<RoomUser> Users => Entities.OfType<RoomUser>();
         public IEnumerable<Pet> Pets => Entities.OfType<Pet>();
-        public IEnumerable<UserBot> UserBots => Entities.OfType<UserBot>();
+        public IEnumerable<PrivateBot> UserBots => Entities.OfType<PrivateBot>();
         public IEnumerable<PublicBot> PublicBots => Entities.OfType<PublicBot>();
 
         public Entity GetEntity(int index) => entities.TryGetValue(index, out Entity e) ? e : null;
