@@ -138,6 +138,7 @@
     <Compile Include="Tasks\GetGroupDataTask.cs" />
     <Compile Include="Tasks\GetGroupMembersTask.cs" />
     <Compile Include="Tasks\GetInventoryTask.cs" />
+    <Compile Include="Tasks\GetPetInfoTask.cs" />
     <Compile Include="Tasks\GetProfileTask.cs" />
     <Compile Include="Tasks\GetRightsListTask.cs" />
     <Compile Include="Tasks\GetRoomDataTask.cs" />

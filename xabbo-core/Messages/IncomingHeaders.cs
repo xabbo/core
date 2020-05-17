@@ -254,7 +254,7 @@ namespace Xabbo.Core.Messages
         public short PetBreedingStartFailed { get; private set; }
         public short PetBreeds { get; private set; }
         public short PetError { get; private set; }
-        public short PetInformation { get; private set; }
+        public short PetInfo { get; private set; }
         public short PetLevelUp { get; private set; }
         public short PetLevelUpdated { get; private set; }
         public short PetNameError { get; private set; }

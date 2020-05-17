@@ -212,7 +212,7 @@ namespace Xabbo.Core.Messages
         public short RequestOwnGuilds { get; private set; }
         public short RequestOwnItems { get; private set; }
         public short RequestPetBreeds { get; private set; }
-        public short RequestPetInformation { get; private set; }
+        public short RequestPetInfo { get; private set; }
         public short RequestPetTrainingPanel { get; private set; }
         public short RequestPopularRooms { get; private set; }
         public short RequestProfileFriends { get; private set; }
