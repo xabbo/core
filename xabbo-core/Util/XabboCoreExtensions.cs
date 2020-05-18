@@ -43,7 +43,7 @@ namespace Xabbo.Core
             {
                 if (x.HasValue && item.X != x.Value) continue;
                 if (y.HasValue && item.Y != y.Value) continue;
-                if (z.HasValue && Math.Abs(item.Z - z.Value) < epsilon) continue;
+                if (z.HasValue && Math.Abs(item.Z - z.Value) >= epsilon) continue;
                 if (dir.HasValue && item.Direction != dir.Value) continue;
                 yield return item;
             }
