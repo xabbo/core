@@ -11,16 +11,18 @@ namespace Xabbo.Core
         public int Y { get; set; }
         public double Z { get; set; }
 
+        public Tile() { }
+
+        public Tile(int x, int y)
+            : this(x, y, 0)
+        { }
+
         public Tile(int x, int y, double z)
         {
             X = x;
             Y = y;
             Z = z;
         }
-
-        public Tile(int x, int y)
-            : this(x, y, 0)
-        { }
 
         public void Write(Packet packet)
         {
