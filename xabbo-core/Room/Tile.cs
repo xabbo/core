@@ -18,6 +18,10 @@ namespace Xabbo.Core
             Z = z;
         }
 
+        public Tile(int x, int y)
+            : this(x, y, 0)
+        { }
+
         public void Write(Packet packet)
         {
             packet.WriteInteger(X);
@@ -74,5 +78,10 @@ namespace Xabbo.Core
                 return a.Equals(b);
         }
         public static bool operator !=(Tile a, Tile b) => !(a == b);
+
+        public static implicit operator Tile(ValueTuple<int, int, double> tuple) => new Tile(tuple.Item1, tuple.Item2, tuple.Item3);
+        public static implicit operator ValueTuple<int, int, double>(Tile tile) => (tile.X, tile.Y, tile.Z);
+        public static implicit operator Tile(ValueTuple<int, int> tuple) => new Tile(tuple.Item1, tuple.Item2, 0.0);
+        public static implicit operator ValueTuple<int, int>(Tile tile) => (tile.X, tile.Y);
     }
 }
