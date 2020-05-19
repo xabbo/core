@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 
 using Xabbo.Core.Protocol;
 
@@ -17,6 +18,9 @@ namespace Xabbo.Core
         public string Figure { get; set; }
 
         public Tile Tile { get; set; }
+        [JsonIgnore] public int X => Tile.X;
+        [JsonIgnore] public int Y => Tile.Y;
+        [JsonIgnore] public double Z => Tile.Z;
         public Direction Direction { get; set; }
 
         // States
