@@ -7,7 +7,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Components
 {
-    public class FriendManager : XabboComponent
+    internal class FriendManager : XabboComponent
     {
         public enum Feature { Autoload }
 

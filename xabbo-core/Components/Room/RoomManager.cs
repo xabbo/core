@@ -19,7 +19,7 @@ namespace Xabbo.Core.Components
         public bool IsInQueue { get; private set; }
         public int QueuePosition { get; private set; }
         // TODO public bool IsSpectating { get; private set; }
-        public bool IsEnteringRoom { get; private set; }
+        public bool IsLoadingRoom { get; private set; }
         public bool IsInRoom { get; private set; }
 
         public int Id { get; private set; }
@@ -73,7 +73,7 @@ namespace Xabbo.Core.Components
         {
             IsRingingDoorbell =
             IsInQueue =
-            IsEnteringRoom =
+            IsLoadingRoom =
             IsInRoom = false;
             QueuePosition = 0;
 
@@ -121,7 +121,7 @@ namespace Xabbo.Core.Components
         [Receive("RoomOpen")]
         private void HandleRoomOpen(Packet packet)
         {
-            if (IsRingingDoorbell || IsInQueue || IsEnteringRoom || IsInRoom)
+            if (IsRingingDoorbell || IsInQueue || IsLoadingRoom || IsInRoom)
             {
                 DebugUtil.Log($"leaving current room ({Id})");
                 LeaveRoom();
@@ -214,7 +214,7 @@ namespace Xabbo.Core.Components
         [Receive("RoomModel")]
         private void HandleRoomModel(Packet packet)
         {
-            if (IsEnteringRoom || IsInRoom)
+            if (IsLoadingRoom || IsInRoom)
             {
                 DebugUtil.Log($"leaving current room ({Id})");
                 LeaveRoom();
@@ -227,7 +227,7 @@ namespace Xabbo.Core.Components
             Model = packet.ReadString();
             Id = packet.ReadInteger();
 
-            IsEnteringRoom = true;
+            IsLoadingRoom = true;
 
             DebugUtil.Log("entering room");
             OnEnteringRoom();
@@ -251,7 +251,7 @@ namespace Xabbo.Core.Components
         [Group(Features.DoorTile), Receive("FloorPlanEditorDoorSettings")]
         private void HandleDoorSettings(Packet packet)
         {
-            if (!IsEnteringRoom)
+            if (!IsLoadingRoom)
             {
                 DebugUtil.Log("not entering room");
                 return;
@@ -269,7 +269,7 @@ namespace Xabbo.Core.Components
         [Group(Features.HeightMap), Receive("RoomRelativeMap")]
         private void HandleHeightMap(Packet packet)
         {
-            if (!IsEnteringRoom)
+            if (!IsLoadingRoom)
             {
                 DebugUtil.Log("not entering room");
                 return;
@@ -299,7 +299,7 @@ namespace Xabbo.Core.Components
         [Group(Features.FloorPlan), Receive("RoomHeightMap")]
         private void HandleFloorPlan(Packet packet)
         {
-            if (!IsEnteringRoom)
+            if (!IsLoadingRoom)
             {
                 DebugUtil.Log("not entering room");
                 return;
@@ -313,7 +313,7 @@ namespace Xabbo.Core.Components
         [Receive("RoomOwner")]
         private void HandleRoomOwner(Packet packet)
         {
-            if (!IsEnteringRoom)
+            if (!IsLoadingRoom)
             {
                 DebugUtil.Log("not entering room");
                 return;
@@ -327,7 +327,7 @@ namespace Xabbo.Core.Components
             }
 
             IsOwner = packet.ReadBoolean();
-            IsEnteringRoom = false;
+            IsLoadingRoom = false;
             IsInRoom = true;
 
             if (roomDataCache.TryGetValue(roomId, out RoomData roomData))
@@ -343,7 +343,7 @@ namespace Xabbo.Core.Components
         [Receive("HotelView")]
         private void HandleHotelView(Packet packet)
         {
-            if (IsRingingDoorbell || IsInQueue || IsEnteringRoom || IsInRoom)
+            if (IsRingingDoorbell || IsInQueue || IsLoadingRoom || IsInRoom)
             {
                 DebugUtil.Log($"leaving current room ({Id})");
                 LeaveRoom();

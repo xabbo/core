@@ -90,7 +90,7 @@ namespace Xabbo.Core.Components
         [Receive("RoomFloorItems")]
         protected void HandleRoomFloorItems(Packet packet)
         {
-            if (!roomManager.IsEnteringRoom)
+            if (!roomManager.IsLoadingRoom)
             {
                 DebugUtil.Log("not entering room");
                 return;
@@ -266,7 +266,7 @@ namespace Xabbo.Core.Components
         [Receive("RoomWallItems")]
         protected void HandleWallItems(Packet packet)
         {
-            if (!roomManager.IsEnteringRoom)
+            if (!roomManager.IsLoadingRoom)
             {
                 DebugUtil.Log("not entering room");
                 return;

@@ -25,6 +25,9 @@ namespace Xabbo.Core.Components
         public IEnumerable<PublicBot> PublicBots => Entities.OfType<PublicBot>();
 
         public Entity GetEntity(int index) => entities.TryGetValue(index, out Entity e) ? e : null;
+        public Entity GetEntityById(int id) => Entities.FirstOrDefault(e => e.Id == id);
+        public Entity GetEntityByName(string name) => Entities.FirstOrDefault(e => e.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+
         public T GetEntity<T>(int index) where T : Entity => GetEntity(index) as T;
         public T GetEntityById<T>(int id) where T : Entity
             => Entities.OfType<T>().FirstOrDefault(e => e.Id == id);
@@ -115,7 +118,7 @@ namespace Xabbo.Core.Components
         [Receive("RoomUsers")]
         protected void HandleRoomUsers(Packet packet)
         {
-            if (!roomManager.IsEnteringRoom && !roomManager.IsInRoom)
+            if (!roomManager.IsLoadingRoom && !roomManager.IsInRoom)
             {
                 DebugUtil.Log("not in room");
                 return;
