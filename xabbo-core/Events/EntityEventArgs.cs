@@ -4,9 +4,9 @@ namespace Xabbo.Core.Events
 {
     public class EntityEventArgs : EventArgs
     {
-        public Entity Entity { get; }
+        public IEntity Entity { get; }
 
-        public EntityEventArgs(Entity entity)
+        public EntityEventArgs(IEntity entity)
         {
             Entity = entity;
         }

@@ -2,11 +2,11 @@
 
 namespace Xabbo.Core.Events
 {
-    public class FloorPlanEventArgs : EventArgs
+    public class HeightMapEventArgs : EventArgs
     {
-        public FloorPlan Map { get; }
+        public IHeightMap Map { get; }
 
-        public FloorPlanEventArgs(FloorPlan map)
+        public HeightMapEventArgs(IHeightMap map)
         {
             Map = map;
         }

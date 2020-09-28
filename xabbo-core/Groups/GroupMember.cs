@@ -4,7 +4,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class GroupMember
+    public class GroupMember : IGroupMember
     {
         public static GroupMember Parse(Packet packet) => new GroupMember(packet);
 
@@ -18,8 +18,8 @@ namespace Xabbo.Core
 
         protected GroupMember(Packet packet)
         {
-            Type = (GroupMemberType)packet.ReadInteger();
-            Id = packet.ReadInteger();
+            Type = (GroupMemberType)packet.ReadInt();
+            Id = packet.ReadInt();
             Name = packet.ReadString();
             Figure = packet.ReadString();
             Joined = DateTime.Parse(packet.ReadString());

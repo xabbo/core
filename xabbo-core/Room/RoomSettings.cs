@@ -61,25 +61,25 @@ namespace Xabbo.Core
             moderationSettings
             */
 
-            Id = packet.ReadInteger();
+            Id = packet.ReadInt();
             Name = packet.ReadString();
             Description = packet.ReadString();
-            Access = (RoomAccess)packet.ReadInteger();
-            Category = (RoomCategory)packet.ReadInteger();
-            MaxVisitors = packet.ReadInteger();
-            packet.ReadInteger();
-            int n = packet.ReadInteger();
+            Access = (RoomAccess)packet.ReadInt();
+            Category = (RoomCategory)packet.ReadInt();
+            MaxVisitors = packet.ReadInt();
+            packet.ReadInt();
+            int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
                 Tags.Add(packet.ReadString());
-            Trading = (TradePermissions)packet.ReadInteger();
-            AllowPets = packet.ReadInteger() > 0;
-            AllowOthersPetsToEat = packet.ReadInteger() > 0;
-            DisableRoomBlocking = packet.ReadInteger() > 0;
-            HideWalls = packet.ReadInteger() > 0;
-            WallThickness = (Thickness)packet.ReadInteger();
-            FloorThickness = (Thickness)packet.ReadInteger();
+            Trading = (TradePermissions)packet.ReadInt();
+            AllowPets = packet.ReadInt() > 0;
+            AllowOthersPetsToEat = packet.ReadInt() > 0;
+            DisableRoomBlocking = packet.ReadInt() > 0;
+            HideWalls = packet.ReadInt() > 0;
+            WallThickness = (Thickness)packet.ReadInt();
+            FloorThickness = (Thickness)packet.ReadInt();
             Chat = ChatSettings.Parse(packet);
-            EnlistByFurniContent = packet.ReadBoolean();
+            EnlistByFurniContent = packet.ReadBool();
             Moderation = ModerationSettings.Parse(packet);
         }
 

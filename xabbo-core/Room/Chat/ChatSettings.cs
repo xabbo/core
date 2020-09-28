@@ -1,9 +1,10 @@
 ﻿using System;
+
 using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class ChatSettings : IWritable
+    public class ChatSettings : IChatSettings, IWritable
     {
         public static ChatSettings Parse(Packet packet) => new ChatSettings(packet);
 
@@ -24,11 +25,11 @@ namespace Xabbo.Core
 
         internal ChatSettings(Packet packet)
         {
-            Flow = (ChatFlow)packet.ReadInteger();
-            BubbleWidth = (ChatBubbleWidth)packet.ReadInteger();
-            ScrollSpeed = (ChatScrollSpeed)packet.ReadInteger();
-            TalkHearingDistance = packet.ReadInteger();
-            FloodProtection = (ChatFloodProtection)packet.ReadInteger();
+            Flow = (ChatFlow)packet.ReadInt();
+            BubbleWidth = (ChatBubbleWidth)packet.ReadInt();
+            ScrollSpeed = (ChatScrollSpeed)packet.ReadInt();
+            TalkHearingDistance = packet.ReadInt();
+            FloodProtection = (ChatFloodProtection)packet.ReadInt();
         }
 
         public void Write(Packet packet) => packet.WriteValues(

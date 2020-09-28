@@ -4,9 +4,9 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class GroupInfo
+    public class GroupInfo : IGroupInfo
     {
-        public static GroupInfo Parse(Packet packet) => new GroupInfo(packet);
+        public static GroupInfo Parse(IReadOnlyPacket packet) => new GroupInfo(packet);
 
         public int Id { get; set; }
         public string Name { get; set; }
@@ -15,18 +15,18 @@ namespace Xabbo.Core
         public string ColorB { get; set; }
         public bool IsFavorite { get; set; }
         public int OwnerId { get; set; }
-        public bool UnknownBool1 { get; set; }
+        public bool Bool2 { get; set; }
 
-        protected GroupInfo(Packet packet)
+        protected GroupInfo(IReadOnlyPacket packet)
         {
-            Id = packet.ReadInteger();
+            Id = packet.ReadInt();
             Name = packet.ReadString();
             Badge = packet.ReadString();
             ColorA = packet.ReadString();
             ColorB = packet.ReadString();
-            IsFavorite = packet.ReadBoolean();
-            OwnerId = packet.ReadInteger();
-            UnknownBool1 = packet.ReadBoolean();
+            IsFavorite = packet.ReadBool();
+            OwnerId = packet.ReadInt();
+            Bool2 = packet.ReadBool();
         }
     }
 }

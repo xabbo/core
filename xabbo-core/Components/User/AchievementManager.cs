@@ -7,13 +7,15 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Components
 {
-    public class AchievementManager : XabboComponent
+    internal class AchievementManager : XabboComponent
     {
         private bool isLoadingAchievements = true;
 
+        private Achievements achievements;
+
         protected override void OnInitialize()
         {
-            
+            achievements = new Achievements();
         }
 
         [InterceptIn("AchievementList")]

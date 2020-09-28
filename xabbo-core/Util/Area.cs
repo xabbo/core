@@ -9,11 +9,11 @@ namespace Xabbo.Core
         public int X2 { get; }
         public int Y2 { get; }
 
-        public Position PointA => new Position(X1, Y1);
-        public Position PointB => new Position(X2, Y2);
-
         public int Width => X2 - X1 + 1;
         public int Length => Y2 - Y1 + 1;
+
+        public (int X, int Y) PointA => (X1, Y1);
+        public (int X, int Y) PointB => (X2, Y2);
 
         public Area(int x1, int y1, int x2, int y2)
         {
@@ -35,11 +35,11 @@ namespace Xabbo.Core
             X2 = x2; Y2 = y2;
         }
 
-        public Area(Position a, Position b)
-            : this(a.X, a.Y, b.X, b.Y)
+        public Area((int X, int Y) pointA, (int X, int Y) pointB)
+            : this(pointA.X, pointA.Y, pointB.X, pointB.Y)
         { }
 
-        public Area(Position point, int width, int length)
+        public Area((int X, int Y) point, int width, int length)
         {
             if (width < 1) throw new ArgumentOutOfRangeException("width");
             if (length < 1) throw new ArgumentOutOfRangeException("length");
@@ -50,6 +50,15 @@ namespace Xabbo.Core
             Y2 = Y1 + length - 1;
         }
 
+        public bool Contains(ITile tile)
+        {
+            if (tile is null)
+                return false;
+            return Contains(tile.X, tile.Y);
+        }
+
+        public bool Contains((int X, int Y) position) => Contains(position.X, position.Y);
+
         public bool Contains(int x, int y)
         {
             return
@@ -57,12 +66,7 @@ namespace Xabbo.Core
                 PointA.Y <= y && y <= PointB.Y;
         }
 
-        public bool Contains(Position p) => Contains(p.X, p.Y);
-
-        public bool Contains(Tile t) => Contains(t.X, t.Y);
-
         public override int GetHashCode() => (X1, Y1, X2, Y2).GetHashCode();
-
         public override bool Equals(object obj)
         {
             return obj is Area other &&

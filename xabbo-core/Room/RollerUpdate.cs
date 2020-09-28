@@ -29,22 +29,22 @@ namespace Xabbo.Core
         protected RollerUpdate(Packet packet)
             : this()
         {
-            LocationX = packet.ReadInteger();
-            LocationY = packet.ReadInteger();
-            TargetX = packet.ReadInteger();
-            TargetY = packet.ReadInteger();
-            int n = packet.ReadInteger();
+            LocationX = packet.ReadInt();
+            LocationY = packet.ReadInt();
+            TargetX = packet.ReadInt();
+            TargetY = packet.ReadInt();
+            int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
                 ObjectUpdates.Add(RollerObjectUpdate.Parse(packet));
-            RollerId = packet.ReadInteger();
+            RollerId = packet.ReadInt();
 
             if (packet.Available > 0)
             {
-                Type = (RollerUpdateType)packet.ReadInteger();
+                Type = (RollerUpdateType)packet.ReadInt();
                 if (Type == RollerUpdateType.MovingEntity ||
                     Type == RollerUpdateType.StationaryEntity)
                 {
-                    EntityIndex = packet.ReadInteger();
+                    EntityIndex = packet.ReadInt();
                     EntityLocationZ = packet.ReadDouble();
                     EntityTargetZ = packet.ReadDouble();
                 }

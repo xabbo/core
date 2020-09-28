@@ -6,7 +6,7 @@ namespace Xabbo.Core.Events
     {
         public int PreviousItem { get; }
 
-        public EntityHandItemEventArgs(Entity entity, int previousItem)
+        public EntityHandItemEventArgs(IEntity entity, int previousItem)
             : base(entity)
         {
             PreviousItem = previousItem;

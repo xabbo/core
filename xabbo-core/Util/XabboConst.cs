@@ -2,7 +2,7 @@
 
 namespace Xabbo.Core
 {
-    internal class XabboConst
+    internal static class XabboConst
     {
         public const double DEFAULT_EPSILON = 0.0001;
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Xabbo.Core
 {
-    public enum BanType
+    public enum BanDuration
     {
         Hour,
         Day,
@@ -15,13 +15,13 @@ namespace Xabbo.Core
 
     public static partial class XabboEnumExtensions
     {
-        public static string GetValue(this BanType banType)
+        public static string GetValue(this BanDuration banType)
         {
             switch (banType)
             {
-                case BanType.Hour: return "RWUAM_BAN_USER_HOUR";
-                case BanType.Day: return "RWUAM_BAN_USER_DAY";
-                case BanType.Permanent: return "RWUAM_BAN_USER_PERM";
+                case BanDuration.Hour: return "RWUAM_BAN_USER_HOUR";
+                case BanDuration.Day: return "RWUAM_BAN_USER_DAY";
+                case BanDuration.Permanent: return "RWUAM_BAN_USER_PERM";
                 default: return null;
             }
         }

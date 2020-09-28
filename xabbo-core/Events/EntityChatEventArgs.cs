@@ -10,7 +10,7 @@ namespace Xabbo.Core.Events
 
         public bool IsBlocked { get; private set; }
 
-        public EntityChatEventArgs(Entity entity, ChatType chatType, string message, int bubbleStyle)
+        public EntityChatEventArgs(IEntity entity, ChatType chatType, string message, int bubbleStyle)
             : base(entity)
         {
             ChatType = chatType;

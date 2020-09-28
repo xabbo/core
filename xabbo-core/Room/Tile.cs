@@ -5,11 +5,13 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class Tile : IWritable
+    public class Tile : ITile, IWritable
     {
         public int X { get; set; }
         public int Y { get; set; }
         public double Z { get; set; }
+
+        public (int X, int Y) XY => (X, Y);
 
         public Tile() { }
 
@@ -26,8 +28,8 @@ namespace Xabbo.Core
 
         public void Write(Packet packet)
         {
-            packet.WriteInteger(X);
-            packet.WriteInteger(Y);
+            packet.WriteInt(X);
+            packet.WriteInt(Y);
             packet.WriteString(Z.ToString());
         }
 
@@ -35,7 +37,29 @@ namespace Xabbo.Core
 
         public override bool Equals(object obj)
         {
-            return obj is Tile other && Equals(other);
+            if (obj is Tile other)
+                return Equals(other);
+            else if (obj is ValueTuple<int, int> t2)
+                return Equals(t2);
+            else if (obj is ValueTuple<int, int, double> t3)
+                return Equals(t3);
+            else
+                return false;
+        }
+
+        public bool Equals((int X, int Y) location)
+        {
+            return
+                X == location.X &&
+                Y == location.Y;
+        }
+
+        public bool Equals((int X, int Y, double Z) location, double epsilon = XabboConst.DEFAULT_EPSILON)
+        {
+            return
+                X == location.X &&
+                Y == location.Y &&
+                Math.Abs(location.Z - Z) < epsilon;
         }
 
         public bool Equals(Tile other, double epsilon = XabboConst.DEFAULT_EPSILON)
@@ -48,8 +72,8 @@ namespace Xabbo.Core
         }
 
         public static Tile Parse(Packet packet) => new Tile(
-            packet.ReadInteger(),
-            packet.ReadInteger(),
+            packet.ReadInt(),
+            packet.ReadInt(),
             packet.ReadDouble()
         );
 
@@ -72,6 +96,8 @@ namespace Xabbo.Core
             return new Tile(x, y, z);
         }
 
+        public override string ToString() => $"{X}, {Y}, {Z}";
+
         public static bool operator ==(Tile a, Tile b)
         {
             if (a is null)
@@ -81,9 +107,19 @@ namespace Xabbo.Core
         }
         public static bool operator !=(Tile a, Tile b) => !(a == b);
 
-        public static implicit operator Tile(ValueTuple<int, int, double> tuple) => new Tile(tuple.Item1, tuple.Item2, tuple.Item3);
-        public static implicit operator ValueTuple<int, int, double>(Tile tile) => (tile.X, tile.Y, tile.Z);
-        public static implicit operator Tile(ValueTuple<int, int> tuple) => new Tile(tuple.Item1, tuple.Item2, 0.0);
-        public static implicit operator ValueTuple<int, int>(Tile tile) => (tile.X, tile.Y);
+        public static bool operator ==(Tile tile, (int X, int Y) location) => tile.Equals(location);
+        public static bool operator !=(Tile tile, (int X, int Y) location) => !tile.Equals(location);
+
+        public static bool operator ==(Tile tile, (int X, int Y, double Z) location) => tile.Equals(location);
+        public static bool operator !=(Tile tile, (int X, int Y, double Z) location) => !tile.Equals(location);
+
+        public static Tile operator +(Tile a, Tile b) => new Tile(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+        public static Tile operator -(Tile a, Tile b) => new Tile(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+
+        public static implicit operator Tile((int X, int Y) location) => new Tile(location.X, location.Y, 0.0);
+        public static implicit operator (int X, int Y)(Tile tile) => (tile.X, tile.Y);
+
+        public static implicit operator Tile((int X, int Y, double Z) location) => new Tile(location.X, location.Y, location.Z);
+        public static implicit operator (int X, int Y, double Z)(Tile tile) => (tile.X, tile.Y, tile.Z);
     }
 }

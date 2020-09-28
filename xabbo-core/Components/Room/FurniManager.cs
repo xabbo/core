@@ -12,7 +12,14 @@ namespace Xabbo.Core.Components
     [Dependencies(typeof(RoomManager))]
     public class FurniManager : XabboComponent
     {
-        public enum Features { Tracking }
+        public enum Features
+        {
+            Management,
+            FloorItemManagement,
+            FloorItemUpdates,
+            WallItemManagement,
+            WallItemUpdates
+        }
 
         private RoomManager roomManager;
 
@@ -48,7 +55,7 @@ namespace Xabbo.Core.Components
             => FloorItemAdded?.Invoke(this, new FloorItemEventArgs(item));
         protected virtual void OnFloorItemUpdated(FloorItem previousItem, FloorItem updatedItem)
             => FloorItemUpdated?.Invoke(this, new FloorItemUpdatedEventArgs(previousItem, updatedItem));
-        protected virtual void OnFloorItemDataUpdated(FloorItem item, StuffData previousData)
+        protected virtual void OnFloorItemDataUpdated(FloorItem item, ItemData previousData)
             => FloorItemDataUpdated?.Invoke(this, new FloorItemDataUpdatedEventArgs(item, previousData));
         protected virtual void OnFloorItemSlide(FloorItem item, Tile previousTile, int rollerId)
             => FloorItemSlide?.Invoke(this, new FloorItemSlideEventArgs(item, previousTile, rollerId));
@@ -87,7 +94,7 @@ namespace Xabbo.Core.Components
         }
 
         #region - Floor Items -
-        [Receive("RoomFloorItems")]
+        [Group(Features.FloorItemManagement), Receive("RoomFloorItems")]
         protected void HandleRoomFloorItems(Packet packet)
         {
             if (!roomManager.IsLoadingRoom)
@@ -118,7 +125,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Receive("AddFloorItem")]
+        [Group(Features.FloorItemManagement), Receive("AddFloorItem")]
         protected void HandleAddFloorItem(Packet packet)
         {
             if (!roomManager.IsInRoom)
@@ -139,9 +146,16 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Receive("RemoveFloorItem")]
+        [Group(Features.FloorItemManagement), Receive("RemoveFloorItem")]
         protected void HandleRemoveFloorItem(Packet packet)
         {
+            /*
+                string id
+                bool isExpired
+                int pickerId
+                int delay
+            */
+
             if (!roomManager.IsInRoom)
             {
                 DebugUtil.Log("not in room");
@@ -161,7 +175,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Receive("FloorItemUpdate")]
+        [Group(Features.FloorItemUpdates), Receive("FloorItemUpdate")]
         protected void HandleFloorItemUpdate(Packet packet)
         {
             if (!roomManager.IsInRoom)
@@ -189,7 +203,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.Tracking), Receive("ObjectOnRoller")]
+        [Group(Features.FloorItemUpdates), Receive("ObjectOnRoller")]
         protected void HandleObjectOnRoller(Packet packet)
         {
             if (!roomManager.IsInRoom)
@@ -203,8 +217,8 @@ namespace Xabbo.Core.Components
             {
                 if (floorItems.TryGetValue(objectUpdate.Id, out FloorItem item))
                 {
-                    var previousTile = item.Tile;
-                    item.Tile = new Tile(rollerUpdate.TargetX, rollerUpdate.TargetY, objectUpdate.TargetZ);
+                    var previousTile = item.Location;
+                    item.Location = new Tile(rollerUpdate.TargetX, rollerUpdate.TargetY, objectUpdate.TargetZ);
                     OnFloorItemSlide(item, previousTile, rollerUpdate.RollerId);
                 }
                 else
@@ -214,7 +228,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.Tracking), Receive("ItemExtraData")]
+        [Group(Features.FloorItemUpdates), Receive("ItemExtraData")]
         protected void HandleItemExtraData(Packet packet)
         {
             if (!roomManager.IsInRoom)
@@ -233,12 +247,12 @@ namespace Xabbo.Core.Components
             }
 
             var previousData = item.Data;
-            item.Data = StuffData.Parse(packet);
+            item.Data = ItemData.Parse(packet);
 
             OnFloorItemDataUpdated(item, previousData);
         }
 
-        [Group(Features.Tracking), Receive("ItemsDataUpdate")]
+        [Group(Features.FloorItemUpdates), Receive("ItemsDataUpdate")]
         protected void HandleItemsDataUpdate(Packet packet)
         {
             if (!roomManager.IsInRoom)
@@ -247,11 +261,11 @@ namespace Xabbo.Core.Components
                 return;
             }
 
-            int n = packet.ReadInteger();
+            int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
             {
-                int itemId = packet.ReadInteger();
-                var data = StuffData.Parse(packet);
+                int itemId = packet.ReadInt();
+                var data = ItemData.Parse(packet);
                 if (!floorItems.TryGetValue(itemId, out FloorItem item)) continue;
 
                 var previousData = item.Data;
@@ -263,7 +277,7 @@ namespace Xabbo.Core.Components
         #endregion
 
         #region - Wall Items -
-        [Receive("RoomWallItems")]
+        [Group(Features.WallItemManagement), Receive("RoomWallItems")]
         protected void HandleWallItems(Packet packet)
         {
             if (!roomManager.IsLoadingRoom)
@@ -294,7 +308,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Receive("AddWallItem")]
+        [Group(Features.WallItemManagement), Receive("AddWallItem")]
         protected void HandleAddWallItem(Packet packet)
         {
             if (!roomManager.IsInRoom)
@@ -314,7 +328,29 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.Tracking), Receive("WallItemUpdate")]
+        [Group(Features.WallItemManagement), Receive("RemoveWallItem")]
+        protected void HandleRemoveWallItem(Packet packet)
+        {
+            if (!roomManager.IsInRoom)
+            {
+                DebugUtil.Log("not in room");
+                return;
+            }
+
+            string idString = packet.ReadString();
+            if (!int.TryParse(idString, out int id)) return;
+
+            if (wallItems.TryRemove(id, out WallItem item))
+            {
+                OnWallItemRemoved(item);
+            }
+            else
+            {
+                DebugUtil.Log($"failed to remove item {item.Id} from the dictionary");
+            }
+        }
+
+        [Group(Features.WallItemUpdates), Receive("WallItemUpdate")]
         protected void HandleWallItemUpdate(Packet packet)
         {
             if (!roomManager.IsInRoom)
@@ -339,28 +375,6 @@ namespace Xabbo.Core.Components
             else
             {
                 DebugUtil.Log($"failed to find wall item {updatedItem.Id} to update");
-            }
-        }
-
-        [Receive("RemoveWallItem")]
-        protected void HandleRemoveWallItem(Packet packet)
-        {
-            if (!roomManager.IsInRoom)
-            {
-                DebugUtil.Log("not in room");
-                return;
-            }
-
-            string idString = packet.ReadString();
-            if (!int.TryParse(idString, out int id)) return;
-
-            if (wallItems.TryRemove(id, out WallItem item))
-            {
-                OnWallItemRemoved(item);
-            }
-            else
-            {
-                DebugUtil.Log($"failed to remove item {item.Id} from the dictionary");
             }
         }
         #endregion

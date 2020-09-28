@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Xabbo.Core.Metadata
 {
@@ -15,58 +15,106 @@ namespace Xabbo.Core.Metadata
                 return Load(stream);
         }
 
+        private readonly IReadOnlyDictionary<string, FurniInfo> classNameDictionary;
         private readonly IReadOnlyDictionary<int, FurniInfo> floorItemDictionary, wallItemDictionary;
 
+        /// <summary>
+        /// Gets the information of all floor items.
+        /// </summary>
         public IReadOnlyList<FurniInfo> FloorItems { get; }
+
+        /// <summary>
+        /// Gets the information of all wall items.
+        /// </summary>
         public IReadOnlyList<FurniInfo> WallItems { get; }
+
         public IEnumerator<FurniInfo> GetEnumerator() => FloorItems.Concat(WallItems).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Gets the information of the furni with the specified class name, or <c>null</c> if it does not exist.
+        /// </summary>
+        public FurniInfo this[string className] => classNameDictionary.TryGetValue(className.ToLower(), out FurniInfo info) ? info : null;
 
         internal FurniData(FurniDataXml proxy)
         {
             FloorItems = proxy.FloorItems
-                .Select(furniInfoProxy => new FurniInfo(FurniType.Floor, furniInfoProxy))
+                .Select(furniInfoProxy => new FurniInfo(ItemType.Floor, furniInfoProxy))
                 .ToList().AsReadOnly();
 
             WallItems = proxy.WallItems
-                .Select(furniInfoProxy => new FurniInfo(FurniType.Wall, furniInfoProxy))
+                .Select(furniInfoProxy => new FurniInfo(ItemType.Wall, furniInfoProxy))
                 .ToList().AsReadOnly();
 
-            var dict = new Dictionary<int, FurniInfo>();
-
+            classNameDictionary = this.ToDictionary(furniInfo => furniInfo.ClassName.ToLower());
             floorItemDictionary = FloorItems.ToDictionary(furniInfo => furniInfo.Id);
             wallItemDictionary = WallItems.ToDictionary(wallItem => wallItem.Id);
         }
 
-        public FurniInfo GetInfo(FurniType type, int kind)
+        /// <summary>
+        /// Gets the information of the furni with the specified type and kind, or <c>null</c> if it does not exist.
+        /// </summary>
+        public FurniInfo GetInfo(ItemType type, int kind)
         {
-            if (type == FurniType.Floor)
+            if (type == ItemType.Floor)
                 return GetFloorItem(kind);
-            else if (type == FurniType.Wall)
+            else if (type == ItemType.Wall)
                 return GetWallItem(kind);
             else
                 return null;
         }
+
+        /// <summary>
+        /// Gets the information for the furni of the specified item.
+        /// </summary>
         public FurniInfo GetInfo(IItem item) => GetInfo(item.Type, item.Kind);
 
+        /// <summary>
+        /// Gets the information for the floor item of the specified kind.
+        /// </summary>
         public FurniInfo GetFloorItem(int kind) => floorItemDictionary.TryGetValue(kind, out FurniInfo furniInfo) ? furniInfo : null;
+
+        /// <summary>
+        /// Gets the information for the wall item of the specified kind.
+        /// </summary>
         public FurniInfo GetWallItem(int kind) => wallItemDictionary.TryGetValue(kind, out FurniInfo furniInfo) ? furniInfo : null;
 
-        private IEnumerable<FurniInfo> FindItems(IEnumerable<FurniInfo> infos, string name)
+        private IEnumerable<FurniInfo> FindItems(IEnumerable<FurniInfo> infos, string searchText)
         {
-            name = name.ToLower();
+            searchText = searchText.ToLower();
             return infos
-                .Where(x => x.Name.ToLower().Contains(name))
-                .OrderBy(x => Math.Abs(x.Name.Length - name.Length));
+                .Where(x => x.Name.ToLower().Contains(searchText))
+                .OrderBy(x => Math.Abs(x.Name.Length - searchText.Length));
         }
-        public IEnumerable<FurniInfo> FindItems(string name) => FindItems(this, name);
-        public IEnumerable<FurniInfo> FindFloorItems(string name) => FindItems(FloorItems, name);
-        public IEnumerable<FurniInfo> FindWallItems(string name) => FindItems(WallItems, name);
-        public FurniInfo FindItem(string name) => FindItems(this, name).FirstOrDefault();
-        public FurniInfo FindFloorItem(string name) => FindItems(FloorItems, name).FirstOrDefault();
-        public FurniInfo FindWallItem(string name) => FindItems(WallItems, name).FirstOrDefault();
 
-        public FurniInfo GetInfo(string className)
-            => this.FirstOrDefault(info => info.ClassName.Equals(className, StringComparison.InvariantCultureIgnoreCase));
+        /// <summary>
+        /// Finds information of furni containing the specified text in its name.
+        /// </summary>
+        public IEnumerable<FurniInfo> FindItems(string searchText) => FindItems(this, searchText);
+
+        /// <summary>
+        /// Finds information of floor furni containing the specified text in its name.
+        /// </summary>
+        public IEnumerable<FurniInfo> FindFloorItems(string searchText) => FindItems(FloorItems, searchText);
+
+        /// <summary>
+        /// Finds information of wall furni containing the specified text in its name.
+        /// </summary>
+        public IEnumerable<FurniInfo> FindWallItems(string searchText) => FindItems(WallItems, searchText);
+
+        /// <summary>
+        /// Finds the information of a furni containing the specified text in its name.
+        /// </summary>
+        public FurniInfo FindItem(string name) => FindItems(this, name).FirstOrDefault();
+
+        /// <summary>
+        /// Finds the information of a floor furni containing the specified text in its name.
+        /// </summary>
+        public FurniInfo FindFloorItem(string name) => FindItems(FloorItems, name).FirstOrDefault();
+
+        /// <summary>
+        /// Finds the information of a wall furni containing the specified text in its name.
+        /// </summary>
+        public FurniInfo FindWallItem(string name) => FindItems(WallItems, name).FirstOrDefault();
     }
 }

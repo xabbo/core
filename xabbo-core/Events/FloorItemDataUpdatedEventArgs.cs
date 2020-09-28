@@ -4,9 +4,9 @@ namespace Xabbo.Core.Events
 {
     public class FloorItemDataUpdatedEventArgs : FloorItemEventArgs
     {
-        public StuffData PreviousData { get; }
+        public IItemData PreviousData { get; }
 
-        public FloorItemDataUpdatedEventArgs(FloorItem item, StuffData previousData)
+        public FloorItemDataUpdatedEventArgs(IFloorItem item, IItemData previousData)
             : base(item)
         {
             PreviousData = previousData;

@@ -1,32 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class FriendInfo : IWritable
+    public class FriendInfo : IFriendInfo, IWritable
     {
         public static FriendInfo Parse(Packet packet) => new FriendInfo(packet);
-
-        /*
-            int id
-            string name
-            int gender
-            bool online
-            bool ? 
-            string figure
-            int ?
-            string motto
-            string realName
-            string ?
-            bool 
-            bool 
-            bool packetHabboUser
-            short 
-        */
 
         public int Id { get; set; }
         public string Name { get; set; }
@@ -37,9 +17,9 @@ namespace Xabbo.Core
         public int Category { get; set; }
         public string Motto { get; set; }
         public string RealName { get; set; }
-        public string UnknownStringA { get; set; }
+        public string String5 { get; set; }
         public bool IsAcceptingOfflineMessages { get; set; }
-        public bool UnknownBoolC { get; set; }
+        public bool Bool4 { get; set; }
         public bool IsPocketHabboUser { get; set; }
         public Relation Relation { get; set; }
 
@@ -47,19 +27,19 @@ namespace Xabbo.Core
 
         protected FriendInfo(Packet packet)
         {
-            Id = packet.ReadInteger();
+            Id = packet.ReadInt();
             Name = packet.ReadString();
-            Gender = H.ToGender(packet.ReadInteger());
-            IsOnline = packet.ReadBoolean();
-            CanFollow = packet.ReadBoolean();
+            Gender = H.ToGender(packet.ReadInt());
+            IsOnline = packet.ReadBool();
+            CanFollow = packet.ReadBool();
             FigureString = packet.ReadString();
-            Category = packet.ReadInteger();
+            Category = packet.ReadInt();
             Motto = packet.ReadString();
             RealName = packet.ReadString();
-            UnknownStringA = packet.ReadString();
-            IsAcceptingOfflineMessages = packet.ReadBoolean();
-            UnknownBoolC = packet.ReadBoolean();
-            IsPocketHabboUser = packet.ReadBoolean();
+            String5 = packet.ReadString();
+            IsAcceptingOfflineMessages = packet.ReadBool();
+            Bool4 = packet.ReadBool();
+            IsPocketHabboUser = packet.ReadBool();
             Relation = (Relation)packet.ReadShort();
         }
 
@@ -75,9 +55,9 @@ namespace Xabbo.Core
                 Category,
                 Motto,
                 RealName,
-                UnknownStringA,
+                String5,
                 IsAcceptingOfflineMessages,
-                UnknownBoolC,
+                Bool4,
                 IsPocketHabboUser,
                 (short)Relation
             );

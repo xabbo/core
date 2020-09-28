@@ -1,0 +1,39 @@
+﻿using System;
+using System.Threading.Tasks;
+
+using Xabbo.Core.Messages;
+
+namespace Xabbo.Core.Tasks
+{
+    [RequiredOut("RequestCatalogPage")]
+    public class GetCatalogPageTask : InterceptorTask<CatalogPage>
+    {
+        private readonly int pageId;
+        private readonly string mode;
+
+        public GetCatalogPageTask(IInterceptor interceptor, int pageId, string mode)
+            : base(interceptor)
+        {
+            this.pageId = pageId;
+            this.mode = mode;
+        }
+
+        protected override Task OnExecuteAsync() => SendAsync(Out.RequestCatalogPage, pageId, -1, mode);
+
+        [InterceptIn("CatalogPage")]
+        private void HandleCatalogPage(InterceptEventArgs e)
+        {
+            try
+            {
+                var catalogPage = CatalogPage.Parse(e.Packet);
+                if (catalogPage.Id == pageId &&
+                    catalogPage.Mode == mode)
+                {
+                    if (SetResult(catalogPage))
+                        e.Block();
+                }
+            }
+            catch (Exception ex) { SetException(ex); }
+        }
+    }
+}

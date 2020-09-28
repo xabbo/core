@@ -14,7 +14,7 @@ namespace Xabbo.Core.Events
         public bool MottoUpdated { get; }
         public bool AchievementScoreUpdated { get; }
 
-        public UserDataUpdatedEventArgs(RoomUser user,
+        public UserDataUpdatedEventArgs(IRoomUser user,
             string previousFigure, Gender previousGender,
             string previousMotto, int previousAchievementScore)
             : base(user)

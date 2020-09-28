@@ -2,26 +2,19 @@
 using System.Collections;
 using System.Collections.Generic;
 
-
 using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class ActivityPoints
+    public class ActivityPoints : IReadOnlyDictionary<ActivityPointType, int>
     {
+        public static ActivityPoints Parse(Packet packet) => new ActivityPoints(packet);
+
         private readonly Dictionary<ActivityPointType, int> dictionary = new Dictionary<ActivityPointType, int>();
 
-        public ActivityPoints() { }
-
-        internal ActivityPoints(Packet packet)
-        {
-            int n = packet.ReadInteger();
-            for (int i = 0; i < n; i++)
-            {
-                var type = (ActivityPointType)packet.ReadInteger();
-                dictionary[type] = packet.ReadInteger();
-            }
-        }
+        public IEnumerable<ActivityPointType> Keys => dictionary.Keys;
+        public IEnumerable<int> Values => dictionary.Values;
+        public int Count => dictionary.Count;
 
         public int this[ActivityPointType key]
         {
@@ -29,8 +22,7 @@ namespace Xabbo.Core
             {
                 lock (dictionary)
                 {
-                    if (dictionary.TryGetValue(key, out int value)) return value;
-                    else return 0;
+                    return dictionary[key];
                 }
             }
 
@@ -43,6 +35,22 @@ namespace Xabbo.Core
             }
         }
 
-        public static ActivityPoints Parse(Packet packet) => new ActivityPoints(packet);
+        public ActivityPoints() { }
+
+        internal ActivityPoints(Packet packet)
+        {
+            int n = packet.ReadInt();
+            for (int i = 0; i < n; i++)
+            {
+                var type = (ActivityPointType)packet.ReadInt();
+                dictionary[type] = packet.ReadInt();
+            }
+        }
+
+        public bool ContainsKey(ActivityPointType key) => dictionary.ContainsKey(key);
+
+        public IEnumerator<KeyValuePair<ActivityPointType, int>> GetEnumerator() => dictionary.GetEnumerator();
+        public bool TryGetValue(ActivityPointType key, out int value) => dictionary.TryGetValue(key, out value);
+        IEnumerator IEnumerable.GetEnumerator() => dictionary.GetEnumerator();
     }
 }

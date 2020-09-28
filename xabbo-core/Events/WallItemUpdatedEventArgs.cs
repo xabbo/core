@@ -4,9 +4,9 @@ namespace Xabbo.Core.Events
 {
     public class WallItemUpdatedEventArgs : WallItemEventArgs
     {
-        public WallItem PreviousItem { get; }
+        public IWallItem PreviousItem { get; }
 
-        public WallItemUpdatedEventArgs(WallItem previousItem, WallItem updatedItem)
+        public WallItemUpdatedEventArgs(IWallItem previousItem, IWallItem updatedItem)
             : base(updatedItem)
         {
             PreviousItem = previousItem;

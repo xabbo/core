@@ -4,40 +4,44 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class CatalogPageData
+    public class CatalogPageData : ICatalogPageData
     {
         public static CatalogPageData Parse(Packet packet) => new CatalogPageData(packet);
 
         public int Position { get; set; }
-        public string StringA { get; set; }
-        public string StringB { get; set; }
+        public string String1 { get; set; }
+        public string String2 { get; set; }
         public int Type { get; set; }
-        public string StringC { get; set; }
-        public int IntA { get; set; }
-        public string StringD { get; set; }
+        public string String3 { get; set; }
+        public int Int3 { get; set; }
+        public string String4 { get; set; }
         public int SecondsToExpiration { get; set; }
 
         public CatalogPageData() { }
 
         internal CatalogPageData(Packet packet)
         {
-            Position = packet.ReadInteger();
-            StringA = packet.ReadString();
-            StringB = packet.ReadString();
-            Type = packet.ReadInteger();
-            if (Type == 0)
+            Position = packet.ReadInt();
+            String1 = packet.ReadString();
+            String2 = packet.ReadString();
+            Type = packet.ReadInt();
+
+            switch (Type)
             {
-                StringC = packet.ReadString();
+                case 0:
+                    String3 = packet.ReadString();
+                    break;
+                case 1:
+                    Int3 = packet.ReadInt();
+                    break;
+                case 2:
+                    String4 = packet.ReadString();
+                    break;
+                default:
+                    break;
             }
-            else if (Type == 1)
-            {
-                IntA = packet.ReadInteger();
-            }
-            else if (Type == 2)
-            {
-                StringD = packet.ReadString();
-            }
-            SecondsToExpiration = packet.ReadInteger();
+
+            SecondsToExpiration = packet.ReadInt();
         }
     }
 }

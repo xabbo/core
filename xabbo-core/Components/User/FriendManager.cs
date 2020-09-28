@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
@@ -7,19 +9,25 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Components
 {
-    internal class FriendManager : XabboComponent
+    public class FriendManager : XabboComponent
     {
         public enum Feature { Autoload }
 
-        private bool isLoadingFriends = true, isForceLoading = false;
-        private int currentPacket = 0, totalPackets = -1;
+        private int totalExpected = -1, currentIndex = 0;
         private readonly List<FriendInfo> loadList = new List<FriendInfo>();
+        private bool isLoadingFriends = true, isForceLoading;
 
-        public bool IsInitialized { get; private set; }
+        private ConcurrentDictionary<int, FriendInfo> friends;
+        private ConcurrentDictionary<string, FriendInfo> nameMap;
 
-        private readonly object listLock = new object();
-        public IReadOnlyList<FriendInfo> Friends { get; private set; }
+        public bool IsLoaded { get; private set; }
+        public IEnumerable<IFriendInfo> Friends => friends.Select(x => x.Value);
+        public bool IsFriend(int id) => friends.ContainsKey(id);
+        public bool IsFriend(string name) => nameMap.ContainsKey(name.ToLower());
+        public IFriendInfo GetFriend(int id) => friends.TryGetValue(id, out FriendInfo friend) ? friend : null;
+        public IFriendInfo GetFriend(string name) => nameMap.TryGetValue(name.ToLower(), out FriendInfo friend) ? friend : null;
 
+        #region - Events -
         public event EventHandler Loaded;
         protected virtual void OnLoaded() => Loaded?.Invoke(this, EventArgs.Empty);
 
@@ -31,99 +39,104 @@ namespace Xabbo.Core.Components
 
         public EventHandler<FriendEventArgs> FriendUpdated; // TODO FriendUpdatedEventArgs ?
         protected virtual void OnFriendUpdated(FriendInfo friend) => FriendUpdated?.Invoke(this, new FriendEventArgs(friend));
+        #endregion
 
         public FriendManager()
         {
-            ResetFriends();
+            friends = new ConcurrentDictionary<int, FriendInfo>();
+            nameMap = new ConcurrentDictionary<string, FriendInfo>();
         }
 
-        protected override void OnInitialize()
-        {
+        protected override void OnInitialize() { }
 
-        }
-
-        private void ResetFriends()
+        private void AddFriend(FriendInfo friend, bool raiseEvent = true)
         {
-            lock (listLock)
+            if (friends.TryAdd(friend.Id, friend))
             {
-                Friends = new List<FriendInfo>().AsReadOnly();
+                if (!nameMap.TryAdd(friend.Name.ToLower(), friend))
+                    DebugUtil.Log("failed to add friend to name map");
+
+                if (raiseEvent)
+                    OnFriendAdded(friend);
+            }
+            else
+            {
+                DebugUtil.Log("failed to add friend to id map");
             }
         }
 
-        private void AddFriend(FriendInfo friend)
+        private void AddFriends(IEnumerable<FriendInfo> friends, bool raiseEvent = true)
         {
-            lock (listLock)
-            {
-                var list = new List<FriendInfo>(Friends);
-                list.Add(friend);
-                Friends = list.AsReadOnly();
-            }
-        }
-
-        private void AddFriends(IEnumerable<FriendInfo> friends)
-        {
-            lock (listLock)
-            {
-                var list = new List<FriendInfo>(Friends);
-                list.AddRange(friends);
-                Friends = list.AsReadOnly();
-            }
+            foreach (var friend in friends)
+                AddFriend(friend, raiseEvent);
         }
 
         private void RemoveFriend(FriendInfo friend)
         {
-            lock (listLock)
+            if (friends.TryRemove(friend.Id, out _))
             {
-                var list = new List<FriendInfo>(Friends);
-                list.Remove(friend);
-                Friends = list.AsReadOnly();
+                if (!nameMap.TryRemove(friend.Name.ToLower(), out _))
+                    DebugUtil.Log("failed to remove friend from name map");
+
+                OnFriendRemoved(friend);
+            }
+            else
+            {
+                DebugUtil.Log("failed to remove friend from id mape");
             }
         }
 
         [Group(Feature.Autoload), Receive("LatencyResponse"), RequiredOut("RequestInitFriends")]
         private async void HandleLatencyResponse(Packet packet)
         {
-            if (!IsInitialized && !isForceLoading)
+            if (!Dispatcher.IsAttached(this, MessageGroups.Default)) return;
+
+            if (!IsLoaded && !isForceLoading)
             {
+                DebugUtil.Log("force loading friends");
+
                 isForceLoading = true;
                 await SendAsync(Out.RequestInitFriends);
             }
         }
 
-        [InterceptIn("Friends")]
-        private void HandleFriends(InterceptEventArgs e)
+        [InterceptIn("InitFriends")]
+        protected virtual void HandleInitFriends(InterceptEventArgs e)
         {
-            if (!isLoadingFriends) return;
+            if (isLoadingFriends && isForceLoading)
+                e.Block();
+        }
 
-            try
+        [InterceptIn("Friends")]
+        protected virtual void HandleFriends(InterceptEventArgs e)
+        {
+            if (!isLoadingFriends)
+                return;
+
+            int total = e.Packet.ReadInt();
+            int current = e.Packet.ReadInt();
+
+            if (current != currentIndex) return;
+            if (totalExpected == -1) totalExpected = total;
+            else if (totalExpected != total) return;
+            currentIndex++;
+
+            if (isForceLoading)
+                e.Block();
+
+            int n = e.Packet.ReadInt();
+            for (int i = 0; i < n; i++)
+                loadList.Add(FriendInfo.Parse(e.Packet));
+
+            if (currentIndex == total)
             {
-                var packet = e.Packet;
-                int total = packet.ReadInteger();
-                int current = packet.ReadInteger();
+                AddFriends(loadList, false);
 
-                if (current != currentPacket) return;
-                if (totalPackets == -1) totalPackets = total;
-                else if (total != totalPackets) return;
-                if (currentPacket == 0) loadList.Clear();
-                currentPacket++;
-
-                if (isForceLoading) e.Block();
-
-                int n = packet.ReadInteger();
-                for (int i = 0; i < n; i++)
-                    loadList.Add(FriendInfo.Parse(packet));
-
-                if (currentPacket == totalPackets)
-                {
-                    IsInitialized = true;
-                    isLoadingFriends = false;
-                    ResetFriends();
-                    AddFriends(loadList);
-                    loadList.Clear();
-                    OnLoaded();
-                }
+                isLoadingFriends = false;
+                isForceLoading = false;
+                IsLoaded = true;
+                OnLoaded();
             }
-            catch { /* TODO handle this */ throw; }
         }
 
 

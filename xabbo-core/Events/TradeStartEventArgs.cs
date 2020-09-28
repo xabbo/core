@@ -7,14 +7,14 @@ namespace Xabbo.Core.Events
         /// <summary>
         /// Gets the user who started the trade.
         /// </summary>
-        public RoomUser Trader { get; }
+        public IRoomUser Trader { get; }
 
         /// <summary>
         /// Gets the user who was traded.
         /// </summary>
-        public RoomUser Tradee { get; }
+        public IRoomUser Tradee { get; }
 
-        public TradeStartEventArgs(RoomUser trader, RoomUser tradee)
+        public TradeStartEventArgs(IRoomUser trader, IRoomUser tradee)
         {
             Trader = trader;
             Tradee = tradee;

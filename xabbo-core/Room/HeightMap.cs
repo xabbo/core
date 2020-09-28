@@ -1,31 +1,15 @@
 ﻿using System;
-
+using System.Collections.Generic;
 using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class HeightMap
+    public class HeightMap : IHeightMap, IWritable
     {
         public int Width { get; }
         public int Length { get; }
         public short[] Values { get; }
-
-        public static double GetHeight(short value)
-        {
-            if (value < 0)
-                return -1;
-            return (value & 0x3FFF) / 256.0;
-        }
-
-        public static bool IsBlocked(short value)
-        {
-            return (value & 0x4000) > 0;
-        }
-
-        public static bool IsTile(short value)
-        {
-            return value >= 0;
-        }
+        IReadOnlyList<short> IHeightMap.Values => Values;
 
         public short this[int x, int y]
         {
@@ -53,8 +37,8 @@ namespace Xabbo.Core
 
         private HeightMap(Packet packet)
         {
-            Width = packet.ReadInteger();
-            int n = packet.ReadInteger();
+            Width = packet.ReadInt();
+            int n = packet.ReadInt();
             Length = n / Width;
 
             Values = new short[n];
@@ -66,21 +50,27 @@ namespace Xabbo.Core
         {
             if (x < 0 || x >= Width || y < 0 || y >= Length)
                 return -1;
-            return GetHeight(Values[y * Width + x]);
+
+            short value = Values[y * Width + x];
+            if (value < 0) return -1;
+
+            return (value & 0x3FFF) / 256.0;
         }
 
         public bool IsBlocked(int x, int y)
         {
             if (x < 0 || x >= Width || y < 0 || y >= Length)
-                return true;
-            return IsBlocked(Values[y * Width + x]);
+                return false;
+
+            return (Values[y * Width + x] & 0x4000) > 0;
         }
 
         public bool IsTile(int x, int y)
         {
             if (x < 0 || x >= Width || y < 0 || y >= Length)
                 return false;
-            return IsTile(Values[y * Width + x]);
+
+            return Values[y * Width + x] >= 0;
         }
 
         public bool IsFree(int x, int y) => IsTile(x, y) && !IsBlocked(x, y);
@@ -94,8 +84,8 @@ namespace Xabbo.Core
             if (Values.Length != Width * Length)
                 throw new FormatException($"The length of Values must be equal to Width * Height");
 
-            packet.WriteInteger(Width);
-            packet.WriteInteger(Width * Length);
+            packet.WriteInt(Width);
+            packet.WriteInt(Width * Length);
             for (int i = 0; i < Values.Length; i++)
                 packet.WriteShort(Values[i]);
         }

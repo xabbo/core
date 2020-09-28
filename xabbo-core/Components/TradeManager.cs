@@ -18,15 +18,15 @@ namespace Xabbo.Core.Components
         public bool IsTrading { get; private set; }
         public bool IsWaitingConfirmation { get; private set; }
 
-        public RoomUser Trader { get; private set; }
-        public RoomUser Tradee { get; private set; }
+        public IRoomUser Trader { get; private set; }
+        public IRoomUser Tradee { get; private set; }
         public bool TraderAccepted { get; private set; }
         public bool TradeeAccepted { get; private set; }
 
-        public TradeOffer OwnOffer { get; private set; }
-        public TradeOffer PartnerOffer { get; private set; }
+        public ITradeOffer OwnOffer { get; private set; }
+        public ITradeOffer PartnerOffer { get; private set; }
 
-        public bool HasAccepted(RoomUser user) => HasAccepted(user?.Id ?? throw new ArgumentNullException("user"));
+        public bool HasAccepted(IRoomUser user) => HasAccepted(user?.Id ?? throw new ArgumentNullException("user"));
         public bool HasAccepted(int userId)
         {
             if (!IsTrading) return false;
@@ -35,8 +35,8 @@ namespace Xabbo.Core.Components
             else return false;
         }
 
-        public TradeOffer GetOffer(RoomUser user) => GetOffer(user?.Id ?? throw new ArgumentNullException("user"));
-        public TradeOffer GetOffer(int userId)
+        public ITradeOffer GetOffer(IRoomUser user) => GetOffer(user?.Id ?? throw new ArgumentNullException("user"));
+        public ITradeOffer GetOffer(int userId)
         {
             if (OwnOffer?.UserId == userId) return OwnOffer;
             else if (PartnerOffer?.UserId == userId) return PartnerOffer;
@@ -51,18 +51,18 @@ namespace Xabbo.Core.Components
         public event EventHandler<TradeStopEventArgs> Stop;
         public event EventHandler<TradeOfferEventArgs> Complete;
 
-        protected virtual void OnStart(RoomUser trader, RoomUser tradee)
+        protected virtual void OnStart(IRoomUser trader, IRoomUser tradee)
             => Start?.Invoke(this, new TradeStartEventArgs(trader, tradee));
         protected virtual void OnStartFail(int reason, string name)
             => StartFail?.Invoke(this, new TradeStartFailEventArgs(reason, name));
-        protected virtual void OnUpdate(RoomUser trader, RoomUser tradee, TradeOffer ownOffer, TradeOffer partnerOffer)
+        protected virtual void OnUpdate(IRoomUser trader, IRoomUser tradee, ITradeOffer ownOffer, ITradeOffer partnerOffer)
             => Update?.Invoke(this, new TradeOfferEventArgs(trader, tradee, ownOffer, partnerOffer));
-        protected virtual void OnAccept(RoomUser user, bool accepted)
+        protected virtual void OnAccept(IRoomUser user, bool accepted)
             => Accept?.Invoke(this, new TradeAcceptEventArgs(user, accepted));
         protected virtual void OnWaitingConfirm() => WaitingConfirm?.Invoke(this, EventArgs.Empty);
         protected virtual void OnStop(int reason)
             => Stop?.Invoke(this, new TradeStopEventArgs(reason));
-        protected virtual void OnComplete(RoomUser trader, RoomUser tradee, TradeOffer ownOffer, TradeOffer partnerOffer)
+        protected virtual void OnComplete(IRoomUser trader, IRoomUser tradee, ITradeOffer ownOffer, ITradeOffer partnerOffer)
             => Complete?.Invoke(this, new TradeOfferEventArgs(trader, tradee, ownOffer, partnerOffer));
 
         protected override void OnInitialize()
@@ -93,18 +93,18 @@ namespace Xabbo.Core.Components
                 return;
             }
 
-            int traderId = packet.ReadInteger();
-            int unknownA = packet.ReadInteger(); // ?
-            int tradeeId = packet.ReadInteger();
-            int unknownB = packet.ReadInteger(); // ?
+            int traderId = packet.ReadInt();
+            int unknownA = packet.ReadInt(); // ?
+            int tradeeId = packet.ReadInt();
+            int unknownB = packet.ReadInt(); // ?
 
-            if (!entityManager.TryGetEntityById(traderId, out RoomUser trader))
+            if (!entityManager.TryGetEntity(traderId, out IRoomUser trader))
             {
                 DebugUtil.Log($"failed to find user with id {traderId}");
                 return;
             }
 
-            if (!entityManager.TryGetEntityById(tradeeId, out RoomUser tradee))
+            if (!entityManager.TryGetEntity(tradeeId, out IRoomUser tradee))
             {
                 DebugUtil.Log($"failed to find user with id {tradeeId}");
                 return;
@@ -129,7 +129,7 @@ namespace Xabbo.Core.Components
                 return;
             }
 
-            int reason = packet.ReadInteger();
+            int reason = packet.ReadInt();
             string name = packet.ReadString();
 
             OnStartFail(reason, name);
@@ -182,9 +182,9 @@ namespace Xabbo.Core.Components
                 return;
             }
 
-            RoomUser user;
-            int userId = packet.ReadInteger();
-            bool accepted = packet.ReadInteger() == 1;
+            IRoomUser user;
+            int userId = packet.ReadInt();
+            bool accepted = packet.ReadInt() == 1;
 
             if (userId == Trader.Id)
             {
@@ -227,20 +227,11 @@ namespace Xabbo.Core.Components
         [Receive("TradeStopped")]
         private void HandleTradeStopped(Packet packet)
         {
-            if (!roomManager.IsInRoom)
-            {
-                DebugUtil.Log("not in room");
+            if (!roomManager.IsInRoom || !IsTrading)
                 return;
-            }
 
-            if (!IsTrading)
-            {
-                DebugUtil.Log("not trading");
-                return;
-            }
-
-            int userId = packet.ReadInteger();
-            int reason = packet.ReadInteger();
+            int userId = packet.ReadInt();
+            int reason = packet.ReadInt();
 
             if (reason == 0)
             {

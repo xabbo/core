@@ -9,9 +9,20 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Xabbo.Core</RootNamespace>
     <AssemblyName>xabbo-core</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+    <ShouldCreateLogs>True</ShouldCreateLogs>
+    <AdvancedSettingsExpanded>False</AdvancedSettingsExpanded>
+    <UpdateAssemblyVersion>True</UpdateAssemblyVersion>
+    <UpdateAssemblyFileVersion>True</UpdateAssemblyFileVersion>
+    <UpdateAssemblyInfoVersion>False</UpdateAssemblyInfoVersion>
+    <AssemblyVersionSettings>None.NoneWithAutoReset.IncrementWithResetOnIncrease.None</AssemblyVersionSettings>
+    <UpdatePackageVersion>False</UpdatePackageVersion>
+    <AssemblyInfoVersionType>SettingsVersion</AssemblyInfoVersionType>
+    <InheritWinAppVersionFrom>None</InheritWinAppVersionFrom>
+    <AssemblyFileVersionSettings>None.NoneWithAutoReset.IncrementWithResetOnIncrease.None</AssemblyFileVersionSettings>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -23,13 +34,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DebugSymbols>false</DebugSymbols>
+    <DebugSymbols>true</DebugSymbols>
+    <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
+    <PathMap>$(AppOutputBase)=\b7\xabbo-core\</PathMap>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -47,6 +60,7 @@
   <ItemGroup>
     <Compile Include="Achievements\Achievement.cs" />
     <Compile Include="Achievements\Achievements.cs" />
+    <Compile Include="Achievements\IAchievement.cs" />
     <Compile Include="BanType.cs" />
     <Compile Include="Catalog\CatalogPage.cs" />
     <Compile Include="Catalog\CatalogPageData.cs" />
@@ -54,14 +68,22 @@
     <Compile Include="Catalog\CatalogOffer.cs" />
     <Compile Include="Catalog\Catalog.cs" />
     <Compile Include="Catalog\CatalogProduct.cs" />
+    <Compile Include="Catalog\ICatalog.cs" />
+    <Compile Include="Catalog\ICatalogPageData.cs" />
+    <Compile Include="Catalog\ICatalogOffer.cs" />
+    <Compile Include="Catalog\ICatalogPage.cs" />
+    <Compile Include="Catalog\ICatalogPageNode.cs" />
+    <Compile Include="Catalog\ICatalogProduct.cs" />
     <Compile Include="Components\TradeManager.cs" />
     <Compile Include="Components\User\AchievementManager.cs" />
     <Compile Include="Components\User\FriendManager.cs" />
     <Compile Include="Components\User\InventoryManager.cs" />
     <Compile Include="Events\DoorbellEventArgs.cs" />
+    <Compile Include="Events\EntityNameChangedEventArgs.cs" />
     <Compile Include="Events\EntityTypingEventArgs.cs" />
     <Compile Include="Events\FriendEventArgs.cs" />
     <Compile Include="Events\FriendsEventArgs.cs" />
+    <Compile Include="Events\PointsUpdatedEventArgs.cs" />
     <Compile Include="Events\RoomUserEventArgs.cs" />
     <Compile Include="Events\TradeAcceptEventArgs.cs" />
     <Compile Include="Events\TradeOfferEventArgs.cs" />
@@ -73,22 +95,20 @@
     <Compile Include="Events\EntitySlideEventArgs.cs" />
     <Compile Include="Events\FloorItemSlideEventArgs.cs" />
     <Compile Include="Events\FloorItemUpdatedEventArgs.cs" />
-    <Compile Include="Events\RoomItemEventArgs.cs" />
-    <Compile Include="Events\RoomItemsEventArgs.cs" />
     <Compile Include="Events\EntityActionEventArgs.cs" />
     <Compile Include="Events\EntityEffectEventArgs.cs" />
     <Compile Include="Events\EntityIdleEventArgs.cs" />
     <Compile Include="Events\FloorItemEventArgs.cs" />
     <Compile Include="Events\FloorItemsEventArgs.cs" />
+    <Compile Include="Events\FloorPlanEventArgs.cs" />
     <Compile Include="Events\HeightMapEventArgs.cs" />
-    <Compile Include="Events\RelativeMapEventArgs.cs" />
     <Compile Include="Events\EntityDanceEventArgs.cs" />
     <Compile Include="Events\EntityUpdateEventArgs.cs" />
     <Compile Include="Events\FloorItemDataUpdatedEventArgs.cs" />
     <Compile Include="Events\WallItemEventArgs.cs" />
     <Compile Include="Events\WallItemsEventArgs.cs" />
     <Compile Include="Events\WallItemUpdatedEventArgs.cs" />
-    <Compile Include="Components\DependenciesAttribute.cs" />
+    <Compile Include="Components\Attributes\DependenciesAttribute.cs" />
     <Compile Include="Components\XabboComponent.cs" />
     <Compile Include="Components\ComponentManager.cs" />
     <Compile Include="Components\Room\ChatManager.cs" />
@@ -96,16 +116,30 @@
     <Compile Include="Components\Room\RoomManager.cs" />
     <Compile Include="Components\Room\EntityManager.cs" />
     <Compile Include="Components\User\ProfileManager.cs" />
-    <Compile Include="Components\XabboMessageGroups.cs" />
     <Compile Include="Groups\GroupData.cs" />
     <Compile Include="Groups\GroupInfo.cs" />
     <Compile Include="Groups\GroupMember.cs" />
-    <Compile Include="Groups\GroupMemberPage.cs" />
+    <Compile Include="Groups\GroupMembers.cs" />
     <Compile Include="Groups\GroupMemberSearchType.cs" />
+    <Compile Include="Groups\GroupMemberStatus.cs" />
     <Compile Include="Groups\GroupMemberType.cs" />
+    <Compile Include="Groups\GroupType.cs" />
+    <Compile Include="Groups\IGroupData.cs" />
+    <Compile Include="Groups\IGroupMember.cs" />
+    <Compile Include="Groups\IGroupMembers.cs" />
     <Compile Include="Interceptor\IInterceptor.cs" />
+    <Compile Include="Achievements\IAchievements.cs" />
+    <Compile Include="Inventory\IInventory.cs" />
     <Compile Include="Inventory\IInventoryItem.cs" />
     <Compile Include="Inventory\IItem.cs" />
+    <Compile Include="ItemData\ICrackableFurniData.cs" />
+    <Compile Include="ItemData\IHighScore.cs" />
+    <Compile Include="ItemData\IHighScoreData.cs" />
+    <Compile Include="ItemData\IIntArrayData.cs" />
+    <Compile Include="ItemData\IItemData.cs" />
+    <Compile Include="ItemData\ILegacyData.cs" />
+    <Compile Include="ItemData\IMapData.cs" />
+    <Compile Include="ItemData\IVoteResultData.cs" />
     <Compile Include="Messages\Attributes\InterceptAttribute.cs" />
     <Compile Include="Messages\Header.cs" />
     <Compile Include="Messages\IListener.cs" />
@@ -113,48 +147,77 @@
     <Compile Include="Messages\ListenerAttachment.cs" />
     <Compile Include="Messages\ListenerCallback.cs" />
     <Compile Include="Messages\UnresolvedIdentifiersException.cs" />
+    <Compile Include="Metadata\ExternalTexts.cs" />
     <Compile Include="Metadata\FigureDataXml.cs" />
     <Compile Include="Metadata\FurniDataXml.cs" />
     <Compile Include="Metadata\FurniInfo.cs" />
     <Compile Include="Metadata\ProductData.cs" />
     <Compile Include="Pet\PetInfo.cs" />
+    <Compile Include="Protocol\IPacket.cs" />
+    <Compile Include="Protocol\IReadOnlyPacket.cs" />
     <Compile Include="Protocol\IWritable.cs" />
+    <Compile Include="Room\Chat\IChatSettings.cs" />
+    <Compile Include="Room\Entity\Bot.cs" />
+    <Compile Include="Room\Entity\IBot.cs" />
+    <Compile Include="Room\Entity\IEntity.cs" />
+    <Compile Include="Room\Entity\IEntityUpdate.cs" />
+    <Compile Include="Room\Entity\IPet.cs" />
+    <Compile Include="Room\Entity\IRoomUser.cs" />
+    <Compile Include="Room\Furni\ColorTiles.cs" />
     <Compile Include="Room\Furni\FurniCategory.cs" />
     <Compile Include="Room\Furni\FurniUsage.cs" />
+    <Compile Include="Room\Furni\IFloorItem.cs" />
+    <Compile Include="Room\Furni\IFurni.cs" />
+    <Compile Include="Room\Furni\IWallItem.cs" />
     <Compile Include="Room\Furni\PhotoInfo.cs" />
     <Compile Include="Room\Furni\StickyColor.cs" />
+    <Compile Include="Room\IFloorPlan.cs" />
+    <Compile Include="Room\IHeightMap.cs" />
+    <Compile Include="Room\IRoomData.cs" />
+    <Compile Include="Room\IRoomInfo.cs" />
+    <Compile Include="Room\ITile.cs" />
+    <Compile Include="Room\IWallLocation.cs" />
     <Compile Include="Room\RollerInstanceUpdate.cs" />
     <Compile Include="Room\RollerUpdate.cs" />
     <Compile Include="Room\RollerUpdateType.cs" />
     <Compile Include="Room\Furni\StickyColors.cs" />
     <Compile Include="Room\Furni\Sticky.cs" />
+    <Compile Include="Room\Settings\IModerationSettings.cs" />
     <Compile Include="Room\WallLocation.cs" />
     <Compile Include="Room\WallOrientation.cs" />
-    <Compile Include="Tasks\CaptureMessageTask.cs" />
-    <Compile Include="Tasks\GetBadgesTask.cs" />
-    <Compile Include="Tasks\GetCatalogPageTask.cs" />
-    <Compile Include="Tasks\GetCatalogTask.cs" />
-    <Compile Include="Tasks\GetFriendsTask.cs" />
-    <Compile Include="Tasks\GetGroupDataTask.cs" />
-    <Compile Include="Tasks\GetGroupMembersTask.cs" />
-    <Compile Include="Tasks\GetInventoryTask.cs" />
-    <Compile Include="Tasks\GetPetInfoTask.cs" />
-    <Compile Include="Tasks\GetProfileTask.cs" />
-    <Compile Include="Tasks\GetRightsListTask.cs" />
-    <Compile Include="Tasks\GetRoomDataTask.cs" />
-    <Compile Include="Tasks\GetRoomSettingsTask.cs" />
-    <Compile Include="Tasks\GetStickyDataTask.cs" />
-    <Compile Include="Tasks\GetUserDataTask.cs" />
-    <Compile Include="Tasks\SearchNavigatorTask.cs" />
-    <Compile Include="Tasks\SearchUserTask.cs" />
-    <Compile Include="Tasks\InterceptorTask.cs" />
-    <Compile Include="Trading\TradeItem.cs" />
-    <Compile Include="Trading\TradeOffer.cs" />
+    <Compile Include="Interceptor\Tasks\CaptureMessageTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetAchievementsTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetBadgesTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetCatalogPageTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetCatalogTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetFriendsTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetGroupDataTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetGroupMembersTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetInventoryTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetPetInfoTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetProfileTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetRightsListTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetRoomDataTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetRoomSettingsTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetStickyTask.cs" />
+    <Compile Include="Interceptor\Tasks\GetUserDataTask.cs" />
+    <Compile Include="Interceptor\Tasks\LoadRoomTask.cs" />
+    <Compile Include="Interceptor\Tasks\SearchNavigatorTask.cs" />
+    <Compile Include="Interceptor\Tasks\SearchUserTask.cs" />
+    <Compile Include="Interceptor\Tasks\InterceptorTask.cs" />
+    <Compile Include="Trade\ITradeItem.cs" />
+    <Compile Include="Trade\ITradeOffer.cs" />
+    <Compile Include="Trade\TradeItem.cs" />
+    <Compile Include="Trade\TradeOffer.cs" />
     <Compile Include="Users\Badge.cs" />
     <Compile Include="Users\FriendInfo.cs" />
+    <Compile Include="Groups\IGroupInfo.cs" />
+    <Compile Include="Users\IFriendInfo.cs" />
+    <Compile Include="Users\IUserData.cs" />
+    <Compile Include="Users\IUserProfile.cs" />
     <Compile Include="Users\Relation.cs" />
     <Compile Include="Users\UserSearchResults.cs" />
-    <Compile Include="Room\Furni\FurniType.cs" />
+    <Compile Include="Room\Furni\ItemType.cs" />
     <Compile Include="Room\RoomInfo.cs" />
     <Compile Include="Navigator\NavigatorSearchResultList.cs" />
     <Compile Include="Navigator\NavigatorSearchResults.cs" />
@@ -198,21 +261,20 @@
     <Compile Include="Figure\FigureRandomizer.cs" />
     <Compile Include="Inventory\Inventory.cs" />
     <Compile Include="Inventory\InventoryItem.cs" />
-    <Compile Include="Metadata\IFigureData.cs" />
-    <Compile Include="Room\Entities\Actions.cs" />
-    <Compile Include="Room\Entities\Dance.cs" />
+    <Compile Include="Room\Entity\Actions.cs" />
+    <Compile Include="Room\Entity\Dances.cs" />
     <Compile Include="Room\Furni\FloorItem.cs" />
     <Compile Include="Users\Gender.cs" />
-    <Compile Include="Objects\CrackableFurniStuffData.cs" />
-    <Compile Include="Objects\HighScoreStuffData.cs" />
-    <Compile Include="Objects\IntArrayStuffData.cs" />
-    <Compile Include="Objects\MapStuffData.cs" />
-    <Compile Include="Objects\StringArrayStuffData.cs" />
-    <Compile Include="Objects\StuffData.cs" />
-    <Compile Include="Objects\StuffData0.cs" />
-    <Compile Include="Objects\StuffData3.cs" />
-    <Compile Include="Objects\StuffData4.cs" />
-    <Compile Include="Objects\StuffDataType.cs" />
+    <Compile Include="ItemData\CrackableFurniData.cs" />
+    <Compile Include="ItemData\HighScoreData.cs" />
+    <Compile Include="ItemData\IntArrayData.cs" />
+    <Compile Include="ItemData\MapData.cs" />
+    <Compile Include="ItemData\StringArrayData.cs" />
+    <Compile Include="ItemData\ItemData.cs" />
+    <Compile Include="ItemData\LegacyData.cs" />
+    <Compile Include="ItemData\VoteResultData.cs" />
+    <Compile Include="ItemData\ItemData4.cs" />
+    <Compile Include="ItemData\ItemDataType.cs" />
     <Compile Include="Protocol\Packet.cs" />
     <Compile Include="Room\Chat\ChatBubbleWidth.cs" />
     <Compile Include="Room\Chat\ChatFloodProtection.cs" />
@@ -223,16 +285,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Room\Chat\ChatType.cs" />
     <Compile Include="Room\Chat\MuteType.cs" />
-    <Compile Include="Room\Entities\Direction.cs" />
-    <Compile Include="Room\Entities\Entity.cs" />
-    <Compile Include="Room\Entities\EntityType.cs" />
-    <Compile Include="Room\Entities\EntityUpdate.cs" />
-    <Compile Include="Room\Entities\Pet.cs" />
-    <Compile Include="Room\Entities\PublicBot.cs" />
-    <Compile Include="Room\Entities\RoomUser.cs" />
-    <Compile Include="Room\Entities\Sign.cs" />
-    <Compile Include="Room\Entities\Stance.cs" />
-    <Compile Include="Room\Entities\PrivateBot.cs" />
+    <Compile Include="Room\Entity\Directions.cs" />
+    <Compile Include="Room\Entity\Entity.cs" />
+    <Compile Include="Room\Entity\EntityType.cs" />
+    <Compile Include="Room\Entity\EntityUpdate.cs" />
+    <Compile Include="Room\Entity\Pet.cs" />
+    <Compile Include="Room\Entity\RoomUser.cs" />
+    <Compile Include="Room\Entity\Signs.cs" />
+    <Compile Include="Room\Entity\Stances.cs" />
     <Compile Include="Room\FloorPlan.cs" />
     <Compile Include="Room\HeightMap.cs" />
     <Compile Include="Room\RoomData.cs" />
@@ -253,11 +313,10 @@
     <Compile Include="Util\Area.cs" />
     <Compile Include="Util\DebugUtil.cs" />
     <Compile Include="Util\EnumerableExtensions.cs" />
-    <Compile Include="Util\Position.cs" />
     <Compile Include="Util\ReflectionExtensions.cs" />
     <Compile Include="Util\XabboConst.cs" />
     <Compile Include="Util\XabboCoreExtensions.cs" />
-    <Compile Include="Web\AccountSettings.cs" />
+    <Compile Include="Web\AccountPrivacySettings.cs" />
     <Compile Include="Web\AvatarInfo.cs" />
     <Compile Include="Web\BadgeInfo.cs" />
     <Compile Include="Web\BasicUserInfo.cs" />
@@ -268,8 +327,8 @@
     <Compile Include="Web\ErrorMessageInfo.cs" />
     <Compile Include="Web\GroupInfo.cs" />
     <Compile Include="Web\LoginRequestData.cs" />
-    <Compile Include="Web\LoginResponseData.cs" />
-    <Compile Include="Web\LoginUnauthorizedResponseData.cs" />
+    <Compile Include="Web\SessionData.cs" />
+    <Compile Include="Web\LoginUnauthorizedData.cs" />
     <Compile Include="Web\PhotoData.cs" />
     <Compile Include="Web\ProfileGroupInfo.cs" />
     <Compile Include="Web\RegistrationRequestData.cs" />
@@ -278,9 +337,7 @@
     <Compile Include="Web\UserProfile.cs" />
     <Compile Include="Web\UserInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Components\Attributes\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

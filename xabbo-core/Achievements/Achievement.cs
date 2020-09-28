@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Xabbo.Core.Protocol;
 
 /*
@@ -29,39 +26,39 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class Achievement : IWritable
+    public class Achievement : IAchievement, IWritable
     {
         public int Id { get; set; }
         public int Level { get; set; }
         public string BadgeName { get; set; }
         public int BaseProgress { get; set; }
         public int MaxProgress { get; set; }
-        public int UnknownIntA { get; set; }
-        public int UnknownIntB { get; set; }
+        public int Int5 { get; set; }
+        public int Int6 { get; set; }
         public int CurrentProgress { get; set; }
         public bool IsCompleted { get; set; }
         public string Category { get; set; }
-        public string UnknownStringA { get; set; }
+        public string String3 { get; set; }
         public int MaxLevel { get; set; }
-        public int UnknownIntC { get; set; }
+        public int Int9 { get; set; }
 
         public Achievement() { }
 
-        internal Achievement(Packet packet)
+        internal Achievement(IReadOnlyPacket packet)
         {
-            Id = packet.ReadInteger();
-            Level = packet.ReadInteger();
+            Id = packet.ReadInt();
+            Level = packet.ReadInt();
             BadgeName = packet.ReadString();
-            BaseProgress = packet.ReadInteger();
-            MaxProgress = packet.ReadInteger();
-            UnknownIntA = packet.ReadInteger();
-            UnknownIntB = packet.ReadInteger();
-            CurrentProgress = packet.ReadInteger();
-            IsCompleted = packet.ReadBoolean();
+            BaseProgress = packet.ReadInt();
+            MaxProgress = packet.ReadInt();
+            Int5 = packet.ReadInt();
+            Int6 = packet.ReadInt();
+            CurrentProgress = packet.ReadInt();
+            IsCompleted = packet.ReadBool();
             Category = packet.ReadString();
-            UnknownStringA = packet.ReadString();
-            MaxLevel = packet.ReadInteger();
-            UnknownIntC = packet.ReadInteger();
+            String3 = packet.ReadString();
+            MaxLevel = packet.ReadInt();
+            Int9 = packet.ReadInt();
         }
 
         public void Write(Packet packet)
@@ -72,17 +69,17 @@ namespace Xabbo.Core
                 BadgeName,
                 BaseProgress,
                 MaxProgress,
-                UnknownIntA,
-                UnknownIntB,
+                Int5,
+                Int6,
                 CurrentProgress,
                 IsCompleted,
                 Category,
-                UnknownStringA,
+                String3,
                 MaxLevel,
-                UnknownIntC
+                Int9
             );
         }
 
-        public static Achievement Parse(Packet packet) => new Achievement(packet);
+        public static Achievement Parse(IReadOnlyPacket packet) => new Achievement(packet);
     }
 }

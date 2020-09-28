@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 
@@ -12,17 +13,22 @@ namespace Xabbo.Core.Messages
 
         private readonly Type type;
         private readonly Dictionary<string, short> defaultValues = new Dictionary<string, short>();
-        private readonly Dictionary<string, short> valueMap = new Dictionary<string, short>();
-        private readonly Dictionary<short, string> nameMap = new Dictionary<short, string>();
 
-        public HeaderDictionary()
+        private readonly Dictionary<short, Header> _valueMap = new Dictionary<short, Header>();
+        private readonly Dictionary<string, Header> _nameMap = new Dictionary<string, Header>();
+
+        public Destination Destination { get; }
+
+        public HeaderDictionary(Destination destination)
         {
+            Destination = destination;
+
             type = GetType();
             InitializeProperties();
         }
 
-        public HeaderDictionary(IDictionary<string, short> values)
-            : this()
+        public HeaderDictionary(Destination destination, IDictionary<string, short> values)
+            : this(destination)
         {
             if (values == null) throw new ArgumentNullException("values");
 
@@ -35,7 +41,7 @@ namespace Xabbo.Core.Messages
             var props = type.GetProperties();
             foreach (var prop in props)
             {
-                if (prop.PropertyType.Equals(typeof(short)) &&
+                if (prop.PropertyType.Equals(typeof(Header)) &&
                     prop.GetMethod.GetParameters().Length == 0)
                 {
                     var attribute = prop.GetCustomAttribute<DefaultValueAttribute>();
@@ -55,14 +61,18 @@ namespace Xabbo.Core.Messages
             var props = type.GetProperties();
             foreach (var prop in props)
             {
-                if (prop.PropertyType.Equals(typeof(short)) &&
+                if (prop.PropertyType.Equals(typeof(Header)) &&
                     prop.GetMethod.GetParameters().Length == 0)
                 {
                     short value = -1;
                     if (defaultValues.ContainsKey(prop.Name))
                         value = defaultValues[prop.Name];
-                    prop.SetValue(this, value);
-                    valueMap[prop.Name] = value;
+
+                    var header = new Header(Destination, prop.Name, value);
+                    _nameMap[prop.Name] = header;
+                    if (value > -1) _valueMap[value] = header;
+
+                    prop.SetValue(this, header);
                 }
             }
         }
@@ -75,31 +85,33 @@ namespace Xabbo.Core.Messages
             foreach (var pair in values)
             {
                 if (!identifierSet.Add(pair.Key))
-                    throw new InvalidOperationException($"Trying to load duplicate identifier '{pair.Key}'.");
+                    throw new InvalidOperationException($"Attempting to load duplicate identifier '{pair.Key}'.");
                 if (pair.Value >= 0 && !headerSet.Add(pair.Value))
-                    throw new InvalidOperationException($"Trying to load duplicate header {pair.Value} for identifier '{pair.Key}'.");
+                {
+                    // throw new InvalidOperationException($"Attempting to load duplicate header {pair.Value} for identifier '{pair.Key}'.");
+                    DebugUtil.Log($"loading duplicate header {pair.Value} for identifier '{pair.Key}'");
+                }
             }
 
             _lock.EnterWriteLock();
             try
             {
-                valueMap.Clear();
-                nameMap.Clear();
+                _valueMap.Clear();
+                _nameMap.Clear();
 
                 ResetProperties();
-                // TODO threads could read *properties*
-                // that have just been reset ?
 
                 foreach (var pair in values)
                 {
-                    valueMap[pair.Key] = pair.Value;
-                    if (pair.Value >= 0) nameMap[pair.Value] = pair.Key;
+                    var header = new Header(Destination, pair.Key, pair.Value);
 
-                    var prop = type.GetProperty(pair.Key, typeof(short));
+                    _nameMap[pair.Key] = header;
+                    if (pair.Value >= 0)
+                        _valueMap[pair.Value] = header;
+
+                    var prop = type.GetProperty(pair.Key, typeof(Header));
                     if (prop != null)
-                    {
-                        prop.SetValue(this, pair.Value);
-                    }
+                        prop.SetValue(this, new Header(Destination, prop.Name, pair.Value));
                 }
             }
             finally { _lock.ExitWriteLock(); }
@@ -108,68 +120,46 @@ namespace Xabbo.Core.Messages
         public bool HasIdentifier(string identifier)
         {
             _lock.EnterReadLock();
-            try { return valueMap.ContainsKey(identifier); }
+            try { return _nameMap.ContainsKey(identifier); }
             finally { _lock.ExitReadLock(); }
         }
 
         public bool TryGetIdentifier(short id, out string name)
         {
             _lock.EnterReadLock();
-            try { return nameMap.TryGetValue(id, out name); }
-            finally { _lock.ExitReadLock(); }
-        }
-
-        public bool TryGetHeader(string identifier, out short header)
-        {
-            _lock.EnterReadLock();
             try
             {
-                if (valueMap.TryGetValue(identifier, out header))
-                {
-                    return true;
-                }
-                else
-                {
-                    header = -1;
+                name = null;
+                if (!_valueMap.TryGetValue(id, out Header header))
                     return false;
-                }
+
+                name = header.Name;
+                return true;
             }
             finally { _lock.ExitReadLock(); }
         }
 
-        public short this[string identifier]
+        public bool TryGetHeader(string identifier, out Header header)
+        {
+            _lock.EnterReadLock();
+            try { return _nameMap.TryGetValue(identifier, out header); }
+            finally { _lock.ExitReadLock(); }
+        }
+
+        public Header this[string identifier]
         {
             get
             {
                 _lock.EnterReadLock();
-                try { return valueMap.TryGetValue(identifier, out short header) ? header : (short)-1; }
-                finally { _lock.ExitReadLock(); }
-            }
-
-            /*set
-            {
-                _lock.EnterWriteLock();
                 try
                 {
-                    bool hasPreviousValue = valueMap.TryGetValue(identifier, out short previousValue);
-                    if (hasPreviousValue && value == previousValue) return;
-
-                    if (value >= 0 &&
-                        nameMap.TryGetValue(value, out string name) &&
-                        !string.Equals(identifier, name))
-                    {
-                        throw new Exception($"Cannot set identifier '{identifier}', another identifier '{name}' has the value {value}");
-                    }
-
-                    valueMap[identifier] = value;
-                    var prop = type.GetProperty(identifier, typeof(short));
-                    if (prop != null) prop.SetValue(this, value);
-
-                    if (hasPreviousValue && previousValue >= 0) nameMap.Remove(previousValue);
-                    if (value >= 0) nameMap[value] = identifier;
+                    if (_nameMap.TryGetValue(identifier, out Header header))
+                        return header;
+                    else
+                        return new Header(Destination, identifier, -1);
                 }
-                finally { _lock.ExitWriteLock(); }
-            }*/
+                finally { _lock.ExitReadLock(); }
+            }
         }
     }
 }

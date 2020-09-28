@@ -21,10 +21,10 @@ namespace Xabbo.Core
         {
             Category = packet.ReadString();
             Text = packet.ReadString();
-            ActionAllowed = packet.ReadInteger();
-            BoolA = packet.ReadBoolean();
-            ViewMode = packet.ReadInteger();
-            int n = packet.ReadInteger();
+            ActionAllowed = packet.ReadInt();
+            BoolA = packet.ReadBool();
+            ViewMode = packet.ReadInt();
+            int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
                 Add(RoomInfo.Parse(packet));
         }

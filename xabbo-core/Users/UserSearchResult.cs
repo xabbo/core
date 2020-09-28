@@ -21,13 +21,13 @@ namespace Xabbo.Core
 
         protected UserSearchResult(Packet packet)
         {
-            Id = packet.ReadInteger();
+            Id = packet.ReadInt();
             Name = packet.ReadString();
             Motto = packet.ReadString();
-            Online = packet.ReadBoolean();
-            UnknownBoolA = packet.ReadBoolean();
+            Online = packet.ReadBool();
+            UnknownBoolA = packet.ReadBool();
             UnknownStringA = packet.ReadString();
-            UnknownIntA = packet.ReadInteger();
+            UnknownIntA = packet.ReadInt();
             Figure  = packet.ReadString();
             RealName = packet.ReadString();
         }

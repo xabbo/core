@@ -45,72 +45,72 @@ namespace Xabbo.Core
 		internal PetInfo(Packet packet)
 			: base()
 		{
-			Id = packet.ReadInteger();
+			Id = packet.ReadInt();
 			Name = packet.ReadString();
-			Level = packet.ReadInteger();
-			MaxLevel = packet.ReadInteger();
-			Experience = packet.ReadInteger();
-			MaxExperience = packet.ReadInteger();
-			Energy = packet.ReadInteger();
-			MaxEnergy = packet.ReadInteger();
-			Happiness = packet.ReadInteger();
-			MaxHappiness = packet.ReadInteger();
-			Scratches = packet.ReadInteger();
-			OwnerId = packet.ReadInteger();
-			Age = packet.ReadInteger();
+			Level = packet.ReadInt();
+			MaxLevel = packet.ReadInt();
+			Experience = packet.ReadInt();
+			MaxExperience = packet.ReadInt();
+			Energy = packet.ReadInt();
+			MaxEnergy = packet.ReadInt();
+			Happiness = packet.ReadInt();
+			MaxHappiness = packet.ReadInt();
+			Scratches = packet.ReadInt();
+			OwnerId = packet.ReadInt();
+			Age = packet.ReadInt();
 			OwnerName = packet.ReadString();
-			IntA = packet.ReadInteger();
-			BoolA = packet.ReadBoolean();
-			BoolB = packet.ReadBoolean();
+			IntA = packet.ReadInt();
+			BoolA = packet.ReadBool();
+			BoolB = packet.ReadBool();
 
-			int n = packet.ReadInteger();
+			int n = packet.ReadInt();
 			for (int i = 0; i < n; i++)
-				IntsA.Add(packet.ReadInteger());
+				IntsA.Add(packet.ReadInt());
 
-			IntB = packet.ReadInteger();
-			BoolC = packet.ReadBoolean();
-			BoolD = packet.ReadBoolean();
-			BoolE = packet.ReadBoolean();
-			RarityLevel = packet.ReadInteger();
-			MaxWellbeing = packet.ReadInteger();
-			Wellbeing = packet.ReadInteger();
-			IntC = packet.ReadInteger();
-			BoolF = packet.ReadBoolean();
+			IntB = packet.ReadInt();
+			BoolC = packet.ReadBool();
+			BoolD = packet.ReadBool();
+			BoolE = packet.ReadBool();
+			RarityLevel = packet.ReadInt();
+			MaxWellbeing = packet.ReadInt();
+			Wellbeing = packet.ReadInt();
+			IntC = packet.ReadInt();
+			BoolF = packet.ReadBool();
 		}
 
 		public void Write(Packet packet)
 		{
-			packet.WriteInteger(Id);
+			packet.WriteInt(Id);
 			packet.WriteString(Name);
-			packet.WriteInteger(Level);
-			packet.WriteInteger(MaxLevel);
-			packet.WriteInteger(Experience);
-			packet.WriteInteger(MaxExperience);
-			packet.WriteInteger(Energy);
-			packet.WriteInteger(MaxEnergy);
-			packet.WriteInteger(Happiness);
-			packet.WriteInteger(MaxHappiness);
-			packet.WriteInteger(Scratches);
-			packet.WriteInteger(OwnerId);
-			packet.WriteInteger(Age);
+			packet.WriteInt(Level);
+			packet.WriteInt(MaxLevel);
+			packet.WriteInt(Experience);
+			packet.WriteInt(MaxExperience);
+			packet.WriteInt(Energy);
+			packet.WriteInt(MaxEnergy);
+			packet.WriteInt(Happiness);
+			packet.WriteInt(MaxHappiness);
+			packet.WriteInt(Scratches);
+			packet.WriteInt(OwnerId);
+			packet.WriteInt(Age);
 			packet.WriteString(OwnerName);
-			packet.WriteInteger(IntA);
-			packet.WriteBoolean(BoolA);
-			packet.WriteBoolean(BoolB);
+			packet.WriteInt(IntA);
+			packet.WriteBool(BoolA);
+			packet.WriteBool(BoolB);
 
-			packet.WriteInteger(IntsA.Count);
+			packet.WriteInt(IntsA.Count);
 			foreach (int value in IntsA)
-				packet.WriteInteger(value);
+				packet.WriteInt(value);
 
-			packet.WriteInteger(IntB);
-			packet.WriteBoolean(BoolC);
-			packet.WriteBoolean(BoolD);
-			packet.WriteBoolean(BoolE);
-			packet.WriteInteger(RarityLevel);
-			packet.WriteInteger(MaxWellbeing);
-			packet.WriteInteger(Wellbeing);
-			packet.WriteInteger(IntC);
-			packet.WriteBoolean(BoolF);
+			packet.WriteInt(IntB);
+			packet.WriteBool(BoolC);
+			packet.WriteBool(BoolD);
+			packet.WriteBool(BoolE);
+			packet.WriteInt(RarityLevel);
+			packet.WriteInt(MaxWellbeing);
+			packet.WriteInt(Wellbeing);
+			packet.WriteInt(IntC);
+			packet.WriteBool(BoolF);
 		}
 	}
 }

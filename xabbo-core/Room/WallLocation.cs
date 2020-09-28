@@ -4,9 +4,9 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class WallLocation : IWritable
+    public class WallLocation : IWallLocation, IWritable
     {
-        public static readonly WallLocation Zero = new WallLocation();
+        public static WallLocation Zero => new WallLocation();
 
         public int WallX { get; set; }
         public int WallY { get; set; }
@@ -19,6 +19,15 @@ namespace Xabbo.Core
             Orientation = WallOrientation.Left;
         }
 
+        public WallLocation(IWallLocation origin)
+        {
+            WallX = origin.WallX;
+            WallY = origin.WallY;
+            X = origin.X;
+            Y = origin.Y;
+            Orientation = origin.Orientation;
+        }
+
         public WallLocation(int wallX, int wallY, int x, int y, WallOrientation orientation)
         {
             WallX = wallX;
@@ -28,7 +37,15 @@ namespace Xabbo.Core
             Orientation = orientation;
         }
 
-        public void OffsetWall(int offsetX, int offsetY, int scale)
+        /// <summary>
+        /// Offsets the wall location by the specified values
+        /// and attempts to keep the offset X and Y locations in place,
+        /// relative to the original wall location.
+        /// </summary>
+        /// <param name="offsetX">The amount to offset the wall X by.</param>
+        /// <param name="offsetY">The amount to offset the wall Y by.</param>
+        /// <param name="scale">The scale value of the room as specified in the floor plan.</param>
+        public void Offset(int offsetX, int offsetY, int scale)
         {
             int halfTileWidth = scale / 2;
             WallX += offsetX;
@@ -37,7 +54,12 @@ namespace Xabbo.Core
             Y -= (offsetX + offsetY) * halfTileWidth / 2;
         }
 
-        public void AdjustWall(int scale)
+        /// <summary>
+        /// Attempts to adjust the wall X, Y and offset X, Y positions
+        /// to a valid location using the room scale.
+        /// </summary>
+        /// <param name="scale">The scale value of the room as specified in the floor plan.</param>
+        public void Adjust(int scale)
         {
             while (X > (scale / 2))
             {
@@ -70,12 +92,7 @@ namespace Xabbo.Core
             }
         }
 
-        public WallLocation Clone() => new WallLocation(WallX, WallY, X, Y, Orientation);
-
-        public void Write(Packet packet)
-        {
-            packet.WriteString(ToString());
-        }
+        public void Write(Packet packet) => packet.WriteString(ToString());
 
         public override string ToString() => ToString(WallX, WallY, X, Y, Orientation);
 
@@ -109,24 +126,34 @@ namespace Xabbo.Core
             if (locationString.IndexOf(':') != 0)
                 return false;
 
-            string[] a = locationString.Split(' ');
-            if (a.Length != 3) return false;
+            string[] parts = locationString.Split(' ');
+            if (parts.Length != 3 ||
+                parts[0].Length < 6 ||
+                parts[1].Length < 5 ||
+                parts[2].Length != 1 ||
+                !parts[0].StartsWith(":w=") ||
+                !parts[1].StartsWith("l="))
+            {
+                return false;
+            }
 
-            string[] b = a[0].Substring(3).Split(',');
-            if (b.Length != 2) return false;
+            string[] positions = parts[0].Substring(3).Split(',');
+            if (positions.Length != 2) return false;
+            if (!int.TryParse(positions[0], out int wallX)) return false;
+            if (!int.TryParse(positions[1], out int wallY)) return false;
 
-            if (!int.TryParse(b[0], out int wallX)) return false;
-            if (!int.TryParse(b[1], out int wallY)) return false;
-
-            b = a[1].Substring(2).Split(',');
-            if (b.Length != 2) return false;
-            if (!int.TryParse(b[0], out int x)) return false;
-            if (!int.TryParse(b[1], out int y)) return false;
+            positions = parts[1].Substring(2).Split(',');
+            if (positions.Length != 2) return false;
+            if (!int.TryParse(positions[0], out int x)) return false;
+            if (!int.TryParse(positions[1], out int y)) return false;
 
             WallOrientation orientation;
-            if (a[2].Length != 1) return false;
-            try { orientation = WallOrientation.FromChar(a[2].ToLower()[0]); }
-            catch { return false; }
+            switch (parts[2][0])
+            {
+                case 'l': orientation = WallOrientation.Left; break;
+                case 'r': orientation = WallOrientation.Right; break;
+                default: return false;
+            }
 
             location = new WallLocation()
             {
@@ -146,6 +173,9 @@ namespace Xabbo.Core
             else return a.Equals(b);
         }
         public static bool operator !=(WallLocation a, WallLocation b) => !(a == b);
+
+        public static WallLocation operator +(WallLocation location, (int X, int Y) offset)
+            => new WallLocation(location.WallX, location.WallY, location.X + offset.X, location.Y + offset.Y, location.Orientation);
 
         public static implicit operator string(WallLocation location) => location.ToString();
         public static implicit operator WallLocation(string s) => WallLocation.Parse(s);

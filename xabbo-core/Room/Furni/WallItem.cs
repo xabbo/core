@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Xabbo.Core
 {
-    public class WallItem : Furni
+    public class WallItem : Furni, IWallItem
     {
         public static WallItem Parse(Packet packet, bool readName = true) => new WallItem(packet, readName);
 
@@ -14,11 +14,11 @@ namespace Xabbo.Core
         {
             var ownerDictionary = new Dictionary<int, string>();
 
-            int n = packet.ReadInteger();
+            int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
-                ownerDictionary.Add(packet.ReadInteger(), packet.ReadString());
+                ownerDictionary.Add(packet.ReadInt(), packet.ReadString());
 
-            n = packet.ReadInteger();
+            n = packet.ReadInt();
             var wallItems = new WallItem[n];
             for (int i = 0; i < n; i++)
             {
@@ -30,21 +30,35 @@ namespace Xabbo.Core
             return wallItems;
         }
 
-        public override FurniType Type => FurniType.Wall;
+        public override ItemType Type => ItemType.Wall;
 
-        public string Data { get; set; }
-        public int SecondsToExpiration { get; set; }
-        public FurniUsage Usage { get; set; }
+        private string _data;
+        public string Data
+        {
+            get => _data;
+            set
+            {
+                _data = value;
+
+                if (!string.IsNullOrWhiteSpace(_data) && int.TryParse(_data, out int state))
+                    State = state;
+                else
+                    State = -1;
+            }
+        }
 
         public WallLocation Location { get; set; }
+        IWallLocation IWallItem.Location => Location;
 
-        [JsonIgnore] public int WallX
+        [JsonIgnore]
+        public int WallX
         {
             get => Location.WallX;
             set => Location.WallX = value;
         }
 
-        [JsonIgnore] public int WallY
+        [JsonIgnore]
+        public int WallY
         {
             get => Location.WallY;
             set => Location.WallY = value;
@@ -57,7 +71,8 @@ namespace Xabbo.Core
             set => Location.X = value;
         }
 
-        [JsonIgnore] public int Y
+        [JsonIgnore]
+        public int Y
         {
             get => Location.Y;
             set => Location.Y = value;
@@ -72,7 +87,13 @@ namespace Xabbo.Core
 
         public WallItem()
         {
+            OwnerId = -1;
             OwnerName = "(unknown)";
+
+            Data = "";
+            SecondsToExpiration = -1;
+            Usage = FurniUsage.None;
+            Location = WallLocation.Zero;
         }
 
         internal WallItem(Packet packet, bool readName)
@@ -83,12 +104,12 @@ namespace Xabbo.Core
                 throw new FormatException($"Unable to parse wall item id: '{idString}'");
 
             Id = id;
-            Kind = packet.ReadInteger();
+            Kind = packet.ReadInt();
             Location = WallLocation.Parse(packet.ReadString());
             Data = packet.ReadString();
-            SecondsToExpiration = packet.ReadInteger();
-            Usage = (FurniUsage)packet.ReadInteger();
-            OwnerId = packet.ReadInteger();
+            SecondsToExpiration = packet.ReadInt();
+            Usage = (FurniUsage)packet.ReadInt();
+            OwnerId = packet.ReadInt();
 
             if (readName && packet.CanReadString())
                 OwnerName = packet.ReadString();
@@ -99,12 +120,12 @@ namespace Xabbo.Core
         public override void Write(Packet packet, bool writeName = true)
         {
             packet.WriteString(Id.ToString());
-            packet.WriteInteger(Kind);
+            packet.WriteInt(Kind);
             packet.WriteString(Location.ToString());
             packet.WriteString(Data);
-            packet.WriteInteger(SecondsToExpiration);
-            packet.WriteInteger((int)Usage);
-            packet.WriteInteger(OwnerId);
+            packet.WriteInt(SecondsToExpiration);
+            packet.WriteInt((int)Usage);
+            packet.WriteInt(OwnerId);
             if (writeName)
                 packet.WriteString(OwnerName);
         }

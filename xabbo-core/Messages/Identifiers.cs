@@ -44,20 +44,20 @@ namespace Xabbo.Core.Messages
             var sb = new StringBuilder();
 
             if (Unknown.Any())
-                sb.Append(string.Join(", ", Unknown));
+                sb.Append(string.Join(", ", Unknown.Select(x => x.Name)));
 
             if (Incoming.Any())
             {
                 if (sb.Length > 0) sb.Append("; ");
                 sb.Append("Incoming: ");
-                sb.Append(string.Join(", ", Incoming));
+                sb.Append(string.Join(", ", Incoming.Select(x => x.Name)));
             }
 
             if (Outgoing.Any())
             {
                 if (sb.Length > 0) sb.Append("; ");
                 sb.Append("Outgoing: ");
-                sb.Append(string.Join(", ", Outgoing));
+                sb.Append(string.Join(", ", Outgoing.Select(x => x.Name)));
             }
 
             return sb.ToString();

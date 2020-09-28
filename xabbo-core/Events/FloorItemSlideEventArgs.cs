@@ -4,10 +4,10 @@ namespace Xabbo.Core.Events
 {
     public class FloorItemSlideEventArgs : FloorItemEventArgs
     {
-        public Tile PreviousTile { get; }
+        public ITile PreviousTile { get; }
         public int RollerId;
 
-        public FloorItemSlideEventArgs(FloorItem item, Tile previousTile, int rollerId)
+        public FloorItemSlideEventArgs(IFloorItem item, ITile previousTile, int rollerId)
             : base(item)
         {
             PreviousTile = previousTile;

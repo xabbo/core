@@ -6,7 +6,7 @@ namespace Xabbo.Core.Events
     {
         public int PreviousEffect { get; }
 
-        public EntityEffectEventArgs(Entity entity, int previousEffect)
+        public EntityEffectEventArgs(IEntity entity, int previousEffect)
             : base(entity)
         {
             PreviousEffect = previousEffect;

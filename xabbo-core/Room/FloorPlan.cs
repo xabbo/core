@@ -5,7 +5,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class FloorPlan
+    public class FloorPlan : IFloorPlan
     {
         public int Scale { get; set; }
         public int WallHeight { get; set; }
@@ -38,12 +38,12 @@ namespace Xabbo.Core
 
         protected FloorPlan(Packet packet)
         {
-            if (packet.ReadBoolean())
+            if (packet.ReadBool())
                 Scale = 32;
             else
                 Scale = 64;
 
-            WallHeight = packet.ReadInteger();
+            WallHeight = packet.ReadInt();
             string map = packet.ReadString();
 
             tiles = ParseString(map, out int width, out int length);
@@ -82,7 +82,7 @@ namespace Xabbo.Core
                 if (y > 0) sb.Append('\n');
                 for (int x = 0; x < Width; x++)
                 {
-                    sb.Append(H.GetCharFromHeight(tiles[y * Width + x]));
+                    sb.Append(H.GetCharacterFromHeight(tiles[y * Width + x]));
                 }
             }
 

@@ -4,9 +4,9 @@ namespace Xabbo.Core.Events
 {
     public class WallItemEventArgs : EventArgs
     {
-        public WallItem Item { get; }
+        public IWallItem Item { get; }
 
-        public WallItemEventArgs(WallItem item)
+        public WallItemEventArgs(IWallItem item)
         {
             Item = item;
         }

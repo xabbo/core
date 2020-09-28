@@ -5,7 +5,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class CatalogOffer
+    public class CatalogOffer : ICatalogOffer
     {
         public static CatalogOffer Parse(Packet packet) => new CatalogOffer(packet);
 
@@ -17,6 +17,7 @@ namespace Xabbo.Core
         public ActivityPointType ActivityPointType { get; set; }
         public bool CanPurchaseAsGift { get; set; } // @Sulakore
         public List<CatalogProduct> Products { get; set; } = new List<CatalogProduct>();
+        IReadOnlyList<ICatalogProduct> ICatalogOffer.Products => Products;
         public int ClubLevel { get; set; }
         public bool CanPurchaseMultiple { get; set; }
         public bool IsPet { get; set; }
@@ -26,21 +27,21 @@ namespace Xabbo.Core
 
         internal CatalogOffer(Packet packet)
         {
-            Id = packet.ReadInteger();
+            Id = packet.ReadInt();
             FurniLine = packet.ReadString();
-            IsRentable = packet.ReadBoolean();
-            PriceInCredits = packet.ReadInteger();
-            PriceInActivityPoints = packet.ReadInteger();
-            ActivityPointType = (ActivityPointType)packet.ReadInteger();
-            CanPurchaseAsGift = packet.ReadBoolean();
+            IsRentable = packet.ReadBool();
+            PriceInCredits = packet.ReadInt();
+            PriceInActivityPoints = packet.ReadInt();
+            ActivityPointType = (ActivityPointType)packet.ReadInt();
+            CanPurchaseAsGift = packet.ReadBool();
 
-            int n = packet.ReadInteger();
+            int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
                 Products.Add(CatalogProduct.Parse(packet));
 
-            ClubLevel = packet.ReadInteger();
-            CanPurchaseMultiple = packet.ReadBoolean();
-            IsPet = packet.ReadBoolean();
+            ClubLevel = packet.ReadInt();
+            CanPurchaseMultiple = packet.ReadBool();
+            IsPet = packet.ReadBool();
             PreviewImage = packet.ReadString();
         }
     }

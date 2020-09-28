@@ -6,11 +6,11 @@ namespace Xabbo.Core.Events
 {
     public class EntitiesEventArgs : EventArgs
     {
-        public Entity[] Entities { get; }
+        public IEntity[] Entities { get; }
 
-        public EntitiesEventArgs(IEnumerable<Entity> entities)
+        public EntitiesEventArgs(IEnumerable<IEntity> entities)
         {
-            if (entities is Entity[] array)
+            if (entities is IEntity[] array)
                 Entities = array;
             else
                 Entities = entities.ToArray();

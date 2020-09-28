@@ -22,7 +22,7 @@ namespace Xabbo.Core
         {
             Category = packet.ReadString();
             Filter = packet.ReadString();
-            int n = packet.ReadInteger();
+            int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
                 Add(NavigatorSearchResultList.Parse(packet));
         }

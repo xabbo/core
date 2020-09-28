@@ -6,7 +6,7 @@ namespace Xabbo.Core.Events
     {
         public int PreviousDance { get; }
 
-        public EntityDanceEventArgs(Entity entity, int previousDance)
+        public EntityDanceEventArgs(IEntity entity, int previousDance)
             : base(entity)
         {
             PreviousDance = previousDance;

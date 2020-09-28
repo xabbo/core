@@ -6,11 +6,11 @@ namespace Xabbo.Core.Events
 {
     public class FloorItemsEventArgs : EventArgs
     {
-        public FloorItem[] Items { get; }
+        public IFloorItem[] Items { get; }
 
-        public FloorItemsEventArgs(IEnumerable<FloorItem> items)
+        public FloorItemsEventArgs(IEnumerable<IFloorItem> items)
         {
-            if (items is FloorItem[] array)
+            if (items is IFloorItem[] array)
                 Items = array;
             else
                 Items = items.ToArray();

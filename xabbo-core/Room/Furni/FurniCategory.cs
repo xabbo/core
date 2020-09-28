@@ -4,6 +4,7 @@ namespace Xabbo.Core
 {
     public enum FurniCategory
     {
+        Unknown = 0,
         Normal = 1,
         Wallpaper = 2,
         Floor = 3,

@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Collections.Concurrent;
 using System.Runtime.Serialization;
+using System.Diagnostics;
+using System.Threading;
+using System.Reflection;
 
 using Xabbo.Core.Messages;
 
+
 namespace Xabbo.Core.Components
 {
-    public class ComponentManager
+    public class ComponentManager : IDisposable
     {
         private static readonly Type componentType = typeof(XabboComponent);
 
@@ -19,9 +22,14 @@ namespace Xabbo.Core.Components
         }
 
         public IInterceptor Interceptor { get; }
+        public CancellationToken DisposeToken { get; }
 
         private readonly ConcurrentDictionary<Type, XabboComponent> components = new ConcurrentDictionary<Type, XabboComponent>();
         private readonly HashSet<Type> faultedComponents = new HashSet<Type>();
+
+        private readonly CancellationTokenSource disposeTokenSource = new CancellationTokenSource();
+
+        private bool isDisposed;
 
         public ComponentManager(IInterceptor interceptor)
         {
@@ -87,7 +95,12 @@ namespace Xabbo.Core.Components
             EnsureIsComponent(componentType);
 
             if (IsAvailable(componentType)) return true;
-            if (!CheckComponent(componentType)) return false;
+            if (!CheckComponent(componentType))
+            {
+                var unresolved = Interceptor.Dispatcher.Headers.GetUnresolvedIdentifiers(componentType);
+                Debug.WriteLine($"Component {componentType.FullName} has unresolved headers. {unresolved}");
+                return false;
+            }
 
             var dependsOnAttribute = componentType.GetCustomAttribute<DependenciesAttribute>();
             if (dependsOnAttribute != null)
@@ -95,12 +108,16 @@ namespace Xabbo.Core.Components
                 foreach (var dependency in dependsOnAttribute.Types)
                 {
                     if (IsAvailable(dependency)) continue;
-                    if (!LoadComponent(dependency)) return false;
+                    if (!LoadComponent(dependency))
+                    {
+                        Debug.WriteLine($"Component {componentType.FullName} dependency failure {dependency.FullName}.");
+                        return false;
+                    }
                 }
             }
 
             XabboComponent c;
-            
+
             if (!components.TryGetValue(componentType, out c))
             {
                 var constructor = componentType.GetConstructor(Type.EmptyTypes);
@@ -116,9 +133,19 @@ namespace Xabbo.Core.Components
                     return false;
             }
 
-            try { Interceptor.Dispatcher.Attach(c); }
+            if (!c.CheckAvailability())
+            {
+                Debug.WriteLine($"Component {componentType.FullName} is unavailable.");
+                return false;
+            }
+
+            try
+            {
+                Interceptor.Dispatcher.Attach(c);
+            }
             catch
             {
+                Debug.WriteLine($"Component {componentType.FullName} failed to attach.");
                 components.TryRemove(componentType, out _);
                 c.Manager = null;
                 return false;
@@ -153,6 +180,7 @@ namespace Xabbo.Core.Components
                 {
                     if (!this.components.TryAdd(component.GetType(), component))
                         throw new Exception($"Unable to add component {type.FullName} to dictionary");
+                    component.Manager = this;
                 }
                 else
                 {
@@ -174,6 +202,19 @@ namespace Xabbo.Core.Components
         {
             EnsureIsComponent(componentType);
             return components.TryGetValue(componentType, out XabboComponent component) ? component : null;
+        }
+
+        public void Dispose() => Dispose(true);
+        protected virtual void Dispose(bool disposing)
+        {
+            if (isDisposed) return;
+
+            if (disposing)
+            {
+                disposeTokenSource?.Cancel();
+            }
+
+            isDisposed = true;
         }
     }
 }

@@ -46,16 +46,16 @@ namespace Xabbo.Core
             }
         }
 
-        public static FurniType ToFurniType(string s)
+        public static ItemType ToFurniType(string s)
         {
             switch (s.ToLower())
             {
                 case "s":
                 case "floor":
-                    return FurniType.Floor;
+                    return ItemType.Floor;
                 case "i":
                 case "wall":
-                    return FurniType.Wall;
+                    return ItemType.Wall;
                 default: throw new FormatException($"Unknown furni type: {s}");
             }
         }
@@ -85,30 +85,56 @@ namespace Xabbo.Core
 
         public static FigurePartType GetFigurePartType(string partTypeString)
         {
-            if (!TryGetFigurePartType(partTypeString, out FigurePartType partType))
-                throw new Exception($"Unknown figure part type '{partTypeString}'");
-            return partType;
+            if (TryGetFigurePartType(partTypeString, out FigurePartType partType))
+                return partType;
+
+            throw new Exception($"Unknown figure part type '{partTypeString}'");
         }
         #endregion
 
         #region - Movement -
-        private static readonly int[][] directionVectors =
+        private static readonly int[][] magicVectors =
         {
-            new[] { -1000, -10000 },
-            new[] { 1000, -10000 },
-            new[] { 10000, -1000 },
-            new[] { 10000, 1000 },
-            new[] { 1000, 10000 },
-            new[] { -1000, 10000 },
-            new[] { -10000, 1000 },
-            new[] { -10000, -1000 }
+            new[] { -1000, -10000 }, // N
+            new[] { 1000, -10000 },  // NE
+            new[] { 10000, -1000 },  // E
+            new[] { 10000, 1000 },   // SE
+            new[] { 1000, 10000 },   // S
+            new[] { -1000, 10000 },  // SW
+            new[] { -10000, 1000 },  // W
+            new[] { -10000, -1000 }  // NW
         };
 
-        public static (int x, int y) GetDirectionVector(int direction)
+        /// <summary>
+        /// Gets a vector that can be used to face the specified direction
+        /// regardless of where your character is in the room.
+        /// </summary>
+        /// <param name="direction">The direction to face.</param>
+        public static (int X, int Y) GetMagicVector(int direction)
         {
-            var vector = directionVectors[direction % 8];
+            var vector = magicVectors[direction % 8];
             return (vector[0], vector[1]);
         }
+
+        public static (int X, int Y) GetMagicVector(Directions direction) => GetMagicVector((int)direction);
+
+        public static (int X, int Y) GetVector(Directions direction)
+        {
+            switch (direction)
+            {
+                case Directions.North: return (0, -1);
+                case Directions.NorthEast: return (1, -1);
+                case Directions.East: return (1, 0);
+                case Directions.SouthEast: return (1, 1);
+                case Directions.South: return (0, 1);
+                case Directions.SouthWest: return (-1, 1);
+                case Directions.West: return (-1, 0);
+                case Directions.NorthWest: return (-1, -1);
+                default: return (0, 0);
+            }
+        }
+
+        public static (int X, int Y) GetVector(int direction) => GetVector((Directions)direction);
         #endregion
 
         #region - Room -
@@ -122,7 +148,7 @@ namespace Xabbo.Core
                 return -1;
         }
 
-        public static char GetCharFromHeight(int height)
+        public static char GetCharacterFromHeight(int height)
         {
             if (0 <= height && height < 10)
                 return (char)('0' + height);

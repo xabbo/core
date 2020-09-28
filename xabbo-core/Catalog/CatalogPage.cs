@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class CatalogPage
+    public class CatalogPage : ICatalogPage
     {
         public static CatalogPage Parse(Packet packet) => new CatalogPage(packet);
 
@@ -15,33 +14,37 @@ namespace Xabbo.Core
         public string Mode { get; set; }
         public string LayoutCode { get; set; }
         public List<string> Images { get; set; } = new List<string>();
+        IReadOnlyList<string> ICatalogPage.Images => Images;
         public List<string> Texts { get; set; } = new List<string>();
+        IReadOnlyList<string> ICatalogPage.Texts => Texts;
         public List<CatalogOffer> Offers { get; set; } = new List<CatalogOffer>();
+        IReadOnlyList<ICatalogOffer> ICatalogPage.Offers => Offers;
         public int UnknownIntA { get; set; }
         public bool AcceptSeasonCurrencyAsCredits { get; set; }
         public List<CatalogPageData> Data { get; set; } = new List<CatalogPageData>();
+        IReadOnlyList<ICatalogPageData> ICatalogPage.Data => Data;
 
         public CatalogPage() { }
 
         internal CatalogPage(Packet packet)
         {
-            Id = packet.ReadInteger();
+            Id = packet.ReadInt();
             Mode = packet.ReadString();
             LayoutCode = packet.ReadString();
-            int n = packet.ReadInteger();
+            int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
                 Images.Add(packet.ReadString());
-            n = packet.ReadInteger();
+            n = packet.ReadInt();
             for (int i = 0; i < n; i++)
                 Texts.Add(packet.ReadString());
-            n = packet.ReadInteger();
+            n = packet.ReadInt();
             for (int i = 0; i < n; i++)
                 Offers.Add(CatalogOffer.Parse(packet));
-            UnknownIntA = packet.ReadInteger();
-            AcceptSeasonCurrencyAsCredits = packet.ReadBoolean();
+            UnknownIntA = packet.ReadInt();
+            AcceptSeasonCurrencyAsCredits = packet.ReadBool();
             if (packet.Available > 0)
             {
-                n = packet.ReadInteger();
+                n = packet.ReadInt();
                 for (int i = 0; i < n; i++)
                     Data.Add(CatalogPageData.Parse(packet));
             }
@@ -88,7 +91,7 @@ namespace Xabbo.Core
                 if (productCount != -1 && offer.Products.Count != productCount) continue;
                 foreach (var product in offer.Products)
                 {
-                    if (furniIds != null && !furniIds.Contains(product.FurniId))
+                    if (furniIds != null && !furniIds.Contains(product.Kind))
                     {
                         match = false;
                         break;

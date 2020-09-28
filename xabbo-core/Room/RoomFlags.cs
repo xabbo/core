@@ -10,6 +10,6 @@ namespace Xabbo.Core
         HasEvent = 4,
         ShowOwnerName = 8,
         AllowPets = 16,
-        ShowRoomAd = 32 // @Sulakore
+        ShowRoomAd = 32
     }
 }

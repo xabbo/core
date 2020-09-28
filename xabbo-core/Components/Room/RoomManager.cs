@@ -11,7 +11,7 @@ namespace Xabbo.Core.Components
     {
         private const int ERROR_KICKED = 4008;
 
-        public enum Features { Permissions, DoorTile, HeightMap, FloorPlan }
+        public enum Features { Paint, DoorTile, HeightMap, FloorPlan, Rating, Permissions }
 
         private readonly Dictionary<int, RoomData> roomDataCache = new Dictionary<int, RoomData>();
 
@@ -24,6 +24,9 @@ namespace Xabbo.Core.Components
 
         public int Id { get; private set; }
         public string Model { get; private set; }
+        public string Floor { get; private set; }
+        public string Wallpaper { get; private set; }
+        public string Landscape { get; private set; }
         public RoomData Data { get; private set; }
 
         public Tile DoorTile { get; private set; }
@@ -69,7 +72,7 @@ namespace Xabbo.Core.Components
 
         protected override void OnInitialize() { }
 
-        private void LeaveRoom()
+        private void Reset()
         {
             IsRingingDoorbell =
             IsInQueue =
@@ -79,6 +82,10 @@ namespace Xabbo.Core.Components
 
             Model = null;
             Data = null;
+
+            Floor =
+            Wallpaper =
+            Landscape = null;
             
             DoorTile = null;
             FloorPlan = null;
@@ -124,15 +131,15 @@ namespace Xabbo.Core.Components
             if (IsRingingDoorbell || IsInQueue || IsLoadingRoom || IsInRoom)
             {
                 DebugUtil.Log($"leaving current room ({Id})");
-                LeaveRoom();
+                Reset();
             }
 
-            Id = packet.ReadInteger();
+            Id = packet.ReadInt();
 
-            if (roomDataCache.ContainsKey(Id))
+            if (roomDataCache.TryGetValue(Id, out RoomData data))
             {
+                Data = data;
                 DebugUtil.Log("loaded room data from cache");
-                Data = roomDataCache[Id];
             }
         }
 
@@ -152,15 +159,10 @@ namespace Xabbo.Core.Components
                 var doorbellArgs = new DoorbellEventArgs(name);
                 OnDoorbell(doorbellArgs);
 
-                if (doorbellArgs.Reject)
+                if (doorbellArgs.Accept.HasValue)
                 {
                     e.Block();
-                    await Interceptor.SendToServerAsync(Out.HandleDoorbell, name, false);
-                }
-                else if (doorbellArgs.Accept)
-                {
-                    e.Block();
-                    await Interceptor.SendToServerAsync(Out.HandleDoorbell, name, true);
+                    await Interceptor.SendToServerAsync(Out.HandleDoorbell, name, doorbellArgs.Accept.Value);
                 }
             }
         }
@@ -168,7 +170,7 @@ namespace Xabbo.Core.Components
         [Receive("HideDoorbell")]
         private void HandleHideDoorbell(Packet packet)
         {
-            int roomId = packet.ReadInteger();
+            int roomId = packet.ReadInt();
             if (roomId != Id)
             {
                 DebugUtil.Log("room id mismatch");
@@ -186,17 +188,17 @@ namespace Xabbo.Core.Components
         [Receive("RoomEntryInfo")]
         private void HandleRoomEntryInfo(Packet packet)
         {
-            packet.ReadInteger(); // room id
-            if (packet.ReadInteger() == 2 &&
+            packet.ReadInt(); // room id
+            if (packet.ReadInt() == 2 &&
                 packet.ReadString() == "visitors" &&
-                packet.ReadInteger() == 2 &&
-                packet.ReadInteger() == 1 &&
+                packet.ReadInt() == 2 &&
+                packet.ReadInt() == 1 &&
                 packet.ReadString() == "visitors")
             {
                 bool enteredQueue = !IsInQueue;
 
                 IsInQueue = true;
-                QueuePosition = packet.ReadInteger() + 1;
+                QueuePosition = packet.ReadInt() + 1;
 
                 if (enteredQueue)
                 {
@@ -217,7 +219,7 @@ namespace Xabbo.Core.Components
             if (IsLoadingRoom || IsInRoom)
             {
                 DebugUtil.Log($"leaving current room ({Id})");
-                LeaveRoom();
+                Reset();
             }
 
             IsRingingDoorbell =
@@ -225,7 +227,7 @@ namespace Xabbo.Core.Components
             QueuePosition = 0;
 
             Model = packet.ReadString();
-            Id = packet.ReadInteger();
+            Id = packet.ReadInt();
 
             IsLoadingRoom = true;
 
@@ -233,17 +235,31 @@ namespace Xabbo.Core.Components
             OnEnteringRoom();
         }
 
+        [Group(Features.Paint), Receive("RoomPaint")]
+        private void HandleRoomPaint(Packet packet)
+        {
+            string key = packet.ReadString();
+            string value = packet.ReadString();
+            switch (key)
+            {
+                case "floor": Floor = value; break;
+                case "wallpaper": Wallpaper = value; break;
+                case "landscape": Landscape = value; break;
+                default: DebugUtil.Log($"unknown paint type: {key}"); break;
+            }
+        }
+
         [Group(Features.Permissions), Receive("RoomRights")]
         private void HandleRoomRights(Packet packet)
         {
-            int roomId = packet.ReadInteger();
+            int roomId = packet.ReadInt();
             if (roomId != Id)
             {
                 DebugUtil.Log("room id mismatch");
                 return;
             }
 
-            RightsLevel = packet.ReadInteger();
+            RightsLevel = packet.ReadInt();
 
             DebugUtil.Log($"rights = {RightsLevel}");
         }
@@ -257,9 +273,9 @@ namespace Xabbo.Core.Components
                 return;
             }
 
-            int x = packet.ReadInteger();
-            int y = packet.ReadInteger();
-            int dir = packet.ReadInteger();
+            int x = packet.ReadInt();
+            int y = packet.ReadInt();
+            int dir = packet.ReadInt();
 
             DoorTile = new Tile(x, y, 0);
 
@@ -319,14 +335,14 @@ namespace Xabbo.Core.Components
                 return;
             }
 
-            int roomId = packet.ReadInteger();
+            int roomId = packet.ReadInt();
             if (roomId != Id)
             {
                 DebugUtil.Log("room id mismatch");
                 return;
             }
 
-            IsOwner = packet.ReadBoolean();
+            IsOwner = packet.ReadBool();
             IsLoadingRoom = false;
             IsInRoom = true;
 
@@ -346,7 +362,7 @@ namespace Xabbo.Core.Components
             if (IsRingingDoorbell || IsInQueue || IsLoadingRoom || IsInRoom)
             {
                 DebugUtil.Log($"leaving current room ({Id})");
-                LeaveRoom();
+                Reset();
             }
         }
 
@@ -355,7 +371,7 @@ namespace Xabbo.Core.Components
         {
             if (!IsInRoom) return;
 
-            int errorCode = packet.ReadInteger();
+            int errorCode = packet.ReadInt();
             if (errorCode == ERROR_KICKED)
                 OnKicked();
         }

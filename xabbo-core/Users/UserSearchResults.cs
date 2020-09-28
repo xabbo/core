@@ -22,13 +22,13 @@ namespace Xabbo.Core
         {
             var results = new List<UserSearchResult>();
 
-            int n = packet.ReadInteger();
+            int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
                 results.Add(UserSearchResult.Parse(packet));
             Friends = results.AsReadOnly();
 
             results = new List<UserSearchResult>();
-            n = packet.ReadInteger();
+            n = packet.ReadInt();
             for (int i = 0; i < n; i++)
                 results.Add(UserSearchResult.Parse(packet));
             Others = results.AsReadOnly();

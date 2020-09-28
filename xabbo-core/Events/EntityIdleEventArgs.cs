@@ -6,7 +6,7 @@ namespace Xabbo.Core.Events
     {
         public bool WasIdle { get; }
 
-        public EntityIdleEventArgs(Entity entity, bool wasIdle)
+        public EntityIdleEventArgs(IEntity entity, bool wasIdle)
             : base(entity)
         {
             WasIdle = wasIdle;

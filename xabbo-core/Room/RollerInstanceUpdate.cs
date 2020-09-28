@@ -17,7 +17,7 @@ namespace Xabbo.Core
 
         protected RollerObjectUpdate(Packet packet)
         {
-            Id = packet.ReadInteger();
+            Id = packet.ReadInt();
             LocationZ = packet.ReadDouble();
             TargetZ = packet.ReadDouble();
         }

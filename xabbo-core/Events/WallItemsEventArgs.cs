@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Xabbo.Core.Events
 {
     public class WallItemsEventArgs : EventArgs
     {
-        public WallItem[] Items { get; }
+        public IReadOnlyCollection<IWallItem> Items { get; }
 
-        public WallItemsEventArgs(IEnumerable<WallItem> items)
+        public WallItemsEventArgs(IEnumerable<IWallItem> items)
         {
-            if (items is WallItem[] array)
-                Items = array;
-            else
-                Items = items.ToArray();
+            Items = new List<IWallItem>(items).AsReadOnly();
         }
     }
 }

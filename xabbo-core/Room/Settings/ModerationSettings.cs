@@ -1,23 +1,24 @@
 ﻿using System;
+
 using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class ModerationSettings : IWritable
+    public class ModerationSettings : IModerationSettings, IWritable
     {
         public static ModerationSettings Parse(Packet packet) => new ModerationSettings(packet);
 
-        public ModerationPermissions WhoCanMute { get; internal set; }
-        public ModerationPermissions WhoCanKick { get; internal set; }
-        public ModerationPermissions WhoCanBan { get; internal set; }
+        public ModerationPermissions WhoCanMute { get; set; }
+        public ModerationPermissions WhoCanKick { get; set; }
+        public ModerationPermissions WhoCanBan { get; set; }
 
         public ModerationSettings() { }
 
         internal ModerationSettings(Packet packet)
         {
-            WhoCanMute = (ModerationPermissions)packet.ReadInteger();
-            WhoCanKick = (ModerationPermissions)packet.ReadInteger();
-            WhoCanBan = (ModerationPermissions)packet.ReadInteger();
+            WhoCanMute = (ModerationPermissions)packet.ReadInt();
+            WhoCanKick = (ModerationPermissions)packet.ReadInt();
+            WhoCanBan = (ModerationPermissions)packet.ReadInt();
         }
 
         public void Write(Packet packet) => packet.WriteValues(

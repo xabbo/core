@@ -4,9 +4,9 @@ namespace Xabbo.Core.Events
 {
     public class RoomDataEventArgs : EventArgs
     {
-        public RoomData Data { get; }
+        public IRoomData Data { get; }
 
-        public RoomDataEventArgs(RoomData data)
+        public RoomDataEventArgs(IRoomData data)
         {
             Data = data;
         }

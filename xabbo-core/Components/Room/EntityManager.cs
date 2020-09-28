@@ -12,47 +12,51 @@ namespace Xabbo.Core.Components
     [Dependencies(typeof(RoomManager))]
     public class EntityManager : XabboComponent
     {
-        public enum Features { EntityUpdates, StateTracking }
+        public enum Features { Tracking, StateTracking }
 
         private RoomManager roomManager;
 
         private readonly ConcurrentDictionary<int, Entity> entities = new ConcurrentDictionary<int, Entity>();
 
-        public IEnumerable<Entity> Entities => entities.Select(x => x.Value);
-        public IEnumerable<RoomUser> Users => Entities.OfType<RoomUser>();
-        public IEnumerable<Pet> Pets => Entities.OfType<Pet>();
-        public IEnumerable<PrivateBot> UserBots => Entities.OfType<PrivateBot>();
-        public IEnumerable<PublicBot> PublicBots => Entities.OfType<PublicBot>();
+        public IEnumerable<IEntity> Entities => entities.Select(x => x.Value);
+        public IEnumerable<IRoomUser> Users => Entities.OfType<RoomUser>();
+        public IEnumerable<IPet> Pets => Entities.OfType<Pet>();
+        public IEnumerable<IBot> Bots => Entities.OfType<Bot>();
 
-        public Entity GetEntity(int index) => entities.TryGetValue(index, out Entity e) ? e : null;
-        public Entity GetEntityById(int id) => Entities.FirstOrDefault(e => e.Id == id);
-        public Entity GetEntityByName(string name) => Entities.FirstOrDefault(e => e.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
-
-        public T GetEntity<T>(int index) where T : Entity => GetEntity(index) as T;
-        public T GetEntityById<T>(int id) where T : Entity
+        public T GetEntityByIndex<T>(int index) where T : class, IEntity => GetEntityByIndex(index) as T;
+        public T GetEntity<T>(int id) where T : IEntity
             => Entities.OfType<T>().FirstOrDefault(e => e.Id == id);
-        public T GetEntityByName<T>(string name) where T : Entity
+        public T GetEntity<T>(string name) where T : IEntity
             => Entities.OfType<T>().FirstOrDefault(e => e.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
 
-        public bool TryGetEntity(int index, out Entity entity) => entities.TryGetValue(index, out entity);
-        public bool TryGetEntity<T>(int index, out T entity) where T : Entity
+        public IEntity GetEntityByIndex(int index) => entities.TryGetValue(index, out Entity e) ? e : null;
+        public IEntity GetEntity(int id) => Entities.FirstOrDefault(e => e.Id == id);
+        public IEntity GetEntity(string name) => Entities.FirstOrDefault(e => e.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+
+        public bool TryGetEntityByIndex(int index, out IEntity entity)
+        {
+            entity = null;
+            if (entities.TryGetValue(index, out Entity result))
+                entity = result;
+            return entity != null;
+        }
+        public bool TryGetEntityByIndex<T>(int index, out T entity) where T : IEntity
         {
             if (entities.TryGetValue(index, out Entity e))
             {
-                entity = (T)e;
+                entity = (T)(IEntity)e;
                 return true;
             }
             else
             {
-                entity = null;
+                entity = default(T);
                 return false;
             }
         }
-
-        public bool TryGetEntityById<T>(int id, out T entity) where T : Entity
-            => (entity = GetEntityById<T>(id)) != null;
-        public bool TryGetEntityByName<T>(string name, out T entity) where T : Entity
-            => (entity = GetEntityByName<T>(name)) != null;
+        public bool TryGetEntity<T>(int id, out T entity) where T : IEntity
+            => (entity = GetEntity<T>(id)) != null;
+        public bool TryGetEntity<T>(string name, out T entity) where T : IEntity
+            => (entity = GetEntity<T>(name)) != null;
 
         #region - Events -
         public event EventHandler<EntityEventArgs> EntityAdded;
@@ -61,6 +65,7 @@ namespace Xabbo.Core.Components
         public event EventHandler<EntitiesEventArgs> EntitiesUpdated;
         public event EventHandler<EntitySlideEventArgs> EntitySlide;
         public event EventHandler<UserDataUpdatedEventArgs> UserDataUpdated;
+        public event EventHandler<EntityNameChangedEventArgs> EntityNameChanged;
         public event EventHandler<EntityIdleEventArgs> EntityIdle;
         public event EventHandler<EntityDanceEventArgs> EntityDance;
         public event EventHandler<EntityHandItemEventArgs> EntityHandItem;
@@ -69,38 +74,42 @@ namespace Xabbo.Core.Components
         public event EventHandler<EntityTypingEventArgs> EntityTyping;
         public event EventHandler<EntityEventArgs> EntityRemoved;
 
-        protected virtual void OnEntityAdded(Entity entity)
+        protected virtual void OnEntityAdded(IEntity entity)
             => EntityAdded?.Invoke(this, new EntityEventArgs(entity));
-        protected virtual void OnEntitiesAdded(IEnumerable<Entity> entities)
+        protected virtual void OnEntitiesAdded(IEnumerable<IEntity> entities)
             => EntitiesAdded?.Invoke(this, new EntitiesEventArgs(entities));
-        protected virtual void OnEntityUpdated(Entity entity)
+        protected virtual void OnEntityUpdated(IEntity entity)
             => EntityUpdated?.Invoke(this, new EntityEventArgs(entity));
-        protected virtual void OnEntitiesUpdated(IEnumerable<Entity> entities)
+        protected virtual void OnEntitiesUpdated(IEnumerable<IEntity> entities)
             => EntitiesUpdated?.Invoke(this, new EntitiesEventArgs(entities));
-        protected virtual void OnEntitySlide(Entity entity, Tile previousTile)
+        protected virtual void OnEntitySlide(IEntity entity, ITile previousTile)
             => EntitySlide?.Invoke(this, new EntitySlideEventArgs(entity, previousTile));
-        protected virtual void OnUserDataUpdated(RoomUser user,
+        protected virtual void OnUserDataUpdated(IRoomUser user,
             string previousFigure, Gender previousGender,
             string previousMotto, int previousAchievementScore)
             => UserDataUpdated?.Invoke(this, new UserDataUpdatedEventArgs(
                 user, previousFigure, previousGender,
                 previousMotto, previousAchievementScore
             ));
-        protected virtual void OnEntityIdle(Entity entity, bool wasIdle)
+        protected virtual void OnEntityNameChanged(IEntity entity, string previousName)
+            => EntityNameChanged?.Invoke(this, new EntityNameChangedEventArgs(entity, previousName));
+        protected virtual void OnEntityIdle(IEntity entity, bool wasIdle)
             => EntityIdle?.Invoke(this, new EntityIdleEventArgs(entity, wasIdle));
-        protected virtual void OnEntityDance(Entity entity, int previousDance)
+        protected virtual void OnEntityDance(IEntity entity, int previousDance)
             => EntityDance?.Invoke(this, new EntityDanceEventArgs(entity, previousDance));
-        protected virtual void OnEntityHandItem(Entity entity, int previousItem)
+        protected virtual void OnEntityHandItem(IEntity entity, int previousItem)
             => EntityHandItem?.Invoke(this, new EntityHandItemEventArgs(entity, previousItem));
-        protected virtual void OnEntityEffect(Entity entity, int previousEffect)
+        protected virtual void OnEntityEffect(IEntity entity, int previousEffect)
             => EntityEffect?.Invoke(this, new EntityEffectEventArgs(entity, previousEffect));
-        protected virtual void OnEntityAction(Entity entity, Actions action)
+        protected virtual void OnEntityAction(IEntity entity, Actions action)
             => EntityAction?.Invoke(this, new EntityActionEventArgs(entity, action));
-        protected virtual void OnEntityTyping(Entity entity, bool wasTyping)
+        protected virtual void OnEntityTyping(IEntity entity, bool wasTyping)
             => EntityTyping?.Invoke(this, new EntityTypingEventArgs(entity, wasTyping));
-        protected virtual void OnEntityRemoved(Entity entity)
+        protected virtual void OnEntityRemoved(IEntity entity)
             => EntityRemoved?.Invoke(this, new EntityEventArgs(entity));
         #endregion
+
+        public EntityManager() { }
 
         protected override void OnInitialize()
         {
@@ -126,7 +135,7 @@ namespace Xabbo.Core.Components
 
             var newEntities = new List<Entity>();
 
-            int n = packet.ReadInteger();
+            int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
             {
                 var entity = Entity.Parse(packet);
@@ -167,14 +176,14 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.EntityUpdates), Receive("RoomUserStatus")]
+        [Group(Features.Tracking), Receive("RoomUserStatus")]
         protected void HandleEntityUpdate(Packet packet)
         {
             if (!roomManager.IsInRoom) return;
 
-            var updatedEntities = new List<Entity>();
+            var updatedEntities = new List<IEntity>();
 
-            int n = packet.ReadInteger();
+            int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
             {
                 var entityUpdate = EntityUpdate.Parse(packet);
@@ -193,7 +202,7 @@ namespace Xabbo.Core.Components
             OnEntitiesUpdated(updatedEntities);
         }
 
-        [Group(Features.EntityUpdates), Receive("ObjectOnRoller")]
+        [Group(Features.Tracking), Receive("ObjectOnRoller")]
         protected void HandleObjectOnRoller(Packet packet)
         {
             if (!roomManager.IsInRoom) return;
@@ -205,8 +214,8 @@ namespace Xabbo.Core.Components
             {
                 if (entities.TryGetValue(rollerUpdate.EntityIndex, out Entity entity))
                 {
-                    var previousTile = entity.Tile;
-                    entity.Tile = new Tile(rollerUpdate.TargetX, rollerUpdate.TargetY, rollerUpdate.EntityTargetZ);
+                    var previousTile = entity.Location;
+                    entity.Location = new Tile(rollerUpdate.TargetX, rollerUpdate.TargetY, rollerUpdate.EntityTargetZ);
 
                     OnEntitySlide(entity, previousTile);
                 }
@@ -222,8 +231,8 @@ namespace Xabbo.Core.Components
         {
             if (!roomManager.IsInRoom) return;
 
-            int index = packet.ReadInteger();
-            if (TryGetEntity(index, out RoomUser user))
+            int index = packet.ReadInt();
+            if (TryGetEntityByIndex(index, out RoomUser user))
             {
                 string previousFigure = user.Figure;
                 Gender previousGender = user.Gender;
@@ -233,7 +242,7 @@ namespace Xabbo.Core.Components
                 user.Figure = packet.ReadString();
                 user.Gender = H.ToGender(packet.ReadString());
                 user.Motto = packet.ReadString();
-                user.AchievementScore = packet.ReadInteger();
+                user.AchievementScore = packet.ReadInt();
 
                 OnUserDataUpdated(user,
                     previousFigure, previousGender,
@@ -246,16 +255,37 @@ namespace Xabbo.Core.Components
             }
         }
 
+        [Group(Features.StateTracking), Receive("RoomUserNameChanged")]
+        protected void HandleRoomUserNameChanged(Packet packet)
+        {
+            if (!roomManager.IsInRoom) return;
+
+            int id = packet.ReadInt();
+            int index = packet.ReadInt();
+            string newName = packet.ReadString();
+
+            if (TryGetEntityByIndex(index, out Entity entity))
+            {
+                string previousName = entity.Name;
+                entity.Name = newName;
+                OnEntityNameChanged(entity, previousName);
+            }
+            else
+            {
+                DebugUtil.Log($"failed to find entity {index} to update");
+            }
+        }
+
         [Group(Features.StateTracking), Receive("RoomUnitIdle")]
         protected void HandleEntityIdle(Packet packet)
         {
             if (!roomManager.IsInRoom) return;
 
-            int index = packet.ReadInteger();
-            if (TryGetEntity(index, out Entity entity))
+            int index = packet.ReadInt();
+            if (TryGetEntityByIndex(index, out Entity entity))
             {
                 bool wasIdle = entity.IsIdle;
-                entity.IsIdle = packet.ReadBoolean();
+                entity.IsIdle = packet.ReadBool();
                 OnEntityIdle(entity, wasIdle);
             }
             else
@@ -269,8 +299,8 @@ namespace Xabbo.Core.Components
         {
             if (!roomManager.IsInRoom) return;
 
-            int index = packet.ReadInteger();
-            var entity = GetEntity(index);
+            int index = packet.ReadInt();
+            var entity = GetEntityByIndex(index) as Entity;
             if (entity == null)
             {
                 DebugUtil.Log($"failed to find entity {index} to update");
@@ -278,7 +308,7 @@ namespace Xabbo.Core.Components
             }
 
             int previousDance = entity.Dance;
-            entity.Dance = packet.ReadInteger();
+            entity.Dance = packet.ReadInt();
 
             OnEntityDance(entity, previousDance);
         }
@@ -288,10 +318,10 @@ namespace Xabbo.Core.Components
         {
             if (!roomManager.IsInRoom) return;
 
-            int index = packet.ReadInteger();
-            if (TryGetEntity(index, out Entity entity))
+            int index = packet.ReadInt();
+            if (TryGetEntityByIndex(index, out Entity entity))
             {
-                OnEntityAction(entity, (Actions)packet.ReadInteger());
+                OnEntityAction(entity, (Actions)packet.ReadInt());
             }
             else
             {
@@ -304,11 +334,11 @@ namespace Xabbo.Core.Components
         {
             if (!roomManager.IsInRoom) return;
 
-            int index = packet.ReadInteger();
-            if (TryGetEntity(index, out Entity entity))
+            int index = packet.ReadInt();
+            if (TryGetEntityByIndex(index, out Entity entity))
             {
                 int previousItem = entity.HandItem;
-                entity.HandItem = packet.ReadInteger();
+                entity.HandItem = packet.ReadInt();
                 OnEntityHandItem(entity, previousItem);
             }
             else
@@ -322,11 +352,11 @@ namespace Xabbo.Core.Components
         {
             if (!roomManager.IsInRoom) return;
 
-            int index = packet.ReadInteger();
-            if (TryGetEntity(index, out Entity entity))
+            int index = packet.ReadInt();
+            if (TryGetEntityByIndex(index, out Entity entity))
             {
                 int previousEffect = entity.Effect;
-                entity.Effect = packet.ReadInteger();
+                entity.Effect = packet.ReadInt();
                 OnEntityEffect(entity, previousEffect);
             }
             else
@@ -340,12 +370,12 @@ namespace Xabbo.Core.Components
         {
             if (!roomManager.IsInRoom) return;
 
-            int index = packet.ReadInteger();
+            int index = packet.ReadInt();
 
-            if (TryGetEntity(index, out Entity entity))
+            if (TryGetEntityByIndex(index, out Entity entity))
             {
                 bool wasTyping = entity.IsTyping;
-                entity.IsTyping = packet.ReadInteger() != 0;
+                entity.IsTyping = packet.ReadInt() != 0;
                 OnEntityTyping(entity, wasTyping);
             }
             else

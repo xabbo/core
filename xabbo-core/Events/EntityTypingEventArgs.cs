@@ -6,7 +6,7 @@ namespace Xabbo.Core.Events
     {
         public bool WasTyping { get; }
 
-        public EntityTypingEventArgs(Entity entity, bool wasTyping)
+        public EntityTypingEventArgs(IEntity entity, bool wasTyping)
             : base(entity)
         {
             WasTyping = wasTyping;

@@ -5,7 +5,7 @@ namespace Xabbo.Core.Metadata
 {
     public class FurniInfo
     {
-        public FurniType Type { get; }
+        public ItemType Type { get; }
         public int Id { get; }
         public string ClassName { get; }
         public int Revision { get; }
@@ -29,7 +29,7 @@ namespace Xabbo.Core.Metadata
         public bool CanLayOn { get; }
         public string Line { get; }
 
-        internal FurniInfo(FurniType type, FurniDataXml.FurniInfo proxy)
+        internal FurniInfo(ItemType type, FurniDataXml.FurniInfo proxy)
         {
             Type = type;
             Id = proxy.Id;

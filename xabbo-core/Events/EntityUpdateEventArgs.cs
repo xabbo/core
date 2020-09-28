@@ -8,7 +8,7 @@ namespace Xabbo.Core.Events
         public Gender PreviousGender { get; }
         public string PreviousMotto { get; }
         
-        public EntityUpdateEventArgs(Entity entity, string previousFigure, Gender previousGender, string previousMotto)
+        public EntityUpdateEventArgs(IEntity entity, string previousFigure, Gender previousGender, string previousMotto)
             : base(entity)
         {
             PreviousFigure = previousFigure;

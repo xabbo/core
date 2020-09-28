@@ -1,14 +1,79 @@
 ﻿using System;
-using System.Linq;
 using System.Collections;
 using System.IO;
 using System.Text;
 using System.Globalization;
 
+using Xabbo.Core.Messages;
+
 namespace Xabbo.Core.Protocol
 {
-    public class Packet
+    public class Packet : IPacket
     {
+        private class ReadOnlyWrapper : IReadOnlyPacket
+        {
+            private readonly Packet packet;
+
+            public Header Header => packet.Header;
+
+            public int Position
+            {
+                get => packet.Position;
+                set => packet.Position = value;
+            }
+
+            public int Length => packet.Length;
+
+            public int Available => packet.Available;
+
+            public ReadOnlyWrapper(Packet packet)
+            {
+                this.packet = packet;
+            }
+
+            public bool CanReadBool() => packet.CanReadBool();
+
+            public bool CanReadByte() => packet.CanReadByte();
+
+            public bool CanReadDouble() => packet.CanReadDouble();
+
+            public bool CanReadInt() => packet.CanReadInt();
+
+            public bool CanReadShort() => packet.CanReadShort();
+
+            public bool CanReadString() => packet.CanReadString();
+
+            public byte[] GetData() => packet.GetData();
+
+            public bool ReadBool() => packet.ReadBool();
+
+            public bool ReadBool(int position) => packet.ReadBool(position);
+
+            public byte ReadByte() => packet.ReadByte();
+
+            public byte ReadByte(int position) => packet.ReadByte(position);
+
+            public byte[] ReadBytes(int count) => packet.ReadBytes(count);
+
+            public double ReadDouble() => packet.ReadDouble();
+
+            public double ReadDouble(int position) => packet.ReadDouble(position);
+
+            public int ReadInt() => packet.ReadInt();
+
+            public int ReadInt(int position) => packet.ReadInt(position);
+
+            public short ReadShort() => packet.ReadShort();
+
+            public short ReadShort(int position) => packet.ReadShort(position);
+
+            public string ReadString() => packet.ReadString();
+
+            public string ReadString(int position) => packet.ReadString(position);
+
+            public byte[] ToBytes() => packet.ToBytes();
+        }
+
         public static readonly Type
             Byte = typeof(byte),
             Bool = typeof(bool),
@@ -17,7 +82,7 @@ namespace Xabbo.Core.Protocol
             ByteArray = typeof(byte[]),
             String = typeof(string);
 
-        private MemoryStream _ms;
+        private readonly MemoryStream _ms;
 
         /// <summary>
         /// Gets the data in the packet including the length and message ID headers.
@@ -59,7 +124,7 @@ namespace Xabbo.Core.Protocol
             return data;
         }
 
-        public short Header { get; set; }
+        public Header Header { get; set; } = Header.Unknown;
 
         public int Position
         {
@@ -82,42 +147,45 @@ namespace Xabbo.Core.Protocol
             _ms = new MemoryStream();
         }
 
-        public Packet(short header)
+        public Packet(Header header)
             : this()
         {
             Header = header;
         }
 
-        public Packet(byte[] buffer, int offset, int count, bool includesHeader = true)
+        public Packet(byte[] data, int offset, int count, bool includesHeader = true, Destination destination = Destination.Unknown)
             : this()
         {
-            if (offset < 0 || offset >= buffer.Length)
+            if (offset < 0 || offset > data.Length)
                 throw new ArgumentOutOfRangeException("offset");
-            if (count < 0 || offset + count > buffer.Length || (includesHeader && count < 2))
-                throw new ArgumentOutOfRangeException("length");
+            if (count < 0 || (offset + count) > data.Length || (includesHeader && count < 2))
+                throw new ArgumentOutOfRangeException("count");
 
             if (includesHeader)
             {
-                Header = (short)(
-                    (buffer[offset] << 8) |
-                    buffer[offset + 1]
+                Header = new Header(
+                    destination,
+                    (short)(
+                        (data[offset] << 8) |
+                        data[offset + 1]
+                    )
                 );
-                _ms.Write(buffer, offset + 2, count - 2);
+                _ms.Write(data, offset + 2, count - 2);
             }
             else
             {
-                _ms.Write(buffer, offset, count);
+                _ms.Write(data, offset, count);
             }
 
             Position = 0;
             Length = (int)_ms.Length;
         }
 
-        public Packet(byte[] buffer, bool includesHeader = true)
-            : this(buffer, 0, buffer.Length, includesHeader)
+        public Packet(byte[] data, bool includesHeader = true)
+            : this(data, 0, data.Length, includesHeader)
         { }
 
-        public Packet(short header, params object[] values)
+        public Packet(Header header, params object[] values)
         {
             _ms = new MemoryStream();
 
@@ -125,9 +193,18 @@ namespace Xabbo.Core.Protocol
             WriteValues(values);
         }
 
+        public Packet(Packet packet)
+            : this(packet.Header)
+        {
+            byte[] data = packet.GetData();
+            _ms.Write(data, 0, data.Length);
+            _ms.Position = 0;
+            Length = (int)_ms.Length;
+        }
+
         public bool CanReadByte() => Available >= 1;
 
-        public bool CanReadBoolean()
+        public bool CanReadBool()
         {
             if (!CanReadByte()) return false;
             byte b = ReadByte();
@@ -137,16 +214,25 @@ namespace Xabbo.Core.Protocol
 
         public bool CanReadShort() => Available >= 2;
 
-        public bool CanReadInteger() => Available >= 4;
-
-        public bool CanReadBytes(int count) => Available >= count;
+        public bool CanReadInt() => Available >= 4;
 
         public bool CanReadString()
         {
             if (!CanReadShort()) return false;
             int len = ReadShort();
             Position -= 2;
-            return CanReadBytes(2 + len);
+            return Available >= (2 + len);
+        }
+
+        public bool CanReadDouble()
+        {
+            if (!CanReadString()) return false;
+
+            int pos = Position;
+            bool success = double.TryParse(ReadString(), NumberStyles.Float, CultureInfo.InvariantCulture, out _);
+            Position = pos;
+
+            return success;
         }
 
         public byte ReadByte()
@@ -167,12 +253,12 @@ namespace Xabbo.Core.Protocol
             return ReadByte();
         }
 
-        public bool ReadBoolean() => ReadByte() == 1;
+        public bool ReadBool() => ReadByte() != 0;
 
-        public bool ReadBoolean(int position)
+        public bool ReadBool(int position)
         {
             Position = position;
-            return ReadBoolean();
+            return ReadBool();
         }
 
         public short ReadShort()
@@ -193,7 +279,7 @@ namespace Xabbo.Core.Protocol
             return ReadShort();
         }
 
-        public int ReadInteger()
+        public int ReadInt()
         {
             if (Available < 4)
                 throw new EndOfStreamException();
@@ -206,10 +292,10 @@ namespace Xabbo.Core.Protocol
                 buffer[3];
         }
 
-        public int ReadInteger(int position)
+        public int ReadInt(int position)
         {
             Position = position;
-            return ReadInteger(position);
+            return ReadInt(position);
         }
 
         public double ReadDouble()
@@ -244,7 +330,7 @@ namespace Xabbo.Core.Protocol
             if (!CanReadString())
                 throw new EndOfStreamException();
 
-            short len = ReadShort();
+            int len = (ushort)ReadShort();
             byte[] bytes = ReadBytes(len);
 
             return Encoding.UTF8.GetString(bytes);
@@ -274,12 +360,12 @@ namespace Xabbo.Core.Protocol
             WriteByte(value);
         }
 
-        public void WriteBoolean(bool value) => WriteByte((byte)(value ? 1 : 0));
+        public void WriteBool(bool value) => WriteByte((byte)(value ? 1 : 0));
 
-        public void WriteBoolean(bool value, int position)
+        public void WriteBool(bool value, int position)
         {
             Position = position;
-            WriteBoolean(value);
+            WriteBool(value);
         }
 
         public void WriteShort(short value)
@@ -295,7 +381,7 @@ namespace Xabbo.Core.Protocol
             WriteShort(value);
         }
 
-        public void WriteInteger(int value)
+        public void WriteInt(int value)
         {
             buffer[0] = (byte)((value >> 24) & 0xFF);
             buffer[1] = (byte)((value >> 16) & 0xFF);
@@ -304,10 +390,10 @@ namespace Xabbo.Core.Protocol
             Write(buffer, 0, 4);
         }
 
-        public void WriteInteger(int value, int position)
+        public void WriteInt(int value, int position)
         {
             Position = position;
-            WriteInteger(value);
+            WriteInt(value);
         }
 
         public void WriteDouble(double value)
@@ -321,20 +407,20 @@ namespace Xabbo.Core.Protocol
             WriteDouble(value);
         }
 
-        public void WriteBytes(byte[] value)
+        public void WriteBytes(byte[] bytes)
         {
-            Write(value, 0, value.Length);
+            Write(bytes, 0, bytes.Length);
         }
 
-        public void WriteBytes(byte[] value, int position)
+        public void WriteBytes(byte[] bytes, int position)
         {
             Position = position;
-            WriteBytes(value);
+            WriteBytes(bytes);
         }
 
         public void WriteString(string value)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(value);
+            byte[] bytes = Encoding.UTF8.GetBytes(value ?? string.Empty);
             WriteShort((short)bytes.Length);
             WriteBytes(bytes);
         }
@@ -352,20 +438,20 @@ namespace Xabbo.Core.Protocol
                 switch (value)
                 {
                     case byte x: WriteByte(x); break;
-                    case bool x: WriteBoolean(x); break;
+                    case bool x: WriteBool(x); break;
                     case short x: WriteShort(x); break;
                     case ushort x: WriteShort((short)x); break;
-                    case int x: WriteInteger(x); break;
+                    case int x: WriteInt(x); break;
                     case byte[] x:
-                        WriteInteger(x.Length);
+                        WriteInt(x.Length);
                         WriteBytes(x);
                         break;
                     case string x: WriteString(x); break;
-                    case double x: WriteString(x.ToString()); break;
+                    case double x: WriteDouble(x); break;
                     case IWritable x: x.Write(this); break;
                     case ICollection x:
                         {
-                            WriteInteger(x.Count);
+                            WriteInt(x.Count);
                             foreach (object o in x)
                                 WriteValues(o);
                         }
@@ -373,14 +459,14 @@ namespace Xabbo.Core.Protocol
                     case IEnumerable x:
                         {
                             int count = 0, startPosition = Position;
-                            WriteInteger(-1);
+                            WriteInt(-1);
                             foreach (object o in x)
                             {
                                 WriteValues(o);
                                 count++;
                             }
                             int endPosition = Position;
-                            WriteInteger(count, startPosition);
+                            WriteInt(count, startPosition);
                             Position = endPosition;
                         }
                         break;
@@ -390,9 +476,9 @@ namespace Xabbo.Core.Protocol
         }
 
         #region - Replacement -
-        public void ReplaceString(string value) => ReplaceString(value, Position);
+        public void ReplaceString(string newValue) => ReplaceString(newValue, Position);
 
-        public void ReplaceString(string value, int position)
+        public void ReplaceString(string newValue, int position)
         {
             Position = position;
             if (!CanReadString())
@@ -400,17 +486,19 @@ namespace Xabbo.Core.Protocol
 
             int len = ReadShort();
 
-            if (len == Encoding.UTF8.GetByteCount(value))
+            byte[] stringBytes = Encoding.UTF8.GetBytes(newValue);
+
+            if (len == stringBytes.Length)
             {
-                Position = position;
-                WriteString(value);
+                WriteBytes(stringBytes);
                 return;
             }
 
             Position += len;
             byte[] temp = ReadBytes(Length - Position);
             Position = position;
-            WriteString(value);
+            WriteShort((short)stringBytes.Length);
+            WriteBytes(stringBytes);
 
             int finalPosition = Position;
             WriteBytes(temp);
@@ -418,25 +506,25 @@ namespace Xabbo.Core.Protocol
             Position = finalPosition;
         }
 
-        public void ReplaceValues(params object[] values)
+        public void ReplaceValues(params object[] newValues)
         {
-            foreach (object value in values)
+            foreach (object value in newValues)
             {
                 switch (value)
                 {
                     case byte x: WriteByte(x); break;
-                    case bool x: WriteBoolean(x); break;
+                    case bool x: WriteBool(x); break;
                     case short x: WriteShort(x); break;
                     case ushort x: WriteShort((short)x); break;
-                    case int x: WriteInteger(x); break;
+                    case int x: WriteInt(x); break;
                     case byte[] x: WriteBytes(x); break;
                     case string x: ReplaceString(x); break;
                     case Type t:
                         {
                             if (t == Byte) ReadByte();
-                            else if (t == Bool) ReadBoolean();
+                            else if (t == Bool) ReadBool();
                             else if (t == Short) ReadShort();
-                            else if (t == Int) ReadInteger();
+                            else if (t == Int) ReadInt();
                             else if (t == ByteArray) throw new NotSupportedException();
                             else if (t == String) ReadString();
                             else throw new Exception($"Invalid type specified: {t.FullName}");
@@ -447,17 +535,13 @@ namespace Xabbo.Core.Protocol
             }
         }
 
-        public void ReplaceValues(object[] values, int position)
+        public void ReplaceValues(object[] newValues, int position)
         {
             Position = position;
-            ReplaceValues(values);
+            ReplaceValues(newValues);
         }
-        #endregion
 
-        public Packet Clone()
-        {
-            byte[] bytes = ToBytes();
-            return new Packet(bytes, 4, bytes.Length - 4);
-        }
+        public IReadOnlyPacket AsReadOnly() => new ReadOnlyWrapper(this);
+        #endregion
     }
 }

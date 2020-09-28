@@ -18,7 +18,7 @@ namespace Xabbo.Core
 
         protected Badge(Packet packet)
         {
-            Id = packet.ReadInteger();
+            Id = packet.ReadInt();
             Code = packet.ReadString();
         }
 

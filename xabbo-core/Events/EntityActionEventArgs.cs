@@ -6,7 +6,7 @@ namespace Xabbo.Core.Events
     {
         public Actions Action { get; }
 
-        public EntityActionEventArgs(Entity entity, Actions action)
+        public EntityActionEventArgs(IEntity entity, Actions action)
             :  base(entity)
         {
             Action = action;

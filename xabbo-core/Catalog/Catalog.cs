@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class Catalog
+    public class Catalog : ICatalog
     {
         public static Catalog Parse(Packet packet) => new Catalog(packet);
 
         public CatalogPageNode Root { get; set; }
+        ICatalogPageNode ICatalog.Root => Root;
         public bool UnknownBoolA { get; set; }
         public string Mode { get; set; }
 
@@ -18,12 +18,15 @@ namespace Xabbo.Core
         internal Catalog(Packet packet)
         {
             Root = CatalogPageNode.Parse(packet);
-            UnknownBoolA = packet.ReadBoolean();
+            UnknownBoolA = packet.ReadBool();
             Mode = packet.ReadString();
         }
 
-        public CatalogPageNode FindPage(string pageName) => Root.FindPage(pageName);
-        public CatalogPageNode FindPage(int? id = null, string name = null, string localization = null) => Root.FindPage(id, name, localization);
-        public CatalogPageNode FindPage(Predicate<CatalogPageNode> predicate) => Root.FindPage(predicate);
+        public CatalogPageNode Find(Predicate<CatalogPageNode> predicate) => Root.Find(predicate);
+        ICatalogPageNode ICatalog.Find(Predicate<ICatalogPageNode> predicate) => Find(predicate);
+        public CatalogPageNode Find(string name) => Root.Find(name);
+        ICatalogPageNode ICatalog.Find(string name) => Find(name);
+        public CatalogPageNode Find(int? id = null, string name = null, string text = null) => Root.Find(id, name, text);
+        ICatalogPageNode ICatalog.Find(int? id, string name, string text) => Find(id, name, text);
     }
 }

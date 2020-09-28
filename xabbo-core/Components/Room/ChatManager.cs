@@ -36,12 +36,12 @@ namespace Xabbo.Core.Components
             else
                 throw new Exception($"Unable to detect chat type from incoming header: {packet.Header}");
 
-            int index = packet.ReadInteger();
-            var entity = entities.GetEntity(index);
+            int index = packet.ReadInt();
+            var entity = entities.GetEntityByIndex(index);
 
             string message = packet.ReadString();
-            packet.ReadInteger();
-            int bubbleStyle = packet.ReadInteger();
+            packet.ReadInt();
+            int bubbleStyle = packet.ReadInt();
 
             var eventArgs = new EntityChatEventArgs(entity, chatType, message, bubbleStyle);
             OnEntityChat(eventArgs);

@@ -1,7 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Xabbo.Core.Metadata
 {
@@ -35,8 +35,8 @@ namespace Xabbo.Core.Metadata
 
         public class Palette
         {
-            public int Id { get; set; }
-            public IReadOnlyList<Color> Colors { get; set; }
+            public int Id { get; }
+            public IReadOnlyList<Color> Colors { get; }
 
             internal Palette(FigureDataXml.Palette proxy)
             {

@@ -55,7 +55,7 @@ namespace Xabbo.Core.Messages
             return !param.IsOut && !param.IsIn && !param.IsOptional && !param.HasDefaultValue;
         }
 
-        private bool CheckReceiveMethodSignature(MethodInfo methodInfo)
+        private bool VerifyReceiveMethodSignature(MethodInfo methodInfo)
         {
             if (!methodInfo.ReturnType.Equals(typeof(void)))
                 return false;
@@ -79,7 +79,7 @@ namespace Xabbo.Core.Messages
             }
         }
 
-        private bool CheckInterceptorMethodSignature(MethodInfo methodInfo)
+        private bool VerifyInterceptorMethodSignature(MethodInfo methodInfo)
         {
             if (!methodInfo.ReturnType.Equals(typeof(void)))
                 return false;
@@ -169,7 +169,7 @@ namespace Xabbo.Core.Messages
         }
 
         #region - Handlers -
-        public bool AddHandler(short header, Action<object, Packet> handler)
+        public bool AddHandler(Header header, Action<object, Packet> handler)
         {
             if (handler == null)
                 throw new ArgumentNullException("handler");
@@ -201,7 +201,7 @@ namespace Xabbo.Core.Messages
             return result;
         }
 
-        public bool RemoveHandler(short header, Action<object, Packet> handler)
+        public bool RemoveHandler(Header header, Action<object, Packet> handler)
         {
             if (handler == null)
                 throw new ArgumentNullException("handler");
@@ -307,9 +307,8 @@ namespace Xabbo.Core.Messages
             var unresolvedIdentifiers = new Identifiers();
 
             /*
-                Pass 1
-                    Detect unknown, invalid identifiers
-                    Create a list of faulted groups
+                Detect unknown, invalid identifiers
+                Create a list of faulted groups
             */
             {
                 var classIdentifiersAttributes = listenerType.GetCustomAttributes<IdentifiersAttribute>();
@@ -320,7 +319,7 @@ namespace Xabbo.Core.Messages
                         if (!Headers.HasIdentifier(identifier))
                             throw new UnknownIdentifierException(identifier, listenerType);
 
-                        if (!Headers.TryGetHeader(identifier, out short header) || header < 0)
+                        if (!Headers.TryGetHeader(identifier, out Header header) || header < 0)
                         {
                             unresolvedIdentifiers.Add(identifier);
                             requiredGroupFaulted = true;
@@ -348,7 +347,7 @@ namespace Xabbo.Core.Messages
                         if (!Headers.HasIdentifier(identifier))
                             throw new UnknownIdentifierException(identifier, methodInfo);
 
-                        if (!Headers.TryGetHeader(identifier, out short header) || header < 0)
+                        if (!Headers.TryGetHeader(identifier, out Header header) || header < 0)
                         {
                             foreach (var group in groups) faultedGroups.Add(group);
 
@@ -370,8 +369,7 @@ namespace Xabbo.Core.Messages
             var callbackList = new List<ListenerCallback>();
 
             /*
-                Pass 2
-                    Generate receive/intercept callbacks for all non-faulted groups
+                Generate receive/intercept callbacks for all non-faulted groups
             */
             foreach (var methodInfo in methodInfos)
             {
@@ -390,7 +388,7 @@ namespace Xabbo.Core.Messages
                 var receiveAttribute = methodInfo.GetCustomAttribute<ReceiveAttribute>();
                 if (receiveAttribute != null)
                 {
-                    if (!CheckReceiveMethodSignature(methodInfo))
+                    if (!VerifyReceiveMethodSignature(methodInfo))
                     {
                         throw new Exception(
                             $"{listenerType.Name}.{methodInfo.Name} has a " +
@@ -423,7 +421,7 @@ namespace Xabbo.Core.Messages
                 var interceptAttribute = interceptAttributes.FirstOrDefault();
                 if (interceptAttribute != null)
                 {
-                    if (!CheckInterceptorMethodSignature(methodInfo))
+                    if (!VerifyInterceptorMethodSignature(methodInfo))
                     {
                         throw new Exception(
                             $"{listenerType.Name}.{methodInfo.Name} has a " +
@@ -567,13 +565,13 @@ namespace Xabbo.Core.Messages
         #endregion
 
         #region - Intercepts -
-        public bool AddInterceptIn(short header, Action<InterceptEventArgs> callback)
+        public bool AddInterceptIn(Header header, Action<InterceptEventArgs> callback)
             => AddIntercept(Destination.Client, header, callback);
 
-        public bool AddInterceptOut(short header, Action<InterceptEventArgs> callback)
+        public bool AddInterceptOut(Header header, Action<InterceptEventArgs> callback)
             => AddIntercept(Destination.Server, header, callback);
 
-        public bool AddIntercept(Destination destination, short header, Action<InterceptEventArgs> callback)
+        public bool AddIntercept(Destination destination, Header header, Action<InterceptEventArgs> callback)
         {
             bool result;
             IReadOnlyList<InterceptCallback> previousList, newList;
@@ -601,13 +599,13 @@ namespace Xabbo.Core.Messages
             return result;
         }
 
-        public bool RemoveInterceptIn(short header, Action<InterceptEventArgs> action)
+        public bool RemoveInterceptIn(Header header, Action<InterceptEventArgs> action)
             => RemoveIntercept(Destination.Client, header, action);
 
-        public bool RemoveInterceptOut(short header, Action<InterceptEventArgs> action)
+        public bool RemoveInterceptOut(Header header, Action<InterceptEventArgs> action)
             => RemoveIntercept(Destination.Server, header, action);
 
-        public bool RemoveIntercept(Destination destination, short header, Action<InterceptEventArgs> action)
+        public bool RemoveIntercept(Destination destination, Header header, Action<InterceptEventArgs> action)
         {
             bool result;
             IReadOnlyList<InterceptCallback> previousList, newList;

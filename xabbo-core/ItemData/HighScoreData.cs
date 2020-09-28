@@ -1,0 +1,99 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+
+using Xabbo.Core.Protocol;
+
+namespace Xabbo.Core
+{
+    public class HighScoreData : ItemData, IHighScoreData, IList<HighScoreData.HighScore>
+    {
+        private readonly List<HighScore> list;
+
+        public int Int1 { get; set; }
+        public int Int2 { get; set; }
+
+        public int Count => list.Count;
+        public bool IsReadOnly => false;
+        public HighScore this[int index]
+        {
+            get => list[index];
+            set => list[index] = value;
+        }
+        IHighScore IReadOnlyList<IHighScore>.this[int index] => this[index];
+        IEnumerator<IHighScore> IEnumerable<IHighScore>.GetEnumerator() => GetEnumerator();
+
+        public HighScoreData()
+            : base(ItemDataType.HighScore)
+        {
+            list = new List<HighScore>();
+        }
+
+        protected override void Initialize(Packet packet)
+        {
+            LegacyString = packet.ReadString();
+            Int1 = packet.ReadInt();
+            Int2 = packet.ReadInt();
+
+            int n = packet.ReadInt();
+            for (int i = 0; i < n; i++)
+            {
+                var highScore = new HighScore();
+                highScore.Score = packet.ReadInt(); 
+
+                int k = packet.ReadInt();
+                for (int j = 0; j < k; j++)
+                    highScore.Names.Add(packet.ReadString());
+
+                Add(highScore);
+            }
+
+            // No base call.
+        }
+
+        public class HighScore : IHighScore, IWritable
+        {
+            public int Score { get; set; }
+            public List<string> Names { get; set; }
+            IReadOnlyList<string> IHighScore.Names => Names;
+
+            public HighScore()
+            {
+                Names = new List<string>();
+            }
+
+            public void Write(Packet packet)
+            {
+                packet.WriteInt(Score);
+                packet.WriteInt(Names?.Count ?? 0);
+                if (Names != null)
+                {
+                    foreach (string name in Names)
+                        packet.WriteString(name);
+                }
+            }
+        }
+
+        protected override void WriteData(Packet packet)
+        {
+            packet.WriteString(LegacyString);
+            packet.WriteInt(Int1);
+            packet.WriteInt(Int2);
+
+            packet.WriteInt(Count);
+            foreach (var highScore in this)
+                highScore.Write(packet);
+        }
+
+        public int IndexOf(HighScore item) => list.IndexOf(item);
+        public void Insert(int index, HighScore item) => list.Insert(index, item);
+        public void RemoveAt(int index) => list.RemoveAt(index);
+        public void Add(HighScore item) => list.Add(item);
+        public void Clear() => list.Clear();
+        public bool Contains(HighScore item) => list.Contains(item);
+        public void CopyTo(HighScore[] array, int arrayIndex) => list.CopyTo(array, arrayIndex);
+        public bool Remove(HighScore item) => list.Remove(item);
+        public IEnumerator<HighScore> GetEnumerator() => list.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => list.GetEnumerator();
+    }
+}

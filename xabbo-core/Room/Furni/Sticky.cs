@@ -19,8 +19,8 @@ namespace Xabbo.Core
             Id = int.Parse(packet.ReadString());
             string text = packet.ReadString();
             int spaceIndex = text.IndexOf(' ');
-            if (spaceIndex != 6)
-                throw new FormatException($"Sticky data is of an invalid format: '{text}'");
+            if (spaceIndex != 6 && text.Length != 6)
+               throw new FormatException($"Sticky data is of an invalid format: '{text}'");
             Color = text.Substring(0, 6);
             Text = text.Substring(7);
         }
