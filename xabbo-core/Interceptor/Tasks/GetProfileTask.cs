@@ -5,8 +5,8 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut("RequestUserProfile")]
-    public class GetProfileTask : InterceptorTask<UserProfile>
+    [RequiredOut(nameof(Outgoing.RequestUserProfile))]
+    public class GetProfileTask : InterceptorTask<IUserProfile>
     {
         private readonly int userId;
 
@@ -18,8 +18,8 @@ namespace Xabbo.Core.Tasks
 
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestUserProfile, userId, false);
 
-        [InterceptIn("UserProfile")]
-        private void OnUserProfile(InterceptEventArgs e)
+        [InterceptIn(nameof(Incoming.UserProfile))]
+        protected void OnUserProfile(InterceptEventArgs e)
         {
             try
             {

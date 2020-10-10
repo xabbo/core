@@ -233,10 +233,10 @@
     <Compile Include="Messages\Headers.cs" />
     <Compile Include="Messages\Identifier.cs" />
     <Compile Include="Messages\Identifiers.cs" />
-    <Compile Include="Messages\IncomingHeaders.cs" />
+    <Compile Include="Messages\Incoming.cs" />
     <Compile Include="Messages\Destination.cs" />
     <Compile Include="Messages\InterceptEventArgs.cs" />
-    <Compile Include="Messages\OutgoingHeaders.cs" />
+    <Compile Include="Messages\Outgoing.cs" />
     <Compile Include="Messages\Attributes\ReceiveAttribute.cs" />
     <Compile Include="Messages\MessageDispatcher.cs" />
     <Compile Include="Messages\MessageEventArgs.cs" />

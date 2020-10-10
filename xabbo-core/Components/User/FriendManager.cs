@@ -20,7 +20,7 @@ namespace Xabbo.Core.Components
         private ConcurrentDictionary<int, FriendInfo> friends;
         private ConcurrentDictionary<string, FriendInfo> nameMap;
 
-        public bool IsLoaded { get; private set; }
+        public bool IsInitialized { get; private set; }
         public IEnumerable<IFriendInfo> Friends => friends.Select(x => x.Value);
         public bool IsFriend(int id) => friends.ContainsKey(id);
         public bool IsFriend(string name) => nameMap.ContainsKey(name.ToLower());
@@ -91,7 +91,7 @@ namespace Xabbo.Core.Components
         {
             if (!Dispatcher.IsAttached(this, MessageGroups.Default)) return;
 
-            if (!IsLoaded && !isForceLoading)
+            if (!IsInitialized && !isForceLoading)
             {
                 DebugUtil.Log("force loading friends");
 
@@ -134,7 +134,7 @@ namespace Xabbo.Core.Components
 
                 isLoadingFriends = false;
                 isForceLoading = false;
-                IsLoaded = true;
+                IsInitialized = true;
                 OnLoaded();
             }
         }

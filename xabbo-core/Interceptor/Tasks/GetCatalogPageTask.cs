@@ -5,8 +5,8 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut("RequestCatalogPage")]
-    public class GetCatalogPageTask : InterceptorTask<CatalogPage>
+    [RequiredOut(nameof(Outgoing.RequestCatalogPage))]
+    public class GetCatalogPageTask : InterceptorTask<ICatalogPage>
     {
         private readonly int pageId;
         private readonly string mode;
@@ -20,8 +20,8 @@ namespace Xabbo.Core.Tasks
 
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestCatalogPage, pageId, -1, mode);
 
-        [InterceptIn("CatalogPage")]
-        private void HandleCatalogPage(InterceptEventArgs e)
+        [InterceptIn(nameof(Incoming.CatalogPage))]
+        protected void OnCatalogPage(InterceptEventArgs e)
         {
             try
             {

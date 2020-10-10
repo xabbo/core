@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 using Xabbo.Core.Protocol;
 
@@ -16,7 +17,7 @@ namespace Xabbo.Core
         public string String1 { get; set; }
 
         public int Count => _dict.Count;
-        public IEnumerator<Achievement> GetEnumerator() => _dict.Values.GetEnumerator();
+        public IEnumerator<Achievement> GetEnumerator() => _dict.Select(x => x.Value).GetEnumerator();
         IEnumerator<IAchievement> IEnumerable<IAchievement>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

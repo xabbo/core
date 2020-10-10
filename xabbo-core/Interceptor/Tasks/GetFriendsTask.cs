@@ -18,11 +18,11 @@ namespace Xabbo.Core.Tasks
 
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestInitFriends);
 
-        [InterceptIn("InitFriends")]
-        protected virtual void HandleInitFriends(InterceptEventArgs e) => e.Block();
+        [InterceptIn(nameof(Incoming.InitFriends))]
+        protected void OnInitFriends(InterceptEventArgs e) => e.Block();
 
-        [InterceptIn("Friends")]
-        protected virtual void HandleFriends(InterceptEventArgs e)
+        [InterceptIn(nameof(Incoming.Friends))]
+        protected void OnFriends(InterceptEventArgs e)
         {
             try
             {

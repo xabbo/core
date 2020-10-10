@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut("RequestAchievements")]
+    [RequiredOut(nameof(Outgoing.RequestAchievements))]
     public class GetAchievementsTask : InterceptorTask<IAchievements>
     {
         public GetAchievementsTask(IInterceptor interceptor)
@@ -14,8 +14,8 @@ namespace Xabbo.Core.Tasks
 
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestAchievements);
 
-        [InterceptIn("AchievementList")]
-        private void HandleAchievementList(InterceptEventArgs e)
+        [InterceptIn(nameof(Incoming.AchievementList))]
+        protected void OnAchievementList(InterceptEventArgs e)
         {
             try
             {

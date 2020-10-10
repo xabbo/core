@@ -28,7 +28,7 @@ namespace Xabbo.Core.Web
         public bool HabboClubMember { get; set; }
 
         [JsonProperty("lastWebAccess")]
-        public DateTime LastWebAccess { get; set; }
+        public DateTime? LastWebAccess { get; set; }
 
         [JsonProperty("creationTime")]
         public DateTime CreationTime { get; set; }

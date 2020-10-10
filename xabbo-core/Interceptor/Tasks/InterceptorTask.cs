@@ -15,8 +15,8 @@ namespace Xabbo.Core.Tasks
 
         private readonly IInterceptor interceptor;
         protected MessageDispatcher Dispatcher => interceptor.Dispatcher;
-        protected IncomingHeaders In => Dispatcher.Headers.Incoming;
-        protected OutgoingHeaders Out => Dispatcher.Headers.Outgoing;
+        protected Incoming In => Dispatcher.Headers.Incoming;
+        protected Outgoing Out => Dispatcher.Headers.Outgoing;
 
         protected InterceptorTask(IInterceptor interceptor)
         {

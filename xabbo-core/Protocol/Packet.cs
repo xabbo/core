@@ -202,6 +202,13 @@ namespace Xabbo.Core.Protocol
             Length = (int)_ms.Length;
         }
 
+        public static Packet Compose(Header header, params object[] values)
+        {
+            var packet = new Packet(header);
+            packet.WriteValues(values);
+            return packet;
+        }
+
         public bool CanReadByte() => Available >= 1;
 
         public bool CanReadBool()

@@ -5,8 +5,8 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut("RequestUserData")]
-    public class GetUserDataTask : InterceptorTask<UserData>
+    [RequiredOut(nameof(Outgoing.RequestUserData))]
+    public class GetUserDataTask : InterceptorTask<IUserData>
     {
         public GetUserDataTask(IInterceptor interceptor)
             : base(interceptor)
@@ -14,8 +14,8 @@ namespace Xabbo.Core.Tasks
 
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestUserData);
 
-        [InterceptIn("UserData")]
-        private void OnUserData(InterceptEventArgs e)
+        [InterceptIn(nameof(Incoming.UserData))]
+        protected void HandleUserData(InterceptEventArgs e)
         {
             try
             {

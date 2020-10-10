@@ -14,7 +14,7 @@ namespace Xabbo.Core
         public string Mode { get; set; }
 
         public Catalog() { }
-
+        
         internal Catalog(Packet packet)
         {
             Root = CatalogPageNode.Parse(packet);

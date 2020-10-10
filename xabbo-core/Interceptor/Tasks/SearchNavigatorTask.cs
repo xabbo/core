@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut("RequestNewNavigatorRooms")]
+    [RequiredOut(nameof(Outgoing.RequestNewNavigatorRooms))]
     public class SearchNavigatorTask : InterceptorTask<NavigatorSearchResults>
     {
         private readonly string category;
@@ -20,8 +20,8 @@ namespace Xabbo.Core.Tasks
 
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestNewNavigatorRooms, category, filter);
 
-        [InterceptIn("NewNavigatorSearchResults")]
-        private void OnNavigatorSearchResults(InterceptEventArgs e)
+        [InterceptIn(nameof(Incoming.NewNavigatorSearchResults))]
+        protected void OnNavigatorSearchResults(InterceptEventArgs e)
         {
             try
             {

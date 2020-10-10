@@ -1,8 +1,10 @@
 ﻿using System;
 
+using Xabbo.Core.Protocol;
+
 namespace Xabbo.Core
 {
-    public interface IItemData
+    public interface IItemData : IWritable
     {
         ItemDataType Type { get; }
 

@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace Xabbo.Core.Messages
 {
-    public sealed class IncomingHeaders : HeaderDictionary
+    public sealed class Incoming : HeaderDictionary
     {
-        public IncomingHeaders()
+        public Incoming()
             : base(Destination.Client)
         { }
 
-        public IncomingHeaders(IDictionary<string, short> values)
+        public Incoming(IDictionary<string, short> values)
             : base(Destination.Client, values)
         { }
 
@@ -164,6 +164,7 @@ namespace Xabbo.Core.Messages
         public Header HotelViewNextLTDAvailable { get; private set; }
         public Header HotelWillCloseInMinutesAndBackIn { get; private set; }
         public Header HotelWillCloseInMinutes { get; private set; }
+        public Header InitFriends { get; private set; }
         public Header InventoryAchievements { get; private set; }
         public Header InventoryAddEffect { get; private set; }
         public Header InventoryBadges { get; private set; }

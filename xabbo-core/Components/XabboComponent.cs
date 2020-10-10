@@ -46,8 +46,8 @@ namespace Xabbo.Core.Components
         protected IInterceptor Interceptor => Manager.Interceptor;
         protected MessageDispatcher Dispatcher => Interceptor.Dispatcher;
         protected Headers Headers => Dispatcher.Headers;
-        protected IncomingHeaders In => Headers.Incoming;
-        protected OutgoingHeaders Out => Headers.Outgoing;
+        protected Incoming In => Headers.Incoming;
+        protected Outgoing Out => Headers.Outgoing;
 
         protected T GetComponent<T>() where T : XabboComponent => Manager.GetComponent<T>();
 

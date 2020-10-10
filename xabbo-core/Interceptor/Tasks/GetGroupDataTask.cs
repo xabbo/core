@@ -5,8 +5,8 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut("RequestGuildInfo")]
-    public class GetGroupDataTask : InterceptorTask<GroupData>
+    [RequiredOut(nameof(Outgoing.RequestGuildInfo))]
+    public class GetGroupDataTask : InterceptorTask<IGroupData>
     {
         private readonly int groupId;
 
@@ -18,8 +18,8 @@ namespace Xabbo.Core.Tasks
 
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestGuildInfo, groupId, false);
 
-        [InterceptIn("GuildInfo")]
-        private void OnGuildInfo(InterceptEventArgs e)
+        [InterceptIn(nameof(Incoming.GuildInfo))]
+        protected void OnGuildInfo(InterceptEventArgs e)
         {
             try
             {

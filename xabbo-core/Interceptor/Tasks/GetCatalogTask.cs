@@ -5,8 +5,8 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut("RequestCatalogMode")]
-    public class GetCatalogTask : InterceptorTask<Catalog>
+    [RequiredOut(nameof(Outgoing.RequestCatalogMode))]
+    public class GetCatalogTask : InterceptorTask<ICatalog>
     {
         private readonly string mode;
 
@@ -18,8 +18,8 @@ namespace Xabbo.Core.Tasks
 
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestCatalogMode, mode);
 
-        [InterceptIn("CatalogPagesList")]
-        private void OnCatalog(InterceptEventArgs e)
+        [InterceptIn(nameof(Incoming.CatalogPagesList))]
+        protected void OnCatalogPagesList(InterceptEventArgs e)
         {
             try
             {

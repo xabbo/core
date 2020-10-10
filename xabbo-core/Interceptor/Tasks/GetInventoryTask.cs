@@ -5,8 +5,8 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut("RequestInventoryItems")]
-    public class GetInventoryTask : InterceptorTask<Inventory>
+    [RequiredOut(nameof(Outgoing.RequestInventoryItems))]
+    public class GetInventoryTask : InterceptorTask<IInventory>
     {
         private int totalExpected = -1, currentIndex = 0;
         private readonly Inventory inventory = new Inventory();
@@ -17,8 +17,8 @@ namespace Xabbo.Core.Tasks
 
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestInventoryItems);
 
-        [InterceptIn("InventoryItems")]
-        private void OnInventoryItems(InterceptEventArgs e)
+        [InterceptIn(nameof(Incoming.InventoryItems))]
+        protected void OnInventoryItems(InterceptEventArgs e)
         {
             try
             {
@@ -33,7 +33,8 @@ namespace Xabbo.Core.Tasks
 
                 e.Block();
 
-                inventory.AddRange(Inventory.ParseItems(packet));
+                foreach (var item in Inventory.ParseItems(packet))
+                    inventory.Add(item);
                 if (currentIndex == totalExpected)
                     SetResult(inventory);
             }

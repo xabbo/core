@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut("RequestPetInfo")]
+    [RequiredOut(nameof(Outgoing.RequestPetInfo))]
     public class GetPetInfoTask : InterceptorTask<PetInfo>
     {
         private readonly int petId;
@@ -18,8 +18,8 @@ namespace Xabbo.Core.Tasks
 
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestPetInfo);
 
-        [InterceptIn("PetInfo")]
-        private void HandlePetInfo(InterceptEventArgs e)
+        [InterceptIn(nameof(Incoming.PetInfo))]
+        protected void OnPetInfo(InterceptEventArgs e)
         {
             try
             {

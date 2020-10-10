@@ -17,8 +17,8 @@ namespace Xabbo.Core.Messages
             return methods;
         }
 
-        public IncomingHeaders Incoming { get; }
-        public OutgoingHeaders Outgoing { get; }
+        public Incoming Incoming { get; }
+        public Outgoing Outgoing { get; }
 
         public short this[Identifier identifier]
         {
@@ -35,11 +35,11 @@ namespace Xabbo.Core.Messages
 
         public Headers()
         {
-            Incoming = new IncomingHeaders();
-            Outgoing = new OutgoingHeaders();
+            Incoming = new Incoming();
+            Outgoing = new Outgoing();
         }
 
-        public Headers(IncomingHeaders incoming, OutgoingHeaders outgoing)
+        public Headers(Incoming incoming, Outgoing outgoing)
         {
             Incoming = incoming;
             Outgoing = outgoing;

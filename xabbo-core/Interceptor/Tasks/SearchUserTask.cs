@@ -5,6 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
+    [RequiredOut(nameof(Outgoing.SearchUser))]
     public class SearchUserTask : InterceptorTask<UserSearchResults>
     {
         private readonly string searchName;
@@ -17,8 +18,8 @@ namespace Xabbo.Core.Tasks
 
         protected override Task OnExecuteAsync() => SendAsync(Out.SearchUser, searchName);
 
-        [InterceptIn("UserSearchResult")]
-        private void OnUserSearchResult(InterceptEventArgs e)
+        [InterceptIn(nameof(Incoming.UserSearchResult))]
+        protected void OnUserSearchResult(InterceptEventArgs e)
         {
             try
             {

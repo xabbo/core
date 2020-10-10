@@ -5,8 +5,8 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut("RequestGuildMembers")]
-    public class GetGroupMembersTask : InterceptorTask<GroupMembers>
+    [RequiredOut(nameof(Outgoing.RequestGuildMembers))]
+    public class GetGroupMembersTask : InterceptorTask<IGroupMembers>
     {
         private readonly int groupId;
         private readonly int page;
@@ -24,8 +24,8 @@ namespace Xabbo.Core.Tasks
 
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestGuildMembers, groupId, page, filter, (int)searchType);
 
-        [InterceptIn("GuildMembers")]
-        private void OnGuildMember(InterceptEventArgs e)
+        [InterceptIn(nameof(Incoming.GuildMembers))]
+        protected void OnGuildMembers(InterceptEventArgs e)
         {
             try
             {

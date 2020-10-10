@@ -5,8 +5,8 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut("RequestRoomData")]
-    public class GetRoomDataTask : InterceptorTask<RoomData>
+    [RequiredOut(nameof(Outgoing.RequestRoomData))]
+    public class GetRoomDataTask : InterceptorTask<IRoomData>
     {
         private readonly int roomId;
 
@@ -18,8 +18,8 @@ namespace Xabbo.Core.Tasks
 
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestRoomData, roomId, 0, 0);
 
-        [InterceptIn("RoomData")]
-        private void OnRoomData(InterceptEventArgs e)
+        [InterceptIn(nameof(Incoming.RoomData))]
+        protected void OnRoomData(InterceptEventArgs e)
         {
             try
             {

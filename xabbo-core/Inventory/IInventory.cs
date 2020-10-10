@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Xabbo.Core
 {
-    public interface IInventory : IReadOnlyList<IInventoryItem>
+    public interface IInventory : IReadOnlyCollection<IInventoryItem>
     {
         /// <summary>
         /// Gets the floor items in the inventory.

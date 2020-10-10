@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace Xabbo.Core.Messages
 {
-    public sealed class OutgoingHeaders : HeaderDictionary
+    public sealed class Outgoing : HeaderDictionary
     {
-        public OutgoingHeaders()
+        public Outgoing()
             : base(Destination.Server)
         { }
 
-        public OutgoingHeaders(IDictionary<string, short> values)
+        public Outgoing(IDictionary<string, short> values)
             : base(Destination.Server, values)
         { }
 
