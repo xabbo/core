@@ -5,11 +5,11 @@ namespace Xabbo.Core.Events
 {
     public class FriendsEventArgs : EventArgs
     {
-        public IReadOnlyList<IFriendInfo> Friends { get; }
+        public IReadOnlyList<IFriend> Friends { get; }
 
-        public FriendsEventArgs(IEnumerable<IFriendInfo> friends)
+        public FriendsEventArgs(IEnumerable<IFriend> friends)
         {
-            Friends = new List<IFriendInfo>(friends).AsReadOnly();
+            Friends = new List<IFriend>(friends).AsReadOnly();
         }
     }
 }

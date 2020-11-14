@@ -29,10 +29,10 @@ namespace Xabbo.Core
 
         public TradeItem() { }
 
-        protected TradeItem(Packet packet)
+        protected TradeItem(IReadOnlyPacket packet)
         {
             ItemId = packet.ReadInt();
-            Type = H.ToFurniType(packet.ReadString());
+            Type = H.ToItemType(packet.ReadString());
             Id = packet.ReadInt();
             Kind = packet.ReadInt();
             Category = (FurniCategory)packet.ReadInt();
@@ -48,9 +48,9 @@ namespace Xabbo.Core
                 Extra = -1;
         }
 
-        public static TradeItem Parse(Packet packet) => new TradeItem(packet);
+        public static TradeItem Parse(IReadOnlyPacket packet) => new TradeItem(packet);
 
-        public void Write(Packet packet)
+        public void Write(IPacket packet)
         {
             packet.WriteInt(ItemId);
             packet.WriteString(Type.ToShortString());

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 using Xabbo.Core.Protocol;
@@ -7,12 +8,16 @@ namespace Xabbo.Core
 {
     public class FloorPlan : IFloorPlan
     {
-        public int Scale { get; set; }
+        public string OriginalString { get; }
+
+        public bool UseLegacyScale { get; set; }
+        public int Scale => UseLegacyScale ? 32 : 64;
         public int WallHeight { get; set; }
         public int Width { get; set; }
         public int Length { get; set; }
 
         private readonly int[] tiles;
+        public IReadOnlyList<int> Tiles => tiles;
 
         public int this[int x, int y]
         {
@@ -28,7 +33,9 @@ namespace Xabbo.Core
 
         protected FloorPlan(string map)
         {
-            Scale = 64;
+            OriginalString = map;
+
+            UseLegacyScale = false;
             WallHeight = -1;
 
             tiles = ParseString(map, out int width, out int length);
@@ -36,17 +43,14 @@ namespace Xabbo.Core
             Length = length;
         }
 
-        protected FloorPlan(Packet packet)
+        protected FloorPlan(IReadOnlyPacket packet)
         {
-            if (packet.ReadBool())
-                Scale = 32;
-            else
-                Scale = 64;
+            UseLegacyScale = packet.ReadBool();
 
             WallHeight = packet.ReadInt();
-            string map = packet.ReadString();
+            OriginalString = packet.ReadString();
 
-            tiles = ParseString(map, out int width, out int length);
+            tiles = ParseString(OriginalString, out int width, out int length);
             Width = width;
             Length = length;
         }
@@ -57,20 +61,41 @@ namespace Xabbo.Core
                 throw new ArgumentOutOfRangeException("x");
             if (y < 0 || y >= Length)
                 throw new ArgumentOutOfRangeException("y");
+
             return tiles[y * Width + x];
         }
+        public int GetHeight((int X, int Y) location) => GetHeight(location.X, location.Y);
+        public int GetHeight(Tile tile) => GetHeight(tile.X, tile.Y);
 
         public void SetHeight(int x, int y, int height)
         {
-            if (height < 0) throw new ArgumentOutOfRangeException("height");
+            if (x < 0 || x >= Width)
+                throw new ArgumentOutOfRangeException("x");
+            if (y < 0 || y >= Length)
+                throw new ArgumentOutOfRangeException("y");
+            if (height < -1)
+                throw new ArgumentOutOfRangeException("height");
+
             tiles[y * Width + x] = height;
         }
+        public void SetHeight((int X, int Y) location, int height) => SetHeight(location.X, location.Y, height);
+        public void SetHeight(Tile location, int height) => SetHeight(location.X, location.Y, height);
 
         public bool IsWalkable(int x, int y)
         {
             if (x < 0 || x >= Width || y < 0 || y >= Length)
                 return false;
+
             return GetHeight(x, y) >= 0;
+        }
+        public bool IsWalkable((int X, int Y) location) => IsWalkable(location.X, location.Y);
+        public bool IsWalkable(Tile location) => IsWalkable(location.X, location.Y);
+
+        public void Write(IPacket packet)
+        {
+            packet.WriteBool(UseLegacyScale);
+            packet.WriteInt(WallHeight);
+            packet.WriteString(ToString());
         }
 
         public override string ToString()
@@ -79,7 +104,7 @@ namespace Xabbo.Core
 
             for (int y = 0; y < Length; y++)
             {
-                if (y > 0) sb.Append('\n');
+                if (y > 0) sb.Append('\r');
                 for (int x = 0; x < Width; x++)
                 {
                     sb.Append(H.GetCharacterFromHeight(tiles[y * Width + x]));
@@ -89,7 +114,7 @@ namespace Xabbo.Core
             return sb.ToString();
         }
 
-        public static FloorPlan Parse(Packet packet) => new FloorPlan(packet);
+        public static FloorPlan Parse(IReadOnlyPacket packet) => new FloorPlan(packet);
 
         public static FloorPlan Parse(string map) => new FloorPlan(map);
 

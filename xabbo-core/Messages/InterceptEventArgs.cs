@@ -35,8 +35,8 @@ namespace Xabbo.Core.Messages
             }
         }
 
-        private Packet packet;
-        public Packet Packet
+        private IPacket packet;
+        public IPacket Packet
         {
             get => packet;
             set
@@ -47,7 +47,7 @@ namespace Xabbo.Core.Messages
             }
         }
 
-        public InterceptEventArgs(Destination destination, Packet packet, int step)
+        public InterceptEventArgs(Destination destination, IPacket packet, int step)
         {
             Time = DateTime.Now;
 
@@ -62,7 +62,7 @@ namespace Xabbo.Core.Messages
 
         public void Block() => IsBlocked = true;
 
-        public Packet GetOriginalPacket()
+        public IPacket GetOriginalPacket()
         {
             return new Packet(originalData, false) { Header = originalHeader };
         }

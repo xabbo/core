@@ -11,9 +11,15 @@ namespace Xabbo.Core.Tasks
         private int totalExpected = -1, currentIndex = 0;
         private readonly Inventory inventory = new Inventory();
 
-        public GetInventoryTask(IInterceptor interceptor)
+        private readonly bool _block;
+
+        public GetInventoryTask(IInterceptor interceptor, bool blockPackets)
             : base(interceptor)
-        { }
+        {
+            _block = blockPackets;
+        }
+
+        public GetInventoryTask(IInterceptor interceptor) : this(interceptor, true) { }
 
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestInventoryItems);
 
@@ -31,7 +37,8 @@ namespace Xabbo.Core.Tasks
                 else if (total != totalExpected) return;
                 currentIndex++;
 
-                e.Block();
+                if (_block)
+                    e.Block();
 
                 foreach (var item in Inventory.ParseItems(packet))
                     inventory.Add(item);

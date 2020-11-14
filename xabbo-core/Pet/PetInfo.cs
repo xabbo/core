@@ -5,9 +5,9 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-	public class PetInfo : IWritable
+	public class PetInfo : IPacketData
     {
-		public static PetInfo Parse(Packet packet) => new PetInfo(packet);
+		public static PetInfo Parse(IReadOnlyPacket packet) => new PetInfo(packet);
 
 		public int Id { get; set; }
 		public string Name { get; set; }
@@ -42,7 +42,7 @@ namespace Xabbo.Core
 			IntsA = new List<int>();
 		}
 
-		internal PetInfo(Packet packet)
+		protected PetInfo(IReadOnlyPacket packet)
 			: base()
 		{
 			Id = packet.ReadInt();
@@ -78,7 +78,7 @@ namespace Xabbo.Core
 			BoolF = packet.ReadBool();
 		}
 
-		public void Write(Packet packet)
+		public void Write(IPacket packet)
 		{
 			packet.WriteInt(Id);
 			packet.WriteString(Name);

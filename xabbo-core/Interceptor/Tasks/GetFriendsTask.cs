@@ -7,10 +7,10 @@ using Xabbo.Core.Messages;
 namespace Xabbo.Core.Tasks
 {
     [RequiredOut("RequestInitFriends")]
-    public class GetFriendsTask : InterceptorTask<List<FriendInfo>>
+    public class GetFriendsTask : InterceptorTask<List<Friend>>
     {
         private int totalExpected = -1, currentIndex = 0;
-        private readonly List<FriendInfo> friends = new List<FriendInfo>();
+        private readonly List<Friend> friends = new List<Friend>();
 
         public GetFriendsTask(IInterceptor interceptor)
             : base(interceptor)
@@ -38,7 +38,7 @@ namespace Xabbo.Core.Tasks
 
                 int n = e.Packet.ReadInt();
                 for (int i = 0; i < n; i++)
-                    friends.Add(FriendInfo.Parse(e.Packet));
+                    friends.Add(Friend.Parse(e.Packet));
 
                 if (currentIndex == total)
                     SetResult(friends);

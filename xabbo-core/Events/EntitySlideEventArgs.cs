@@ -4,9 +4,9 @@ namespace Xabbo.Core.Events
 {
     public class EntitySlideEventArgs : EntityEventArgs
     {
-        public ITile PreviousTile { get; set; }
+        public Tile PreviousTile { get; set; }
 
-        public EntitySlideEventArgs(IEntity entity, ITile previousTile)
+        public EntitySlideEventArgs(IEntity entity, Tile previousTile)
             : base(entity)
         {
             PreviousTile = previousTile;

@@ -6,9 +6,9 @@ namespace Xabbo.Core
 {
     public class CatalogProduct : ICatalogProduct
     {
-        public static CatalogProduct Parse(Packet packet) => new CatalogProduct(packet);
+        public static CatalogProduct Parse(IReadOnlyPacket packet) => new CatalogProduct(packet);
 
-        public string Type { get; set; }
+        public ItemType Type { get; set; }
         public int Kind { get; set; }
         public string Variation { get; set; }
         public int Count { get; set; }
@@ -16,12 +16,16 @@ namespace Xabbo.Core
         public int LimitedTotal { get; set; }
         public int LimitedRemaining { get; set; }
 
+        public bool IsFloorItem => Type == ItemType.Floor;
+        public bool IsWallItem => Type == ItemType.Wall;
+        int IItem.Id => -1;
+
         public CatalogProduct() { }
 
-        internal CatalogProduct(Packet packet)
+        protected CatalogProduct(IReadOnlyPacket packet)
         {
-            Type = packet.ReadString();
-            if (Type.ToLower().Equals("b"))
+            Type = H.ToItemType(packet.ReadString());
+            if (Type == ItemType.Badge)
             {
                 Variation = packet.ReadString();
                 Count = 0;

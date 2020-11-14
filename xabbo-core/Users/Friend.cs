@@ -1,12 +1,12 @@
 ﻿using System;
-
+using Xabbo.Core;
 using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class FriendInfo : IFriendInfo, IWritable
+    public class Friend : IFriend
     {
-        public static FriendInfo Parse(Packet packet) => new FriendInfo(packet);
+        public static Friend Parse(IReadOnlyPacket packet) => new Friend(packet);
 
         public int Id { get; set; }
         public string Name { get; set; }
@@ -23,9 +23,9 @@ namespace Xabbo.Core
         public bool IsPocketHabboUser { get; set; }
         public Relation Relation { get; set; }
 
-        public FriendInfo() { }
+        public Friend() { }
 
-        protected FriendInfo(Packet packet)
+        protected Friend(IReadOnlyPacket packet)
         {
             Id = packet.ReadInt();
             Name = packet.ReadString();
@@ -43,24 +43,23 @@ namespace Xabbo.Core
             Relation = (Relation)packet.ReadShort();
         }
 
-        void IWritable.Write(Packet packet)
-        {
-            packet.WriteValues(
-                Id,
-                Name,
-                Gender.GetValue(),
-                IsOnline,
-                CanFollow,
-                FigureString,
-                Category,
-                Motto,
-                RealName,
-                String5,
-                IsAcceptingOfflineMessages,
-                Bool4,
-                IsPocketHabboUser,
-                (short)Relation
-            );
-        }
+        public void Write(IPacket packet) => packet.WriteValues(
+            Id,
+            Name,
+            Gender.GetValue(),
+            IsOnline,
+            CanFollow,
+            FigureString,
+            Category,
+            Motto,
+            RealName,
+            String5,
+            IsAcceptingOfflineMessages,
+            Bool4,
+            IsPocketHabboUser,
+            (short)Relation
+        );
+
+        public override string ToString() => $"{Name} (id:{Id})";
     }
 }

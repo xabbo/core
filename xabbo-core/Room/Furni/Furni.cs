@@ -16,12 +16,14 @@ namespace Xabbo.Core
         public int OwnerId { get; set; }
         public string OwnerName { get; set; }
 
-        public int State { get; set; }
+        public abstract int State { get; }
 
         public int SecondsToExpiration { get; set; }
         public FurniUsage Usage { get; set; }
 
-        public abstract void Write(Packet packet);
-        public abstract void Write(Packet packet, bool writeName = true);
+        public bool IsHidden { get; set; }
+
+        public abstract void Write(IPacket packet);
+        public abstract void Write(IPacket packet, bool writeName = true);
     }
 }

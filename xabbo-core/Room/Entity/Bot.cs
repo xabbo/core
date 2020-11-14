@@ -30,7 +30,7 @@ namespace Xabbo.Core
             Data = new List<short>();
         }
 
-        public Bot(EntityType type, int id, int index, Packet packet)
+        public Bot(EntityType type, int id, int index, IReadOnlyPacket packet)
             : this(type, id, index)
         {
             if (type == EntityType.PrivateBot)
@@ -45,7 +45,7 @@ namespace Xabbo.Core
             }
         }
 
-        public override void Write(Packet packet)
+        public override void Write(IPacket packet)
         {
             base.Write(packet);
 

@@ -45,7 +45,7 @@ namespace Xabbo.Core.Messages
             Outgoing = outgoing;
         }
 
-        public void Load(IDictionary<string, short> incoming, IDictionary<string, short> outgoing)
+        public void Load(IReadOnlyDictionary<string, short> incoming, IReadOnlyDictionary<string, short> outgoing)
         {
             Incoming.Load(incoming);
             Outgoing.Load(outgoing);
@@ -69,6 +69,9 @@ namespace Xabbo.Core.Messages
 
         public bool TryGetHeader(Destination destination, string identifier, out Header header)
             => GetDictionary(destination).TryGetHeader(identifier, out header);
+
+        public bool TryGetHeader(Destination destination, short id, out Header header)
+            => GetDictionary(destination).TryGetHeader(id, out header);
 
         public bool IsResolved(Destination destination, string identifier)
         {

@@ -1,13 +1,21 @@
 ﻿using System;
 
+using Xabbo.Core.Components;
+using Xabbo.Core.Protocol;
+
 namespace Xabbo.Core
 {
-    public interface IEntity
+    public interface IEntity : IPacketData
     {
         /// <summary>
         /// Gets if the entity has been removed from the room.
         /// </summary>
         bool IsRemoved { get; }
+
+        /// <summary>
+        /// Gets if the entity is hidden client-side by the <see cref="EntityManager" />.
+        /// </summary>
+        bool IsHidden { get; }
 
         /// <summary>
         /// Gets the type of the entity.
@@ -42,7 +50,7 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the location of the entity.
         /// </summary>
-        ITile Location { get; }
+        Tile Location { get; }
 
         /// <summary>
         /// Gets the X coordinate of the entity.
@@ -63,6 +71,11 @@ namespace Xabbo.Core
         /// Gets the Z coordinate of the entity.
         /// </summary>
         double Z { get; }
+
+        /// <summary>
+        /// Gets the XYZ coordinates of the entity.
+        /// </summary>
+        (int X, int Y, double Z) XYZ { get; }
 
         /// <summary>
         /// Gets the direction of the entity.

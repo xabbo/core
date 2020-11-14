@@ -70,11 +70,11 @@ namespace Xabbo.Core.Messages
                 case 1:
                     return
                         parameters[0].ParameterType.Equals(typeof(object)) ||
-                        parameters[0].ParameterType.Equals(typeof(Packet));
+                        parameters[0].ParameterType.Equals(typeof(IReadOnlyPacket));
                 case 2:
                     return
                         parameters[0].ParameterType.Equals(typeof(object)) &&
-                        parameters[1].ParameterType.Equals(typeof(Packet));
+                        parameters[1].ParameterType.Equals(typeof(IReadOnlyPacket));
                 default: return false;
             }
         }
@@ -91,7 +91,7 @@ namespace Xabbo.Core.Messages
                 parameters.All(param => IsValidParameter(param));
         }
 
-        public void DispatchMessage(object sender, Packet packet)
+        public void DispatchMessage(object sender, IReadOnlyPacket packet)
         {
             IReadOnlyList<ReceiveCallback> list;
 
@@ -104,7 +104,7 @@ namespace Xabbo.Core.Messages
                 InvokeReceiverCallbacks(list, sender, packet);
         }
 
-        private void InvokeReceiverCallbacks(IEnumerable<ReceiveCallback> callbacks, object sender, Packet packet)
+        private void InvokeReceiverCallbacks(IEnumerable<ReceiveCallback> callbacks, object sender, IReadOnlyPacket packet)
         {
             short header = packet.Header;
 
@@ -123,8 +123,8 @@ namespace Xabbo.Core.Messages
                     string messageName = Headers.Incoming.TryGetIdentifier(header, out string name) ? $"'{name}' ({header})" : $"{header}";
                     Debug.WriteLine(
                         $"[MessageDispatcher] Unhandled exception occurred in receiver method " +
-                        $"{callback.Target.GetType().FullName}.{callback.Method.Name} " +
-                        // TODO the method name here is incorrect due to being generated
+                        $"{callback.Delegate.Target.GetType().FullName}.{callback.Delegate.Method.Name} " +
+                        // TODO the method name here is incorrect due to being generated. FIXED with .Delegate ?
                         $"for message {messageName}: {ex.Message}\r\n{ex.StackTrace}"
                     );
                 }
@@ -169,7 +169,7 @@ namespace Xabbo.Core.Messages
         }
 
         #region - Handlers -
-        public bool AddHandler(Header header, Action<object, Packet> handler)
+        public bool AddHandler(Header header, Action<object, IReadOnlyPacket> handler)
         {
             if (handler == null)
                 throw new ArgumentNullException("handler");
@@ -201,7 +201,7 @@ namespace Xabbo.Core.Messages
             return result;
         }
 
-        public bool RemoveHandler(Header header, Action<object, Packet> handler)
+        public bool RemoveHandler(Header header, Action<object, IReadOnlyPacket> handler)
         {
             if (handler == null)
                 throw new ArgumentNullException("handler");

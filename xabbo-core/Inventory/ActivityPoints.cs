@@ -8,7 +8,7 @@ namespace Xabbo.Core
 {
     public class ActivityPoints : IReadOnlyDictionary<ActivityPointType, int>
     {
-        public static ActivityPoints Parse(Packet packet) => new ActivityPoints(packet);
+        public static ActivityPoints Parse(IReadOnlyPacket packet) => new ActivityPoints(packet);
 
         private readonly Dictionary<ActivityPointType, int> dictionary = new Dictionary<ActivityPointType, int>();
 
@@ -37,7 +37,7 @@ namespace Xabbo.Core
 
         public ActivityPoints() { }
 
-        internal ActivityPoints(Packet packet)
+        protected ActivityPoints(IReadOnlyPacket packet)
         {
             int n = packet.ReadInt();
             for (int i = 0; i < n; i++)

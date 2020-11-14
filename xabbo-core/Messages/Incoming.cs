@@ -9,7 +9,7 @@ namespace Xabbo.Core.Messages
             : base(Destination.Client)
         { }
 
-        public Incoming(IDictionary<string, short> values)
+        public Incoming(IReadOnlyDictionary<string, short> values)
             : base(Destination.Client, values)
         { }
 
@@ -361,6 +361,7 @@ namespace Xabbo.Core.Messages
         public Header SimplePollAnswer { get; private set; }
         public Header SimplePollAnswers { get; private set; }
         public Header SimplePollStart { get; private set; }
+        public Header SpectatingRoom { get; private set; }
         public Header StaffAlertAndOpenHabboWay { get; private set; }
         public Header StaffAlertWIthLinkAndOpenHabboWay { get; private set; }
         public Header StaffAlertWithLink { get; private set; }

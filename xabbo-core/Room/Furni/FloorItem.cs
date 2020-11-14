@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Newtonsoft.Json;
 
@@ -9,10 +10,10 @@ namespace Xabbo.Core
 {
     public class FloorItem : Furni, IFloorItem
     {
-        public static FloorItem Parse(Packet packet, bool readName = true) => new FloorItem(packet, readName);
-        public static FloorItem ParseUpdate(Packet packet) => new FloorItem(packet, false);
+        public static FloorItem Parse(IReadOnlyPacket packet, bool readName = true) => new FloorItem(packet, readName);
+        public static FloorItem ParseUpdate(IReadOnlyPacket packet) => new FloorItem(packet, false);
 
-        public static FloorItem[] ParseAll(Packet packet)
+        public static FloorItem[] ParseAll(IReadOnlyPacket packet)
         {
             var ownerDictionary = new Dictionary<int, string>();
 
@@ -32,47 +33,68 @@ namespace Xabbo.Core
             return items;
         }
 
+        public static void WriteAll(IPacket packet, IEnumerable<IFloorItem> items)
+        {
+            var ownerIds = new HashSet<int>();
+            var ownerDictionary = items
+                .Where(x => ownerIds.Add(x.OwnerId))
+                .ToDictionary(
+                    key => key.OwnerId,
+                    val => val.OwnerName
+                );
+
+            packet.WriteInt(ownerDictionary.Count);
+            foreach (var pair in ownerDictionary)
+            {
+                packet.WriteInt(pair.Key);
+                packet.WriteString(pair.Value);
+            }
+
+            packet.WriteInt(items.Count());
+            foreach (var item in items)
+                item.Write(packet, false);
+        }
+
+        public static void WriteAll(IPacket packet, params FloorItem[] items) => WriteAll(packet, (IEnumerable<IFloorItem>)items);
+
         public override ItemType Type => ItemType.Floor;
 
         public Tile Location { get; set; }
-        ITile IFloorItem.Location => Location;
         [JsonIgnore] public int X => Location.X;
         [JsonIgnore] public int Y => Location.Y;
+        [JsonIgnore] public (int X, int Y) XY => Location.XY;
         [JsonIgnore] public double Z => Location.Z;
+        [JsonIgnore] public (int X, int Y, double Z) XYZ => Location.XYZ;
         public int Direction { get; set; }
         public double Height { get; set; }
         public int Extra { get; set; }
 
-        private ItemData _data;
+        private ItemData data;
         public ItemData Data
         {
-            get => _data;
+            get => data;
             set
             {
-                _data = value;
-
-                if (!string.IsNullOrWhiteSpace(_data?.LegacyString) &&
-                    double.TryParse(_data.LegacyString, out double state))
-                {
-                    State = (int)state;
-                }
-                else
-                    State = -1;
+                if (value is null)
+                    throw new ArgumentNullException("Data");
+                data = value;
             }
         }
         IItemData IFloorItem.Data => Data;
+
+        public override int State => double.TryParse(data.LegacyString, out double state) ? (int)state : -1;
 
         public string UnknownStringA { get; set; }
 
         public FloorItem()
         {
-            Location = new Tile();
+            Location = Tile.Zero;
             Data = new LegacyData();
             SecondsToExpiration = -1;
             Usage = FurniUsage.None;
         }
 
-        private FloorItem(Packet packet, bool readName)
+        protected FloorItem(IReadOnlyPacket packet, bool readName)
         {
             Id = packet.ReadInt();
             Kind = packet.ReadInt();
@@ -99,26 +121,25 @@ namespace Xabbo.Core
                 OwnerName = packet.ReadString();
         }
 
-        public override void Write(Packet packet) => Write(packet, true);
+        public override void Write(IPacket packet) => Write(packet, true);
 
-        public override void Write(Packet packet, bool writeName)
+        public override void Write(IPacket packet, bool writeOwnerName = true)
         {
-            packet.WriteValues(
-                Id,
-                Kind,
-                Location.X,
-                Location.Y,
-                Direction,
-                Location.Z,
-                Height,
-                Extra,
-                Data,
-                SecondsToExpiration,
-                (int)Usage,
-                OwnerId
-            );
+            packet.WriteInt(Id);
+            packet.WriteInt(Kind);
+            packet.WriteInt(Location.X);
+            packet.WriteInt(Location.Y);
+            packet.WriteInt(Direction);
+            packet.WriteDouble(Location.Z);
+            packet.WriteDouble(Height);
+            packet.WriteInt(Extra);
+            Data.Write(packet);
+            packet.WriteInt(SecondsToExpiration);
+            packet.WriteInt((int)Usage);
+            packet.WriteInt(OwnerId);
+
             if (Kind < 0) packet.WriteString(UnknownStringA);
-            if (writeName) packet.WriteString(OwnerName);
+            if (writeOwnerName) packet.WriteString(OwnerName);
         }
     }
 }

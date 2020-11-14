@@ -10,6 +10,8 @@ namespace Xabbo.Core
     /// </summary>
     public class UserProfile : IUserProfile
     {
+        public static UserProfile Parse(IReadOnlyPacket packet) => new UserProfile(packet);
+
         public int Id { get; set; }
         public string Name { get; set; }
         public string Figure { get; set; }
@@ -30,31 +32,42 @@ namespace Xabbo.Core
             Groups = new List<GroupInfo>();
         }
 
-        public static UserProfile Parse(Packet packet)
+        protected UserProfile(IReadOnlyPacket packet)
+            : this()
         {
-            var profile = new UserProfile();
-
-            profile.Id = packet.ReadInt();
-            profile.Name = packet.ReadString();
-            profile.Figure = packet.ReadString();
-            profile.Motto = packet.ReadString();
-            profile.Created = packet.ReadString();
-            profile.ActivityPoints = packet.ReadInt();
-            profile.Friends = packet.ReadInt();
-            profile.IsFriend = packet.ReadBool();
-            profile.IsFriendRequestSent = packet.ReadBool();
-            profile.IsOnline = packet.ReadBool();
+            Id = packet.ReadInt();
+            Name = packet.ReadString();
+            Figure = packet.ReadString();
+            Motto = packet.ReadString();
+            Created = packet.ReadString();
+            ActivityPoints = packet.ReadInt();
+            Friends = packet.ReadInt();
+            IsFriend = packet.ReadBool();
+            IsFriendRequestSent = packet.ReadBool();
+            IsOnline = packet.ReadBool();
 
             int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
-            {
-                profile.Groups.Add(GroupInfo.Parse(packet));
-            }
+                Groups.Add(GroupInfo.Parse(packet));
 
-            profile.LastLogin = TimeSpan.FromSeconds(packet.ReadInt());
-            profile.DisplayInClient = packet.ReadBool();
-
-            return profile;
+            LastLogin = TimeSpan.FromSeconds(packet.ReadInt());
+            DisplayInClient = packet.ReadBool();
         }
+
+        public void Write(IPacket packet) => packet.WriteValues(
+            Id,
+            Name,
+            Figure,
+            Motto,
+            Created,
+            ActivityPoints,
+            Friends,
+            IsFriend,
+            IsFriendRequestSent,
+            IsOnline,
+            Groups,
+            (int)LastLogin.TotalSeconds,
+            DisplayInClient
+        );
     }
 }

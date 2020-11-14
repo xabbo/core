@@ -6,7 +6,7 @@ namespace Xabbo.Core
 {
     public class CatalogPageData : ICatalogPageData
     {
-        public static CatalogPageData Parse(Packet packet) => new CatalogPageData(packet);
+        public static CatalogPageData Parse(IReadOnlyPacket packet) => new CatalogPageData(packet);
 
         public int Position { get; set; }
         public string String1 { get; set; }
@@ -19,7 +19,7 @@ namespace Xabbo.Core
 
         public CatalogPageData() { }
 
-        internal CatalogPageData(Packet packet)
+        protected CatalogPageData(IReadOnlyPacket packet)
         {
             Position = packet.ReadInt();
             String1 = packet.ReadString();

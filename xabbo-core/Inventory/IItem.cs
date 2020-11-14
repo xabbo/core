@@ -18,15 +18,5 @@ namespace Xabbo.Core
         /// Gets the ID of the item.
         /// </summary>
         int Id { get; }
-
-        /// <summary>
-        /// Gets if the item is a floor item or not.
-        /// </summary>
-        bool IsFloorItem { get; }
-
-        /// <summary>
-        /// Gets if the item is a wall item or not.
-        /// </summary>
-        bool IsWallItem { get; }
     }
 }

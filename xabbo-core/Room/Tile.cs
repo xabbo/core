@@ -5,19 +5,15 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class Tile : ITile, IWritable
+    public struct Tile : IPacketData
     {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public double Z { get; set; }
+        public static readonly Tile Zero = new Tile(0, 0, 0);
 
+        public int X { get; }
+        public int Y { get; }
+        public double Z { get; }
         public (int X, int Y) XY => (X, Y);
-
-        public Tile() { }
-
-        public Tile(int x, int y)
-            : this(x, y, 0)
-        { }
+        public (int X, int Y, double Z) XYZ => (X, Y, Z);
 
         public Tile(int x, int y, double z)
         {
@@ -26,12 +22,24 @@ namespace Xabbo.Core
             Z = z;
         }
 
-        public void Write(Packet packet)
+        public Tile(int x, int y)
+            : this(x, y, 0)
+        { }
+
+        public void Write(IPacket packet)
         {
             packet.WriteInt(X);
             packet.WriteInt(Y);
             packet.WriteString(Z.ToString());
         }
+
+        public Tile Add(int x, int y) => Add(x, y, 0);
+        public Tile Add(int x, int y, double z) => new Tile(X + x, Y + y, Z + z);
+        public Tile Add(Tile other) => Add(other.X, other.Y, other.Z);
+
+        public Tile Subtract(int x, int y) => Subtract(x, y, 0);
+        public Tile Subtract(int x, int y, double z) => new Tile(X - x, Y - y, Z - z);
+        public Tile Subtract(Tile other) => Subtract(other.X, other.Y, other.Z);
 
         public override int GetHashCode() => (X, Y, Z).GetHashCode();
 
@@ -62,64 +70,58 @@ namespace Xabbo.Core
                 Math.Abs(location.Z - Z) < epsilon;
         }
 
-        public bool Equals(Tile other, double epsilon = XabboConst.DEFAULT_EPSILON)
+        public bool Equals((int X, int Y, int Z) location, double epsilon = XabboConst.DEFAULT_EPSILON)
         {
             return
-                other != null &&
-                X == other.X &&
-                Y == other.Y &&
-                Math.Abs(Z - other.Z) < epsilon;
+                X == location.X &&
+                Y == location.Y &&
+                Math.Abs(location.Z - Z) < epsilon;
         }
 
-        public static Tile Parse(Packet packet) => new Tile(
-            packet.ReadInt(),
-            packet.ReadInt(),
-            packet.ReadDouble()
-        );
+        public bool Equals(Tile other, double epsilon = XabboConst.DEFAULT_EPSILON) => Equals(other.XYZ, epsilon);
 
-        public static Tile Parse(string format)
-        {
-            var split = format.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            if (split.Length != 3)
-                throw new FormatException($"Tile format string is invalid: '{format}'");
+        public override string ToString() => $"{X},{Y},{Z:0.0###############}";
 
-            int x, y;
-            double z;
-
-            if (!int.TryParse(split[0], out x))
-                throw new FormatException($"The x value of the tile format string is invalid: '{format}'");
-            if (!int.TryParse(split[1], out y))
-                throw new FormatException($"The y value of the tile format string is invalid: {format}");
-            if (!double.TryParse(split[2], NumberStyles.Float, CultureInfo.InvariantCulture, out z))
-                throw new FormatException($"The z value of the tile format string is invalid: {format}");
-
-            return new Tile(x, y, z);
-        }
-
-        public override string ToString() => $"{X}, {Y}, {Z}";
-
-        public static bool operator ==(Tile a, Tile b)
-        {
-            if (a is null)
-                return b is null;
-            else
-                return a.Equals(b);
-        }
+        public static bool operator ==(Tile a, Tile b) => a.Equals(b);
         public static bool operator !=(Tile a, Tile b) => !(a == b);
 
         public static bool operator ==(Tile tile, (int X, int Y) location) => tile.Equals(location);
         public static bool operator !=(Tile tile, (int X, int Y) location) => !tile.Equals(location);
 
         public static bool operator ==(Tile tile, (int X, int Y, double Z) location) => tile.Equals(location);
+        public static bool operator ==(Tile tile, (int X, int Y, int Z) location) => tile.Equals(location);
         public static bool operator !=(Tile tile, (int X, int Y, double Z) location) => !tile.Equals(location);
+        public static bool operator !=(Tile tile, (int X, int Y, int Z) location) => !tile.Equals(location);
 
-        public static Tile operator +(Tile a, Tile b) => new Tile(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
-        public static Tile operator -(Tile a, Tile b) => new Tile(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+        public static Tile operator +(Tile location, (int X, int Y) offset) => location.Add(offset.X, offset.Y);
+        public static Tile operator +(Tile location, (int X, int Y, int Z) offset) => location.Add(offset.X, offset.Y, offset.Z);
+        public static Tile operator +(Tile location, (int X, int Y, double Z) offset) => location.Add(offset.X, offset.Y, offset.Z);
+        public static Tile operator +(Tile a, Tile b) => a.Add(b);
 
-        public static implicit operator Tile((int X, int Y) location) => new Tile(location.X, location.Y, 0.0);
-        public static implicit operator (int X, int Y)(Tile tile) => (tile.X, tile.Y);
+        public static Tile operator -(Tile location, (int X, int Y) offset) => location.Subtract(offset.X, offset.Y);
+        public static Tile operator -(Tile location, (int X, int Y, int Z) offset) => location.Subtract(offset.X, offset.Y, offset.Z);
+        public static Tile operator -(Tile location, (int X, int Y, double Z) offset) => location.Subtract(offset.X, offset.Y, offset.Z);
+        public static Tile operator -(Tile a, Tile b) => a.Subtract(b);
 
         public static implicit operator Tile((int X, int Y, double Z) location) => new Tile(location.X, location.Y, location.Z);
         public static implicit operator (int X, int Y, double Z)(Tile tile) => (tile.X, tile.Y, tile.Z);
+
+        public static implicit operator Tile((int X, int Y) location) => new Tile(location.X, location.Y);
+        public static implicit operator (int X, int Y)(Tile tile) => (tile.X, tile.Y);
+
+        public static Tile Parse(IReadOnlyPacket packet) => new Tile(packet.ReadInt(), packet.ReadInt(), packet.ReadDouble());
+        public static Tile Parse(string format)
+        {
+            var split = format.Split(',');
+            if (split.Length != 3 ||
+                !int.TryParse(split[0], out int x) ||
+                !int.TryParse(split[1], out int y) ||
+                !double.TryParse(split[2], NumberStyles.Float, CultureInfo.InvariantCulture, out double z))
+            {
+                throw new FormatException($"Invalid tile format: '{format}'");
+            }
+
+            return new Tile(x, y, z);
+        }
     }
 }

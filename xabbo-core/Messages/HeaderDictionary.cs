@@ -27,7 +27,7 @@ namespace Xabbo.Core.Messages
             InitializeProperties();
         }
 
-        public HeaderDictionary(Destination destination, IDictionary<string, short> values)
+        public HeaderDictionary(Destination destination, IReadOnlyDictionary<string, short> values)
             : this(destination)
         {
             if (values == null) throw new ArgumentNullException("values");
@@ -77,7 +77,7 @@ namespace Xabbo.Core.Messages
             }
         }
 
-        public void Load(IDictionary<string, short> values)
+        public void Load(IReadOnlyDictionary<string, short> values)
         {
             var identifierSet = new HashSet<string>();
             var headerSet = new HashSet<short>();
@@ -136,6 +136,13 @@ namespace Xabbo.Core.Messages
                 name = header.Name;
                 return true;
             }
+            finally { _lock.ExitReadLock(); }
+        }
+
+        public bool TryGetHeader(short id, out Header header)
+        {
+            _lock.EnterReadLock();
+            try { return _valueMap.TryGetValue(id, out header); }
             finally { _lock.ExitReadLock(); }
         }
 

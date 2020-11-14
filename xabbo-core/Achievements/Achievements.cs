@@ -33,7 +33,7 @@ namespace Xabbo.Core
             _dict = new ConcurrentDictionary<int, Achievement>();
         }
 
-        internal Achievements(IReadOnlyPacket packet)
+        protected Achievements(IReadOnlyPacket packet)
             : this()
         {
             int n = packet.ReadInt();

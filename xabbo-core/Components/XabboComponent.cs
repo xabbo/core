@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+
 using Xabbo.Core.Messages;
 using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Components
 {
-    public abstract class XabboComponent : INotifyPropertyChanged, IListener
+    public abstract class XabboComponent : INotifyPropertyChanged, IListener, IDisposable
     {
         public static IEnumerable<Type> GetCoreComponentTypes()
         {
@@ -33,6 +34,8 @@ namespace Xabbo.Core.Components
         }
         #endregion
 
+        private bool isInitialized;
+
         public ComponentManager Manager { get; internal set; }
 
         private bool isAvailable;
@@ -51,15 +54,26 @@ namespace Xabbo.Core.Components
 
         protected T GetComponent<T>() where T : XabboComponent => Manager.GetComponent<T>();
 
-        internal void Initialize() => OnInitialize();
+        internal void Initialize()
+        {
+            if (isInitialized)
+                throw new InvalidOperationException($"The component {GetType().FullName} has already been initialized");
+            isInitialized = true;
 
-        protected internal virtual bool CheckAvailability() => true;
+            OnInitialize();
+        }
+        internal bool CheckAvailability() => OnCheckAvailability();
+
+        protected virtual bool OnCheckAvailability() => true;
         protected abstract void OnInitialize();
 
-        protected Task SendAsync(short header, params object[] values) => Interceptor.SendToServerAsync(header, values);
-        protected Task SendAsync(Packet packet) => Interceptor.SendToServerAsync(packet);
+        protected Task SendAsync(Header header, params object[] values) => Interceptor.SendToServerAsync(header, values);
+        protected Task SendAsync(IReadOnlyPacket packet) => Interceptor.SendToServerAsync(packet);
 
-        protected Task SendLocalAsync(short header, params object[] values) => Interceptor.SendToClientAsync(header, values);
-        protected Task SendLocalAsync(Packet packet) => Interceptor.SendToClientAsync(packet);
+        protected Task SendLocalAsync(Header header, params object[] values) => Interceptor.SendToClientAsync(header, values);
+        protected Task SendLocalAsync(IReadOnlyPacket packet) => Interceptor.SendToClientAsync(packet);
+
+        protected virtual void Dispose(bool disposing) { }
+        public void Dispose() => Dispose(true);
     }
 }

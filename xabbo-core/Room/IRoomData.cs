@@ -6,6 +6,7 @@ namespace Xabbo.Core
     {
         bool IsUpdating { get; }
         bool ForceLoad { get; }
+        bool BypassAccess { get; }
         bool IsRoomMuted { get; }
         IModerationSettings Moderation { get; }
         bool ShowMuteButton { get; }

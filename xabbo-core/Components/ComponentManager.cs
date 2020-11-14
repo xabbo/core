@@ -7,7 +7,7 @@ using System.Threading;
 using System.Reflection;
 
 using Xabbo.Core.Messages;
-
+using System.Linq;
 
 namespace Xabbo.Core.Components
 {
@@ -29,7 +29,12 @@ namespace Xabbo.Core.Components
 
         private readonly CancellationTokenSource disposeTokenSource = new CancellationTokenSource();
 
-        private bool isDisposed;
+        protected bool isDisposed;
+
+        /// <summary>
+        /// Gets all components loaded into the component manager.
+        /// </summary>
+        public IEnumerable<XabboComponent> GetComponents() => components.Select(x => x.Value);
 
         public ComponentManager(IInterceptor interceptor)
         {
@@ -151,8 +156,8 @@ namespace Xabbo.Core.Components
                 return false;
             }
 
-            c.Initialize();
             c.IsAvailable = true;
+            c.Initialize();
 
             component = c;
             return true;
@@ -208,13 +213,9 @@ namespace Xabbo.Core.Components
         protected virtual void Dispose(bool disposing)
         {
             if (isDisposed) return;
-
-            if (disposing)
-            {
-                disposeTokenSource?.Cancel();
-            }
-
             isDisposed = true;
+
+            disposeTokenSource?.Cancel();
         }
     }
 }

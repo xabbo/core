@@ -5,9 +5,9 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class RollerUpdate : IWritable
+    public class RollerUpdate : IPacketData
     {
-        public static RollerUpdate Parse(Packet packet) => new RollerUpdate(packet);
+        public static RollerUpdate Parse(IReadOnlyPacket packet) => new RollerUpdate(packet);
 
         public int LocationX { get; set; }
         public int LocationY { get; set; }
@@ -26,7 +26,7 @@ namespace Xabbo.Core
             Type = RollerUpdateType.None;
         }
 
-        protected RollerUpdate(Packet packet)
+        protected RollerUpdate(IReadOnlyPacket packet)
             : this()
         {
             LocationX = packet.ReadInt();
@@ -51,20 +51,25 @@ namespace Xabbo.Core
             }
         }
 
-        public void Write(Packet packet)
+        public void Write(IPacket packet)
         {
-            packet.WriteValues(
-                LocationX,
-                LocationY,
-                TargetX,
-                TargetY,
-                ObjectUpdates,
-                RollerId
-            );
+            packet.WriteInt(LocationX);
+            packet.WriteInt(LocationY);
+            packet.WriteInt(TargetX);
+            packet.WriteInt(TargetY);
+
+            packet.WriteInt(ObjectUpdates.Count);
+            foreach (var update in ObjectUpdates)
+                update.Write(packet);
+
+            packet.WriteInt(RollerId);
 
             if (Type != RollerUpdateType.None)
             {
-                packet.WriteValues((int)Type, EntityIndex, EntityLocationZ, EntityTargetZ);
+                packet.WriteInt((int)Type);
+                packet.WriteInt(EntityIndex);
+                packet.WriteDouble(EntityLocationZ);
+                packet.WriteDouble(EntityTargetZ);
             }
         }
     }

@@ -30,6 +30,8 @@ namespace Xabbo.Core.Metadata
 
         public Palette GetPalette(int id) => Palettes.FirstOrDefault(x => x.Id == id);
 
+        public Palette GetPalette(FigurePartType partType) => GetPalette(GetSetCollection(partType).PaletteId);
+
         public PartSetCollection GetSetCollection(FigurePartType figurePartType)
             => SetCollections.FirstOrDefault(x => x.Type == figurePartType);
 
@@ -71,7 +73,13 @@ namespace Xabbo.Core.Metadata
 
         public class PartSetCollection
         {
+            /// <summary>
+            /// The figure part type of this part set collection.
+            /// </summary>
             public FigurePartType Type { get; }
+            /// <summary>
+            /// The color palette that this part set collection uses.
+            /// </summary>
             public int PaletteId { get; }
             public int mand_m_0 { get; }
             public int mand_f_0 { get; }

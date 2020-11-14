@@ -7,7 +7,7 @@ namespace Xabbo.Core
 {
     public class CatalogOffer : ICatalogOffer
     {
-        public static CatalogOffer Parse(Packet packet) => new CatalogOffer(packet);
+        public static CatalogOffer Parse(IReadOnlyPacket packet) => new CatalogOffer(packet);
 
         public int Id { get; set; }
         public string FurniLine { get; set; }
@@ -25,7 +25,7 @@ namespace Xabbo.Core
 
         public CatalogOffer() { }
 
-        internal CatalogOffer(Packet packet)
+        protected CatalogOffer(IReadOnlyPacket packet)
         {
             Id = packet.ReadInt();
             FurniLine = packet.ReadString();

@@ -8,7 +8,7 @@ namespace Xabbo.Core
 {
     public class Figure
     {
-        private static readonly IReadOnlyDictionary<int, Gender> genderDictionary;
+        private static readonly IReadOnlyDictionary<int, Gender> _genderMap;
 
         static Figure()
         {
@@ -39,11 +39,11 @@ namespace Xabbo.Core
                 }
             }
 
-            genderDictionary = dictionary;
+            _genderMap = dictionary;
         }
 
         public static bool TryGetGender(int partId, out Gender gender)
-            => genderDictionary.TryGetValue(partId, out gender);
+            => _genderMap.TryGetValue(partId, out gender);
 
         public static bool TryGetGender(Figure figure, out Gender gender)
         {

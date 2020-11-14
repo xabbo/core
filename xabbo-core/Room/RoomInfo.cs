@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using Xabbo.Core.Messages;
 using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class RoomInfo : IRoomInfo, IWritable
+    public class RoomInfo : IRoomInfo
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -46,7 +46,7 @@ namespace Xabbo.Core
             Tags = new List<string>();
         }
 
-        internal RoomInfo(Packet packet)
+        protected RoomInfo(IReadOnlyPacket packet)
             : this()
         {
             Id = packet.ReadInt();
@@ -86,45 +86,45 @@ namespace Xabbo.Core
             }
         }
 
-        public static RoomInfo Parse(Packet packet) => new RoomInfo(packet);
+        public static RoomInfo Parse(IReadOnlyPacket packet) => new RoomInfo(packet);
 
-        public virtual void Write(Packet packet)
+        public virtual void Write(IPacket packet)
         {
             packet.WriteInt(Id);
             packet.WriteString(Name);
 
-            OwnerId = packet.ReadInt();
-            OwnerName = packet.ReadString();
-            Access = (RoomAccess)packet.ReadInt();
-            Users = packet.ReadInt();
-            MaxUsers = packet.ReadInt();
-            Description = packet.ReadString();
-            Trading = (TradePermissions)packet.ReadInt();
-            Score = packet.ReadInt();
-            Ranking = packet.ReadInt();
-            Category = (RoomCategory)packet.ReadInt();
+            packet.WriteInt(OwnerId);
+            packet.WriteString(OwnerName);
+            packet.WriteInt((int)Access);
+            packet.WriteInt(Users);
+            packet.WriteInt(MaxUsers);
+            packet.WriteString(Description);
+            packet.WriteInt((int)Trading);
+            packet.WriteInt(Score);
+            packet.WriteInt(Ranking);
+            packet.WriteInt((int)Category);
 
-            int n = packet.ReadInt();
-            for (int i = 0; i < n; i++)
-                Tags.Add(packet.ReadString());
+            packet.WriteInt(Tags.Count);
+            foreach (string tag in Tags)
+                packet.WriteString(tag);
 
-            Flags = (RoomFlags)packet.ReadInt();
+            packet.WriteInt((int)Flags);
 
             if (Flags.HasFlag(RoomFlags.HasOfficialRoomPic))
-                OfficialRoomPicRef = packet.ReadString();
+                packet.WriteString(OfficialRoomPicRef);
 
             if (Flags.HasFlag(RoomFlags.IsGroupHomeRoom))
             {
-                GroupId = packet.ReadInt();
-                GroupName = packet.ReadString();
-                GroupBadge = packet.ReadString();
+                packet.WriteInt(GroupId);
+                packet.WriteString(GroupName);
+                packet.WriteString(GroupBadge);
             }
 
             if (Flags.HasFlag(RoomFlags.HasEvent))
             {
-                EventName = packet.ReadString();
-                EventDescription = packet.ReadString();
-                EventMinutesLeft = packet.ReadInt();
+                packet.WriteString(EventName);
+                packet.WriteString(EventDescription);
+                packet.WriteInt(EventMinutesLeft);
             }
         }
     }

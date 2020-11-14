@@ -10,23 +10,37 @@ namespace Xabbo.Core
 
         public int Id { get; set; }
         public string Name { get; set; }
-        public string Badge { get; set; }
-        public string ColorA { get; set; }
-        public string ColorB { get; set; }
+        public string BadgeCode { get; set; }
+        public string PrimaryColor { get; set; }
+        public string SecondaryColor { get; set; }
         public bool IsFavorite { get; set; }
         public int OwnerId { get; set; }
-        public bool Bool2 { get; set; }
+        public bool HasForum { get; set; }
+
+        public GroupInfo() { }
 
         protected GroupInfo(IReadOnlyPacket packet)
         {
             Id = packet.ReadInt();
             Name = packet.ReadString();
-            Badge = packet.ReadString();
-            ColorA = packet.ReadString();
-            ColorB = packet.ReadString();
+            BadgeCode = packet.ReadString();
+            PrimaryColor = packet.ReadString();
+            SecondaryColor = packet.ReadString();
             IsFavorite = packet.ReadBool();
             OwnerId = packet.ReadInt();
-            Bool2 = packet.ReadBool();
+            HasForum = packet.ReadBool();
+        }
+
+        public void Write(IPacket packet)
+        {
+            packet.WriteInt(Id);
+            packet.WriteString(Name);
+            packet.WriteString(BadgeCode);
+            packet.WriteString(PrimaryColor);
+            packet.WriteString(SecondaryColor);
+            packet.WriteBool(IsFavorite);
+            packet.WriteInt(OwnerId);
+            packet.WriteBool(HasForum);
         }
     }
 }

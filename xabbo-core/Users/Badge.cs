@@ -16,12 +16,12 @@ namespace Xabbo.Core
             Code = code;
         }
 
-        protected Badge(Packet packet)
+        protected Badge(IReadOnlyPacket packet)
         {
             Id = packet.ReadInt();
             Code = packet.ReadString();
         }
 
-        public static Badge Parse(Packet packet) => new Badge(packet);
+        public static Badge Parse(IReadOnlyPacket packet) => new Badge(packet);
     }
 }

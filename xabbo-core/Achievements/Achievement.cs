@@ -26,7 +26,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class Achievement : IAchievement, IWritable
+    public class Achievement : IAchievement, IPacketData
     {
         public int Id { get; set; }
         public int Level { get; set; }
@@ -44,7 +44,7 @@ namespace Xabbo.Core
 
         public Achievement() { }
 
-        internal Achievement(IReadOnlyPacket packet)
+        protected Achievement(IReadOnlyPacket packet)
         {
             Id = packet.ReadInt();
             Level = packet.ReadInt();
@@ -61,7 +61,7 @@ namespace Xabbo.Core
             Int9 = packet.ReadInt();
         }
 
-        public void Write(Packet packet)
+        public void Write(IPacket packet)
         {
             packet.WriteValues(
                 Id,

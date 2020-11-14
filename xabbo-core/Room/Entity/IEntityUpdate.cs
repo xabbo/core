@@ -1,11 +1,12 @@
 ﻿using System;
+using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public interface IEntityUpdate
+    public interface IEntityUpdate : IPacketData
     {
         int Index { get; }
-        ITile Location { get; }
+        Tile Location { get; }
         int HeadDirection { get; }
         int Direction { get; }
         string Status { get; }
@@ -15,11 +16,11 @@ namespace Xabbo.Core
         bool IsController { get; }
         int ControlLevel { get; }
 
-        ITile MovingTo { get; }
+        Tile? MovingTo { get; }
 
         bool SittingOnFloor { get; }
 
-        double ActionHeight { get; }
+        double? ActionHeight { get; }
 
         Signs Sign { get; }
     }

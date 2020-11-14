@@ -6,7 +6,7 @@ namespace Xabbo.Core
 {
     public class Catalog : ICatalog
     {
-        public static Catalog Parse(Packet packet) => new Catalog(packet);
+        public static Catalog Parse(IReadOnlyPacket packet) => new Catalog(packet);
 
         public CatalogPageNode Root { get; set; }
         ICatalogPageNode ICatalog.Root => Root;
@@ -15,7 +15,7 @@ namespace Xabbo.Core
 
         public Catalog() { }
         
-        internal Catalog(Packet packet)
+        protected Catalog(IReadOnlyPacket packet)
         {
             Root = CatalogPageNode.Parse(packet);
             UnknownBoolA = packet.ReadBool();

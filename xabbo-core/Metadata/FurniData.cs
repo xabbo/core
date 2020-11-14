@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Xabbo.Core.Metadata
 {
-    public class FurniData : IEnumerable<FurniInfo>
+    public class FurniData : IReadOnlyCollection<FurniInfo>
     {
         public static FurniData Load(Stream stream) => new FurniData(FurniDataXml.Load(stream));
         public static FurniData Load(string path)
@@ -15,26 +15,31 @@ namespace Xabbo.Core.Metadata
                 return Load(stream);
         }
 
-        private readonly IReadOnlyDictionary<string, FurniInfo> classNameDictionary;
-        private readonly IReadOnlyDictionary<int, FurniInfo> floorItemDictionary, wallItemDictionary;
+        private readonly IReadOnlyDictionary<string, FurniInfo> _identifierMap;
+        private readonly IReadOnlyDictionary<int, FurniInfo> _floorItemMap, _wallItemMap;
 
         /// <summary>
         /// Gets the information of all floor items.
         /// </summary>
-        public IReadOnlyList<FurniInfo> FloorItems { get; }
+        public IReadOnlyCollection<FurniInfo> FloorItems { get; }
 
         /// <summary>
         /// Gets the information of all wall items.
         /// </summary>
-        public IReadOnlyList<FurniInfo> WallItems { get; }
+        public IReadOnlyCollection<FurniInfo> WallItems { get; }
+
+        /// <summary>
+        /// Gets the total number of <see cref="FurniInfo"/> contained in the furni data.
+        /// </summary>
+        public int Count => FloorItems.Count + WallItems.Count;
 
         public IEnumerator<FurniInfo> GetEnumerator() => FloorItems.Concat(WallItems).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
-        /// Gets the information of the furni with the specified class name, or <c>null</c> if it does not exist.
+        /// Gets the information of the furni with the specified identifier, or <c>null</c> if it does not exist.
         /// </summary>
-        public FurniInfo this[string className] => classNameDictionary.TryGetValue(className.ToLower(), out FurniInfo info) ? info : null;
+        public FurniInfo this[string identifier] => GetInfo(identifier);
 
         internal FurniData(FurniDataXml proxy)
         {
@@ -46,9 +51,9 @@ namespace Xabbo.Core.Metadata
                 .Select(furniInfoProxy => new FurniInfo(ItemType.Wall, furniInfoProxy))
                 .ToList().AsReadOnly();
 
-            classNameDictionary = this.ToDictionary(furniInfo => furniInfo.ClassName.ToLower());
-            floorItemDictionary = FloorItems.ToDictionary(furniInfo => furniInfo.Id);
-            wallItemDictionary = WallItems.ToDictionary(wallItem => wallItem.Id);
+            _identifierMap = this.ToDictionary(furniInfo => furniInfo.Identifier, StringComparer.InvariantCultureIgnoreCase);
+            _floorItemMap = FloorItems.ToDictionary(furniInfo => furniInfo.Kind);
+            _wallItemMap = WallItems.ToDictionary(wallItem => wallItem.Kind);
         }
 
         /// <summary>
@@ -65,19 +70,24 @@ namespace Xabbo.Core.Metadata
         }
 
         /// <summary>
-        /// Gets the information for the furni of the specified item.
+        /// Gets the information of the specified item, or <c>null</c> if it does not exist.
         /// </summary>
         public FurniInfo GetInfo(IItem item) => GetInfo(item.Type, item.Kind);
 
         /// <summary>
-        /// Gets the information for the floor item of the specified kind.
+        /// Gets the information of the furni with the specified identifier, or <c>null</c> if it does not exist.
         /// </summary>
-        public FurniInfo GetFloorItem(int kind) => floorItemDictionary.TryGetValue(kind, out FurniInfo furniInfo) ? furniInfo : null;
+        public FurniInfo GetInfo(string identifier) => _identifierMap.TryGetValue(identifier, out FurniInfo info) ? info : null;
 
         /// <summary>
-        /// Gets the information for the wall item of the specified kind.
+        /// Gets the information for the floor item of the specified kind, or <c>null</c> if it does not exist.
         /// </summary>
-        public FurniInfo GetWallItem(int kind) => wallItemDictionary.TryGetValue(kind, out FurniInfo furniInfo) ? furniInfo : null;
+        public FurniInfo GetFloorItem(int kind) => _floorItemMap.TryGetValue(kind, out FurniInfo furniInfo) ? furniInfo : null;
+
+        /// <summary>
+        /// Gets the information for the wall item of the specified kind, or <c>null</c> if it does not exist.
+        /// </summary>
+        public FurniInfo GetWallItem(int kind) => _wallItemMap.TryGetValue(kind, out FurniInfo furniInfo) ? furniInfo : null;
 
         private IEnumerable<FurniInfo> FindItems(IEnumerable<FurniInfo> infos, string searchText)
         {

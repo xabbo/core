@@ -5,9 +5,9 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class RoomSettings : IWritable
+    public class RoomSettings : IPacketData
     {
-        public static RoomSettings Parse(Packet packet) => new RoomSettings(packet);
+        public static RoomSettings Parse(IReadOnlyPacket packet) => new RoomSettings(packet);
 
         public int Id { get; set; }
         public string Name { get; set; }
@@ -33,10 +33,14 @@ namespace Xabbo.Core
 
         public RoomSettings()
         {
+            Name = string.Empty;
+            Description = string.Empty;
+            Password = string.Empty;
+
             Tags = new List<string>();
         }
 
-        internal RoomSettings(Packet packet)
+        protected RoomSettings(IReadOnlyPacket packet)
             : this()
         {
             /*
@@ -117,14 +121,14 @@ namespace Xabbo.Core
         /// Writes the values of this <see cref="RoomSettings"/> to the specified packet
         /// to be sent to the server with <c>RoomSettingsSave</c>.
         /// </summary>
-        public void Write(Packet packet)
+        public void Write(IPacket packet)
         {
             packet.WriteValues(
                 Id,
-                Name,
-                Description,
+                Name ?? string.Empty,
+                Description ?? string.Empty,
                 (int)Access,
-                Password,
+                Password ?? string.Empty,
                 MaxVisitors,
                 (int)Category,
                 Tags,

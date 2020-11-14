@@ -27,7 +27,7 @@ namespace Xabbo.Core
             Stance = "";
         }
 
-        internal Pet(int id, int index, Packet packet)
+        internal Pet(int id, int index, IReadOnlyPacket packet)
             : this(id, index)
         {
             Breed = packet.ReadInt();
@@ -44,7 +44,7 @@ namespace Xabbo.Core
             Stance = packet.ReadString();
         }
 
-        public override void Write(Packet packet)
+        public override void Write(IPacket packet)
         {
             base.Write(packet);
 

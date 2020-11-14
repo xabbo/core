@@ -10,21 +10,23 @@ namespace Xabbo.Core
     public static class XabboCoreExtensions
     {
         #region - Items -
-        public static IEnumerable<T> GetFloorItems<T>(this IEnumerable<T> furni) where T : IItem => furni.Where(x => x.IsFloorItem);
-        public static IEnumerable<T> GetWallItems<T>(this IEnumerable<T> furni) where T : IItem => furni.Where(x => x.IsWallItem);
+        public static IEnumerable<T> GetFloorItems<T>(this IEnumerable<T> items) where T : IItem
+            => items.Where(x => x.Type == ItemType.Floor);
+        public static IEnumerable<T> GetWallItems<T>(this IEnumerable<T> items) where T : IItem
+            => items.Where(x => x.Type == ItemType.Wall);
 
         public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, ItemType type, int kind) where T : IItem
             => items.Where(item => item.Type == type && item.Kind == kind);
         public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, FurniInfo furniInfo) where T : IItem
-            => OfKind(items, furniInfo.Type, furniInfo.Id);
+            => OfKind(items, furniInfo.Type, furniInfo.Kind);
 
-        public static IEnumerable<T> OfAnyKind<T>(this IEnumerable<T> items, params FurniInfo[] infos) where T : IItem
+        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, IEnumerable<FurniInfo> furniInfo) where T : IItem
         {
-            var hashSet = new HashSet<(ItemType, int)>(infos.Select(info => (info.Type, info.Id)));
-            return items.Where(item => hashSet.Contains((item.Type, item.Kind)));
+            var set = new HashSet<(ItemType, int)>(furniInfo.Select(info => (info.Type, info.Kind)));
+            return items.Where(item => set.Contains((item.Type, item.Kind)));
         }
-        public static IEnumerable<T> OfAnyKind<T>(this IEnumerable<T> items, IEnumerable<FurniInfo> infos) where T : IItem
-            => OfAnyKind(items, infos.ToArray());
+        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, params FurniInfo[] furniInfo) where T : IItem
+            => OfKinds(items, (IEnumerable<FurniInfo>)furniInfo);
         #endregion
 
         #region - Furni -
@@ -33,20 +35,26 @@ namespace Xabbo.Core
         public static IEnumerable<IWallItem> OfKind(this IEnumerable<IWallItem> items, int kind)
             => items.Where(item => item.Kind == kind);
 
-        public static IEnumerable<IFloorItem> OfAnyKind(this IEnumerable<IFloorItem> items, params int[] kinds)
-            => items.Where(item => kinds.Contains(item.Kind));
-        public static IEnumerable<IFloorItem> OfAnyKind(this IEnumerable<IFloorItem> items, IEnumerable<int> kinds)
-            => items.Where(item => kinds.Contains(item.Kind));
+        public static IEnumerable<IFloorItem> OfKinds(this IEnumerable<IFloorItem> items, IEnumerable<int> kinds)
+        {
+            var set = new HashSet<int>(kinds);
+            return items.Where(item => set.Contains(item.Kind));
+        }
+        public static IEnumerable<IFloorItem> OfKinds(this IEnumerable<IFloorItem> items, params int[] kinds)
+            => OfKinds(items, (IEnumerable<int>)kinds);
 
-        public static IEnumerable<IWallItem> OfAnyKind(this IEnumerable<IWallItem> items, params int[] kinds)
-            => items.Where(item => kinds.Contains(item.Kind));
-        public static IEnumerable<IWallItem> OfAnyKind(this IEnumerable<IWallItem> items, IEnumerable<int> kinds)
-            => items.Where(item => kinds.Contains(item.Kind));
+        public static IEnumerable<IWallItem> OfKinds(this IEnumerable<IWallItem> items, IEnumerable<int> kinds)
+        {
+            var set = new HashSet<int>(kinds);
+            return items.Where(item => set.Contains(item.Kind));
+        }
+        public static IEnumerable<IWallItem> OfKinds(this IEnumerable<IWallItem> items, params int[] kinds)
+            => OfKinds(items, (IEnumerable<int>)kinds);
 
         public static IEnumerable<T> OwnedBy<T>(this IEnumerable<T> items, int ownerId) where T : IFurni
             => items.Where(item => item.OwnerId == ownerId);
         public static IEnumerable<T> OwnedBy<T>(this IEnumerable<T> items, string ownerName) where T : IFurni
-            => items.Where(item => string.Equals(item.OwnerName, ownerName, StringComparison.InvariantCultureIgnoreCase));
+            => items.Where(item => string.Equals(item.OwnerName, ownerName, StringComparison.OrdinalIgnoreCase));
 
         public static IEnumerable<IFloorItem> At(this IEnumerable<IFloorItem> items,
             int? x = null, int? y = null, double? z = null, int? dir = null,
@@ -82,7 +90,7 @@ namespace Xabbo.Core
 
         public static IEnumerable<IWallItem> At(this IEnumerable<IWallItem> items,
             int? wallX = null, int? wallY = null, int? x = null, int? y = null,
-            WallOrientation orientation = null)
+            WallOrientation? orientation = null)
         {
             foreach (var item in items)
             {
@@ -90,20 +98,16 @@ namespace Xabbo.Core
                 if (wallY.HasValue && item.WallY != wallY) continue;
                 if (x.HasValue && item.X != x) continue;
                 if (y.HasValue && item.Y != y) continue;
-                if (orientation != null && item.Orientation != orientation) continue;
+                if (orientation.HasValue && item.Orientation != orientation) continue;
                 yield return item;
             }
         }
 
-        public static IEnumerable<IWallItem> At(this IEnumerable<IWallItem> items, IWallLocation location)
+        public static IEnumerable<IWallItem> At(this IEnumerable<IWallItem> items, WallLocation location)
             => At(items, location.WallX, location.WallY, location.X, location.Y, location.Orientation);
         #endregion
 
         #region - Inventory -
-        public static IEnumerable<T> OfCategory<T>(this IEnumerable<T> items, FurniCategory category) where T : IInventoryItem
-            => items.Where(item => item.Category == category);
-        public static IEnumerable<T> GetGroupable<T>(this IEnumerable<T> items) where T : IInventoryItem
-            => items.Where(item => item.IsGroupable);
         public static IEnumerable<IInventoryItem> GetTradeable(this IEnumerable<IInventoryItem> items)
             => items.Where(item => item.IsTradeable);
         public static IEnumerable<IInventoryItem> GetSellable(this IEnumerable<IInventoryItem> items)
@@ -128,7 +132,7 @@ namespace Xabbo.Core
                     currentCount++;
                     lastKind = kind;
 
-                    if (currentSlots > maxSlots || currentCount == maxItems)
+                    if (currentSlots > maxSlots || currentCount > maxItems)
                     {
                         currentCount = 0;
                         currentSlots = 1;
@@ -201,23 +205,25 @@ namespace Xabbo.Core
         public static IEnumerable<T> Inside<T>(this IEnumerable<T> entities, Area area)
             where T : IEntity
         {
-            foreach (var e in entities)
-            {
-                if (e.Location == null) continue;
-                if (area.Contains(e.Location))
-                    yield return e;
-            }
+            return entities.Where(x => area.Contains(x.Location));
+        }
+
+        public static IEnumerable<T> Inside<T>(this IEnumerable<T> entities, AreaCollection areas)
+            where T : IEntity
+        {
+            return entities.Where(x => areas.Contains(x.Location));
         }
 
         public static IEnumerable<T> Outside<T>(this IEnumerable<T> entities, Area area)
             where T : IEntity
         {
-            foreach (var e in entities)
-            {
-                if (e.Location == null) continue;
-                if (!area.Contains(e.Location))
-                    yield return e;
-            }
+            return entities.Where(x => !area.Contains(x.Location));
+        }
+
+        public static IEnumerable<T> Outside<T>(this IEnumerable<T> entities, AreaCollection areas)
+            where T : IEntity
+        {
+            return entities.Where(x => !areas.Contains(x.Location));
         }
         #endregion
     }

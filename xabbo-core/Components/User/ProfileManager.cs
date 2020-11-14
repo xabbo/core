@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
 
@@ -7,6 +8,9 @@ namespace Xabbo.Core.Components
     public class ProfileManager : XabboComponent
     {
         public enum Features { Autoload, UserData, HomeRoom, Credits, Points, Achievements, AchievementScore }
+
+        private Task<IUserData> userDataTask;
+        private TaskCompletionSource<IUserData> userDataTcs;
 
         public UserData UserData { get; private set; }
         public int? HomeRoom { get; private set; }
@@ -22,6 +26,9 @@ namespace Xabbo.Core.Components
         public event EventHandler LoadedUserData;
         protected virtual void OnLoadedUserData() => LoadedUserData?.Invoke(this, EventArgs.Empty);
 
+        public event EventHandler UserDataUpdated;
+        protected virtual void OnUserDataUpdated() => UserDataUpdated?.Invoke(this, EventArgs.Empty);
+
         public event EventHandler HomeRoomUpdated;
         protected virtual void OnHomeRoomUpdated() => HomeRoomUpdated?.Invoke(this, EventArgs.Empty);
 
@@ -29,8 +36,8 @@ namespace Xabbo.Core.Components
         protected virtual void OnLoadedAchievements() => LoadedAchievements?.Invoke(this, EventArgs.Empty);
 
         public event EventHandler AchievementUpdated;
-        protected virtual void OnAchievementUpdated(Achievement previousAchievement)
-            => AchievementUpdated?.Invoke(this, EventArgs.Empty);
+        protected virtual void OnAchievementUpdated(IAchievement achievement)
+            => AchievementUpdated?.Invoke(this, EventArgs.Empty); // TODO AchievementEventArgs
 
         public event EventHandler CreditsUpdated;
         protected virtual void OnCreditsUpdated() => CreditsUpdated?.Invoke(this, EventArgs.Empty);
@@ -42,19 +49,27 @@ namespace Xabbo.Core.Components
         protected virtual void OnPointsUpdated(ActivityPointType type, int amount, int change)
             => PointsUpdated?.Invoke(this, new PointsUpdatedEventArgs(type, amount, change));
 
-        // LoadedAchievements, AchievementUpdated
         // LoadedFriends, FriendAdded, FriendRemoved, FriendUpdated
         #endregion
 
         public ProfileManager()
         {
+            userDataTcs = new TaskCompletionSource<IUserData>();
+            userDataTask = userDataTcs.Task;
+
             Points = new ActivityPoints();
         }
 
         protected override void OnInitialize()
         {
-
+            if (!Dispatcher.IsAttached(this, Features.UserData))
+                userDataTcs?.TrySetException(new Exception("User data is unavailable"));
         }
+
+        /// <summary>
+        /// Waits for the user data load, or returns the user's data instantly if it has already loaded.
+        /// </summary>
+        public Task<IUserData> GetUserDataAsync() => userDataTask;
 
         [Group(Features.Autoload), InterceptIn("LatencyResponse")]
         private async void HandleLatencyResponse(InterceptEventArgs e)
@@ -79,15 +94,43 @@ namespace Xabbo.Core.Components
         private void HandleUserData(InterceptEventArgs e)
         {
             UserData = UserData.Parse(e.Packet);
+
+            userDataTcs?.TrySetResult(UserData);
+            userDataTcs = null;
+
+            userDataTask = Task.FromResult<IUserData>(UserData);
+
             OnLoadedUserData();
+        }
+
+        [Group(Features.UserData), InterceptIn(nameof(Incoming.UpdateUserLook))]
+        private void HandleUpdateUserLook(InterceptEventArgs e)
+        {
+            UserData.Figure = e.Packet.ReadString();
+            UserData.Gender = H.ToGender(e.Packet.ReadString());
+
+            OnUserDataUpdated();
+        }
+
+        [Group(Features.UserData), InterceptIn(nameof(Incoming.RoomUserData))]
+        private void HandleRoomUserdata(InterceptEventArgs e)
+        {
+            int index = e.Packet.ReadInt();
+            if (index == -1)
+            {
+                UserData.Figure = e.Packet.ReadString();
+                UserData.Gender = H.ToGender(e.Packet.ReadString());
+                UserData.Motto = e.Packet.ReadString();
+                AchievementScore = e.Packet.ReadInt();
+
+                OnUserDataUpdated();
+            }
         }
 
         [Group(Features.HomeRoom), InterceptIn("UserHomeRoom")]
         private void HandleUserHomeRoom(InterceptEventArgs e)
         {
             HomeRoom = e.Packet.ReadInt();
-
-
         }
 
         [Group(Features.Credits), InterceptIn("UserCredits"), RequiredOut("RequestUserCredits")]
@@ -131,6 +174,8 @@ namespace Xabbo.Core.Components
         {
             var achievement = Achievement.Parse(e.Packet);
             Achievements?.Update(achievement);
+
+            OnAchievementUpdated(achievement);
         }
     }
 }

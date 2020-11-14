@@ -1,16 +1,18 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
-using Xabbo.Core.Protocol;
 
 using Newtonsoft.Json;
+
+using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
     public class WallItem : Furni, IWallItem
     {
-        public static WallItem Parse(Packet packet, bool readName = true) => new WallItem(packet, readName);
+        public static WallItem Parse(IReadOnlyPacket packet, bool readName = true) => new WallItem(packet, readName);
 
-        public static WallItem[] ParseAll(Packet packet)
+        public static WallItem[] ParseAll(IReadOnlyPacket packet)
         {
             var ownerDictionary = new Dictionary<int, string>();
 
@@ -30,73 +32,75 @@ namespace Xabbo.Core
             return wallItems;
         }
 
+        public static void WriteAll(IPacket packet, IEnumerable<IWallItem> items)
+        {
+            var ownerIds = new HashSet<int>();
+            var ownerDictionary = items
+                .Where(x => ownerIds.Add(x.OwnerId))
+                .ToDictionary(
+                    key => key.OwnerId,
+                    val => val.OwnerName
+                );
+
+            packet.WriteInt(ownerDictionary.Count);
+            foreach (var pair in ownerDictionary)
+            {
+                packet.WriteInt(pair.Key);
+                packet.WriteString(pair.Value);
+            }
+
+            packet.WriteInt(items.Count());
+            foreach (var item in items)
+                item.Write(packet, false);
+        }
+
+        public static void WriteAll(IPacket packet, params WallItem[] items) => WriteAll(packet, (IEnumerable<IWallItem>)items);
+
         public override ItemType Type => ItemType.Wall;
 
-        private string _data;
+        private string data;
         public string Data
         {
-            get => _data;
+            get => data;
             set
             {
-                _data = value;
-
-                if (!string.IsNullOrWhiteSpace(_data) && int.TryParse(_data, out int state))
-                    State = state;
-                else
-                    State = -1;
+                if (value is null)
+                    throw new ArgumentNullException("Data");
+                data = value;
             }
         }
 
+        public override int State => int.TryParse(Data, out int state) ? state : -1;
+
         public WallLocation Location { get; set; }
-        IWallLocation IWallItem.Location => Location;
 
         [JsonIgnore]
-        public int WallX
-        {
-            get => Location.WallX;
-            set => Location.WallX = value;
-        }
+        public int WallX => Location.WallX;
 
         [JsonIgnore]
-        public int WallY
-        {
-            get => Location.WallY;
-            set => Location.WallY = value;
-        }
+        public int WallY => Location.WallY;
 
         [JsonIgnore]
-        public int X
-        {
-            get => Location.X;
-            set => Location.X = value;
-        }
+        public int X => Location.X;
 
         [JsonIgnore]
-        public int Y
-        {
-            get => Location.Y;
-            set => Location.Y = value;
-        }
+        public int Y => Location.Y;
 
         [JsonIgnore]
-        public WallOrientation Orientation
-        {
-            get => Location.Orientation;
-            set => Location.Orientation = value;
-        }
+        public WallOrientation Orientation => Location.Orientation;
 
         public WallItem()
         {
             OwnerId = -1;
             OwnerName = "(unknown)";
 
-            Data = "";
+            Data = string.Empty;
             SecondsToExpiration = -1;
             Usage = FurniUsage.None;
             Location = WallLocation.Zero;
         }
 
-        internal WallItem(Packet packet, bool readName)
+        protected WallItem(IReadOnlyPacket packet, bool readName)
             : this()
         {
             string idString = packet.ReadString();
@@ -115,9 +119,9 @@ namespace Xabbo.Core
                 OwnerName = packet.ReadString();
         }
 
-        public override void Write(Packet packet) => Write(packet, true);
+        public override void Write(IPacket packet) => Write(packet, true);
 
-        public override void Write(Packet packet, bool writeName = true)
+        public override void Write(IPacket packet, bool writeOwnerName = true)
         {
             packet.WriteString(Id.ToString());
             packet.WriteInt(Kind);
@@ -126,7 +130,7 @@ namespace Xabbo.Core
             packet.WriteInt(SecondsToExpiration);
             packet.WriteInt((int)Usage);
             packet.WriteInt(OwnerId);
-            if (writeName)
+            if (writeOwnerName)
                 packet.WriteString(OwnerName);
         }
     }

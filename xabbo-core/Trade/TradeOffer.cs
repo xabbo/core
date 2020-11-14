@@ -7,7 +7,7 @@ namespace Xabbo.Core
 {
     public class TradeOffer : ITradeOffer
     {
-        public static TradeOffer Parse(Packet packet) => new TradeOffer(packet);
+        public static TradeOffer Parse(IReadOnlyPacket packet) => new TradeOffer(packet);
 
         public int UserId { get; set; }
         public List<TradeItem> Items { get; set; }
@@ -20,7 +20,7 @@ namespace Xabbo.Core
             Items = new List<TradeItem>();
         }
 
-        protected TradeOffer(Packet packet)
+        protected TradeOffer(IReadOnlyPacket packet)
             : this()
         {
             UserId = packet.ReadInt();

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public interface IHeightMap
+    public interface IHeightMap : IPacketData
     {
         int Width { get; }
         int Length { get; }

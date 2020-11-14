@@ -20,9 +20,10 @@ namespace Xabbo.Core
         protected ItemData(ItemDataType type)
         {
             Type = type;
+            LegacyString = string.Empty;
         }
 
-        protected virtual void Initialize(Packet packet)
+        protected virtual void Initialize(IReadOnlyPacket packet)
         {
             if ((Flags & 256) > 0)
             {
@@ -31,13 +32,13 @@ namespace Xabbo.Core
             }
         }
 
-        public void Write(Packet packet)
+        public void Write(IPacket packet)
         {
             packet.WriteInt((int)Type | (int)(Flags & 0xFFFFFF00));
             WriteData(packet);
         }
 
-        protected void WriteBase(Packet packet)
+        protected void WriteBase(IPacket packet)
         {
             if ((Flags & 256) > 0)
             {
@@ -46,9 +47,9 @@ namespace Xabbo.Core
             }
         }
 
-        protected abstract void WriteData(Packet packet);
+        protected abstract void WriteData(IPacket packet);
 
-        public static ItemData Parse(Packet packet)
+        public static ItemData Parse(IReadOnlyPacket packet)
         {
             ItemData stuffData;
 

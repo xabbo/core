@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public interface IRoomInfo
+    public interface IRoomInfo : IPacketData
     {
         int Id { get; }
         string Name { get; }

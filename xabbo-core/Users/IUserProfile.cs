@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Xabbo.Core.Protocol;
+
 namespace Xabbo.Core
 {
-    public interface IUserProfile
+    public interface IUserProfile : IPacketData
     {
         int Id { get; }
         string Name { get; }

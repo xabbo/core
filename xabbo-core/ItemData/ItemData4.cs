@@ -10,6 +10,6 @@ namespace Xabbo.Core
             : base(ItemDataType.ItemData4)
         { }
 
-        protected override void WriteData(Packet packet) { }
+        protected override void WriteData(IPacket packet) { }
     }
 }

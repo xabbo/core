@@ -29,7 +29,7 @@ namespace Xabbo.Core
             list = new List<HighScore>();
         }
 
-        protected override void Initialize(Packet packet)
+        protected override void Initialize(IReadOnlyPacket packet)
         {
             LegacyString = packet.ReadString();
             Int1 = packet.ReadInt();
@@ -39,7 +39,7 @@ namespace Xabbo.Core
             for (int i = 0; i < n; i++)
             {
                 var highScore = new HighScore();
-                highScore.Score = packet.ReadInt(); 
+                highScore.Value = packet.ReadInt(); 
 
                 int k = packet.ReadInt();
                 for (int j = 0; j < k; j++)
@@ -51,9 +51,9 @@ namespace Xabbo.Core
             // No base call.
         }
 
-        public class HighScore : IHighScore, IWritable
+        public class HighScore : IHighScore
         {
-            public int Score { get; set; }
+            public int Value { get; set; }
             public List<string> Names { get; set; }
             IReadOnlyList<string> IHighScore.Names => Names;
 
@@ -62,9 +62,9 @@ namespace Xabbo.Core
                 Names = new List<string>();
             }
 
-            public void Write(Packet packet)
+            public void Write(IPacket packet)
             {
-                packet.WriteInt(Score);
+                packet.WriteInt(Value);
                 packet.WriteInt(Names?.Count ?? 0);
                 if (Names != null)
                 {
@@ -74,7 +74,7 @@ namespace Xabbo.Core
             }
         }
 
-        protected override void WriteData(Packet packet)
+        protected override void WriteData(IPacket packet)
         {
             packet.WriteString(LegacyString);
             packet.WriteInt(Int1);

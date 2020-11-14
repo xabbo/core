@@ -2,10 +2,8 @@
  
 namespace Xabbo.Core
 {
-    public interface ICatalogProduct
+    public interface ICatalogProduct : IItem
     {
-        string Type { get; }
-        int Kind { get; }
         string Variation { get; }
         int Count { get; }
         bool IsLimited { get; }

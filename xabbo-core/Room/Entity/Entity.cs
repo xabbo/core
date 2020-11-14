@@ -1,14 +1,16 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 
 using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public abstract class Entity : IEntity, IWritable
+    public abstract class Entity : IEntity, IPacketData
     {
         public bool IsRemoved { get; set; }
+        public bool IsHidden { get; set; }
 
         public EntityType Type { get; }
 
@@ -20,11 +22,11 @@ namespace Xabbo.Core
         public string Figure { get; set; }
 
         public Tile Location { get; set; }
-        ITile IEntity.Location => Location;
         [JsonIgnore] public int X => Location.X;
         [JsonIgnore] public int Y => Location.Y;
         [JsonIgnore] public (int X, int Y) XY => Location.XY;
         [JsonIgnore] public double Z => Location.Z;
+        [JsonIgnore] public (int X, int Y, double Z) XYZ => Location.XYZ;
         public int Direction { get; set; }
 
         // States
@@ -48,7 +50,7 @@ namespace Xabbo.Core
             Name = "";
             Motto = "";
             Figure = "";
-            Location = new Tile();
+            Location = Tile.Zero;
             Direction = 0;
         }
 
@@ -68,7 +70,7 @@ namespace Xabbo.Core
 
         protected virtual void OnUpdate(EntityUpdate update) { }
 
-        public virtual void Write(Packet packet)
+        public virtual void Write(IPacket packet)
         {
             packet.WriteValues(
                 Id,
@@ -77,12 +79,12 @@ namespace Xabbo.Core
                 Figure,
                 Index,
                 Location,
-                (int)Direction,
+                Direction,
                 (int)Type
             );
         }
 
-        public static Entity Parse(Packet packet)
+        public static Entity Parse(IReadOnlyPacket packet)
         {
             int id = packet.ReadInt();
             string name = packet.ReadString();
@@ -115,6 +117,24 @@ namespace Xabbo.Core
             return entity;
         }
 
-        public override string ToString() => $"{Name} (id:{Id})";
+        public static Entity[] ParseAll(IReadOnlyPacket packet)
+        {
+            int n = packet.ReadInt();
+            var entities = new Entity[n];
+            for (int i = 0; i < n; i++)
+                entities[i] = Parse(packet);
+            return entities;
+        }
+
+        public static void WriteAll(IPacket packet, IEnumerable<IEntity> entities)
+        {
+            packet.WriteInt(entities.Count());
+            foreach (var entity in entities)
+                entity.Write(packet);
+        }
+
+        public static void WriteAll(IPacket packet, params IEntity[] entities) => WriteAll(packet, (IEnumerable<IEntity>)entities);
+
+        public override string ToString() => Name;
     }
 }

@@ -9,9 +9,9 @@ namespace Xabbo.Core
 {
     public class Inventory : IInventory, ICollection<InventoryItem>
     {
-        public static Inventory Parse(Packet packet) => new Inventory(packet);
+        public static Inventory Parse(IReadOnlyPacket packet) => new Inventory(packet);
 
-        public static IEnumerable<InventoryItem> ParseItems(Packet packet)
+        public static IEnumerable<InventoryItem> ParseItems(IReadOnlyPacket packet)
         {
             int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
@@ -40,7 +40,7 @@ namespace Xabbo.Core
 
         public Inventory() { }
 
-        internal Inventory(Packet packet)
+        protected Inventory(IReadOnlyPacket packet)
         {
             TotalPackets = packet.ReadInt();
             PacketIndex = packet.ReadInt();

@@ -6,7 +6,7 @@ namespace Xabbo.Core
 {
     public class InventoryItem : IInventoryItem
     {
-        public static InventoryItem Parse(Packet packet) => new InventoryItem(packet);
+        public static InventoryItem Parse(IReadOnlyPacket packet) => new InventoryItem(packet);
 
         public int ItemId { get; set; }
         public ItemType Type { get; set; }
@@ -30,10 +30,10 @@ namespace Xabbo.Core
 
         public InventoryItem() { }
 
-        private InventoryItem(Packet packet)
+        protected InventoryItem(IReadOnlyPacket packet)
         {
             ItemId = packet.ReadInt();
-            Type = H.ToFurniType(packet.ReadString());
+            Type = H.ToItemType(packet.ReadString());
             Id = packet.ReadInt();
             Kind = packet.ReadInt();
             Category = (FurniCategory)packet.ReadInt();
@@ -53,9 +53,27 @@ namespace Xabbo.Core
             }
         }
 
-        public void Write(Packet packet)
+        public void Write(IPacket packet)
         {
+            packet.WriteInt(ItemId);
+            packet.WriteString(Type.ToShortString());
+            packet.WriteInt(Id);
+            packet.WriteInt(Kind);
+            packet.WriteInt((int)Category);
+            Data.Write(packet);
+            packet.WriteBool(Bool1);
+            packet.WriteBool(IsTradeable);
+            packet.WriteBool(IsGroupable);
+            packet.WriteBool(IsSellable);
+            packet.WriteInt(SecondsToExpiration);
+            packet.WriteBool(HasRentPeriodStarted);
+            packet.WriteInt(RoomId);
 
+            if (Type == ItemType.Floor)
+            {
+                packet.WriteString(String2);
+                packet.WriteInt(Extra);
+            }
         }
     }
 }

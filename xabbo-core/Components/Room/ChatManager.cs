@@ -2,13 +2,13 @@
 
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
-using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Components
 {
-    [Dependencies(typeof(EntityManager))]
+    [Dependencies(typeof(RoomManager), typeof(EntityManager))]
     public class ChatManager : XabboComponent
     {
+        private RoomManager roomManager;
         private EntityManager entities;
 
         public event EventHandler<EntityChatEventArgs> EntityChat;
@@ -18,12 +18,15 @@ namespace Xabbo.Core.Components
 
         protected override void OnInitialize()
         {
+            roomManager = GetComponent<RoomManager>();
             entities = GetComponent<EntityManager>();
         }
 
         [InterceptIn("RoomUserWhisper", "RoomUserTalk", "RoomUserShout")]
         private void HandleEntityChat(InterceptEventArgs e)
         {
+            if (!roomManager.IsInRoom) return;
+
             var packet = e.Packet;
 
             ChatType chatType;
@@ -38,6 +41,11 @@ namespace Xabbo.Core.Components
 
             int index = packet.ReadInt();
             var entity = entities.GetEntityByIndex(index);
+            if (entity == null)
+            {
+                DebugUtil.Log($"unable to find entity {index}");
+                return;
+            }
 
             string message = packet.ReadString();
             packet.ReadInt();
@@ -46,7 +54,7 @@ namespace Xabbo.Core.Components
             var eventArgs = new EntityChatEventArgs(entity, chatType, message, bubbleStyle);
             OnEntityChat(eventArgs);
 
-            if (eventArgs.IsBlocked) e.Block();
+            if (eventArgs.IsBlocked || entity.IsHidden) e.Block();
         }
     }
 }

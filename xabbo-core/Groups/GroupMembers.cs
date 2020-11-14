@@ -7,7 +7,7 @@ namespace Xabbo.Core
 {
     public class GroupMembers : List<GroupMember>, IGroupMembers
     {
-        public static GroupMembers Parse(Packet packet) => new GroupMembers(packet);
+        public static GroupMembers Parse(IReadOnlyPacket packet) => new GroupMembers(packet);
 
         public int GroupId { get; set; }
         public string GroupName { get; set; }
@@ -25,7 +25,7 @@ namespace Xabbo.Core
 
         public GroupMembers() { }
 
-        protected GroupMembers(Packet packet)
+        protected GroupMembers(IReadOnlyPacket packet)
         {
             GroupId = packet.ReadInt();
             GroupName = packet.ReadString();

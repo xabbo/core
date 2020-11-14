@@ -46,7 +46,8 @@ namespace Xabbo.Core.Tasks
             catch (OperationCanceledException ex)
             when (!token.IsCancellationRequested)
             {
-                throw new TimeoutException($"The interceptor task '{GetType().FullName}' timed out.", ex);
+                throw ex;
+                // throw new OperationCanceledException($"The interceptor task '{GetType().FullName}' timed out.", ex);
             }
             finally
             {
@@ -58,26 +59,12 @@ namespace Xabbo.Core.Tasks
 
         protected virtual void Hook()
         {
-            if (Dispatcher.Attach(this))
-            {
-                Debug.WriteLine($"[{GetType().Name}.Hook] attached listener");
-            }
-            else
-            {
-                Debug.WriteLine($"[{GetType().Name}.Hook] no listener methods were attached");
-            }
+            Dispatcher.Attach(this);
         }
 
         protected virtual void Unhook()
         {
-            if (Dispatcher.Detach(this))
-            {
-                Debug.WriteLine($"[{GetType().Name}.Unhook] detached listener");
-            }
-            else
-            {
-                Debug.WriteLine($"[{GetType().Name}.Unhook] failed to detach listener");
-            }
+            Dispatcher.Detach(this);
         }
 
         protected abstract Task OnExecuteAsync();

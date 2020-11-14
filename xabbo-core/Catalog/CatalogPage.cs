@@ -8,7 +8,7 @@ namespace Xabbo.Core
 {
     public class CatalogPage : ICatalogPage
     {
-        public static CatalogPage Parse(Packet packet) => new CatalogPage(packet);
+        public static CatalogPage Parse(IReadOnlyPacket packet) => new CatalogPage(packet);
 
         public int Id { get; set; }
         public string Mode { get; set; }
@@ -26,7 +26,7 @@ namespace Xabbo.Core
 
         public CatalogPage() { }
 
-        internal CatalogPage(Packet packet)
+        protected CatalogPage(IReadOnlyPacket packet)
         {
             Id = packet.ReadInt();
             Mode = packet.ReadString();

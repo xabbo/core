@@ -4,9 +4,9 @@ namespace Xabbo.Core.Events
 {
     public class FriendEventArgs : EventArgs
     {
-        public IFriendInfo Friend { get; }
+        public IFriend Friend { get; }
 
-        public FriendEventArgs(IFriendInfo friend)
+        public FriendEventArgs(IFriend friend)
         {
             Friend = friend;
         }

@@ -2,7 +2,7 @@
 
 namespace Xabbo.Core
 {
-    public sealed class WallOrientation
+    public struct WallOrientation
     {
         public static readonly WallOrientation Left = new WallOrientation('l');
         public static readonly WallOrientation Right = new WallOrientation('r');

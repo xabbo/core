@@ -12,7 +12,7 @@ namespace Xabbo.Core
             : base(ItemDataType.VoteResult)
         { }
 
-        protected override void Initialize(Packet packet)
+        protected override void Initialize(IReadOnlyPacket packet)
         {
             LegacyString = packet.ReadString();
             Result = packet.ReadInt();
@@ -20,7 +20,7 @@ namespace Xabbo.Core
             base.Initialize(packet);
         }
 
-        protected override void WriteData(Packet packet)
+        protected override void WriteData(IPacket packet)
         {
             packet.WriteString(LegacyString);
             packet.WriteInt(Result);

@@ -6,7 +6,7 @@ namespace Xabbo.Core
 {
     public class GroupMember : IGroupMember
     {
-        public static GroupMember Parse(Packet packet) => new GroupMember(packet);
+        public static GroupMember Parse(IReadOnlyPacket packet) => new GroupMember(packet);
 
         public GroupMemberType Type { get; set; }
         public int Id { get; set; }
@@ -16,7 +16,7 @@ namespace Xabbo.Core
 
         public GroupMember() { }
 
-        protected GroupMember(Packet packet)
+        protected GroupMember(IReadOnlyPacket packet)
         {
             Type = (GroupMemberType)packet.ReadInt();
             Id = packet.ReadInt();

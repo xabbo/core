@@ -7,41 +7,26 @@ using Xabbo.Core.Protocol;
 namespace Xabbo.Core.Components
 {
     [Dependencies(
+        typeof(ProfileManager),
         typeof(RoomManager),
         typeof(EntityManager)
     )]
     public class TradeManager : XabboComponent
     {
+        private ProfileManager profileManager;
         private RoomManager roomManager;
         private EntityManager entityManager;
 
         public bool IsTrading { get; private set; }
-        public bool IsWaitingConfirmation { get; private set; }
-
-        public IRoomUser Trader { get; private set; }
-        public IRoomUser Tradee { get; private set; }
-        public bool TraderAccepted { get; private set; }
-        public bool TradeeAccepted { get; private set; }
-
+        public bool IsTrader { get; private set; }
+        public IRoomUser Self { get; private set; }
+        public IRoomUser Partner { get; private set; }
         public ITradeOffer OwnOffer { get; private set; }
         public ITradeOffer PartnerOffer { get; private set; }
 
-        public bool HasAccepted(IRoomUser user) => HasAccepted(user?.Id ?? throw new ArgumentNullException("user"));
-        public bool HasAccepted(int userId)
-        {
-            if (!IsTrading) return false;
-            else if (userId == Trader?.Id) return TraderAccepted;
-            else if (userId == Tradee?.Id) return TradeeAccepted;
-            else return false;
-        }
-
-        public ITradeOffer GetOffer(IRoomUser user) => GetOffer(user?.Id ?? throw new ArgumentNullException("user"));
-        public ITradeOffer GetOffer(int userId)
-        {
-            if (OwnOffer?.UserId == userId) return OwnOffer;
-            else if (PartnerOffer?.UserId == userId) return PartnerOffer;
-            else return null;
-        }
+        public bool HasAccepted { get; private set; }
+        public bool HasPartnerAccepted { get; private set; }
+        public bool IsWaitingConfirmation { get; private set; }
 
         public event EventHandler<TradeStartEventArgs> Start;
         public event EventHandler<TradeStartFailEventArgs> StartFail;
@@ -49,24 +34,26 @@ namespace Xabbo.Core.Components
         public event EventHandler<TradeAcceptEventArgs> Accept;
         public event EventHandler WaitingConfirm;
         public event EventHandler<TradeStopEventArgs> Stop;
-        public event EventHandler<TradeOfferEventArgs> Complete;
+        public event EventHandler<TradeCompleteEventArgs> Complete;
 
-        protected virtual void OnStart(IRoomUser trader, IRoomUser tradee)
-            => Start?.Invoke(this, new TradeStartEventArgs(trader, tradee));
+        protected virtual void OnStart(bool isTrader, IRoomUser partner)
+            => Start?.Invoke(this, new TradeStartEventArgs(isTrader, partner));
         protected virtual void OnStartFail(int reason, string name)
             => StartFail?.Invoke(this, new TradeStartFailEventArgs(reason, name));
-        protected virtual void OnUpdate(IRoomUser trader, IRoomUser tradee, ITradeOffer ownOffer, ITradeOffer partnerOffer)
-            => Update?.Invoke(this, new TradeOfferEventArgs(trader, tradee, ownOffer, partnerOffer));
+        protected virtual void OnUpdate(ITradeOffer ownOffer, ITradeOffer partnerOffer)
+            => Update?.Invoke(this, new TradeOfferEventArgs(ownOffer, partnerOffer));
         protected virtual void OnAccept(IRoomUser user, bool accepted)
             => Accept?.Invoke(this, new TradeAcceptEventArgs(user, accepted));
         protected virtual void OnWaitingConfirm() => WaitingConfirm?.Invoke(this, EventArgs.Empty);
-        protected virtual void OnStop(int reason)
-            => Stop?.Invoke(this, new TradeStopEventArgs(reason));
-        protected virtual void OnComplete(IRoomUser trader, IRoomUser tradee, ITradeOffer ownOffer, ITradeOffer partnerOffer)
-            => Complete?.Invoke(this, new TradeOfferEventArgs(trader, tradee, ownOffer, partnerOffer));
+        protected virtual void OnStop(IRoomUser user, int reason)
+            => Stop?.Invoke(this, new TradeStopEventArgs(user, reason));
+        protected virtual void OnComplete(bool wasTrader, IRoomUser self, IRoomUser partner,
+            ITradeOffer ownOffer, ITradeOffer partnerOffer)
+            => Complete?.Invoke(this, new TradeCompleteEventArgs(wasTrader, self, partner, ownOffer, partnerOffer));
 
         protected override void OnInitialize()
         {
+            profileManager = GetComponent<ProfileManager>();
             roomManager = GetComponent<RoomManager>();
             entityManager = GetComponent<EntityManager>();
         }
@@ -74,19 +61,27 @@ namespace Xabbo.Core.Components
         private void ResetTrade()
         {
             IsTrading =
-            IsWaitingConfirmation =
-            TraderAccepted =
-            TradeeAccepted = false;
+            IsTrader =
+            HasAccepted = 
+            HasPartnerAccepted =
+            IsWaitingConfirmation = false;
 
-            Trader = null;
-            Tradee = null;
-            OwnOffer = null;
+            Self =
+            Partner = null;
+
+            OwnOffer =
             PartnerOffer = null;
         }
 
         [Receive("TradeStart")]
-        private void HandleTradeStart(Packet packet)
+        private void HandleTradeStart(IReadOnlyPacket packet)
         {
+            if (profileManager.UserData == null)
+            {
+                DebugUtil.Log("user data not loaded");
+                return;
+            }
+
             if (!roomManager.IsInRoom)
             {
                 DebugUtil.Log("not in room");
@@ -112,16 +107,17 @@ namespace Xabbo.Core.Components
 
             ResetTrade();
 
-            IsTrading = true;
-            Trader = trader;
-            Tradee = tradee;
+            IsTrader = profileManager.UserData.Id == traderId;
+            Self = IsTrader ? trader : tradee;
+            Partner = IsTrader ? tradee : trader;
 
-            DebugUtil.Log($"trader {Trader} {unknownA} / tradee {Tradee} {unknownB}");
-            OnStart(Trader, Tradee);
+            IsTrading = true;
+
+            OnStart(IsTrader, Partner);
         }
 
         [Receive("TradeStartFail")]
-        private void HandleTradeStartFail(Packet packet)
+        private void HandleTradeStartFail(IReadOnlyPacket packet)
         {
             if (!roomManager.IsInRoom)
             {
@@ -132,11 +128,12 @@ namespace Xabbo.Core.Components
             int reason = packet.ReadInt();
             string name = packet.ReadString();
 
+            ResetTrade();
             OnStartFail(reason, name);
         }
 
         [Receive("TradeUpdate")]
-        private void HandleTradeUpdate(Packet packet)
+        private void HandleTradeUpdate(IReadOnlyPacket packet)
         {
             if (!roomManager.IsInRoom)
             {
@@ -150,8 +147,8 @@ namespace Xabbo.Core.Components
                 return;
             }
 
-            TraderAccepted = false;
-            TradeeAccepted = false;
+            HasAccepted = 
+            HasPartnerAccepted = false;
             OwnOffer = TradeOffer.Parse(packet);
             PartnerOffer = TradeOffer.Parse(packet);
 
@@ -164,11 +161,11 @@ namespace Xabbo.Core.Components
                 $"{PartnerOffer.CreditCount} credits"
             );
 
-            OnUpdate(Trader, Tradee, OwnOffer, PartnerOffer);
+            OnUpdate(OwnOffer, PartnerOffer);
         }
 
         [Receive("TradeAccepted")]
-        private void HandleTradeAccepted(Packet packet)
+        private void HandleTradeAccepted(IReadOnlyPacket packet)
         {
             if (!roomManager.IsInRoom)
             {
@@ -186,19 +183,19 @@ namespace Xabbo.Core.Components
             int userId = packet.ReadInt();
             bool accepted = packet.ReadInt() == 1;
 
-            if (userId == Trader.Id)
+            if (userId == Self.Id)
             {
-                user = Trader;
-                TraderAccepted = accepted;
+                user = Self;
+                HasAccepted = accepted;
             }
-            else if (userId == Tradee.Id)
+            else if (userId == Partner.Id)
             {
-                user = Tradee;
-                TradeeAccepted = accepted;
+                user = Partner;
+                HasPartnerAccepted = accepted;
             }
             else
             {
-                DebugUtil.Log($"user id {userId} does not match trader {Trader} or tradee {Tradee} ids");
+                DebugUtil.Log($"user id {userId} does not match self {Self} or partner {Partner} ids");
                 return;
             }
 
@@ -207,7 +204,7 @@ namespace Xabbo.Core.Components
         }
 
         [Receive("TradingWaitingConfirm")]
-        private void HandleTradingWaitingConfirm(Packet packet)
+        private void HandleTradingWaitingConfirm(IReadOnlyPacket packet)
         {
             if (!roomManager.IsInRoom)
             {
@@ -221,11 +218,12 @@ namespace Xabbo.Core.Components
                 return;
             }
 
+            IsWaitingConfirmation = true;
             OnWaitingConfirm();
         }
 
         [Receive("TradeStopped")]
-        private void HandleTradeStopped(Packet packet)
+        private void HandleTradeStopped(IReadOnlyPacket packet)
         {
             if (!roomManager.IsInRoom || !IsTrading)
                 return;
@@ -233,18 +231,33 @@ namespace Xabbo.Core.Components
             int userId = packet.ReadInt();
             int reason = packet.ReadInt();
 
+            bool wasTrader = IsTrader;
+            IRoomUser self = Self;
+            IRoomUser partner = Partner;
+            ITradeOffer ownOffer = OwnOffer;
+            ITradeOffer partnerOffer = PartnerOffer;
+
+            IRoomUser user;
+            if (userId == Self.Id) user = Self;
+            else if (userId == Partner.Id) user = Partner;
+            else
+            {
+                DebugUtil.Log($"user id {userId} does not match self {Self} or partner {Partner} ids");
+                return;
+            }
+
+            ResetTrade();
+
             if (reason == 0)
             {
-                DebugUtil.Log($"complete ({userId}), trader = {Trader}, Tradee = {Tradee}");
-                OnComplete(Trader, Tradee, OwnOffer, PartnerOffer);
+                DebugUtil.Log($"complete {userId}, partner = {partner}");
+                OnComplete(wasTrader, self, partner, ownOffer, partnerOffer);
             }
             else
             {
                 DebugUtil.Log($"stopped, reason = {reason} ({userId})");
-                OnStop(reason);
+                OnStop(user, reason);
             }
-
-            ResetTrade();
         }
     }
 }

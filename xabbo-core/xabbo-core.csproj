@@ -32,6 +32,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\xabbo-core.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -43,6 +44,7 @@
     <DebugSymbols>true</DebugSymbols>
     <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
     <PathMap>$(AppOutputBase)=\b7\xabbo-core\</PathMap>
+    <DocumentationFile>bin\Release\xabbo-core.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -61,7 +63,7 @@
     <Compile Include="Achievements\Achievement.cs" />
     <Compile Include="Achievements\Achievements.cs" />
     <Compile Include="Achievements\IAchievement.cs" />
-    <Compile Include="BanType.cs" />
+    <Compile Include="BanDuration.cs" />
     <Compile Include="Catalog\CatalogPage.cs" />
     <Compile Include="Catalog\CatalogPageData.cs" />
     <Compile Include="Catalog\CatalogPageNode.cs" />
@@ -82,10 +84,13 @@
     <Compile Include="Events\EntityNameChangedEventArgs.cs" />
     <Compile Include="Events\EntityTypingEventArgs.cs" />
     <Compile Include="Events\FriendEventArgs.cs" />
+    <Compile Include="Events\FriendMessageEventArgs.cs" />
     <Compile Include="Events\FriendsEventArgs.cs" />
+    <Compile Include="Events\FriendUpdatedEventArgs.cs" />
     <Compile Include="Events\PointsUpdatedEventArgs.cs" />
     <Compile Include="Events\RoomUserEventArgs.cs" />
     <Compile Include="Events\TradeAcceptEventArgs.cs" />
+    <Compile Include="Events\TradeCompleteEventArgs.cs" />
     <Compile Include="Events\TradeOfferEventArgs.cs" />
     <Compile Include="Events\TradeStartEventArgs.cs" />
     <Compile Include="Events\TradeStartFailEventArgs.cs" />
@@ -139,6 +144,7 @@
     <Compile Include="ItemData\IItemData.cs" />
     <Compile Include="ItemData\ILegacyData.cs" />
     <Compile Include="ItemData\IMapData.cs" />
+    <Compile Include="ItemData\IStringArrayData.cs" />
     <Compile Include="ItemData\IVoteResultData.cs" />
     <Compile Include="Messages\Attributes\InterceptAttribute.cs" />
     <Compile Include="Messages\Header.cs" />
@@ -151,11 +157,12 @@
     <Compile Include="Metadata\FigureDataXml.cs" />
     <Compile Include="Metadata\FurniDataXml.cs" />
     <Compile Include="Metadata\FurniInfo.cs" />
+    <Compile Include="Metadata\MetadataType.cs" />
     <Compile Include="Metadata\ProductData.cs" />
     <Compile Include="Pet\PetInfo.cs" />
     <Compile Include="Protocol\IPacket.cs" />
     <Compile Include="Protocol\IReadOnlyPacket.cs" />
-    <Compile Include="Protocol\IWritable.cs" />
+    <Compile Include="Protocol\IPacketData.cs" />
     <Compile Include="Room\Chat\IChatSettings.cs" />
     <Compile Include="Room\Entity\Bot.cs" />
     <Compile Include="Room\Entity\IBot.cs" />
@@ -175,8 +182,6 @@
     <Compile Include="Room\IHeightMap.cs" />
     <Compile Include="Room\IRoomData.cs" />
     <Compile Include="Room\IRoomInfo.cs" />
-    <Compile Include="Room\ITile.cs" />
-    <Compile Include="Room\IWallLocation.cs" />
     <Compile Include="Room\RollerInstanceUpdate.cs" />
     <Compile Include="Room\RollerUpdate.cs" />
     <Compile Include="Room\RollerUpdateType.cs" />
@@ -210,9 +215,9 @@
     <Compile Include="Trade\TradeItem.cs" />
     <Compile Include="Trade\TradeOffer.cs" />
     <Compile Include="Users\Badge.cs" />
-    <Compile Include="Users\FriendInfo.cs" />
+    <Compile Include="Users\Friend.cs" />
     <Compile Include="Groups\IGroupInfo.cs" />
-    <Compile Include="Users\IFriendInfo.cs" />
+    <Compile Include="Users\IFriend.cs" />
     <Compile Include="Users\IUserData.cs" />
     <Compile Include="Users\IUserProfile.cs" />
     <Compile Include="Users\Relation.cs" />
@@ -311,6 +316,7 @@
     <Compile Include="Users\UserSearchResult.cs" />
     <Compile Include="Room\Furni\WallItem.cs" />
     <Compile Include="Util\Area.cs" />
+    <Compile Include="Util\AreaCollection.cs" />
     <Compile Include="Util\DebugUtil.cs" />
     <Compile Include="Util\EnumerableExtensions.cs" />
     <Compile Include="Util\ReflectionExtensions.cs" />

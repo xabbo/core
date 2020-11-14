@@ -9,7 +9,7 @@ namespace Xabbo.Core.Messages
             : base(Destination.Server)
         { }
 
-        public Outgoing(IDictionary<string, short> values)
+        public Outgoing(IReadOnlyDictionary<string, short> values)
             : base(Destination.Server, values)
         { }
 
@@ -296,6 +296,7 @@ namespace Xabbo.Core.Messages
         public Header SearchRoomsVisited { get; private set; }
         public Header SearchRoomsWithRights { get; private set; }
         public Header SearchUser { get; private set; }
+        public Header SpectateRoom { get; private set; }
         public Header SSOTicket { get; private set; }
         public Header SellItem { get; private set; }
         public Header SetHomeRoom { get; private set; }

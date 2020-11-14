@@ -26,7 +26,7 @@ namespace Xabbo.Core
             FigureExtra = "";
         }
 
-        internal RoomUser(int id, int index, Packet packet)
+        internal RoomUser(int id, int index, IReadOnlyPacket packet)
             : this(id, index)
         {
             Gender = H.ToGender(packet.ReadString());
@@ -40,7 +40,7 @@ namespace Xabbo.Core
 
         protected override void OnUpdate(EntityUpdate update) { }
 
-        public override void Write(Packet packet)
+        public override void Write(IPacket packet)
         {
             base.Write(packet);
 

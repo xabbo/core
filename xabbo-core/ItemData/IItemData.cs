@@ -4,7 +4,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public interface IItemData : IWritable
+    public interface IItemData : IPacketData
     {
         ItemDataType Type { get; }
 

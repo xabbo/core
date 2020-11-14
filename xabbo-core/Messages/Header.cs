@@ -1,6 +1,4 @@
 ﻿using System;
-using System.CodeDom;
-using System.Runtime.CompilerServices;
 
 namespace Xabbo.Core.Messages
 {

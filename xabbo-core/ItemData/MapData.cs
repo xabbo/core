@@ -29,7 +29,7 @@ namespace Xabbo.Core
             dict = new Dictionary<string, string>();
         }
 
-        protected override void Initialize(Packet packet)
+        protected override void Initialize(IReadOnlyPacket packet)
         {
             int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
@@ -38,7 +38,7 @@ namespace Xabbo.Core
             base.Initialize(packet);
         }
 
-        protected override void WriteData(Packet packet)
+        protected override void WriteData(IPacket packet)
         {
             packet.WriteInt(dict.Count);
             foreach (var item in dict)

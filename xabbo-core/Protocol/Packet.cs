@@ -193,7 +193,7 @@ namespace Xabbo.Core.Protocol
             WriteValues(values);
         }
 
-        public Packet(Packet packet)
+        public Packet(IReadOnlyPacket packet)
             : this(packet.Header)
         {
             byte[] data = packet.GetData();
@@ -405,7 +405,7 @@ namespace Xabbo.Core.Protocol
 
         public void WriteDouble(double value)
         {
-            WriteString(value.ToString(CultureInfo.InvariantCulture));
+            WriteString(value.ToString("0.0##############", CultureInfo.InvariantCulture));
         }
 
         public void WriteDouble(double value, int position)
@@ -455,7 +455,7 @@ namespace Xabbo.Core.Protocol
                         break;
                     case string x: WriteString(x); break;
                     case double x: WriteDouble(x); break;
-                    case IWritable x: x.Write(this); break;
+                    case IPacketData x: x.Write(this); break;
                     case ICollection x:
                         {
                             WriteInt(x.Count);
@@ -477,7 +477,11 @@ namespace Xabbo.Core.Protocol
                             Position = endPosition;
                         }
                         break;
-                    default: throw new Exception($"Invalid value type: {value.GetType().Name}");
+                    default:
+                        if (value == null)
+                            throw new Exception("Null value");
+                        else
+                            throw new Exception($"Invalid value type: {value.GetType().Name}");
                 }
             }
         }

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -46,18 +49,16 @@ namespace Xabbo.Core
             }
         }
 
-        public static ItemType ToFurniType(string s)
+        public static ItemType ToItemType(string s)
         {
-            switch (s.ToLower())
-            {
-                case "s":
-                case "floor":
-                    return ItemType.Floor;
-                case "i":
-                case "wall":
-                    return ItemType.Wall;
-                default: throw new FormatException($"Unknown furni type: {s}");
-            }
+            if (s.Length != 1)
+                throw new Exception($"Invalid item type: {s}");
+
+            ItemType type = (ItemType)s.ToLower()[0];
+            if (!Enum.IsDefined(typeof(ItemType), type))
+                throw new Exception($"Unknown item type: {s}");
+
+            return type;
         }
 
         #region - Figure -
@@ -144,8 +145,10 @@ namespace Xabbo.Core
                 return c - '0';
             else if ('a' <= c && c != 'x' && c <= 'z')
                 return 10 + (c - 'a');
+            else if ('A' <= c && c != 'X' && c <= 'Z')
+                return 10 + (c - 'A');
             else
-                return -1;
+                return -110;
         }
 
         public static char GetCharacterFromHeight(int height)
@@ -159,6 +162,44 @@ namespace Xabbo.Core
         }
         #endregion
 
+        #region - Text -
+        private static readonly Dictionary<char, string> altCharacterMap = new Dictionary<char, string>()
+        {
+            { '‡', "🚫" },
+            { '|', "❤️" },
+            { '¥', "⭐" },
+            { 'ƒ', "🖤" },
+            { 'í', "-" },
+            { '—', "🎵" },
+            { 'ª', "💀" },
+            { 'º', "⚡" },
+            { 'µ', "☕" },
+            { '±', "📱" },
+            { '÷', "👎" },
+            { '•', "👍" },
+            { '¶', "💡" },
+            { '‘', "🔒" },
+            { '†', "💣" },
+            { '¬', "🐟" },
+            { '»', "♣️" }
+        };
+
+        public static IReadOnlyDictionary<char, string> GetAltCharacterMap() => altCharacterMap.ToDictionary(x => x.Key, x => x.Value);
+
+        public static string ReplaceSpecialCharacters(string text)
+        {
+            var sb = new StringBuilder();
+            foreach (char c in text)
+            {
+                if (altCharacterMap.ContainsKey(c))
+                    sb.Append(altCharacterMap[c]);
+                else
+                    sb.Append(c);
+            }
+            return sb.ToString();
+        }
+        #endregion
+
         #region - Web API -
         public static string USER_AGENT = DEFAULT_USER_AGENT;
 
@@ -166,7 +207,7 @@ namespace Xabbo.Core
         {
             var req = WebRequest.CreateHttp(url);
             req.UserAgent = USER_AGENT;
-            req.Host = "www.habbo.com";
+            //req.Host = "www.habbo.com";
             req.Referer = referer;
 
             using (var res = await req.GetResponseAsync().ConfigureAwait(false))
@@ -201,7 +242,10 @@ namespace Xabbo.Core
             }
         }
 
-        public static Task<string> LoadExternalVariablesAsync() => DownloadStringAsync(URL_EXTERNAL_VARIABLES);
+        public static Task<string> LoadExternalVariablesAsync() => LoadExternalVariablesAsync("com"); 
+
+        public static Task<string> LoadExternalVariablesAsync(string domain)
+            => DownloadStringAsync(URL_EXTERNAL_VARIABLES.Replace("$domain", domain));
 
         public static async Task<UserInfo> FindUserAsync(string name)
         {

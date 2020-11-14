@@ -4,9 +4,9 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class ChatSettings : IChatSettings, IWritable
+    public class ChatSettings : IChatSettings, IPacketData
     {
-        public static ChatSettings Parse(Packet packet) => new ChatSettings(packet);
+        public static ChatSettings Parse(IReadOnlyPacket packet) => new ChatSettings(packet);
 
         public ChatFlow Flow { get; set; }
         public ChatBubbleWidth BubbleWidth { get; set; }
@@ -23,7 +23,7 @@ namespace Xabbo.Core
             FloodProtection = ChatFloodProtection.Standard;
         }
 
-        internal ChatSettings(Packet packet)
+        internal ChatSettings(IReadOnlyPacket packet)
         {
             Flow = (ChatFlow)packet.ReadInt();
             BubbleWidth = (ChatBubbleWidth)packet.ReadInt();
@@ -32,7 +32,7 @@ namespace Xabbo.Core
             FloodProtection = (ChatFloodProtection)packet.ReadInt();
         }
 
-        public void Write(Packet packet) => packet.WriteValues(
+        public void Write(IPacket packet) => packet.WriteValues(
             (int)Flow,
             (int)BubbleWidth,
             (int)ScrollSpeed,

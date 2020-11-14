@@ -7,8 +7,10 @@ namespace Xabbo.Core
     /// <summary>
     /// The user's own data that is sent upon requesting user data.
     /// </summary>
-    public class UserData : IUserData, IWritable
+    public class UserData : IUserData
     {
+        public static UserData Parse(IReadOnlyPacket packet) => new UserData(packet);
+
         public int Id { get; set; }
         public string Name { get; set; }
         public string Figure { get; set; }
@@ -26,7 +28,7 @@ namespace Xabbo.Core
 
         public UserData() { }
 
-        private UserData(Packet packet)
+        protected UserData(IReadOnlyPacket packet)
         {
             Id = packet.ReadInt();
             Name = packet.ReadString();
@@ -44,26 +46,21 @@ namespace Xabbo.Core
             IsSafetyLocked = packet.ReadBool();
         }
 
-        public static UserData Parse(Packet packet) => new UserData(packet);
-
-        public void Write(Packet packet)
-        {
-            packet.WriteValues(
-                Id,
-                Name,
-                Figure,
-                Gender.ToShortString(),
-                Motto,
-                String4,
-                Bool1,
-                TotalRespects,
-                RespectsLeft,
-                ScratchesLeft,
-                Bool2,
-                LastLogin,
-                IsNameChangeable,
-                IsSafetyLocked
-            );
-        }
+        public void Write(Packet packet) => packet.WriteValues(
+            Id,
+            Name,
+            Figure,
+            Gender.ToShortString(),
+            Motto,
+            String4,
+            Bool1,
+            TotalRespects,
+            RespectsLeft,
+            ScratchesLeft,
+            Bool2,
+            LastLogin,
+            IsNameChangeable,
+            IsSafetyLocked
+        );
     }
 }

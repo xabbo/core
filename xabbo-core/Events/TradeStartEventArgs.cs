@@ -5,19 +5,19 @@ namespace Xabbo.Core.Events
     public class TradeStartEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets the user who started the trade.
+        /// Gets if the user was the one who initiated the trade.
         /// </summary>
-        public IRoomUser Trader { get; }
+        public bool IsTrader { get; }
 
         /// <summary>
-        /// Gets the user who was traded.
+        /// Gets the partner of the trade.
         /// </summary>
-        public IRoomUser Tradee { get; }
+        public IRoomUser Partner { get; }
 
-        public TradeStartEventArgs(IRoomUser trader, IRoomUser tradee)
+        public TradeStartEventArgs(bool isTrader, IRoomUser partner)
         {
-            Trader = trader;
-            Tradee = tradee;
+            IsTrader = isTrader;
+            Partner = partner;
         }
     }
 }

@@ -6,7 +6,7 @@ namespace Xabbo.Core
 {
     public class GroupData : IGroupData
     {
-        public static GroupData Parse(Packet packet) => new GroupData(packet);
+        public static GroupData Parse(IReadOnlyPacket packet) => new GroupData(packet);
 
         public int Id { get; set; }
         public bool CanLeave { get; set; }
@@ -28,7 +28,7 @@ namespace Xabbo.Core
         public int PendingRequests { get; set; }
         public bool CanViewForum { get; set; }
 
-        protected GroupData(Packet packet)
+        protected GroupData(IReadOnlyPacket packet)
         {
             Id = packet.ReadInt();
             CanLeave = packet.ReadBool();

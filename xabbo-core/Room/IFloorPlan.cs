@@ -1,9 +1,13 @@
 ﻿using System;
 
+using Xabbo.Core.Protocol;
+
 namespace Xabbo.Core
 {
-    public interface IFloorPlan
+    public interface IFloorPlan : IPacketData
     {
+        string OriginalString { get; }
+
         int Scale { get; }
         int WallHeight { get; }
         int Width { get; }

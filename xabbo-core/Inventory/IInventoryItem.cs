@@ -3,7 +3,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public interface IInventoryItem : IItem, IWritable
+    public interface IInventoryItem : IItem, IPacketData
     {
         /// <summary>
         /// Gets the ID of the inventory item.

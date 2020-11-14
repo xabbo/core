@@ -14,7 +14,7 @@ namespace Xabbo.Core
 
         public Sticky() { }
 
-        protected Sticky(Packet packet)
+        protected Sticky(IReadOnlyPacket packet)
         {
             Id = int.Parse(packet.ReadString());
             string text = packet.ReadString();
@@ -25,6 +25,6 @@ namespace Xabbo.Core
             Text = text.Substring(7);
         }
 
-        public static Sticky Parse(Packet packet) => new Sticky(packet);
+        public static Sticky Parse(IReadOnlyPacket packet) => new Sticky(packet);
     }
 }

@@ -4,7 +4,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class HeightMap : IHeightMap, IWritable
+    public class HeightMap : IHeightMap
     {
         public int Width { get; }
         public int Length { get; }
@@ -35,7 +35,7 @@ namespace Xabbo.Core
             Values = new short[width * length];
         }
 
-        private HeightMap(Packet packet)
+        private HeightMap(IReadOnlyPacket packet)
         {
             Width = packet.ReadInt();
             int n = packet.ReadInt();
@@ -48,21 +48,32 @@ namespace Xabbo.Core
 
         public double GetHeight(int x, int y)
         {
-            if (x < 0 || x >= Width || y < 0 || y >= Length)
-                return -1;
-
             short value = Values[y * Width + x];
             if (value < 0) return -1;
 
             return (value & 0x3FFF) / 256.0;
         }
+        public double GetHeight((int X, int Y) location) => GetHeight(location.X, location.Y);
 
-        public bool IsBlocked(int x, int y)
+        public void SetHeight(int x, int y, double height)
         {
-            if (x < 0 || x >= Width || y < 0 || y >= Length)
-                return false;
+            if (height < 0 || height > 63)
+                throw new ArgumentOutOfRangeException("height", "Height must be from 0 - 63.");
 
-            return (Values[y * Width + x] & 0x4000) > 0;
+            this[x ,y] &= ~0x3FFF;
+            this[x, y] |= (short)(height * 256.0);
+        }
+        public void SetHeight((int X, int Y) location, double height) => SetHeight(location.X, location.Y, height);
+
+        public bool IsBlocked(int x, int y) => (this[x, y] & 0x4000) > 0;
+        public bool IsBlocked((int X, int Y) location) => IsBlocked(location.X, location.Y);
+
+        public void SetBlocked(int x, int y, bool isBlocked)
+        {
+            if (isBlocked)
+                this[x, y] |= 0x4000;
+            else
+                this[x, y] &= ~0x4000;
         }
 
         public bool IsTile(int x, int y)
@@ -72,12 +83,26 @@ namespace Xabbo.Core
 
             return Values[y * Width + x] >= 0;
         }
+        public bool IsTile((int X, int Y) location) => IsTile(location.X, location.Y);
+
+        public void SetIsTile(int x, int y, bool isTile)
+        {
+            unchecked
+            {
+                if (isTile)
+                    this[x, y] &= (short)~0x8000;
+                else
+                    this[x, y] |= (short)0x8000;
+            }
+        }
+        public void SetIsTile((int X, int Y) location, bool isTile) => SetIsTile(location.X, location.Y, isTile);
 
         public bool IsFree(int x, int y) => IsTile(x, y) && !IsBlocked(x, y);
+        public bool IsFree((int X, int Y) location) => IsFree(location.X, location.Y);
 
-        public static HeightMap Parse(Packet packet) => new HeightMap(packet);
+        public static HeightMap Parse(IReadOnlyPacket packet) => new HeightMap(packet);
 
-        public void Write(Packet packet)
+        public void Write(IPacket packet)
         {
             if (Values == null)
                 throw new NullReferenceException("Values cannot be null.");

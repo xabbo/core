@@ -30,6 +30,7 @@ namespace Xabbo.Core.Components
         public RoomData Data { get; private set; }
 
         public Tile DoorTile { get; private set; }
+        public int EntryDirection { get; private set; }
         public FloorPlan FloorPlan { get; private set; }
         public HeightMap HeightMap { get; private set; }
 
@@ -43,18 +44,21 @@ namespace Xabbo.Core.Components
 
         #region - Events -
         public event EventHandler RingingDoorbell;
+        public event EventHandler DoorbellNoAnswer;
         public event EventHandler EnteredQueue;
         public event EventHandler QueuePositionUpdated;
         public event EventHandler Entering;
         public event EventHandler Entered;
         public event EventHandler Left;
         public event EventHandler Kicked;
+        public event EventHandler RightsUpdated;
 
         public event EventHandler<RoomDataEventArgs> RoomDataUpdated;
 
         public event EventHandler<DoorbellEventArgs> Doorbell;
 
         protected virtual void OnRingingDoorbell() => RingingDoorbell?.Invoke(this, EventArgs.Empty);
+        protected virtual void OnDoorbellNoAnswer() => DoorbellNoAnswer?.Invoke(this, EventArgs.Empty);
 
         protected virtual void OnEnteredQueue() => EnteredQueue?.Invoke(this, EventArgs.Empty);
         protected virtual void OnQueuePositionUpdated() => QueuePositionUpdated?.Invoke(this, EventArgs.Empty);
@@ -63,6 +67,8 @@ namespace Xabbo.Core.Components
         protected virtual void OnEnteredRoom() => Entered?.Invoke(this, EventArgs.Empty);
         protected virtual void OnLeftRoom() => Left?.Invoke(this, EventArgs.Empty);
         protected virtual void OnKicked() => Kicked?.Invoke(this, EventArgs.Empty);
+
+        protected virtual void OnRightsUpdated() => RightsUpdated?.Invoke(this, EventArgs.Empty);
 
         protected virtual void OnRoomDataUpdated(RoomData roomData)
             => RoomDataUpdated?.Invoke(this, new RoomDataEventArgs(roomData));
@@ -87,7 +93,7 @@ namespace Xabbo.Core.Components
             Wallpaper =
             Landscape = null;
             
-            DoorTile = null;
+            DoorTile = default;
             FloorPlan = null;
             HeightMap = null;
 
@@ -111,7 +117,7 @@ namespace Xabbo.Core.Components
         }
 
         [Receive("RoomData")]
-        private void HandleRoomData(Packet packet)
+        private void HandleRoomData(IReadOnlyPacket packet)
         {
             var roomData = RoomData.Parse(packet);
             roomDataCache[roomData.Id] = roomData;
@@ -126,7 +132,7 @@ namespace Xabbo.Core.Components
         }
 
         [Receive("RoomOpen")]
-        private void HandleRoomOpen(Packet packet)
+        private void HandleRoomOpen(IReadOnlyPacket packet)
         {
             if (IsRingingDoorbell || IsInQueue || IsLoadingRoom || IsInRoom)
             {
@@ -159,16 +165,16 @@ namespace Xabbo.Core.Components
                 var doorbellArgs = new DoorbellEventArgs(name);
                 OnDoorbell(doorbellArgs);
 
-                if (doorbellArgs.Accept.HasValue)
+                if (doorbellArgs.IsAccepted.HasValue)
                 {
                     e.Block();
-                    await Interceptor.SendToServerAsync(Out.HandleDoorbell, name, doorbellArgs.Accept.Value);
+                    await SendAsync(Out.HandleDoorbell, name, doorbellArgs.IsAccepted.Value);
                 }
             }
         }
 
         [Receive("HideDoorbell")]
-        private void HandleHideDoorbell(Packet packet)
+        private void HandleHideDoorbell(IReadOnlyPacket packet)
         {
             int roomId = packet.ReadInt();
             if (roomId != Id)
@@ -177,16 +183,20 @@ namespace Xabbo.Core.Components
                 return;
             }
 
-            string user = packet.ReadString();
+            string user = null;
+            if (packet.CanReadString())
+                user = packet.ReadString();
+
             if (string.IsNullOrEmpty(user))
             {
                 DebugUtil.Log("no answer");
                 IsRingingDoorbell = false;
+                OnDoorbellNoAnswer();
             }
         }
 
         [Receive("RoomEntryInfo")]
-        private void HandleRoomEntryInfo(Packet packet)
+        private void HandleRoomEntryInfo(IReadOnlyPacket packet)
         {
             packet.ReadInt(); // room id
             if (packet.ReadInt() == 2 &&
@@ -214,7 +224,7 @@ namespace Xabbo.Core.Components
         }
 
         [Receive("RoomModel")]
-        private void HandleRoomModel(Packet packet)
+        private void HandleRoomModel(IReadOnlyPacket packet)
         {
             if (IsLoadingRoom || IsInRoom)
             {
@@ -236,7 +246,7 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.Paint), Receive("RoomPaint")]
-        private void HandleRoomPaint(Packet packet)
+        private void HandleRoomPaint(IReadOnlyPacket packet)
         {
             string key = packet.ReadString();
             string value = packet.ReadString();
@@ -250,22 +260,35 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.Permissions), Receive("RoomRights")]
-        private void HandleRoomRights(Packet packet)
+        private void HandleRoomRights(IReadOnlyPacket packet)
         {
             int roomId = packet.ReadInt();
             if (roomId != Id)
             {
-                DebugUtil.Log("room id mismatch");
+                DebugUtil.Log($"room id mismatch: {roomId}");
                 return;
             }
 
             RightsLevel = packet.ReadInt();
+            OnRightsUpdated();
+        }
 
-            DebugUtil.Log($"rights = {RightsLevel}");
+        [Group(Features.Permissions), Receive(nameof(Incoming.RoomNoRights))]
+        private void HandleRoomNoRights(IReadOnlyPacket packet)
+        {
+            int roomId = packet.ReadInt();
+            if (roomId != Id)
+            {
+                DebugUtil.Log($"room id mismatch: {roomId}");
+                return;
+            }
+
+            RightsLevel = 0;
+            OnRightsUpdated();
         }
 
         [Group(Features.DoorTile), Receive("FloorPlanEditorDoorSettings")]
-        private void HandleDoorSettings(Packet packet)
+        private void HandleDoorSettings(IReadOnlyPacket packet)
         {
             if (!IsLoadingRoom)
             {
@@ -278,12 +301,13 @@ namespace Xabbo.Core.Components
             int dir = packet.ReadInt();
 
             DoorTile = new Tile(x, y, 0);
+            EntryDirection = dir;
 
             DebugUtil.Log("loaded door tile");
         }
 
         [Group(Features.HeightMap), Receive("RoomRelativeMap")]
-        private void HandleHeightMap(Packet packet)
+        private void HandleHeightMap(IReadOnlyPacket packet)
         {
             if (!IsLoadingRoom)
             {
@@ -292,12 +316,10 @@ namespace Xabbo.Core.Components
             }
 
             HeightMap = HeightMap.Parse(packet);
-
-            DebugUtil.Log("loaded heightmap");
         }
 
         [Group(Features.HeightMap), Receive("UpdateStackHeight")]
-        private void HandleUpdateStackHeight(Packet packet)
+        private void HandleUpdateStackHeight(IReadOnlyPacket packet)
         {
             if (HeightMap == null) return;
 
@@ -308,12 +330,10 @@ namespace Xabbo.Core.Components
                 int y = packet.ReadByte();
                 HeightMap[x, y] = packet.ReadShort();
             }
-
-            DebugUtil.Log("heightmap updated");
         }
 
         [Group(Features.FloorPlan), Receive("RoomHeightMap")]
-        private void HandleFloorPlan(Packet packet)
+        private void HandleFloorPlan(IReadOnlyPacket packet)
         {
             if (!IsLoadingRoom)
             {
@@ -327,7 +347,7 @@ namespace Xabbo.Core.Components
         }
 
         [Receive("RoomOwner")]
-        private void HandleRoomOwner(Packet packet)
+        private void HandleRoomOwner(IReadOnlyPacket packet)
         {
             if (!IsLoadingRoom)
             {
@@ -357,7 +377,7 @@ namespace Xabbo.Core.Components
         }
 
         [Receive("HotelView")]
-        private void HandleHotelView(Packet packet)
+        private void HandleHotelView(IReadOnlyPacket packet)
         {
             if (IsRingingDoorbell || IsInQueue || IsLoadingRoom || IsInRoom)
             {
@@ -367,7 +387,7 @@ namespace Xabbo.Core.Components
         }
 
         [Receive("GenericErrorMessages")]
-        private void HandleGenericErrorMessages(Packet packet)
+        private void HandleGenericErrorMessages(IReadOnlyPacket packet)
         {
             if (!IsInRoom) return;
 

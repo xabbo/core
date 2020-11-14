@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
     public class NavigatorSearchResults : List<NavigatorSearchResultList>
     {
-        public static NavigatorSearchResults Parse(Packet packet) => new NavigatorSearchResults(packet);
+        public static NavigatorSearchResults Parse(IReadOnlyPacket packet) => new NavigatorSearchResults(packet);
 
         public string Category { get; set; }
         public string Filter { get; set; }
@@ -18,7 +19,7 @@ namespace Xabbo.Core
             Filter = filter;
         }
 
-        internal NavigatorSearchResults(Packet packet)
+        protected NavigatorSearchResults(IReadOnlyPacket packet)
         {
             Category = packet.ReadString();
             Filter = packet.ReadString();

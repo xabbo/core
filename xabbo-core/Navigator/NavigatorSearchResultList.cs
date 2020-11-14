@@ -7,7 +7,7 @@ namespace Xabbo.Core
 {
     public class NavigatorSearchResultList : List<RoomInfo>
     {
-        public static NavigatorSearchResultList Parse(Packet packet) => new NavigatorSearchResultList(packet);
+        public static NavigatorSearchResultList Parse(IReadOnlyPacket packet) => new NavigatorSearchResultList(packet);
 
         public string Category { get; set; }
         public string Text { get; set; }
@@ -17,7 +17,7 @@ namespace Xabbo.Core
 
         public NavigatorSearchResultList() { }
 
-        internal NavigatorSearchResultList(Packet packet)
+        protected NavigatorSearchResultList(IReadOnlyPacket packet)
         {
             Category = packet.ReadString();
             Text = packet.ReadString();

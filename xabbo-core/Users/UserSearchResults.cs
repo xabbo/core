@@ -9,7 +9,7 @@ namespace Xabbo.Core
 {
     public class UserSearchResults : IReadOnlyCollection<UserSearchResult>
     {
-        public static UserSearchResults Parse(Packet packet) => new UserSearchResults(packet);
+        public static UserSearchResults Parse(IReadOnlyPacket packet) => new UserSearchResults(packet);
 
         public IReadOnlyList<UserSearchResult> Friends { get; }
         public IReadOnlyList<UserSearchResult> Others { get; }
@@ -18,7 +18,7 @@ namespace Xabbo.Core
         public IEnumerator<UserSearchResult> GetEnumerator() => Friends.Concat(Others).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        internal UserSearchResults(Packet packet)
+        protected UserSearchResults(IReadOnlyPacket packet)
         {
             var results = new List<UserSearchResult>();
 

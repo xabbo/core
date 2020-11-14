@@ -8,8 +8,13 @@ namespace Xabbo.Core.Metadata
     [XmlRoot("furnidata")]
     public class FurniDataXml
     {
-        private static readonly XmlSerializer serializer = new XmlSerializer(typeof(FurniDataXml));
-        public static FurniDataXml Load(Stream stream) => (FurniDataXml)serializer.Deserialize(stream);
+        private static readonly XmlSerializer _serializer = new XmlSerializer(typeof(FurniDataXml));
+        public static FurniDataXml Load(Stream stream) => (FurniDataXml)_serializer.Deserialize(stream);
+        public static FurniDataXml Load(string path)
+        {
+            using (Stream stream = File.OpenRead(path))
+                return Load(stream);
+        }
 
         [XmlArray("roomitemtypes")]
         [XmlArrayItem("furnitype")]

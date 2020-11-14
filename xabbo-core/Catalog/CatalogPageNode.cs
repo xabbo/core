@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Xabbo.Core.Protocol;
 
@@ -7,15 +8,7 @@ namespace Xabbo.Core
 {
     public class CatalogPageNode : ICatalogPageNode
     {
-        private static IEnumerable<CatalogPageNode> EnumerateTree(CatalogPageNode node)
-        {
-            yield return node;
-            foreach (var child in node.Children)
-                foreach (var grandChild in EnumerateTree(child))
-                    yield return grandChild;
-        }
-
-        public static CatalogPageNode Parse(Packet packet) => new CatalogPageNode(packet);
+        public static CatalogPageNode Parse(IReadOnlyPacket packet) => new CatalogPageNode(packet);
 
         public bool IsVisible { get; set; }
         public int Icon { get; set; }
@@ -29,7 +22,7 @@ namespace Xabbo.Core
 
         public CatalogPageNode() { }
 
-        internal CatalogPageNode(Packet packet)
+        protected CatalogPageNode(IReadOnlyPacket packet)
         {
             IsVisible = packet.ReadBool();
             Icon = packet.ReadInt();
@@ -46,30 +39,35 @@ namespace Xabbo.Core
                 Children.Add(Parse(packet));
         }
 
-        public CatalogPageNode Find(Predicate<CatalogPageNode> predicate)
+        public IEnumerable<CatalogPageNode> EnumerateDescendants()
         {
-            foreach (var node in EnumerateTree(this))
-                if (predicate(node))
-                    return node;
-            return null;
-        }
+            var queue = new Queue<CatalogPageNode>(new[] { this });
 
+            CatalogPageNode current;
+            while (queue.Any())
+            {
+                yield return current = queue.Dequeue();
+                foreach (var child in current.Children)
+                    queue.Enqueue(child);
+            }
+        }
+        IEnumerable<ICatalogPageNode> ICatalogPageNode.EnumerateDescendants() => EnumerateDescendants();
+
+        public CatalogPageNode Find(Predicate<CatalogPageNode> predicate) => EnumerateDescendants().First(x => predicate(x));
         ICatalogPageNode ICatalogPageNode.Find(Predicate<ICatalogPageNode> predicate) => Find(predicate);
 
         public CatalogPageNode Find(string text) =>
-            Find(node => node.Text.Equals(text, StringComparison.InvariantCultureIgnoreCase));
-
+            Find(node => string.Equals(node.Text, text, StringComparison.OrdinalIgnoreCase));
         ICatalogPageNode ICatalogPageNode.Find(string text) => Find(text);
 
         public CatalogPageNode Find(int? id = null, string name = null, string text = null)
         {
             return Find(node =>
-                (!id.HasValue || node.Id == id) &&
-                (name == null || node.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)) &&
-                (text == null || node.Text.Equals(text, StringComparison.InvariantCultureIgnoreCase))
+                (id == null || node.Id == id) &&
+                (name == null || string.Equals(node.Name, name, StringComparison.OrdinalIgnoreCase)) &&
+                (text == null || string.Equals(node.Text, text, StringComparison.OrdinalIgnoreCase))
             );
         }
-
         ICatalogPageNode ICatalogPageNode.Find(int? id, string name, string text) => Find(id, name, text);
     }
 }

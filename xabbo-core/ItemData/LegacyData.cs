@@ -10,13 +10,13 @@ namespace Xabbo.Core
             : base(ItemDataType.Legacy)
         { }
 
-        protected override void Initialize(Packet packet)
+        protected override void Initialize(IReadOnlyPacket packet)
         {
             LegacyString = packet.ReadString();
             base.Initialize(packet);
         }
 
-        protected override void WriteData(Packet packet)
+        protected override void WriteData(IPacket packet)
         {
             packet.WriteString(LegacyString);
             WriteBase(packet);

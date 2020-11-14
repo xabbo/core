@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public interface IHighScore
+    public interface IHighScore : IPacketData
     {
-        int Score { get; }
+        int Value { get; }
         IReadOnlyList<string> Names { get; }
     }
 }
