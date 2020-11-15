@@ -15,8 +15,8 @@ namespace Xabbo.Core.Components
         private readonly List<Friend> loadList = new List<Friend>();
         private bool isLoadingFriends = true, isForceLoading;
 
-        private ConcurrentDictionary<int, Friend> friends;
-        private ConcurrentDictionary<string, Friend> nameMap;
+        private readonly ConcurrentDictionary<int, Friend> friends;
+        private readonly ConcurrentDictionary<string, Friend> nameMap;
 
         public bool IsInitialized { get; private set; }
         public IEnumerable<IFriend> Friends => friends.Select(x => x.Value);
@@ -30,19 +30,19 @@ namespace Xabbo.Core.Components
         protected virtual void OnLoaded()
             => Loaded?.Invoke(this, EventArgs.Empty);
 
-        public EventHandler<FriendEventArgs> FriendAdded;
+        public event EventHandler<FriendEventArgs> FriendAdded;
         protected virtual void OnFriendAdded(IFriend friend)
             => FriendAdded?.Invoke(this, new FriendEventArgs(friend));
         
-        public EventHandler<FriendEventArgs> FriendRemoved;
+        public event EventHandler<FriendEventArgs> FriendRemoved;
         protected virtual void OnFriendRemoved(IFriend friend)
             => FriendRemoved?.Invoke(this, new FriendEventArgs(friend));
 
-        public EventHandler<FriendUpdatedEventArgs> FriendUpdated;
+        public event EventHandler<FriendUpdatedEventArgs> FriendUpdated;
         protected virtual void OnFriendUpdated(IFriend previous, IFriend current)
             => FriendUpdated?.Invoke(this, new FriendUpdatedEventArgs(previous, current));
 
-        public EventHandler<FriendMessageEventArgs> MessageReceived;
+        public event EventHandler<FriendMessageEventArgs> MessageReceived;
         protected virtual void OnMessageReceived(Friend friend, string message)
             => MessageReceived?.Invoke(this, new FriendMessageEventArgs(this, friend, message));
         #endregion
