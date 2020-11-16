@@ -105,27 +105,35 @@ namespace Xabbo.Core.Components
         /// </summary>
         public event EventHandler<WallItemEventArgs> WallItemRemoved;
 
-        protected virtual void OnFloorItemsLoaded(IEnumerable<FloorItem> items)
+        /// <summary>
+        /// Invoked when a furni's visibility is toggled using <see cref="Hide(IFurni)"/> or <see cref="Show(IFurni)"/>.
+        /// </summary>
+        public event EventHandler<FurniEventArgs> FurniVisibilityToggled;
+
+        protected virtual void OnFloorItemsLoaded(IEnumerable<IFloorItem> items)
             => FloorItemsLoaded?.Invoke(this, new FloorItemsEventArgs(items));
-        protected virtual void OnFloorItemAdded(FloorItem item)
+        protected virtual void OnFloorItemAdded(IFloorItem item)
             => FloorItemAdded?.Invoke(this, new FloorItemEventArgs(item));
-        protected virtual void OnFloorItemUpdated(FloorItem previousItem, FloorItem updatedItem)
+        protected virtual void OnFloorItemUpdated(IFloorItem previousItem, IFloorItem updatedItem)
             => FloorItemUpdated?.Invoke(this, new FloorItemUpdatedEventArgs(previousItem, updatedItem));
-        protected virtual void OnFloorItemDataUpdated(FloorItem item, ItemData previousData)
+        protected virtual void OnFloorItemDataUpdated(IFloorItem item, IItemData previousData)
             => FloorItemDataUpdated?.Invoke(this, new FloorItemDataUpdatedEventArgs(item, previousData));
-        protected virtual void OnFloorItemSlide(FloorItem item, Tile previousTile, int rollerId)
+        protected virtual void OnFloorItemSlide(IFloorItem item, Tile previousTile, int rollerId)
             => FloorItemSlide?.Invoke(this, new FloorItemSlideEventArgs(item, previousTile, rollerId));
-        protected virtual void OnFloorItemRemoved(FloorItem item)
+        protected virtual void OnFloorItemRemoved(IFloorItem item)
             => FloorItemRemoved?.Invoke(this, new FloorItemEventArgs(item));
 
-        protected virtual void OnWallItemsLoaded(IEnumerable<WallItem> items)
+        protected virtual void OnWallItemsLoaded(IEnumerable<IWallItem> items)
             => WallItemsLoaded?.Invoke(this, new WallItemsEventArgs(items));
-        protected virtual void OnWallItemAdded(WallItem item)
+        protected virtual void OnWallItemAdded(IWallItem item)
             => WallItemAdded?.Invoke(this, new WallItemEventArgs(item));
-        protected virtual void OnWallItemUpdated(WallItem previousItem, WallItem updatedItem)
+        protected virtual void OnWallItemUpdated(IWallItem previousItem, IWallItem updatedItem)
             => WallItemUpdated?.Invoke(this, new WallItemUpdatedEventArgs(previousItem, updatedItem));
-        protected virtual void OnWallItemRemoved(WallItem item)
+        protected virtual void OnWallItemRemoved(IWallItem item)
             => WallItemRemoved?.Invoke(this, new WallItemEventArgs(item));
+
+        protected virtual void OnFurniVisibilityToggled(IFurni furni)
+            => FurniVisibilityToggled?.Invoke(this, new FurniEventArgs(furni));
         #endregion
 
         public FurniManager()
@@ -147,7 +155,7 @@ namespace Xabbo.Core.Components
             wallItems.Clear();
         }
 
-        public void SetHidden(ItemType type, int id, bool hide)
+        private void SetHidden(ItemType type, int id, bool hide)
         {
             Furni furni;
 
@@ -174,6 +182,8 @@ namespace Xabbo.Core.Components
                 if (!wallItems.TryGetValue(id, out WallItem item))
                     return;
 
+                if (item.IsHidden == hide) return;
+
                 item.IsHidden = hide;
                 furni = wallItems.AddOrUpdate(
                     id,
@@ -195,18 +205,20 @@ namespace Xabbo.Core.Components
                 if (furni.Type == ItemType.Floor)
                 {
                     // RemoveFloorItem "id" isExpired pickerId delay
-                    SendLocalAsync(In.RemoveFloorItem, furni.Id.ToString(), false, -1, 0);
+                    SendLocalAsync(In.RemoveFloorItem, $"{furni.Id}", false, -1, 0);
                 }
                 else if (furni.Type == ItemType.Wall)
                 {
                     // RemoveWallItem "id" pickerId
-                    SendLocalAsync(In.RemoveWallItem, furni.Id.ToString(), -1);
+                    SendLocalAsync(In.RemoveWallItem, $"{furni.Id}", -1);
                 }
             }
             else
             {
                 SendLocalAsync(furni.Type == ItemType.Floor ? In.AddFloorItem : In.AddWallItem, furni);
             }
+
+            OnFurniVisibilityToggled(furni);
         }
 
         public void Hide(IFurni furni) => SetHidden(furni.Type, furni.Id, true);

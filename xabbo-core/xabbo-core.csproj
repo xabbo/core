@@ -84,6 +84,7 @@
     <Compile Include="Events\FriendMessageEventArgs.cs" />
     <Compile Include="Events\FriendsEventArgs.cs" />
     <Compile Include="Events\FriendUpdatedEventArgs.cs" />
+    <Compile Include="Events\FurniEventArgs.cs" />
     <Compile Include="Events\PointsUpdatedEventArgs.cs" />
     <Compile Include="Events\RoomUserEventArgs.cs" />
     <Compile Include="Events\TradeAcceptEventArgs.cs" />
