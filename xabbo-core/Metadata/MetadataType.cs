@@ -7,6 +7,6 @@ namespace Xabbo.Core.Metadata
         Figure,
         Furni,
         Product,
-        Texts
+        Text
     }
 }
