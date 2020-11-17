@@ -46,7 +46,7 @@ namespace Xabbo.Core
             IsSafetyLocked = packet.ReadBool();
         }
 
-        public void Write(Packet packet) => packet.WriteValues(
+        public void Write(IPacket packet) => packet.WriteValues(
             Id,
             Name,
             Figure,

@@ -1,11 +1,13 @@
 ﻿using System;
 
+using Xabbo.Core.Protocol;
+
 namespace Xabbo.Core
 {
     /// <summary>
     /// The user's own data that is sent upon requesting user data.
     /// </summary>
-    public interface IUserData
+    public interface IUserData : IPacketData
     {
         int Id { get; }
         string Name { get; }
