@@ -221,9 +221,8 @@ namespace Xabbo.Core.Components
             OnFurniVisibilityToggled(furni);
         }
 
-        public void Hide(IFurni furni) => SetHidden(furni.Type, furni.Id, true);
-
-        public void Show(IFurni furni) => SetHidden(furni.Type, furni.Id, false);
+        public void Show(ItemType type, int id) => SetHidden(type, id, false);
+        public void Hide(ItemType type, int id) => SetHidden(type, id, true);
 
         #region - Floor items -
         [Group(Features.FloorItemManagement), Receive("RoomFloorItems")]
