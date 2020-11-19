@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
 
@@ -11,6 +12,8 @@ namespace Xabbo.Core.Components
 
         private Task<IUserData> userDataTask;
         private TaskCompletionSource<IUserData> userDataTcs;
+
+        private bool _loadingCredits;
 
         public UserData UserData { get; private set; }
         public int? HomeRoom { get; private set; }
@@ -79,8 +82,9 @@ namespace Xabbo.Core.Components
                 await SendAsync(Out.RequestUserData);
             }
 
-            if (!Credits.HasValue && Dispatcher.IsAttached(this, Features.Credits))
+            if (!Credits.HasValue && Dispatcher.IsAttached(this, Features.Credits) && !_loadingCredits)
             {
+                _loadingCredits = true;
                 await SendAsync(Out.RequestUserCredits);
             }
 
@@ -136,6 +140,9 @@ namespace Xabbo.Core.Components
         [Group(Features.Credits), InterceptIn("UserCredits"), RequiredOut("RequestUserCredits")]
         private void HandleUserCredits(InterceptEventArgs e)
         {
+            if (_loadingCredits)
+                e.Block();
+
             Credits = (int)e.Packet.ReadDouble();
 
             OnCreditsUpdated();
