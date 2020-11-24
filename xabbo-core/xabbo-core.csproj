@@ -147,6 +147,7 @@
     <Compile Include="ItemData\IStringArrayData.cs" />
     <Compile Include="ItemData\IVoteResultData.cs" />
     <Compile Include="Items\ItemDescriptor.cs" />
+    <Compile Include="Items\StackDescriptor.cs" />
     <Compile Include="Messages\Attributes\InterceptAttribute.cs" />
     <Compile Include="Messages\Header.cs" />
     <Compile Include="Messages\IListener.cs" />

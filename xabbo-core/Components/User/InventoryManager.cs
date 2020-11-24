@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,9 +13,36 @@ namespace Xabbo.Core.Components
 {
     internal class InventoryManager : XabboComponent
     {
-        class PassiveReceiveInventoryTask : GetInventoryTask
+        class InventoryInternal : IInventory
         {
-            public PassiveReceiveInventoryTask(IInterceptor interceptor)
+            private readonly ConcurrentDictionary<int, IInventoryItem> _items;
+
+            public int Count => _items.Count;
+
+            public IEnumerable<IInventoryItem> FloorItems => this.Where(x => x.Type == ItemType.Floor);
+            public IEnumerable<IInventoryItem> WallItems => this.Where(x => x.Type == ItemType.Wall);
+
+            public InventoryInternal(IInventory inventory)
+            {
+                _items = new ConcurrentDictionary<int, IInventoryItem>(
+                    inventory.Select(x => new KeyValuePair<int, IInventoryItem>(
+                        x.ItemId, x
+                    ))
+                );
+            }
+
+            internal void UpdateItem(IInventoryItem item)
+            {
+                _items.AddOrUpdate(item.ItemId, item, (key, existing) => item);
+            }
+
+            public IEnumerator<IInventoryItem> GetEnumerator() => _items.Select(x => x.Value).GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+
+        class ReceiveInventoryTask : GetInventoryTask
+        {
+            public ReceiveInventoryTask(IInterceptor interceptor)
                 : base(interceptor, false)
             { }
 
@@ -25,70 +54,101 @@ namespace Xabbo.Core.Components
         public bool IsLoaded { get; private set; }
         public bool NeedsRefresh { get; private set; }
 
-        private Inventory _inventory;
+        private InventoryInternal _inventory;
         public IInventory Inventory => _inventory;
 
         private Task<IInventory> _currentInventoryTask;
 
+
+
+        private Task<IInventory> _loadTask;
+
+
+
         protected override void OnInitialize()
         {
-            Task.Run(() => MonitorInventoryAsync(Manager.DisposeToken));
+            // Task.Run(() => MonitorInventoryAsync(Manager.DisposeToken));
         }
 
-        private async Task MonitorInventoryAsync(CancellationToken cancellationToken)
+        private async Task<IInventory> ReceiveInventoryAsync(CancellationToken ct)
         {
-            while (!cancellationToken.IsCancellationRequested)
+            return new InventoryInternal(
+                await new ReceiveInventoryTask(Interceptor).ExecuteAsync(-1, ct)
+            );
+        }
+
+       /* private async Task MonitorInventoryAsync(CancellationToken ct)
+        {
+            while (!ct.IsCancellationRequested)
             {
-                _currentInventoryTask = new PassiveReceiveInventoryTask(Interceptor).ExecuteAsync(-1, cancellationToken)
+                _currentInventoryTask = new ReceiveInventoryTask(Interceptor).ExecuteAsync(-1, ct)
                     .ContinueWith(t =>
                     {
-                        _inventory = (Inventory)t.Result;
+                        _inventory = new InventoryInternal(t.Result);
                         IsLoaded = true;
                         NeedsRefresh = false;
-                        return t.Result;
+                        return (IInventory)_inventory;
                     });
+
                 await _currentInventoryTask;
             }
-        }
+        }*/
 
         [InterceptIn(nameof(Incoming.InventoryRefresh))]
-        private void HandleInventoryRefresh(InterceptEventArgs e) => NeedsRefresh = true;
+        private void HandleInventoryRefresh(InterceptEventArgs e)
+        {
+            NeedsRefresh = true;
+            
+            if (_loadTask.IsCompleted)
+                _loadTask = ReceiveInventoryAsync(Manager.DisposeToken);
+        }
 
         [InterceptIn(nameof(Incoming.InventoryItemUpdate))]
         private void HandleInventoryItemUpdate(InterceptEventArgs e)
         {
-            var newItem = InventoryItem.Parse(e.Packet);
-            var existingItem = _inventory.FirstOrDefault<InventoryItem>(
-                x => x.ItemId == newItem.Id && x.Type == newItem.Type
-            );
+            _inventory.UpdateItem(InventoryItem.Parse(e.Packet));
+        }
 
-            if (existingItem != null)
-                _inventory.Remove(existingItem);
-
-            _inventory.Add(newItem);
+        [InterceptIn(nameof(Incoming.AddHabboItem))]
+        private void HandleAddHabboItem(InterceptEventArgs e)
+        {
+            
+            /*
+             * Dictionary<int, List<int>>
+             * 
+            int {
+                int local_2
+                int local_3 {
+                    int
+                }
+            }
+            */
         }
 
         [InterceptIn(nameof(Incoming.RemoveHabboItem))]
         private void HandleRemoveHabboItem(InterceptEventArgs e)
         {
-            // TODO
+            // int itemId
         }
 
-        public async Task<IInventory> LoadInventoryAsync(int timeout, CancellationToken cancellationToken)
+        public async Task<IInventory> GetInventoryAsync(int timeout, CancellationToken ct)
         {
             if (!IsLoaded || NeedsRefresh)
             {
-                await SendAsync(Out.RequestInventoryItems);
-
-                var cts = CancellationTokenSource.CreateLinkedTokenSource(Manager.DisposeToken, cancellationToken);
-                if (timeout > 0) cts.CancelAfter(timeout);
+                CancellationTokenSource cts = null;
 
                 try
                 {
+                    cts = CancellationTokenSource.CreateLinkedTokenSource(Manager.DisposeToken, ct);
+                    if (timeout > 0) cts.CancelAfter(timeout);
+
+                    var inventoryTask = _currentInventoryTask;
+                    await SendAsync(Out.RequestInventoryItems);
+
                     var timeoutTask = Task.Delay(-1, cts.Token);
-                    await Task.WhenAny(_currentInventoryTask, timeoutTask);
+                    await Task.WhenAny(inventoryTask, timeoutTask);
                 }
-                finally { cts.Dispose(); }
+                finally { cts?.Dispose(); }
             }
 
             return Inventory;

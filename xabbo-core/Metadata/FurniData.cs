@@ -126,5 +126,86 @@ namespace Xabbo.Core.Metadata
         /// Finds the information of a wall furni containing the specified text in its name.
         /// </summary>
         public FurniInfo FindWallItem(string name) => FindItems(WallItems, name).FirstOrDefault();
+
+        public ItemDescriptor GetItemDescriptor(IItem item)
+        {
+            string variant = string.Empty;
+
+            var info = GetInfo(item) ?? throw new ArgumentException(
+                $"Unable to find furni info for {item.Type.ToString().ToLower()} item {item.Kind}"
+            );
+
+            if (info.Identifier == "poster")
+            {
+                if (item is IInventoryItem inventoryItem)
+                {
+                    variant = inventoryItem.Data?.LegacyString;
+                }
+                else if (item is IWallItem wallItem)
+                {
+                    variant = wallItem.Data;
+                }
+                else if (item is ICatalogProduct catalogProduct)
+                {
+                    variant = catalogProduct.Variant;
+                }
+                else
+                {
+                    throw new ArgumentException($"Unable to find variant for poster of item type: {item.GetType().FullName}");
+                }
+            }
+
+            return new ItemDescriptor(item.Type, item.Kind, variant);
+        }
+
+        public StackDescriptor GetStackDescriptor(IInventoryItem item)
+        {
+            string variant = string.Empty;
+
+            var info = GetInfo(item) ?? throw new ArgumentException(
+                $"Unable to find furni info for {item.Type.ToString().ToLower()} item {item.Kind}"
+            );
+
+            if (info.Identifier == "poster")
+                variant = item.Data?.LegacyString;
+
+            return new StackDescriptor(item.Type, item.Kind, variant, item.IsTradeable, item.IsGroupable);
+        }
+
+        /// <summary>
+        /// Groups items by maximum slots/items in order to offer in a trade.
+        /// </summary>
+        public IEnumerable<IGrouping<int, IInventoryItem>> GroupItems(IEnumerable<IInventoryItem> items,
+            int maxSlots = 9, int maxItems = 1500)
+        {
+            if (maxSlots < 1 || maxSlots > 9) throw new ArgumentOutOfRangeException("maxSlots");
+            if (maxItems < 1 || maxItems > 1500) throw new ArgumentOutOfRangeException("maxItems");
+
+            StackDescriptor currentDescriptor = default;
+            int currentGroup = 0, currentSlots = 0, currentItems = 0;
+
+            return items
+                .OrderBy(item => item.Type)
+                .ThenBy(item => item.Kind)
+                .ThenBy(item => item.Data?.LegacyString)
+                .GroupBy(item =>
+                {
+                    var descriptor = GetStackDescriptor(item);
+                    if (!item.IsGroupable || descriptor != currentDescriptor)
+                        currentSlots++;
+
+                    currentDescriptor = descriptor;
+                    currentItems++;
+
+                    if (currentSlots > maxSlots || currentItems > maxItems)
+                    {
+                        currentDescriptor = default;
+                        currentSlots = currentItems = 0;
+                        currentGroup++;
+                    }
+
+                    return currentGroup;
+                });
+        }
     }
 }

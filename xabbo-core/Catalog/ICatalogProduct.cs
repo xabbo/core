@@ -4,7 +4,7 @@ namespace Xabbo.Core
 {
     public interface ICatalogProduct : IItem
     {
-        string Variation { get; }
+        string Variant { get; }
         int Count { get; }
         bool IsLimited { get; }
         int LimitedTotal { get; }

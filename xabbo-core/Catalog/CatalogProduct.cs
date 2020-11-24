@@ -10,7 +10,7 @@ namespace Xabbo.Core
 
         public ItemType Type { get; set; }
         public int Kind { get; set; }
-        public string Variation { get; set; }
+        public string Variant { get; set; }
         public int Count { get; set; }
         public bool IsLimited { get; set; }
         public int LimitedTotal { get; set; }
@@ -27,13 +27,13 @@ namespace Xabbo.Core
             Type = H.ToItemType(packet.ReadString());
             if (Type == ItemType.Badge)
             {
-                Variation = packet.ReadString();
+                Variant = packet.ReadString();
                 Count = 0;
             }
             else
             {
                 Kind = packet.ReadInt();
-                Variation = packet.ReadString();
+                Variant = packet.ReadString();
                 Count = packet.ReadInt();
                 IsLimited = packet.ReadBool();
                 if (IsLimited)
