@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
 using Xabbo.Core.Tasks;
 
@@ -31,10 +32,16 @@ namespace Xabbo.Core.Components
                 );
             }
 
-            internal void UpdateItem(IInventoryItem item)
+            /// <summary>
+            /// Adds or updates the inventory item and returns whether the item was added.
+            /// </summary>
+            internal bool AddOrUpdate(IInventoryItem item)
             {
-                _items.AddOrUpdate(item.ItemId, item, (key, existing) => item);
+                _items.AddOrUpdate(item.ItemId, item, (key, existing) => item, out bool added);
+                return added;
             }
+
+            internal bool TryRemove(int itemId, out IInventoryItem item) => _items.TryRemove(itemId, out item);
 
             public IEnumerator<IInventoryItem> GetEnumerator() => _items.Select(x => x.Value).GetEnumerator();
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -52,52 +59,53 @@ namespace Xabbo.Core.Components
 
         public bool IsInitialized { get; private set; }
         public bool IsLoaded { get; private set; }
-        public bool NeedsRefresh { get; private set; }
+        public bool IsRefreshNeeded { get; private set; }
 
         private InventoryInternal _inventory;
         public IInventory Inventory => _inventory;
 
-        private Task<IInventory> _currentInventoryTask;
-
-
-
         private Task<IInventory> _loadTask;
 
+        public event EventHandler RefreshNeeded;
+        protected virtual void OnRefreshNeeded() => RefreshNeeded?.Invoke(this, EventArgs.Empty);
 
+        public event EventHandler InventoryLoaded;
+        protected virtual void OnInventoryLoaded() => InventoryLoaded?.Invoke(this, EventArgs.Empty);
+
+        public event EventHandler<InventoryItemEventArgs> ItemAdded;
+        protected virtual void OnItemAdded(IInventoryItem item)
+            => ItemAdded?.Invoke(this, new InventoryItemEventArgs(item));
+
+        public event EventHandler<InventoryItemEventArgs> ItemUpdated;
+        protected virtual void OnItemUpdated(IInventoryItem item)
+            => ItemUpdated?.Invoke(this, new InventoryItemEventArgs(item));
+
+        public event EventHandler<InventoryItemEventArgs> ItemRemoved;
+        protected virtual void OnItemRemoved(IInventoryItem item)
+            => ItemRemoved?.Invoke(this, new InventoryItemEventArgs(item));
 
         protected override void OnInitialize()
         {
-            // Task.Run(() => MonitorInventoryAsync(Manager.DisposeToken));
+            _loadTask = ReceiveInventoryAsync(Manager.DisposeToken);
         }
 
         private async Task<IInventory> ReceiveInventoryAsync(CancellationToken ct)
         {
-            return new InventoryInternal(
-                await new ReceiveInventoryTask(Interceptor).ExecuteAsync(-1, ct)
-            );
+            var inventory = await new ReceiveInventoryTask(Interceptor).ExecuteAsync(-1, ct);
+            
+            _inventory = new InventoryInternal(inventory);
+            IsLoaded = true;
+            IsRefreshNeeded = false;
+
+            OnInventoryLoaded();
+
+            return Inventory;
         }
-
-       /* private async Task MonitorInventoryAsync(CancellationToken ct)
-        {
-            while (!ct.IsCancellationRequested)
-            {
-                _currentInventoryTask = new ReceiveInventoryTask(Interceptor).ExecuteAsync(-1, ct)
-                    .ContinueWith(t =>
-                    {
-                        _inventory = new InventoryInternal(t.Result);
-                        IsLoaded = true;
-                        NeedsRefresh = false;
-                        return (IInventory)_inventory;
-                    });
-
-                await _currentInventoryTask;
-            }
-        }*/
 
         [InterceptIn(nameof(Incoming.InventoryRefresh))]
         private void HandleInventoryRefresh(InterceptEventArgs e)
         {
-            NeedsRefresh = true;
+            IsRefreshNeeded = true;
             
             if (_loadTask.IsCompleted)
                 _loadTask = ReceiveInventoryAsync(Manager.DisposeToken);
@@ -106,13 +114,23 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.InventoryItemUpdate))]
         private void HandleInventoryItemUpdate(InterceptEventArgs e)
         {
-            _inventory.UpdateItem(InventoryItem.Parse(e.Packet));
+            if (_inventory != null)
+            {
+                var item = InventoryItem.Parse(e.Packet);
+                if (_inventory.AddOrUpdate(item))
+                {
+                    OnItemAdded(item);
+                }
+                else
+                {
+                    OnItemUpdated(item);
+                }
+            }
         }
 
         [InterceptIn(nameof(Incoming.AddHabboItem))]
         private void HandleAddHabboItem(InterceptEventArgs e)
         {
-            
             /*
              * Dictionary<int, List<int>>
              * 
@@ -123,32 +141,50 @@ namespace Xabbo.Core.Components
                 }
             }
             */
+
+            // ???
         }
 
         [InterceptIn(nameof(Incoming.RemoveHabboItem))]
         private void HandleRemoveHabboItem(InterceptEventArgs e)
         {
-            // int itemId
+            int itemId = e.Packet.ReadInt();
+
+            if (_inventory.TryRemove(itemId, out IInventoryItem item))
+            {
+                OnItemRemoved(item);
+            }
+        }
+
+        public async Task<IInventory> RefreshInventoryAsync(int timeout, CancellationToken ct)
+        {
+            if (_loadTask.IsCompleted)
+                _loadTask = ReceiveInventoryAsync(Manager.DisposeToken);
+
+            CancellationTokenSource cts = null;
+
+            try
+            {
+                cts = CancellationTokenSource.CreateLinkedTokenSource(Manager.DisposeToken, ct);
+                if (timeout > 0) cts.CancelAfter(timeout);
+
+                var loadTask = _loadTask;
+                await SendAsync(Out.RequestInventoryItems);
+
+                var timeoutTask = Task.Delay(-1, cts.Token);
+                await await Task.WhenAny(loadTask, timeoutTask);
+
+                return loadTask.Result;
+            }
+            finally { cts?.Dispose(); }
         }
 
         public async Task<IInventory> GetInventoryAsync(int timeout, CancellationToken ct)
         {
-            if (!IsLoaded || NeedsRefresh)
+            // if (!IsLoaded || IsRefreshNeeded)
+            if (!_loadTask.IsCompleted)
             {
-                CancellationTokenSource cts = null;
-
-                try
-                {
-                    cts = CancellationTokenSource.CreateLinkedTokenSource(Manager.DisposeToken, ct);
-                    if (timeout > 0) cts.CancelAfter(timeout);
-
-                    var inventoryTask = _currentInventoryTask;
-                    await SendAsync(Out.RequestInventoryItems);
-
-                    var timeoutTask = Task.Delay(-1, cts.Token);
-                    await Task.WhenAny(inventoryTask, timeoutTask);
-                }
-                finally { cts?.Dispose(); }
+                return await RefreshInventoryAsync(timeout, ct);
             }
 
             return Inventory;

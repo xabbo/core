@@ -87,6 +87,7 @@
     <Compile Include="Events\FriendsEventArgs.cs" />
     <Compile Include="Events\FriendUpdatedEventArgs.cs" />
     <Compile Include="Events\FurniEventArgs.cs" />
+    <Compile Include="Events\InventoryItemEventArgs.cs" />
     <Compile Include="Events\PointsUpdatedEventArgs.cs" />
     <Compile Include="Events\RoomUserEventArgs.cs" />
     <Compile Include="Events\TradeAcceptEventArgs.cs" />
@@ -321,6 +322,7 @@
     <Compile Include="Util\AreaCollection.cs" />
     <Compile Include="Util\DebugUtil.cs" />
     <Compile Include="Util\EnumerableExtensions.cs" />
+    <Compile Include="Util\InternalExtensions.cs" />
     <Compile Include="Util\ReflectionExtensions.cs" />
     <Compile Include="Util\XabboConst.cs" />
     <Compile Include="Util\XabboCoreExtensions.cs" />
