@@ -12,7 +12,7 @@ using Xabbo.Core.Tasks;
 
 namespace Xabbo.Core.Components
 {
-    internal class InventoryManager : XabboComponent
+    public class InventoryManager : XabboComponent
     {
         class InventoryInternal : IInventory
         {
