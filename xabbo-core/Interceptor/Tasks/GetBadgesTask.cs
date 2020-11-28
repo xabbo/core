@@ -19,7 +19,7 @@ namespace Xabbo.Core.Tasks
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestInventoryBadges);
 
         [InterceptIn(nameof(Incoming.InventoryBadges))]
-        protected void OnInventoryBadges(InterceptEventArgs e)
+        protected void OnInventoryBadges(InterceptArgs e)
         {
             try
             {

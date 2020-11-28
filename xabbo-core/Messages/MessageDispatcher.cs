@@ -87,7 +87,7 @@ namespace Xabbo.Core.Messages
             var parameters = methodInfo.GetParameters();
             return
                 parameters.Length == 1 &&
-                parameters[0].ParameterType.Equals(typeof(InterceptEventArgs)) &&
+                parameters[0].ParameterType.Equals(typeof(InterceptArgs)) &&
                 parameters.All(param => IsValidParameter(param));
         }
 
@@ -131,7 +131,7 @@ namespace Xabbo.Core.Messages
             }
         }
 
-        public void DispatchIntercept(InterceptEventArgs e)
+        public void DispatchIntercept(InterceptArgs e)
         {
             var dict = GetInterceptCallbackDictionary(e.Destination);
 
@@ -141,7 +141,7 @@ namespace Xabbo.Core.Messages
                 InvokeInterceptCallbacks(list, e);
         }
 
-        private void InvokeInterceptCallbacks(IEnumerable<InterceptCallback> callbacks, InterceptEventArgs e)
+        private void InvokeInterceptCallbacks(IEnumerable<InterceptCallback> callbacks, InterceptArgs e)
         {
             short header = e.Packet.Header;
 
@@ -565,13 +565,13 @@ namespace Xabbo.Core.Messages
         #endregion
 
         #region - Intercepts -
-        public bool AddInterceptIn(Header header, Action<InterceptEventArgs> callback)
+        public bool AddInterceptIn(Header header, Action<InterceptArgs> callback)
             => AddIntercept(Destination.Client, header, callback);
 
-        public bool AddInterceptOut(Header header, Action<InterceptEventArgs> callback)
+        public bool AddInterceptOut(Header header, Action<InterceptArgs> callback)
             => AddIntercept(Destination.Server, header, callback);
 
-        public bool AddIntercept(Destination destination, Header header, Action<InterceptEventArgs> callback)
+        public bool AddIntercept(Destination destination, Header header, Action<InterceptArgs> callback)
         {
             bool result;
             IReadOnlyList<InterceptCallback> previousList, newList;
@@ -599,13 +599,13 @@ namespace Xabbo.Core.Messages
             return result;
         }
 
-        public bool RemoveInterceptIn(Header header, Action<InterceptEventArgs> action)
+        public bool RemoveInterceptIn(Header header, Action<InterceptArgs> action)
             => RemoveIntercept(Destination.Client, header, action);
 
-        public bool RemoveInterceptOut(Header header, Action<InterceptEventArgs> action)
+        public bool RemoveInterceptOut(Header header, Action<InterceptArgs> action)
             => RemoveIntercept(Destination.Server, header, action);
 
-        public bool RemoveIntercept(Destination destination, Header header, Action<InterceptEventArgs> action)
+        public bool RemoveIntercept(Destination destination, Header header, Action<InterceptArgs> action)
         {
             bool result;
             IReadOnlyList<InterceptCallback> previousList, newList;

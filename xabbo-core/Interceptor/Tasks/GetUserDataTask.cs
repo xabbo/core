@@ -15,7 +15,7 @@ namespace Xabbo.Core.Tasks
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestUserData);
 
         [InterceptIn(nameof(Incoming.UserData))]
-        protected void HandleUserData(InterceptEventArgs e)
+        protected void HandleUserData(InterceptArgs e)
         {
             try
             {

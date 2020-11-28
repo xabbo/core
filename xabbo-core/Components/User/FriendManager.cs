@@ -129,14 +129,14 @@ namespace Xabbo.Core.Components
         }
 
         [InterceptIn(nameof(Incoming.InitFriends))]
-        protected virtual void HandleInitFriends(InterceptEventArgs e)
+        protected virtual void HandleInitFriends(InterceptArgs e)
         {
             if (isLoadingFriends && isForceLoading)
                 e.Block();
         }
 
         [InterceptIn(nameof(Incoming.Friends))]
-        protected virtual void HandleFriends(InterceptEventArgs e)
+        protected virtual void HandleFriends(InterceptArgs e)
         {
             if (!isLoadingFriends)
                 return;
@@ -168,7 +168,7 @@ namespace Xabbo.Core.Components
         }
 
         [InterceptIn(nameof(Incoming.UpdateFriend))]
-        protected virtual void OnUpdateFriend(InterceptEventArgs e)
+        protected virtual void OnUpdateFriend(InterceptArgs e)
         {
             int n = e.Packet.ReadInt();
             for (int i = 0; i < n; i++)
@@ -200,7 +200,7 @@ namespace Xabbo.Core.Components
         }
 
         [InterceptIn(nameof(Incoming.ReceivePrivateMessage))]
-        protected virtual void OnReceivePrivateMessage(InterceptEventArgs e)
+        protected virtual void OnReceivePrivateMessage(InterceptArgs e)
         {
             int id = e.Packet.ReadInt();
             if (!friends.TryGetValue(id, out Friend friend))

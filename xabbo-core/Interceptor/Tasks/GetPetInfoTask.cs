@@ -19,7 +19,7 @@ namespace Xabbo.Core.Tasks
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestPetInfo);
 
         [InterceptIn(nameof(Incoming.PetInfo))]
-        protected void OnPetInfo(InterceptEventArgs e)
+        protected void OnPetInfo(InterceptArgs e)
         {
             try
             {

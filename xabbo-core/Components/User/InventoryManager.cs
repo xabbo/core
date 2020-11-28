@@ -103,7 +103,7 @@ namespace Xabbo.Core.Components
         }
 
         [InterceptIn(nameof(Incoming.InventoryRefresh))]
-        private void HandleInventoryRefresh(InterceptEventArgs e)
+        private void HandleInventoryRefresh(InterceptArgs e)
         {
             IsRefreshNeeded = true;
             
@@ -112,7 +112,7 @@ namespace Xabbo.Core.Components
         }
 
         [InterceptIn(nameof(Incoming.InventoryItemUpdate))]
-        private void HandleInventoryItemUpdate(InterceptEventArgs e)
+        private void HandleInventoryItemUpdate(InterceptArgs e)
         {
             if (_inventory != null)
             {
@@ -129,7 +129,7 @@ namespace Xabbo.Core.Components
         }
 
         [InterceptIn(nameof(Incoming.AddHabboItem))]
-        private void HandleAddHabboItem(InterceptEventArgs e)
+        private void HandleAddHabboItem(InterceptArgs e)
         {
             /*
              * Dictionary<int, List<int>>
@@ -146,7 +146,7 @@ namespace Xabbo.Core.Components
         }
 
         [InterceptIn(nameof(Incoming.RemoveHabboItem))]
-        private void HandleRemoveHabboItem(InterceptEventArgs e)
+        private void HandleRemoveHabboItem(InterceptArgs e)
         {
             int itemId = e.Packet.ReadInt();
 

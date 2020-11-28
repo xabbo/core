@@ -4,7 +4,7 @@ namespace Xabbo.Core
 {
     public enum ItemDataType
     {
-        Legacy = 0,
+        Basic = 0,
         Map = 1,
         StringArray = 2,
         VoteResult = 3,

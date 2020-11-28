@@ -19,7 +19,7 @@ namespace Xabbo.Core.Tasks
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestGuildInfo, groupId, false);
 
         [InterceptIn(nameof(Incoming.GuildInfo))]
-        protected void OnGuildInfo(InterceptEventArgs e)
+        protected void OnGuildInfo(InterceptArgs e)
         {
             try
             {

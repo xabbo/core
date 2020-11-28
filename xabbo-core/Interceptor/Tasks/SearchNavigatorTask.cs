@@ -21,7 +21,7 @@ namespace Xabbo.Core.Tasks
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestNewNavigatorRooms, category, filter);
 
         [InterceptIn(nameof(Incoming.NewNavigatorSearchResults))]
-        protected void OnNavigatorSearchResults(InterceptEventArgs e)
+        protected void OnNavigatorSearchResults(InterceptArgs e)
         {
             try
             {

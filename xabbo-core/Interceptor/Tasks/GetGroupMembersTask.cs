@@ -25,7 +25,7 @@ namespace Xabbo.Core.Tasks
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestGuildMembers, groupId, page, filter, (int)searchType);
 
         [InterceptIn(nameof(Incoming.GuildMembers))]
-        protected void OnGuildMembers(InterceptEventArgs e)
+        protected void OnGuildMembers(InterceptArgs e)
         {
             try
             {

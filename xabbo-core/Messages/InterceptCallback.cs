@@ -15,22 +15,22 @@ namespace Xabbo.Core.Messages
             Destination = destination;
         }
 
-        public abstract void Invoke(InterceptEventArgs e);
+        public abstract void Invoke(InterceptArgs e);
     }
 
     internal class OpenInterceptCallback : InterceptCallback
     {
-        private readonly Action<object, InterceptEventArgs> callback;
+        private readonly Action<object, InterceptArgs> callback;
 
         public OpenInterceptCallback(Destination destination, short header,
             object target, MethodInfo method, object[] tags,
-            Action<object, InterceptEventArgs> callback)
+            Action<object, InterceptArgs> callback)
             : base(destination, header, target, method, tags, callback)
         {
             this.callback = callback;
         }
 
-        public override void Invoke(InterceptEventArgs e)
+        public override void Invoke(InterceptArgs e)
         {
             callback(Target, e);
         }
@@ -38,17 +38,17 @@ namespace Xabbo.Core.Messages
 
     internal class ClosedInterceptCallback : InterceptCallback
     {
-        private readonly Action<InterceptEventArgs> callback;
+        private readonly Action<InterceptArgs> callback;
 
         public ClosedInterceptCallback(Destination destination, short header,
             object target, MethodInfo method, object[] tags,
-            Action<InterceptEventArgs> callback)
+            Action<InterceptArgs> callback)
             : base(destination, header, target, method, tags, callback)
         {
             this.callback = callback;
         }
 
-        public override void Invoke(InterceptEventArgs e)
+        public override void Invoke(InterceptArgs e)
         {
             callback(e);
         }

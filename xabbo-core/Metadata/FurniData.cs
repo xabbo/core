@@ -139,7 +139,7 @@ namespace Xabbo.Core.Metadata
             {
                 if (item is IInventoryItem inventoryItem)
                 {
-                    variant = inventoryItem.Data?.LegacyString;
+                    variant = inventoryItem.Data?.Value;
                 }
                 else if (item is IWallItem wallItem)
                 {
@@ -167,7 +167,7 @@ namespace Xabbo.Core.Metadata
             );
 
             if (info.Identifier == "poster")
-                variant = item.Data?.LegacyString;
+                variant = item.Data?.Value;
 
             return new StackDescriptor(item.Type, item.Kind, variant, item.IsTradeable, item.IsGroupable);
         }
@@ -187,7 +187,7 @@ namespace Xabbo.Core.Metadata
             return items
                 .OrderBy(item => item.Type)
                 .ThenBy(item => item.Kind)
-                .ThenBy(item => item.Data?.LegacyString)
+                .ThenBy(item => item.Data?.Value)
                 .GroupBy(item =>
                 {
                     var descriptor = GetStackDescriptor(item);

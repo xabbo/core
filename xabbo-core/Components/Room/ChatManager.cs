@@ -23,7 +23,7 @@ namespace Xabbo.Core.Components
         }
 
         [InterceptIn("RoomUserWhisper", "RoomUserTalk", "RoomUserShout")]
-        private void HandleEntityChat(InterceptEventArgs e)
+        private void HandleEntityChat(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
 

@@ -15,7 +15,7 @@ namespace Xabbo.Core.Tasks
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestAchievements);
 
         [InterceptIn(nameof(Incoming.AchievementList))]
-        protected void OnAchievementList(InterceptEventArgs e)
+        protected void OnAchievementList(InterceptArgs e)
         {
             try
             {

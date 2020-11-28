@@ -43,7 +43,7 @@ namespace Xabbo.Core.Tasks
 
         protected override Task OnExecuteAsync() => Task.CompletedTask;
 
-        private void OnIntercept(InterceptEventArgs e)
+        private void OnIntercept(InterceptArgs e)
         {
             try
             {

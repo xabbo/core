@@ -150,7 +150,7 @@ namespace Xabbo.Core.Components
         }
 
         [InterceptIn("DoorbellAddUser"), RequiredOut("HandleDoorbell")]
-        private async void HandleDoorbellAddUser(InterceptEventArgs e)
+        private async void HandleDoorbellAddUser(InterceptArgs e)
         {
             string name = e.Packet.ReadString();
             if (string.IsNullOrEmpty(name))

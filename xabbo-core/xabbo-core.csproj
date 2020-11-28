@@ -135,6 +135,7 @@
     <Compile Include="Groups\IGroupMembers.cs" />
     <Compile Include="Interceptor\IInterceptor.cs" />
     <Compile Include="Achievements\IAchievements.cs" />
+    <Compile Include="ItemData\ItemDataFlags.cs" />
     <Compile Include="Items\IInventory.cs" />
     <Compile Include="Items\IInventoryItem.cs" />
     <Compile Include="Items\IItem.cs" />
@@ -147,7 +148,9 @@
     <Compile Include="ItemData\IMapData.cs" />
     <Compile Include="ItemData\IStringArrayData.cs" />
     <Compile Include="ItemData\IVoteResultData.cs" />
+    <Compile Include="Items\IMarketplaceItem.cs" />
     <Compile Include="Items\ItemDescriptor.cs" />
+    <Compile Include="Items\MarketplaceItem.cs" />
     <Compile Include="Items\StackDescriptor.cs" />
     <Compile Include="Messages\Attributes\InterceptAttribute.cs" />
     <Compile Include="Messages\Header.cs" />
@@ -243,7 +246,7 @@
     <Compile Include="Messages\Identifiers.cs" />
     <Compile Include="Messages\Incoming.cs" />
     <Compile Include="Messages\Destination.cs" />
-    <Compile Include="Messages\InterceptEventArgs.cs" />
+    <Compile Include="Messages\InterceptArgs.cs" />
     <Compile Include="Messages\Outgoing.cs" />
     <Compile Include="Messages\Attributes\ReceiveAttribute.cs" />
     <Compile Include="Messages\MessageDispatcher.cs" />
@@ -279,7 +282,7 @@
     <Compile Include="ItemData\MapData.cs" />
     <Compile Include="ItemData\StringArrayData.cs" />
     <Compile Include="ItemData\ItemData.cs" />
-    <Compile Include="ItemData\LegacyData.cs" />
+    <Compile Include="ItemData\BasicData.cs" />
     <Compile Include="ItemData\VoteResultData.cs" />
     <Compile Include="ItemData\ItemData4.cs" />
     <Compile Include="ItemData\ItemDataType.cs" />

@@ -8,24 +8,24 @@ namespace Xabbo.Core
     {
         public ItemDataType Type { get; }
 
-        public int Flags { get; set; }
+        public ItemDataFlags Flags { get; set; }
 
         public int LimitedNumber { get; set; }
         public int LimitedTotal { get; set; }
 
-        public string LegacyString { get; set; }
+        public string Value { get; set; }
 
-        public int State => int.TryParse(LegacyString, out int state) ? state : -1;
+        public int State => int.TryParse(Value, out int state) ? state : -1;
 
         protected ItemData(ItemDataType type)
         {
             Type = type;
-            LegacyString = string.Empty;
+            Value = string.Empty;
         }
 
         protected virtual void Initialize(IReadOnlyPacket packet)
         {
-            if ((Flags & 256) > 0)
+            if (Flags.HasFlag(ItemDataFlags.IsLimitedRare))
             {
                 LimitedNumber = packet.ReadInt();
                 LimitedTotal = packet.ReadInt();
@@ -34,13 +34,13 @@ namespace Xabbo.Core
 
         public void Write(IPacket packet)
         {
-            packet.WriteInt((int)Type | (int)(Flags & 0xFFFFFF00));
+            packet.WriteInt(((int)Type & 0xFF) | ((int)Flags << 8));
             WriteData(packet);
         }
 
         protected void WriteBase(IPacket packet)
         {
-            if ((Flags & 256) > 0)
+            if (Flags.HasFlag(ItemDataFlags.IsLimitedRare))
             {
                 packet.WriteInt(LimitedNumber);
                 packet.WriteInt(LimitedTotal);
@@ -54,10 +54,10 @@ namespace Xabbo.Core
             ItemData stuffData;
 
             int value = packet.ReadInt();
-            var stuffDataType = (ItemDataType)(value & 255);
-            switch (stuffDataType)
+            var type = (ItemDataType)(value & 0xFF);
+            switch (type)
             {
-                case ItemDataType.Legacy: stuffData = new LegacyData(); break;
+                case ItemDataType.Basic: stuffData = new BasicData(); break;
                 case ItemDataType.Map: stuffData = new MapData(); break;
                 case ItemDataType.StringArray: stuffData = new StringArrayData(); break;
                 case ItemDataType.VoteResult: stuffData = new VoteResultData(); break;
@@ -65,12 +65,12 @@ namespace Xabbo.Core
                 case ItemDataType.IntArray: stuffData = new IntArrayData(); break;
                 case ItemDataType.HighScore: stuffData = new HighScoreData(); break;
                 case ItemDataType.CrackableFurni: stuffData = new CrackableFurniData(); break;
-                default: stuffData = null; break;
+                default: throw new Exception($"Unknown ItemData type: {type}");
             }
 
             if (stuffData != null)
             {
-                stuffData.Flags = value & 0xFF00;
+                stuffData.Flags = (ItemDataFlags)(value >> 8);
                 stuffData.Initialize(packet);
             }
 

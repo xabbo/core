@@ -15,7 +15,7 @@ namespace Xabbo.Core
 
         protected override void Initialize(IReadOnlyPacket packet)
         {
-            LegacyString = packet.ReadString();
+            Value = packet.ReadString();
             Hits = packet.ReadInt();
             Target = packet.ReadInt();
 
@@ -24,7 +24,7 @@ namespace Xabbo.Core
 
         protected override void WriteData(IPacket packet)
         {
-            packet.WriteString(LegacyString);
+            packet.WriteString(Value);
             packet.WriteInt(Hits);
             packet.WriteInt(Target);
 

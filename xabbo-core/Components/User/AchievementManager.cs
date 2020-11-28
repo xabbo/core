@@ -19,7 +19,7 @@ namespace Xabbo.Core.Components
         }
 
         [InterceptIn("AchievementList")]
-        private void HandleAchievementList(InterceptEventArgs e)
+        private void HandleAchievementList(InterceptArgs e)
         {
 
         }

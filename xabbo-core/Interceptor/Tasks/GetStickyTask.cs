@@ -19,7 +19,7 @@ namespace Xabbo.Core.Tasks
         protected override Task OnExecuteAsync() => SendAsync(Out.PostItRequestData, stickyId);
 
         [InterceptIn(nameof(Incoming.PostItData))]
-        protected void OnPostItData(InterceptEventArgs e)
+        protected void OnPostItData(InterceptArgs e)
         {
             try
             {

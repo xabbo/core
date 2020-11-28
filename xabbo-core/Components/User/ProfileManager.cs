@@ -10,8 +10,8 @@ namespace Xabbo.Core.Components
     {
         public enum Features { Autoload, UserData, HomeRoom, Credits, Points, Achievements, AchievementScore }
 
-        private Task<IUserData> userDataTask;
-        private TaskCompletionSource<IUserData> userDataTcs;
+        private Task<IUserData> _taskUserData;
+        private TaskCompletionSource<IUserData> _tcsUserData;
 
         private bool _loadingCredits;
 
@@ -57,8 +57,8 @@ namespace Xabbo.Core.Components
 
         public ProfileManager()
         {
-            userDataTcs = new TaskCompletionSource<IUserData>();
-            userDataTask = userDataTcs.Task;
+            _tcsUserData = new TaskCompletionSource<IUserData>();
+            _taskUserData = _tcsUserData.Task;
 
             Points = new ActivityPoints();
         }
@@ -66,16 +66,16 @@ namespace Xabbo.Core.Components
         protected override void OnInitialize()
         {
             if (!Dispatcher.IsAttached(this, Features.UserData))
-                userDataTcs?.TrySetException(new Exception("User data is unavailable"));
+                _tcsUserData?.TrySetException(new Exception("User data is unavailable"));
         }
 
         /// <summary>
         /// Waits for the user data load, or returns the user's data instantly if it has already loaded.
         /// </summary>
-        public Task<IUserData> GetUserDataAsync() => userDataTask;
+        public Task<IUserData> GetUserDataAsync() => _taskUserData;
 
         [Group(Features.Autoload), InterceptIn("LatencyResponse")]
-        private async void HandleLatencyResponse(InterceptEventArgs e)
+        private async void HandleLatencyResponse(InterceptArgs e)
         {
             if (UserData == null && Dispatcher.IsAttached(this, Features.UserData))
             {
@@ -95,20 +95,20 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.UserData), InterceptIn("UserData"), RequiredOut("RequestUserData")]
-        private void HandleUserData(InterceptEventArgs e)
+        private void HandleUserData(InterceptArgs e)
         {
             UserData = UserData.Parse(e.Packet);
 
-            userDataTcs?.TrySetResult(UserData);
-            userDataTcs = null;
+            _tcsUserData?.TrySetResult(UserData);
+            _tcsUserData = null;
 
-            userDataTask = Task.FromResult<IUserData>(UserData);
+            _taskUserData = Task.FromResult<IUserData>(UserData);
 
             OnLoadedUserData();
         }
 
         [Group(Features.UserData), InterceptIn(nameof(Incoming.UpdateUserLook))]
-        private void HandleUpdateUserLook(InterceptEventArgs e)
+        private void HandleUpdateUserLook(InterceptArgs e)
         {
             UserData.Figure = e.Packet.ReadString();
             UserData.Gender = H.ToGender(e.Packet.ReadString());
@@ -117,7 +117,7 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.UserData), InterceptIn(nameof(Incoming.RoomUserData))]
-        private void HandleRoomUserdata(InterceptEventArgs e)
+        private void HandleRoomUserdata(InterceptArgs e)
         {
             int index = e.Packet.ReadInt();
             if (index == -1)
@@ -132,16 +132,19 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.HomeRoom), InterceptIn("UserHomeRoom")]
-        private void HandleUserHomeRoom(InterceptEventArgs e)
+        private void HandleUserHomeRoom(InterceptArgs e)
         {
             HomeRoom = e.Packet.ReadInt();
         }
 
         [Group(Features.Credits), InterceptIn("UserCredits"), RequiredOut("RequestUserCredits")]
-        private void HandleUserCredits(InterceptEventArgs e)
+        private void HandleUserCredits(InterceptArgs e)
         {
             if (_loadingCredits)
+            {
+                _loadingCredits = false;
                 e.Block();
+            }
 
             Credits = (int)e.Packet.ReadDouble();
 
@@ -149,7 +152,7 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.Points), InterceptIn("UserCurrency")]
-        private void HandleUserPoints(InterceptEventArgs e)
+        private void HandleUserPoints(InterceptArgs e)
         {
             Points = ActivityPoints.Parse(e.Packet);
 
@@ -157,7 +160,7 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.Points), InterceptIn("UserPoints")]
-        private void HandleUpdateUserPoints(InterceptEventArgs e)
+        private void HandleUpdateUserPoints(InterceptArgs e)
         {
             int amount = e.Packet.ReadInt();
             int change = e.Packet.ReadInt();
@@ -169,7 +172,7 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.Achievements), InterceptIn("AchievementList"), RequiredOut("RequestAchievements")]
-        private void HandleAchievementList(InterceptEventArgs e)
+        private void HandleAchievementList(InterceptArgs e)
         {
             Achievements = Achievements.Parse(e.Packet);
 
@@ -177,7 +180,7 @@ namespace Xabbo.Core.Components
         }
 
         [Group(Features.Achievements), InterceptIn("AchievementProgress")]
-        private void HandleAchievementProgress(InterceptEventArgs e)
+        private void HandleAchievementProgress(InterceptArgs e)
         {
             var achievement = Achievement.Parse(e.Packet);
             Achievements?.Update(achievement);

@@ -8,7 +8,7 @@ namespace Xabbo.Core.Messages
     {
         private static ConcurrentDictionary<MethodInfo, Delegate> cache = new ConcurrentDictionary<MethodInfo, Delegate>();
 
-        public static Action<object, InterceptEventArgs> GetOpenDelegate(MethodInfo methodInfo)
+        public static Action<object, InterceptArgs> GetOpenDelegate(MethodInfo methodInfo)
         {
             if (!cache.TryGetValue(methodInfo, out Delegate del))
             {
@@ -21,17 +21,17 @@ namespace Xabbo.Core.Messages
                 del = (Delegate)generator.Invoke(null, new object[] { methodInfo });
             }
 
-            return (Action<object, InterceptEventArgs>)del;
+            return (Action<object, InterceptArgs>)del;
         }
 
-        private static Action<object, InterceptEventArgs> GenerateWeaklyTypedOpenDelegate<TTarget>(MethodInfo methodInfo)
+        private static Action<object, InterceptArgs> GenerateWeaklyTypedOpenDelegate<TTarget>(MethodInfo methodInfo)
         {
             var param = methodInfo.GetParameters();
             if (param.Length == 1 &&
-                param[0].ParameterType.Equals(typeof(InterceptEventArgs)))
+                param[0].ParameterType.Equals(typeof(InterceptArgs)))
             {
-                var call = (Action<TTarget, InterceptEventArgs>)methodInfo.CreateDelegate(typeof(Action<TTarget, InterceptEventArgs>));
-                return new Action<object, InterceptEventArgs>((target, args) => call((TTarget)target, args));
+                var call = (Action<TTarget, InterceptArgs>)methodInfo.CreateDelegate(typeof(Action<TTarget, InterceptArgs>));
+                return new Action<object, InterceptArgs>((target, args) => call((TTarget)target, args));
             }
 
             throw new Exception($"Unable to generate delegate, method {methodInfo.DeclaringType.FullName}.{methodInfo.Name} has an invalid signature");

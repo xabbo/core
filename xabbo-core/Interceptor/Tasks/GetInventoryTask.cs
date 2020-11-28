@@ -24,7 +24,7 @@ namespace Xabbo.Core.Tasks
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestInventoryItems);
 
         [InterceptIn(nameof(Incoming.InventoryItems))]
-        protected void OnInventoryItems(InterceptEventArgs e)
+        protected void OnInventoryItems(InterceptArgs e)
         {
             try
             {

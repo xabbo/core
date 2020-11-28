@@ -19,7 +19,7 @@ namespace Xabbo.Core.Tasks
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestRoomData, roomId, 0, 0);
 
         [InterceptIn(nameof(Incoming.RoomData))]
-        protected void OnRoomData(InterceptEventArgs e)
+        protected void OnRoomData(InterceptArgs e)
         {
             try
             {

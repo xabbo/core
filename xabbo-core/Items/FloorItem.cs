@@ -82,14 +82,14 @@ namespace Xabbo.Core
         }
         IItemData IFloorItem.Data => Data;
 
-        public override int State => double.TryParse(data.LegacyString, out double state) ? (int)state : -1;
+        public override int State => double.TryParse(data.Value, out double state) ? (int)state : -1;
 
         public string UnknownStringA { get; set; }
 
         public FloorItem()
         {
             Location = Tile.Zero;
-            Data = new LegacyData();
+            Data = new BasicData();
             SecondsToExpiration = -1;
             Usage = FurniUsage.None;
         }

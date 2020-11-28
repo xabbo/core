@@ -4,7 +4,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Messages
 {
-    public class InterceptEventArgs : EventArgs
+    public class InterceptArgs : EventArgs
     {
         private readonly short originalHeader = -1;
         private readonly byte[] originalData;
@@ -47,7 +47,7 @@ namespace Xabbo.Core.Messages
             }
         }
 
-        public InterceptEventArgs(Destination destination, IPacket packet, int step)
+        public InterceptArgs(Destination destination, IPacket packet, int step)
         {
             Time = DateTime.Now;
 

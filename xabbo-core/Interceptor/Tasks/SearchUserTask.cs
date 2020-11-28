@@ -19,7 +19,7 @@ namespace Xabbo.Core.Tasks
         protected override Task OnExecuteAsync() => SendAsync(Out.SearchUser, searchName);
 
         [InterceptIn(nameof(Incoming.UserSearchResult))]
-        protected void OnUserSearchResult(InterceptEventArgs e)
+        protected void OnUserSearchResult(InterceptArgs e)
         {
             try
             {

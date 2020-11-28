@@ -19,7 +19,7 @@ namespace Xabbo.Core.Tasks
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestCatalogMode, mode);
 
         [InterceptIn(nameof(Incoming.CatalogPagesList))]
-        protected void OnCatalogPagesList(InterceptEventArgs e)
+        protected void OnCatalogPagesList(InterceptArgs e)
         {
             try
             {

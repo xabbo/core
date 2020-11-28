@@ -19,7 +19,7 @@ namespace Xabbo.Core.Tasks
         protected override Task OnExecuteAsync() => SendAsync(Out.RequestUserProfile, userId, false);
 
         [InterceptIn(nameof(Incoming.UserProfile))]
-        protected void OnUserProfile(InterceptEventArgs e)
+        protected void OnUserProfile(InterceptArgs e)
         {
             try
             {
