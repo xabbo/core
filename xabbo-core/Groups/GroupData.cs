@@ -23,7 +23,7 @@ namespace Xabbo.Core
         public bool IsOwner { get; set; }
         public bool IsAdmin { get; set; }
         public string OwnerName { get; set; }
-        public bool Bool5 { get; set; }
+        public bool DisplayInClient { get; set; }
         public bool CanDecorateHomeRoom { get; set; }
         public int PendingRequests { get; set; }
         public bool CanViewForum { get; set; }
@@ -45,7 +45,7 @@ namespace Xabbo.Core
             IsOwner = packet.ReadBool();
             IsAdmin = packet.ReadBool();
             OwnerName = packet.ReadString();
-            Bool5 = packet.ReadBool();
+            DisplayInClient = packet.ReadBool();
             CanDecorateHomeRoom = packet.ReadBool();
             PendingRequests = packet.ReadInt();
             CanViewForum = packet.ReadBool();
