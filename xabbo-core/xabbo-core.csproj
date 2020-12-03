@@ -18,11 +18,11 @@
     <UpdateAssemblyVersion>True</UpdateAssemblyVersion>
     <UpdateAssemblyFileVersion>True</UpdateAssemblyFileVersion>
     <UpdateAssemblyInfoVersion>False</UpdateAssemblyInfoVersion>
-    <AssemblyVersionSettings>None.NoneWithAutoReset.IncrementWithResetOnIncrease.None</AssemblyVersionSettings>
+    <AssemblyVersionSettings>None.NoneWithAutoReset.NoneWithAutoReset.None</AssemblyVersionSettings>
     <UpdatePackageVersion>False</UpdatePackageVersion>
     <AssemblyInfoVersionType>SettingsVersion</AssemblyInfoVersionType>
     <InheritWinAppVersionFrom>None</InheritWinAppVersionFrom>
-    <AssemblyFileVersionSettings>None.NoneWithAutoReset.IncrementWithResetOnIncrease.None</AssemblyFileVersionSettings>
+    <AssemblyFileVersionSettings>None.IncrementOnDemand.IncrementOnDemand.None</AssemblyFileVersionSettings>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
