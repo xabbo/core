@@ -79,6 +79,7 @@
     <Compile Include="Components\User\InventoryManager.cs" />
     <Compile Include="Enum\FollowFriendError.cs" />
     <Compile Include="Enum\TradeCompleteStatus.cs" />
+    <Compile Include="Enum\TradeStartError.cs" />
     <Compile Include="Events\DoorbellEventArgs.cs" />
     <Compile Include="Events\EntityNameChangedEventArgs.cs" />
     <Compile Include="Events\EntityTypingEventArgs.cs" />
