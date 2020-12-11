@@ -302,7 +302,7 @@ namespace Xabbo.Core.Protocol
         public int ReadInt(int position)
         {
             Position = position;
-            return ReadInt(position);
+            return ReadInt();
         }
 
         public double ReadDouble()
