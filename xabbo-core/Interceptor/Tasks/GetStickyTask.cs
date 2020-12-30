@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut(nameof(Outgoing.PostItRequestData))]
+    // @Update [RequiredOut(nameof(Outgoing.PostItRequestData))]
     public class GetStickyTask : InterceptorTask<Sticky>
     {
         private readonly int stickyId;
@@ -16,9 +16,9 @@ namespace Xabbo.Core.Tasks
             this.stickyId = stickyId;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.PostItRequestData, stickyId);
+        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.PostItRequestData, stickyId);
 
-        [InterceptIn(nameof(Incoming.PostItData))]
+        // @Update [InterceptIn(nameof(Incoming.PostItData))]
         protected void OnPostItData(InterceptArgs e)
         {
             try

@@ -22,7 +22,7 @@ namespace Xabbo.Core.Components
             entities = GetComponent<EntityManager>();
         }
 
-        [InterceptIn("RoomUserWhisper", "RoomUserTalk", "RoomUserShout")]
+        // @Update [InterceptIn("RoomUserWhisper", "RoomUserTalk", "RoomUserShout")]
         private void HandleEntityChat(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
@@ -30,11 +30,11 @@ namespace Xabbo.Core.Components
             var packet = e.Packet;
 
             ChatType chatType;
-            if (packet.Header == In.RoomUserWhisper)
+            if (packet.Header == In.Whisper)
                 chatType = ChatType.Whisper;
-            else if (packet.Header == In.RoomUserTalk)
+            else if (packet.Header == In.Chat)
                 chatType = ChatType.Talk;
-            else if (packet.Header == In.RoomUserShout)
+            else if (packet.Header == In.Shout)
                 chatType = ChatType.Shout;
             else
                 throw new Exception($"Unable to detect chat type from incoming header: {packet.Header}");

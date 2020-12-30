@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Xabbo.Core.Messages
 {
@@ -105,6 +102,8 @@ namespace Xabbo.Core.Messages
         public Header Trigger { get; private set; }
         public Header TeleportRelinkResponse { get; private set; }
         public Header FurniRentOrBuyoutOffer { get; private set; }
+        public Header DonationSettings { get; private set; }
+        public Header DonateResult { get; private set; }
         public Header PhLiftDoorOpen { get; private set; }
         public Header PhLiftDoorClose { get; private set; }
         public Header PhTicketsBuy { get; private set; }
@@ -115,6 +114,7 @@ namespace Xabbo.Core.Messages
         public Header PresentOpen { get; private set; }
         public Header FlatPasswordOk { get; private set; }
         public Header NewBuddyRequest { get; private set; }
+        public Header CancelBuddyRequest { get; private set; }
         public Header MessengerNewConsoleMessage { get; private set; }
         public Header MessengerRoomInvite { get; private set; }
         public Header SystemBroadcast { get; private set; }
@@ -138,6 +138,7 @@ namespace Xabbo.Core.Messages
         public Header TrackingRequest { get; private set; }
         public Header ReregistrationRequired { get; private set; }
         public Header AccountUpdateStatus { get; private set; }
+        public Header PurchaseRoomAdResult { get; private set; }
         public Header RoomAd { get; private set; }
         public Header UserCreditTransactions { get; private set; }
         public Header UpdateOk { get; private set; }
@@ -577,6 +578,5 @@ namespace Xabbo.Core.Messages
         public Header ServerDebugPong { get; private set; }
         public Header DisconnectionReason { get; private set; }
         public Header ProxyId { get; private set; }
-        public Header  { get; private set; }
-}
+    }
 }

@@ -16,6 +16,8 @@ namespace Xabbo.Core.Protocol
         /// </summary>
         byte[] GetData();
 
+        ReadOnlyMemory<byte> GetBuffer();
+
         /// <summary>
         /// Gets the message header of the packet.
         /// </summary>

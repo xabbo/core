@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Xabbo.Core.Messages
 {
@@ -82,6 +79,8 @@ namespace Xabbo.Core.Messages
         public Header MoveWallItem { get; private set; }
         public Header RelinkTeleports { get; private set; }
         public Header Goaway { get; private set; }
+        public Header GetDonationSettings { get; private set; }
+        public Header Donate { get; private set; }
         public Header GetRentOrBuyoutOffer { get; private set; }
         public Header ExtendRentOrBuyoutFurniInRoom { get; private set; }
         public Header ExtendRentOrBuyoutFurniInInventory { get; private set; }
@@ -137,6 +136,7 @@ namespace Xabbo.Core.Messages
         public Header RateFlat { get; private set; }
         public Header FollowFriend { get; private set; }
         public Header VisitUser { get; private set; }
+        public Header CancelFriendRequest { get; private set; }
         public Header SetFurniRandomState { get; private set; }
         public Header ClientLatencyPingRequest { get; private set; }
         public Header ClientLatencyPingReport { get; private set; }

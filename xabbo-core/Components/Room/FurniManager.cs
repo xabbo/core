@@ -205,17 +205,17 @@ namespace Xabbo.Core.Components
                 if (furni.Type == ItemType.Floor)
                 {
                     // RemoveFloorItem "id" isExpired pickerId delay
-                    SendLocalAsync(In.RemoveFloorItem, $"{furni.Id}", false, -1, 0);
+                    // @Update SendLocalAsync(In.RemoveFloorItem, $"{furni.Id}", false, -1, 0);
                 }
                 else if (furni.Type == ItemType.Wall)
                 {
                     // RemoveWallItem "id" pickerId
-                    SendLocalAsync(In.RemoveWallItem, $"{furni.Id}", -1);
+                    // @Update SendLocalAsync(In.RemoveWallItem, $"{furni.Id}", -1);
                 }
             }
             else
             {
-                SendLocalAsync(furni.Type == ItemType.Floor ? In.AddFloorItem : In.AddWallItem, furni);
+                // @Update SendLocalAsync(furni.Type == ItemType.Floor ? In.AddFloorItem : In.AddWallItem, furni);
             }
 
             OnFurniVisibilityToggled(furni);
@@ -225,7 +225,7 @@ namespace Xabbo.Core.Components
         public void Hide(ItemType type, int id) => SetHidden(type, id, true);
 
         #region - Floor items -
-        [Group(Features.FloorItemManagement), Receive("RoomFloorItems")]
+        // @Update [Group(Features.FloorItemManagement), Receive("RoomFloorItems")]
         protected void HandleRoomFloorItems(IReadOnlyPacket packet)
         {
             if (!roomManager.IsLoadingRoom)
@@ -256,7 +256,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.FloorItemManagement), Receive("AddFloorItem")]
+        // @Update [Group(Features.FloorItemManagement), Receive("AddFloorItem")]
         protected void HandleAddFloorItem(IReadOnlyPacket packet)
         {
             if (!roomManager.IsInRoom)
@@ -274,7 +274,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.FloorItemManagement), Receive("RemoveFloorItem")]
+        // @Update [Group(Features.FloorItemManagement), Receive("RemoveFloorItem")]
         protected void HandleRemoveFloorItem(IReadOnlyPacket packet)
         {
             /*
@@ -300,7 +300,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.FloorItemUpdates), Receive("FloorItemUpdate")]
+        // @Update [Group(Features.FloorItemUpdates), Receive("FloorItemUpdate")]
         protected void HandleFloorItemUpdate(IReadOnlyPacket packet)
         {
             if (!roomManager.IsInRoom)
@@ -328,7 +328,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.FloorItemUpdates), Receive("ObjectOnRoller")]
+        // @Update [Group(Features.FloorItemUpdates), Receive("ObjectOnRoller")]
         protected void HandleObjectOnRoller(IReadOnlyPacket packet)
         {
             if (!roomManager.IsInRoom)
@@ -350,7 +350,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.FloorItemUpdates), Receive("ItemExtraData")]
+        // @Update [Group(Features.FloorItemUpdates), Receive("ItemExtraData")]
         protected void HandleItemExtraData(IReadOnlyPacket packet)
         {
             if (!roomManager.IsInRoom)
@@ -371,7 +371,7 @@ namespace Xabbo.Core.Components
             OnFloorItemDataUpdated(item, previousData);
         }
 
-        [Group(Features.FloorItemUpdates), Receive("ItemsDataUpdate")]
+        // @Update [Group(Features.FloorItemUpdates), Receive("ItemsDataUpdate")]
         protected void HandleItemsDataUpdate(IReadOnlyPacket packet)
         {
             if (!roomManager.IsInRoom)
@@ -393,7 +393,7 @@ namespace Xabbo.Core.Components
         #endregion
 
         #region - Wall Items -
-        [Group(Features.WallItemManagement), Receive("RoomWallItems")]
+        // @Update [Group(Features.WallItemManagement), Receive("RoomWallItems")]
         protected void HandleWallItems(IReadOnlyPacket packet)
         {
             if (!roomManager.IsLoadingRoom)
@@ -424,7 +424,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.WallItemManagement), Receive("AddWallItem")]
+        // @Update [Group(Features.WallItemManagement), Receive("AddWallItem")]
         protected void HandleAddWallItem(IReadOnlyPacket packet)
         {
             if (!roomManager.IsInRoom)
@@ -442,7 +442,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.WallItemManagement), Receive("RemoveWallItem")]
+        // @Update [Group(Features.WallItemManagement), Receive("RemoveWallItem")]
         protected void HandleRemoveWallItem(IReadOnlyPacket packet)
         {
             if (!roomManager.IsInRoom)
@@ -462,7 +462,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.WallItemUpdates), Receive("WallItemUpdate")]
+        // @Update [Group(Features.WallItemUpdates), Receive("WallItemUpdate")]
         protected void HandleWallItemUpdate(IReadOnlyPacket packet)
         {
             if (!roomManager.IsInRoom)
@@ -517,23 +517,23 @@ namespace Xabbo.Core.Components
 
         #region - Interaction -
         public void Place(int itemId, int x, int y, int direction)
-            => SendAsync(Out.RoomPlaceItem, $"{itemId} {x} {y} {direction}");
+            => throw new NotImplementedException(); // @Update SendAsync(Out.RoomPlaceItem, $"{itemId} {x} {y} {direction}");
         public void Place(int itemId, (int X, int Y) location, int direction)
-            => SendAsync(Out.RoomPlaceItem, $"{itemId} {location.X} {location.Y} {direction}");
+            => throw new NotImplementedException(); // @Update SendAsync(Out.RoomPlaceItem, $"{itemId} {location.X} {location.Y} {direction}");
         public void Place(IInventoryItem item, int x, int y, int direction)
             => Place(item.Id, x, y, direction);
         public void Place(IInventoryItem item, (int X, int Y) location, int direction)
             => Place(item.Id, location, direction);
 
         public void Place(int itemId, WallLocation location)
-            => SendAsync(Out.RoomPlaceItem, $"{itemId} {location}");
+            => throw new NotImplementedException(); // @Update SendAsync(Out.RoomPlaceItem, $"{itemId} {location}");
         public void Place(IInventoryItem item, WallLocation location)
             => Place(item.Id, location);
 
         public void Move(int floorItemId, int x, int y, int direction)
-            => SendAsync(Out.RotateMoveItem, floorItemId, x, y, direction);
+            => throw new NotImplementedException(); // @Update SendAsync(Out.RotateMoveItem, floorItemId, x, y, direction);
         public void Move(int floorItemId, (int X, int Y) location, int direction)
-            => SendAsync(Out.RotateMoveItem, floorItemId, location.X, location.Y, direction);
+            => throw new NotImplementedException(); // @Update SendAsync(Out.RotateMoveItem, floorItemId, location.X, location.Y, direction);
         public void Move(IFloorItem item, int x, int y, int direction)
             => Move(item.Id, x, y, direction);
         public void Move(IFloorItem item, (int X, int Y) location, int direction)
@@ -548,14 +548,14 @@ namespace Xabbo.Core.Components
         public void Pickup(ItemType type, int id)
         {
             if (type == ItemType.Floor)
-                SendAsync(Out.RoomPickupItem, 2, id);
+                throw new NotImplementedException(); // @Update SendAsync(Out.RoomPickupItem, 2, id);
             else if (type == ItemType.Wall)
-                SendAsync(Out.RoomPickupItem, 1, id);
+                throw new NotImplementedException(); // @Update SendAsync(Out.RoomPickupItem, 1, id);
         }
 
         public void UpdateStackTile(IFloorItem stackTile, double height) => UpdateStackTile(stackTile.Id, height);
         public void UpdateStackTile(int stackTileId, double height)
-            => SendAsync(Out.SetStackHelperHeight, stackTileId, (int)Math.Round(height * 100.0));
+            => throw new NotImplementedException(); // @Update SendAsync(Out.SetStackHelperHeight, stackTileId, (int)Math.Round(height * 100.0));
         #endregion
     }
 }

@@ -16,7 +16,7 @@ namespace Xabbo.Core
 
         protected FriendRequest(Packet packet)
         {
-            Id = packet.ReadInteger();
+            Id = packet.ReadInt();
             Name = packet.ReadString();
             Figure = packet.ReadString();
         }

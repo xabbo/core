@@ -55,7 +55,8 @@ namespace Xabbo.Core.Components
 
         protected override void OnInitialize() { }
 
-        public void SendMessage(int id, string message) => SendAsync(Out.FriendPrivateMessage, id, message);
+        // @Legacy FriendPrivateMessage
+        public void SendMessage(int id, string message) => SendAsync(Out.SendMessage, id, message);
         public void SendMessage(Friend friend, string message) => SendMessage(friend.Id, message);
 
         private void AddFriend(Friend friend, bool raiseEvent = true)
@@ -117,7 +118,8 @@ namespace Xabbo.Core.Components
 
         private void RemoveFriend(Friend friend) => RemoveFriend(friend.Id);
 
-        [Receive("LatencyResponse"), RequiredOut("RequestInitFriends")]
+        // @Legacy LatencyResponse, RequestInitFriends
+        [Receive(nameof(Incoming.ClientLatencyPingResponse)), RequiredOut(nameof(Outgoing.FriendListUpdate))]
         private async void HandleLatencyResponse(IReadOnlyPacket packet)
         {
             if (!IsInitialized && !isForceLoading)
@@ -125,18 +127,18 @@ namespace Xabbo.Core.Components
                 DebugUtil.Log("force loading friends");
 
                 isForceLoading = true;
-                await SendAsync(Out.RequestInitFriends);
+                await SendAsync(Out.FriendListUpdate); // @Legacy RequestInitFriends
             }
         }
 
-        [InterceptIn(nameof(Incoming.InitFriends))]
+        [InterceptIn(nameof(Incoming.FriendBarEventNotification))] // @Legacy InitFriends
         protected virtual void HandleInitFriends(InterceptArgs e)
         {
             if (isLoadingFriends && isForceLoading)
                 e.Block();
         }
 
-        [InterceptIn(nameof(Incoming.Friends))]
+        [InterceptIn(nameof(Incoming.FriendListFragment))] // @Legacy Friends
         protected virtual void HandleFriends(InterceptArgs e)
         {
             if (!isLoadingFriends)
@@ -168,7 +170,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [InterceptIn(nameof(Incoming.UpdateFriend))]
+        [InterceptIn(nameof(Incoming.FriendListUpdate))] // @Legacy UpdateFriend
         protected virtual void OnUpdateFriend(InterceptArgs e)
         {
             int n = e.Packet.ReadInt();
@@ -200,7 +202,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [InterceptIn(nameof(Incoming.ReceivePrivateMessage))]
+        [InterceptIn(nameof(Incoming.MessengerNewConsoleMessage))] // @Legacy ReceivePrivateMessage
         protected virtual void OnReceivePrivateMessage(InterceptArgs e)
         {
             int id = e.Packet.ReadInt();

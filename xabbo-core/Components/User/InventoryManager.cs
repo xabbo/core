@@ -102,7 +102,7 @@ namespace Xabbo.Core.Components
             return Inventory;
         }
 
-        [InterceptIn(nameof(Incoming.InventoryRefresh))]
+        // @Update [InterceptIn(nameof(Incoming.InventoryRefresh))]
         private void HandleInventoryRefresh(InterceptArgs e)
         {
             IsRefreshNeeded = true;
@@ -111,7 +111,7 @@ namespace Xabbo.Core.Components
                 _loadTask = ReceiveInventoryAsync(Manager.DisposeToken);
         }
 
-        [InterceptIn(nameof(Incoming.InventoryItemUpdate))]
+        // @Update [InterceptIn(nameof(Incoming.InventoryItemUpdate))]
         private void HandleInventoryItemUpdate(InterceptArgs e)
         {
             if (_inventory != null)
@@ -128,7 +128,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [InterceptIn(nameof(Incoming.AddHabboItem))]
+        // @Update [InterceptIn(nameof(Incoming.AddHabboItem))]
         private void HandleAddHabboItem(InterceptArgs e)
         {
             /*
@@ -145,7 +145,7 @@ namespace Xabbo.Core.Components
             // ???
         }
 
-        [InterceptIn(nameof(Incoming.RemoveHabboItem))]
+        // @Update [InterceptIn(nameof(Incoming.RemoveHabboItem))]
         private void HandleRemoveHabboItem(InterceptArgs e)
         {
             int itemId = e.Packet.ReadInt();
@@ -169,7 +169,7 @@ namespace Xabbo.Core.Components
                 if (timeout > 0) cts.CancelAfter(timeout);
 
                 var loadTask = _loadTask;
-                await SendAsync(Out.RequestInventoryItems);
+                // @Update await SendAsync(Out.RequestInventoryItems);
 
                 var timeoutTask = Task.Delay(-1, cts.Token);
                 await await Task.WhenAny(loadTask, timeoutTask);

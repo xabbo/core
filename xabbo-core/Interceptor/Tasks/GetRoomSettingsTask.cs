@@ -5,7 +5,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut(nameof(Outgoing.RequestRoomSettings))]
+    // @Update [RequiredOut(nameof(Outgoing.RequestRoomSettings))]
     public class GetRoomSettingsTask : InterceptorTask<RoomSettings>
     {
         private readonly int roomId;
@@ -16,9 +16,9 @@ namespace Xabbo.Core.Tasks
             this.roomId = roomId;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.RequestRoomSettings, roomId);
+        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.RequestRoomSettings, roomId);
 
-        [InterceptIn(nameof(Incoming.RoomSettings))]
+        // @Update [InterceptIn(nameof(Incoming.RoomSettings))]
         protected void OnRoomSettings(InterceptArgs e)
         {
             try

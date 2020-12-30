@@ -26,6 +26,8 @@ namespace Xabbo.Core.Protocol
 
             public int Available => packet.Available;
 
+            public ReadOnlyMemory<byte> GetBuffer() => packet.GetData();
+
             public ReadOnlyWrapper(Packet packet)
             {
                 this.packet = packet;
@@ -84,6 +86,11 @@ namespace Xabbo.Core.Protocol
             String = typeof(string);
 
         private readonly MemoryStream _ms;
+
+        public ReadOnlyMemory<byte> GetBuffer()
+        {
+            return new ReadOnlyMemory<byte>(_ms.GetBuffer(), 0, Length);
+        }
 
         /// <summary>
         /// Gets the data in the packet including the length and message ID headers.
@@ -402,6 +409,25 @@ namespace Xabbo.Core.Protocol
         {
             Position = position;
             WriteInt(value);
+        }
+
+        public void WriteLong(long value)
+        {
+            buffer[0] = (byte)((value >> 56) & 0xFF);
+            buffer[1] = (byte)((value >> 48) & 0xFF);
+            buffer[2] = (byte)((value >> 40) & 0xFF);
+            buffer[3] = (byte)((value >> 32) & 0xFF);
+            buffer[4] = (byte)((value >> 24) & 0xFF);
+            buffer[5] = (byte)((value >> 16) & 0xFF);
+            buffer[6] = (byte)((value >> 8) & 0xFF);
+            buffer[7] = (byte)(value >> 0 & 0xFF);
+            Write(buffer, 0, 8);
+        }
+
+        public void WriteLong(long value, int position)
+        {
+            Position = position;
+            WriteLong(value);
         }
 
         public void WriteDouble(double value)

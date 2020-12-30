@@ -6,7 +6,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut(nameof(Outgoing.RequestInventoryBadges))]
+    // @Update [RequiredOut(nameof(Outgoing.RequestInventoryBadges))]
     public class GetBadgesTask : InterceptorTask<List<Badge>>
     {
         private int totalExpected = -1, currentIndex = 0;
@@ -16,9 +16,9 @@ namespace Xabbo.Core.Tasks
             : base(interceptor)
         { }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.RequestInventoryBadges);
+        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update  SendAsync(Out.RequestInventoryBadges);
 
-        [InterceptIn(nameof(Incoming.InventoryBadges))]
+        // @Update [InterceptIn(nameof(Incoming.InventoryBadges))]
         protected void OnInventoryBadges(InterceptArgs e)
         {
             try

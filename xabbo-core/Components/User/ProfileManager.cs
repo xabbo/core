@@ -74,27 +74,27 @@ namespace Xabbo.Core.Components
         /// </summary>
         public Task<IUserData> GetUserDataAsync() => _taskUserData;
 
-        [Group(Features.Autoload), InterceptIn("LatencyResponse")]
+        // @Update [Group(Features.Autoload), InterceptIn("LatencyResponse")]
         private async void HandleLatencyResponse(InterceptArgs e)
         {
             if (UserData == null && Dispatcher.IsAttached(this, Features.UserData))
             {
-                await SendAsync(Out.RequestUserData);
+                // @Update await SendAsync(Out.RequestUserData);
             }
 
             if (!Credits.HasValue && Dispatcher.IsAttached(this, Features.Credits) && !_loadingCredits)
             {
                 _loadingCredits = true;
-                await SendAsync(Out.RequestUserCredits);
+                // @Update await SendAsync(Out.RequestUserCredits);
             }
 
             if (Achievements == null && Dispatcher.IsAttached(this, Features.Achievements))
             {
-                await SendAsync(Out.RequestAchievements);
+                // @Update await SendAsync(Out.RequestAchievements);
             }
         }
 
-        [Group(Features.UserData), InterceptIn("UserData"), RequiredOut("RequestUserData")]
+        // @Update [Group(Features.UserData), InterceptIn("UserData"), RequiredOut("RequestUserData")]
         private void HandleUserData(InterceptArgs e)
         {
             UserData = UserData.Parse(e.Packet);
@@ -107,7 +107,7 @@ namespace Xabbo.Core.Components
             OnLoadedUserData();
         }
 
-        [Group(Features.UserData), InterceptIn(nameof(Incoming.UpdateUserLook))]
+        // @Update [Group(Features.UserData), InterceptIn(nameof(Incoming.UpdateUserLook))]
         private void HandleUpdateUserLook(InterceptArgs e)
         {
             UserData.Figure = e.Packet.ReadString();
@@ -116,7 +116,7 @@ namespace Xabbo.Core.Components
             OnUserDataUpdated();
         }
 
-        [Group(Features.UserData), InterceptIn(nameof(Incoming.RoomUserData))]
+        // @Update [Group(Features.UserData), InterceptIn(nameof(Incoming.RoomUserData))]
         private void HandleRoomUserdata(InterceptArgs e)
         {
             int index = e.Packet.ReadInt();
@@ -131,13 +131,13 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.HomeRoom), InterceptIn("UserHomeRoom")]
+        // @Update [Group(Features.HomeRoom), InterceptIn("UserHomeRoom")]
         private void HandleUserHomeRoom(InterceptArgs e)
         {
             HomeRoom = e.Packet.ReadInt();
         }
 
-        [Group(Features.Credits), InterceptIn("UserCredits"), RequiredOut("RequestUserCredits")]
+        // @Update [Group(Features.Credits), InterceptIn("UserCredits"), RequiredOut("RequestUserCredits")]
         private void HandleUserCredits(InterceptArgs e)
         {
             if (_loadingCredits)
@@ -151,7 +151,7 @@ namespace Xabbo.Core.Components
             OnCreditsUpdated();
         }
 
-        [Group(Features.Points), InterceptIn("UserCurrency")]
+        // @Update [Group(Features.Points), InterceptIn("UserCurrency")]
         private void HandleUserPoints(InterceptArgs e)
         {
             Points = ActivityPoints.Parse(e.Packet);
@@ -159,7 +159,7 @@ namespace Xabbo.Core.Components
             OnLoadedPoints();
         }
 
-        [Group(Features.Points), InterceptIn("UserPoints")]
+        // @Update [Group(Features.Points), InterceptIn("UserPoints")]
         private void HandleUpdateUserPoints(InterceptArgs e)
         {
             int amount = e.Packet.ReadInt();
@@ -171,7 +171,7 @@ namespace Xabbo.Core.Components
             OnPointsUpdated(type, amount, change);
         }
 
-        [Group(Features.Achievements), InterceptIn("AchievementList"), RequiredOut("RequestAchievements")]
+        // @Update [Group(Features.Achievements), InterceptIn("AchievementList"), RequiredOut("RequestAchievements")]
         private void HandleAchievementList(InterceptArgs e)
         {
             Achievements = Achievements.Parse(e.Packet);
@@ -179,7 +179,7 @@ namespace Xabbo.Core.Components
             OnLoadedAchievements();
         }
 
-        [Group(Features.Achievements), InterceptIn("AchievementProgress")]
+        // @Update [Group(Features.Achievements), InterceptIn("AchievementProgress")]
         private void HandleAchievementProgress(InterceptArgs e)
         {
             var achievement = Achievement.Parse(e.Packet);

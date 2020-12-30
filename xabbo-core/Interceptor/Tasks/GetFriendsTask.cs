@@ -6,7 +6,7 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut("RequestInitFriends")]
+    // @Update [RequiredOut("RequestInitFriends")]
     public class GetFriendsTask : InterceptorTask<List<Friend>>
     {
         private int totalExpected = -1, currentIndex = 0;
@@ -16,12 +16,12 @@ namespace Xabbo.Core.Tasks
             : base(interceptor)
         { }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.RequestInitFriends);
+        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.RequestInitFriends);
 
-        [InterceptIn(nameof(Incoming.InitFriends))]
+        // @Update [InterceptIn(nameof(Incoming.InitFriends))]
         protected void OnInitFriends(InterceptArgs e) => e.Block();
 
-        [InterceptIn(nameof(Incoming.Friends))]
+        // @Update [InterceptIn(nameof(Incoming.Friends))]
         protected void OnFriends(InterceptArgs e)
         {
             try

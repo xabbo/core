@@ -5,24 +5,24 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut("RequestRoomData", "RequestRoomLoad")]
+    // @Update [RequiredOut("RequestRoomData", "RequestRoomLoad")]
     public class LoadRoomTask : InterceptorTask<bool>
     {
-        private readonly int roomId;
-        private readonly string password;
+        private readonly long _roomId;
+        private readonly string _password;
 
-        public LoadRoomTask(IInterceptor interceptor, int roomId, string password = "")
+        public LoadRoomTask(IInterceptor interceptor, long roomId, string password = "")
             : base(interceptor)
         {
             throw new NotImplementedException();
 
-            this.roomId = roomId;
-            this.password = password;
+            _roomId = roomId;
+            _password = password;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.RequestRoomData, roomId, 0, 1);
+        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.RequestRoomData, roomId, 0, 1);
 
-        [InterceptIn("RoomData")]
+        // @Update [InterceptIn("RoomData")]
         private void HandleRoomData(InterceptArgs e)
         {
             try

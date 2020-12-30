@@ -5,16 +5,16 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    [RequiredOut(nameof(Outgoing.RequestAchievements))]
+    // @Update [RequiredOut(nameof(Outgoing.RequestAchievements))]
     public class GetAchievementsTask : InterceptorTask<IAchievements>
     {
         public GetAchievementsTask(IInterceptor interceptor)
             : base(interceptor)
         { }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.RequestAchievements);
+        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.RequestAchievements);
 
-        [InterceptIn(nameof(Incoming.AchievementList))]
+        // @Update [InterceptIn(nameof(Incoming.AchievementList))]
         protected void OnAchievementList(InterceptArgs e)
         {
             try

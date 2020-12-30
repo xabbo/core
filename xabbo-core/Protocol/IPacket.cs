@@ -12,47 +12,53 @@ namespace Xabbo.Core.Protocol
         new Header Header { get; set; }
 
         /// <summary>
-        /// Gets or sets the current position of the packet.
+        /// Gets or sets the current position in the packet.
         /// </summary>
         new int Position { get; set; }
 
         /// <summary>
-        /// Writes the specified boolean to the current position in the packet.
+        /// Writes a boolean at the current position in the packet.
         /// </summary>
         void WriteBool(bool value);
 
         /// <summary>
-        /// Writes the specified byte to the current position in the packet.
+        /// Writes a byte at the current position in the packet.
         /// </summary>
         void WriteByte(byte value);
 
         /// <summary>
-        /// Writes the specified short to the current position in the packet.
+        /// Writes a short at the current position in the packet.
         /// </summary>
         void WriteShort(short value);
 
         /// <summary>
-        /// Writes the specified integer to the current position in the packet.
+        /// Writes an integer at the current position in the packet.
         /// </summary>
         void WriteInt(int value);
 
         /// <summary>
-        /// Writes the specified string to the current position in the packet.
+        /// Writes a long at the current position in the packet.
+        /// </summary>
+        /// <param name="value"></param>
+        void WriteLong(long value);
+
+        /// <summary>
+        /// Writes a string at the current position in the packet.
         /// </summary>
         void WriteString(string value);
 
         /// <summary>
-        /// Writes the specified double to the current position in the packet.
+        /// Writes a double (as a string) at the current position in the packet.
         /// </summary>
         void WriteDouble(double value);
 
         /// <summary>
-        /// Writes the specified bytes to the current position in the packet.
+        /// Writes an array of bytes at the current position in the packet.
         /// </summary>
         void WriteBytes(byte[] bytes);
 
         /// <summary>
-        /// Writes the specified values to the current position in the packet.
+        /// Writes values at the current position in the packet.
         /// </summary>
         void WriteValues(params object[] values);
 

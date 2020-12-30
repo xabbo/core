@@ -259,7 +259,7 @@ namespace Xabbo.Core.Components
             if (!e.IsHidden)
             {
                 e.IsHidden = true;
-                SendLocalAsync(In.RoomUserRemove, e.Index.ToString());
+                // @Update SendLocalAsync(In.RoomUserRemove, e.Index.ToString());
             }
         }
 
@@ -292,7 +292,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [InterceptIn(nameof(Incoming.RoomUserRemove))]
+        // @Update [InterceptIn(nameof(Incoming.RoomUserRemove))]
         private void HandleEntityRemove(InterceptArgs e)
         {
             if (!roomManager.IsInRoom)
@@ -312,7 +312,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.Tracking), InterceptIn(nameof(Incoming.RoomUserStatus))]
+        // @Update [Group(Features.Tracking), InterceptIn(nameof(Incoming.RoomUserStatus))]
         private void HandleEntityUpdate(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
@@ -338,7 +338,7 @@ namespace Xabbo.Core.Components
             OnEntitiesUpdated(updatedEntities);
         }
 
-        [Group(Features.Tracking), InterceptIn(nameof(Incoming.ObjectOnRoller))]
+        // @Update [Group(Features.Tracking), InterceptIn(nameof(Incoming.ObjectOnRoller))]
         private void HandleObjectOnRoller(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
@@ -362,7 +362,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserData))]
+        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserData))]
         private void HandleUserDataUpdated(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
@@ -391,7 +391,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserNameChanged))]
+        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserNameChanged))]
         private void HandleRoomUserNameChanged(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
@@ -412,7 +412,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUnitIdle))]
+        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUnitIdle))]
         private void HandleEntityIdle(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
@@ -430,7 +430,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserDance))]
+        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserDance))]
         private void HandleEntityDance(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
@@ -449,7 +449,7 @@ namespace Xabbo.Core.Components
             OnEntityDance(entity, previousDance);
         }
 
-        [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserAction))]
+        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserAction))]
         private void HandleEntityAction(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
@@ -465,7 +465,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserHandItem))]
+        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserHandItem))]
         private void HandleEntityHandItem(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
@@ -483,7 +483,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserEffect))]
+        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserEffect))]
         private void HandleEntityEffect(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
@@ -501,7 +501,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserTyping))]
+        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserTyping))]
         private void HandleEntityTyping(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
