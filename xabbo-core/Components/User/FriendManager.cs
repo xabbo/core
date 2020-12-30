@@ -91,7 +91,8 @@ namespace Xabbo.Core.Components
                     DebugUtil.Log($"failed to update friend {friend} in name map");
                 }
 
-                OnFriendUpdated(previous, friend);
+                if (raiseEvent)
+                    OnFriendUpdated(previous, friend);
             }
             else
             {

@@ -217,6 +217,8 @@
     <Compile Include="Interceptor\Tasks\SearchNavigatorTask.cs" />
     <Compile Include="Interceptor\Tasks\SearchUserTask.cs" />
     <Compile Include="Interceptor\Tasks\InterceptorTask.cs" />
+    <Compile Include="Serialization\AreaConverter.cs" />
+    <Compile Include="Serialization\TileConverter.cs" />
     <Compile Include="Trade\ITradeItem.cs" />
     <Compile Include="Trade\ITradeOffer.cs" />
     <Compile Include="Trade\TradeItem.cs" />
