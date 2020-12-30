@@ -79,6 +79,7 @@ namespace Xabbo.Core.Protocol
             Bool = typeof(bool),
             Short = typeof(short),
             Int = typeof(int),
+            Long = typeof(long),
             ByteArray = typeof(byte[]),
             String = typeof(string);
 
@@ -140,7 +141,7 @@ namespace Xabbo.Core.Protocol
 
         public int Available => Length - Position;
 
-        private byte[] buffer = new byte[4];
+        private byte[] buffer = new byte[8];
 
         public Packet()
         {

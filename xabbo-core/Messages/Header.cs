@@ -37,7 +37,19 @@ namespace Xabbo.Core.Messages
         {
             return
                 obj is Header other &&
-                this == other;
+                Equals(other);
+        }
+
+        public bool Equals(Header other)
+        {
+            if (other is null) return false;
+
+            return
+                Value == other.Value &&
+                (Destination == Destination.Unknown ||
+                other.Destination == Destination.Unknown ||
+                Destination == other.Destination) &&
+                (!HasName || !other.HasName || string.Equals(Name, other.Name));
         }
 
         public override string ToString() => HasName ? $"{Name} ({Value})" : Value.ToString();
@@ -45,15 +57,7 @@ namespace Xabbo.Core.Messages
         public static implicit operator short(Header header) => header?.Value ?? -1;
         public static implicit operator Header(short value) => new Header(value);
 
-        public static bool operator ==(Header a, Header b)
-        {
-            return
-                a.Value == b.Value &&
-                (a.Destination == Destination.Unknown ||
-                b.Destination == Destination.Unknown ||
-                a.Destination == b.Destination) &&
-                (!a.HasName || !b.HasName || string.Equals(a.Name, b.Name));
-        }
+        public static bool operator ==(Header a, Header b) => a.Equals(b);
         public static bool operator !=(Header a, Header b) => !(a == b);
     }
 }

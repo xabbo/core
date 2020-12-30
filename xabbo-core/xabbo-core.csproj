@@ -159,6 +159,8 @@
     <Compile Include="Messages\ListenerAttachFailedException.cs" />
     <Compile Include="Messages\ListenerAttachment.cs" />
     <Compile Include="Messages\ListenerCallback.cs" />
+    <Compile Include="Messages\Incoming.cs" />
+    <Compile Include="Messages\Outgoing.cs" />
     <Compile Include="Messages\UnresolvedIdentifiersException.cs" />
     <Compile Include="Metadata\ExternalTexts.cs" />
     <Compile Include="Metadata\FigureDataXml.cs" />
@@ -247,10 +249,10 @@
     <Compile Include="Messages\Headers.cs" />
     <Compile Include="Messages\Identifier.cs" />
     <Compile Include="Messages\Identifiers.cs" />
-    <Compile Include="Messages\Incoming.cs" />
+    <Compile Include="Messages\Legacy\Incoming.cs" />
     <Compile Include="Messages\Destination.cs" />
     <Compile Include="Messages\InterceptArgs.cs" />
-    <Compile Include="Messages\Outgoing.cs" />
+    <Compile Include="Messages\Legacy\Outgoing.cs" />
     <Compile Include="Messages\Attributes\ReceiveAttribute.cs" />
     <Compile Include="Messages\MessageDispatcher.cs" />
     <Compile Include="Messages\MessageEventArgs.cs" />
