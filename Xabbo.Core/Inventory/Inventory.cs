@@ -13,7 +13,7 @@ namespace Xabbo.Core
 
         public static IEnumerable<InventoryItem> ParseItems(IReadOnlyPacket packet)
         {
-            int n = packet.ReadInt();
+            short n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 yield return InventoryItem.Parse(packet);
         }

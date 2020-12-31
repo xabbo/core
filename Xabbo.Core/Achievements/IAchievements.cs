@@ -5,6 +5,6 @@ namespace Xabbo.Core
 {
     public interface IAchievements : IReadOnlyCollection<IAchievement>
     {
-        IAchievement this[int id] { get; }
+        IAchievement? this[int id] { get; }
     }
 }

@@ -5,26 +5,25 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    // @Update [RequiredOut(nameof(Outgoing.PostItRequestData))]
     public class GetStickyTask : InterceptorTask<Sticky>
     {
-        private readonly int stickyId;
+        private readonly long _stickyId;
 
-        public GetStickyTask(IInterceptor interceptor, int stickyId)
+        public GetStickyTask(IInterceptor interceptor, long stickyId)
             : base(interceptor)
         {
-            this.stickyId = stickyId;
+            _stickyId = stickyId;
         }
 
-        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.PostItRequestData, stickyId);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetItemData, _stickyId);
 
-        // @Update [InterceptIn(nameof(Incoming.PostItData))]
+        [InterceptIn(nameof(Incoming.ItemData))]
         protected void OnPostItData(InterceptArgs e)
         {
             try
             {
                 var sticky = Sticky.Parse(e.Packet);
-                if (sticky.Id == stickyId)
+                if (sticky.Id == _stickyId)
                 {
                     if (SetResult(sticky))
                         e.Block();

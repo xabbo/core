@@ -6,31 +6,30 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    // @Update [RequiredOut(nameof(Outgoing.RequestRoomRights))]
-    public class GetRightsListTask : InterceptorTask<List<(int Id, string Name)>>
+    public class GetRightsListTask : InterceptorTask<List<(long Id, string Name)>>
     {
-        private readonly int roomId;
+        private readonly long roomId;
 
-        public GetRightsListTask(IInterceptor interceptor, int roomId)
+        public GetRightsListTask(IInterceptor interceptor, long _roomId)
             : base(interceptor)
         {
-            this.roomId = roomId;
+            this.roomId = _roomId;
         }
 
-        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.RequestRoomRights, roomId);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetFlatControllers, roomId);
 
-        // @Update [InterceptIn(nameof(Incoming.RoomRightsList))]
+        [InterceptIn(nameof(Incoming.FlatControllers))]
         protected void OnRoomRightsList(InterceptArgs e)
         {
             try
             {
-                int roomId = e.Packet.ReadInt();
+                long roomId = e.Packet.ReadLong();
                 if (roomId == this.roomId)
                 {
-                    var list = new List<(int, string)>();
-                    int n = e.Packet.ReadInt();
+                    var list = new List<(long, string)>();
+                    short n = e.Packet.ReadShort();
                     for (int i = 0; i < n; i++)
-                        list.Add((e.Packet.ReadInt(), e.Packet.ReadString()));
+                        list.Add((e.Packet.ReadLong(), e.Packet.ReadString()));
 
                     if (SetResult(list))
                         e.Block();

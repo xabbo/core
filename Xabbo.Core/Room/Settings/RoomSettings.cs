@@ -46,6 +46,16 @@ namespace Xabbo.Core
         {
             /*
             << RoomSettings
+            long roomId
+            string name
+            string desc
+            int access
+            int category
+            int allowPets
+
+            UNKNOWN DATA
+
+            ---- LEGACY ----
             int roomId
             string name
             string desc
@@ -71,24 +81,29 @@ namespace Xabbo.Core
             Description = packet.ReadString();
             Access = (RoomAccess)packet.ReadInt();
             Category = (RoomCategory)packet.ReadInt();
-            MaxVisitors = packet.ReadInt();
-            UnknownIntA = packet.ReadInt();
-            short n = packet.ReadShort();
-            for (int i = 0; i < n; i++)
-                Tags.Add(packet.ReadString());
-            Trading = (TradePermissions)packet.ReadInt();
             AllowPets = packet.ReadInt() > 0;
-            AllowOthersPetsToEat = packet.ReadInt() > 0;
-            DisableRoomBlocking = packet.ReadInt() > 0;
-            HideWalls = packet.ReadInt() > 0;
-            WallThickness = (Thickness)packet.ReadInt();
-            FloorThickness = (Thickness)packet.ReadInt();
-            Chat = ChatSettings.Parse(packet);
-            EnlistByFurniContent = packet.ReadBool();
-            Moderation = ModerationSettings.Parse(packet);
+
+            // 18 unknown (null) bytes
+
+            //MaxVisitors = packet.ReadInt();
+            //UnknownIntA = packet.ReadInt();
+            //short n = packet.ReadShort();
+            //for (int i = 0; i < n; i++)
+            //    Tags.Add(packet.ReadString());
+            //Trading = (TradePermissions)packet.ReadInt();
+            //AllowPets = packet.ReadInt() > 0;
+            //AllowOthersPetsToEat = packet.ReadInt() > 0;
+            //DisableRoomBlocking = packet.ReadInt() > 0;
+            //HideWalls = packet.ReadInt() > 0;
+            //WallThickness = (Thickness)packet.ReadInt();
+            //FloorThickness = (Thickness)packet.ReadInt();
+            //Chat = ChatSettings.Parse(packet);
+            //EnlistByFurniContent = packet.ReadBool();
+            //Moderation = ModerationSettings.Parse(packet);
         }
 
         /*
+        ----- LEGACY -----
         >> RoomSettingsSave
         int id
         string name
@@ -132,17 +147,9 @@ namespace Xabbo.Core
                 Password ?? string.Empty,
                 MaxVisitors,
                 (int)Category,
-                Tags,
-                (int)Trading,
-                AllowPets,
-                AllowOthersPetsToEat,
-                DisableRoomBlocking,
-                HideWalls,
-                (int)WallThickness,
-                (int)FloorThickness,
-                Moderation,
-                Chat,
-                EnlistByFurniContent
+                AllowPets ? 1 : 0,
+                // @TODO Structure
+                0, 0, 0, 0, ""
             );
         }
     }

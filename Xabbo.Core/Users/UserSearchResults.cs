@@ -34,10 +34,10 @@ namespace Xabbo.Core
             Others = results.AsReadOnly();
         }
 
-        public UserSearchResult GetResult(string name)
+        public UserSearchResult? GetResult(string name)
         {
             return this.FirstOrDefault(result =>
-                string.Equals(result.Name, name, StringComparison.InvariantCultureIgnoreCase)
+                string.Equals(result.Name, name, StringComparison.OrdinalIgnoreCase)
             );
         }
     }

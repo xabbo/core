@@ -22,7 +22,7 @@ namespace Xabbo.Core.Tasks
             this.searchType = searchType;
         }
 
-        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.RequestGuildMembers, groupId, page, filter, (int)searchType);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetGuildMembers, groupId, page, filter, (int)searchType);
 
         [InterceptIn(nameof(Incoming.GuildMembers))] // @Update 
         protected void OnGuildMembers(InterceptArgs e)

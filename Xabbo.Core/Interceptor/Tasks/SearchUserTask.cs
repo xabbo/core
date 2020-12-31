@@ -5,7 +5,6 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    // @Update [RequiredOut(nameof(Outgoing.SearchUser))]
     public class SearchUserTask : InterceptorTask<UserSearchResults>
     {
         private readonly string searchName;
@@ -16,9 +15,9 @@ namespace Xabbo.Core.Tasks
             this.searchName = searchName;
         }
 
-        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.SearchUser, searchName);
+        protected override Task OnExecuteAsync() => SendAsync(Out.HabboSearch, searchName);
 
-        // @Update [InterceptIn(nameof(Incoming.UserSearchResult))]
+        [InterceptIn(nameof(Incoming.HabboSearchResult))]
         protected void OnUserSearchResult(InterceptArgs e)
         {
             try

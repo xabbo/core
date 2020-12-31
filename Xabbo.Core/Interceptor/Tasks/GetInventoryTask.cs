@@ -5,7 +5,6 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    // @Update [RequiredOut(nameof(Outgoing.RequestInventoryItems))]
     public class GetInventoryTask : InterceptorTask<IInventory>
     {
         private int totalExpected = -1, currentIndex = 0;
@@ -21,9 +20,9 @@ namespace Xabbo.Core.Tasks
 
         public GetInventoryTask(IInterceptor interceptor) : this(interceptor, true) { }
 
-        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.RequestInventoryItems);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetInventory);
 
-        // @Update [InterceptIn(nameof(Incoming.InventoryItems))]
+        [InterceptIn(nameof(Incoming.InventoryPush))]
         protected void OnInventoryItems(InterceptArgs e)
         {
             try

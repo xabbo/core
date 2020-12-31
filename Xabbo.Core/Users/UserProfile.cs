@@ -45,6 +45,15 @@ namespace Xabbo.Core
             IsFriend = packet.ReadBool();
             // IsFriendRequestSent = packet.ReadBool();
             // IsOnline = packet.ReadBool();
+            
+            // long secondsSinceLastLogin
+            // bool showInClient ???
+            // bool ?
+            // int ?
+            // int ?
+            // int ?
+            // bool ?
+            // bool ?
 
             int n = packet.ReadInt();
             for (int i = 0; i < n; i++)

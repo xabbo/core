@@ -5,26 +5,25 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    // @Update [RequiredOut(nameof(Outgoing.RequestUserProfile))]
     public class GetProfileTask : InterceptorTask<IUserProfile>
     {
-        private readonly int userId;
+        private readonly long _userId;
 
-        public GetProfileTask(IInterceptor interceptor, int userId)
+        public GetProfileTask(IInterceptor interceptor, long userId)
             : base(interceptor)
         {
-            this.userId = userId;
+            _userId = userId;
         }
 
-        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.RequestUserProfile, userId, false);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetExtendedProfile, _userId, false);
 
-        // @Update [InterceptIn(nameof(Incoming.UserProfile))]
+        [InterceptIn(nameof(Incoming.ExtendedProfile))]
         protected void OnUserProfile(InterceptArgs e)
         {
             try
             {
                 var userProfile = UserProfile.Parse(e.Packet);
-                if (userProfile.Id == userId)
+                if (userProfile.Id == _userId)
                 {
                     if (SetResult(userProfile))
                         e.Block();

@@ -21,12 +21,12 @@ namespace Xabbo.Core
         IEnumerator<IAchievement> IEnumerable<IAchievement>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public Achievement this[int id]
+        public Achievement? this[int id]
         {
             get => _dict.TryGetValue(id, out Achievement? ach) ? ach : null;
         }
 
-        IAchievement IAchievements.this[int id] => this[id];
+        IAchievement? IAchievements.this[int id] => this[id];
 
         public Achievements()
         {

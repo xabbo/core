@@ -60,6 +60,29 @@ namespace Xabbo.Core
             return type;
         }
 
+        public static ItemType ToItemType(int value)
+        {
+            return value switch
+            {
+                0 => ItemType.Wall,
+                1 => ItemType.Floor,
+                _ => throw new Exception($"Unknown item type {value}")
+            };
+        }
+
+        public static ItemType ToItemType(char value)
+        {
+            return value switch
+            {
+                's' => ItemType.Floor,
+                'i' => ItemType.Wall,
+                'e' => ItemType.Effect,
+                'b' => ItemType.Badge,
+                'r' => ItemType.Bot,
+                _ => throw new Exception($"Unknown item type '{value}'")
+            };
+        }
+
         #region - Figure -
         public static bool TryGetFigurePartType(string partTypeString, out FigurePartType partType)
         {

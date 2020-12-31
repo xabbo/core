@@ -19,6 +19,9 @@ namespace Xabbo.Core
         public ChatSettings ChatSettings { get; set; }
         IChatSettings IRoomData.ChatSettings => ChatSettings;
 
+        public int UnknownInt1 { get; set; }
+        public int UnknownInt2 { get; set; }
+
         public RoomData() { }
 
         protected RoomData(bool isUpdating, IReadOnlyPacket packet)
@@ -36,7 +39,8 @@ namespace Xabbo.Core
             ShowMuteButton = packet.ReadBool();
             ChatSettings = ChatSettings.Parse(packet);
 
-            // TODO extra 8 bytes ?
+            UnknownInt1 = packet.ReadInt();
+            UnknownInt2 = packet.ReadInt();
         }
 
         public override void Write(IPacket packet)

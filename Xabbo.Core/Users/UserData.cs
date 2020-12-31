@@ -25,6 +25,7 @@ namespace Xabbo.Core
         public string LastLogin { get; set; }
         public bool IsNameChangeable { get; set; }
         public bool IsSafetyLocked { get; set; }
+        public bool Bool3 { get; set; }
 
         public UserData()
         {
@@ -53,7 +54,7 @@ namespace Xabbo.Core
             LastLogin = packet.ReadString();
             IsNameChangeable = packet.ReadBool();
             IsSafetyLocked = packet.ReadBool();
-            // Extra bool - ?
+            Bool3 = packet.ReadBool();
         }
 
         public void Write(IPacket packet) => packet.WriteValues(

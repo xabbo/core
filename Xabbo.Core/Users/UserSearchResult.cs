@@ -7,7 +7,7 @@ namespace Xabbo.Core
     {
         public static UserSearchResult Parse(IReadOnlyPacket packet) => new UserSearchResult(packet);
 
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; }
         public string Motto { get; set; }
         public bool Online { get; set; }
@@ -21,7 +21,7 @@ namespace Xabbo.Core
 
         protected UserSearchResult(IReadOnlyPacket packet)
         {
-            Id = packet.ReadInt();
+            Id = packet.ReadLong();
             Name = packet.ReadString();
             Motto = packet.ReadString();
             Online = packet.ReadBool();

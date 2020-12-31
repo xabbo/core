@@ -13,6 +13,13 @@ namespace Xabbo.Core
 
     public static partial class XabboEnumExtensions
     {
+        public static short GetValue(this ItemType type) => type switch
+        {
+            ItemType.Floor => 1,
+            ItemType.Wall => 0,
+            _ => throw new Exception($"Unknown value for item type: {type}")
+        };
+
         public static string ToShortString(this ItemType type) => ((char)type).ToString();
     }
 }

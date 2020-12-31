@@ -5,16 +5,15 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    // @Update [RequiredOut(nameof(Outgoing.RequestUserData))]
     public class GetUserDataTask : InterceptorTask<IUserData>
     {
         public GetUserDataTask(IInterceptor interceptor)
             : base(interceptor)
         { }
 
-        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.RequestUserData);
+        protected override Task OnExecuteAsync() => SendAsync(Out.InfoRetrieve);
 
-        // @Update [InterceptIn(nameof(Incoming.UserData))]
+        [InterceptIn(nameof(Incoming.UserObject))]
         protected void HandleUserData(InterceptArgs e)
         {
             try

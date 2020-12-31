@@ -5,7 +5,6 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    // @Update [RequiredOut(nameof(Outgoing.RequestNewNavigatorRooms))]
     public class SearchNavigatorTask : InterceptorTask<NavigatorSearchResults>
     {
         private readonly string category;
@@ -18,9 +17,9 @@ namespace Xabbo.Core.Tasks
             this.filter = filter;
         }
 
-        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.RequestNewNavigatorRooms, category, filter);
+        protected override Task OnExecuteAsync() => SendAsync(Out.Navigator2Search, category, filter);
 
-        // @Update [InterceptIn(nameof(Incoming.NewNavigatorSearchResults))]
+        [InterceptIn(nameof(Incoming.Navigator2SearchResultBlocks))]
         protected void OnNavigatorSearchResults(InterceptArgs e)
         {
             try
