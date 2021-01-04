@@ -169,7 +169,7 @@ namespace Xabbo.Core.Components
                 if (timeout > 0) cts.CancelAfter(timeout);
 
                 var loadTask = _loadTask;
-                // @Update await SendAsync(Out.RequestInventoryItems);
+                await SendAsync(Out.GetInventory);
 
                 var timeoutTask = Task.Delay(-1, cts.Token);
                 await await Task.WhenAny(loadTask, timeoutTask);

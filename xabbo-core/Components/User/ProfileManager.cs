@@ -79,22 +79,22 @@ namespace Xabbo.Core.Components
         {
             if (UserData == null && Dispatcher.IsAttached(this, Features.UserData))
             {
-                // @Update await SendAsync(Out.RequestUserData);
+                await SendAsync(Out.InfoRetrieve);
             }
 
             if (!Credits.HasValue && Dispatcher.IsAttached(this, Features.Credits) && !_loadingCredits)
             {
                 _loadingCredits = true;
-                // @Update await SendAsync(Out.RequestUserCredits);
+                await SendAsync(Out.GetCredits);
             }
 
             if (Achievements == null && Dispatcher.IsAttached(this, Features.Achievements))
             {
-                // @Update await SendAsync(Out.RequestAchievements);
+                await SendAsync(Out.GetUserAchievements);
             }
         }
 
-        // @Update [Group(Features.UserData), InterceptIn("UserData"), RequiredOut("RequestUserData")]
+        // @Update [Group(Features.UserData), InterceptIn("UserData")]
         private void HandleUserData(InterceptArgs e)
         {
             UserData = UserData.Parse(e.Packet);
@@ -137,7 +137,7 @@ namespace Xabbo.Core.Components
             HomeRoom = e.Packet.ReadInt();
         }
 
-        // @Update [Group(Features.Credits), InterceptIn("UserCredits"), RequiredOut("RequestUserCredits")]
+        // @Update [Group(Features.Credits), InterceptIn("UserCredits")]
         private void HandleUserCredits(InterceptArgs e)
         {
             if (_loadingCredits)

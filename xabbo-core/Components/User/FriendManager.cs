@@ -55,7 +55,6 @@ namespace Xabbo.Core.Components
 
         protected override void OnInitialize() { }
 
-        // @Legacy FriendPrivateMessage
         public void SendMessage(int id, string message) => SendAsync(Out.SendMessage, id, message);
         public void SendMessage(Friend friend, string message) => SendMessage(friend.Id, message);
 
@@ -127,7 +126,7 @@ namespace Xabbo.Core.Components
                 DebugUtil.Log("force loading friends");
 
                 isForceLoading = true;
-                await SendAsync(Out.FriendListUpdate); // @Legacy RequestInitFriends
+                await SendAsync(Out.MessengerInit);
             }
         }
 
