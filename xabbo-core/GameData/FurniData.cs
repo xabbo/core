@@ -4,7 +4,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Xabbo.Core.Metadata
+namespace Xabbo.Core.GameData
 {
     public class FurniData : IReadOnlyCollection<FurniInfo>
     {
@@ -41,7 +41,7 @@ namespace Xabbo.Core.Metadata
         /// </summary>
         public FurniInfo this[string identifier] => GetInfo(identifier);
 
-        internal FurniData(FurniDataXml proxy)
+        internal FurniData(Xml.FurniData proxy)
         {
             FloorItems = proxy.FloorItems
                 .Select(furniInfoProxy => new FurniInfo(ItemType.Floor, furniInfoProxy))
@@ -54,6 +54,11 @@ namespace Xabbo.Core.Metadata
             _identifierMap = this.ToDictionary(furniInfo => furniInfo.Identifier, StringComparer.InvariantCultureIgnoreCase);
             _floorItemMap = FloorItems.ToDictionary(furniInfo => furniInfo.Kind);
             _wallItemMap = WallItems.ToDictionary(wallItem => wallItem.Kind);
+        }
+
+        internal FurniData(Json.FurniData proxy)
+        {
+            
         }
 
         /// <summary>

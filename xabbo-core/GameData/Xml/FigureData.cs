@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 
-namespace Xabbo.Core.Metadata
+namespace Xabbo.Core.GameData.Xml
 {
     [XmlRoot("figuredata")]
-    public class FigureDataXml
+    public class FigureData
     {
         private static readonly XmlSerializer serializer;
-        static FigureDataXml() { serializer = new XmlSerializer(typeof(FigureDataXml)); }
-        public static FigureDataXml Load(Stream stream) => (FigureDataXml)serializer.Deserialize(stream);
+        static FigureData() { serializer = new XmlSerializer(typeof(FigureData)); }
+        public static FigureData Load(Stream stream) => (FigureData)serializer.Deserialize(stream);
 
         [XmlArray("colors")]
         [XmlArrayItem("palette")]

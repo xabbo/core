@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Xabbo.Core.Metadata
+namespace Xabbo.Core.GameData
 {
     public class ExternalTexts : IReadOnlyDictionary<string, string>
     {

@@ -2,22 +2,23 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.Json;
 
-namespace Xabbo.Core.Metadata
+namespace Xabbo.Core.GameData
 {
     public class FigureData
     {
-        public static FigureData Load(Stream stream) => new FigureData(FigureDataXml.Load(stream));
-        public static FigureData Load(string path)
+        public static FigureData LoadXml(Stream stream) => new FigureData(Xml.FigureData.Load(stream));
+        public static FigureData LoadXml(string path)
         {
             using (var stream = File.OpenRead(path))
-                return Load(stream);
+                return LoadXml(stream);
         }
 
         public IReadOnlyList<Palette> Palettes { get; }
         public IReadOnlyList<PartSetCollection> SetCollections { get; }
 
-        internal FigureData(FigureDataXml proxy)
+        internal FigureData(Xml.FigureData proxy)
         {
             Palettes = proxy.Palettes
                 .Select(palette => new Palette(palette))
@@ -40,7 +41,7 @@ namespace Xabbo.Core.Metadata
             public int Id { get; }
             public IReadOnlyList<Color> Colors { get; }
 
-            internal Palette(FigureDataXml.Palette proxy)
+            internal Palette(Xml.FigureData.Palette proxy)
             {
                 Id = proxy.Id;
                 Colors = proxy.Colors
@@ -61,7 +62,7 @@ namespace Xabbo.Core.Metadata
 
             public bool IsClubRequired => RequiredClubLevel > 0;
 
-            internal Color(FigureDataXml.Color proxy)
+            internal Color(Xml.FigureData.Color proxy)
             {
                 Id = proxy.Id;
                 Index = proxy.Index;
@@ -87,7 +88,7 @@ namespace Xabbo.Core.Metadata
             public int mand_f_1 { get; }
             public IReadOnlyList<PartSet> Sets { get; }
 
-            internal PartSetCollection(FigureDataXml.PartSetCollection proxy)
+            internal PartSetCollection(Xml.FigureData.PartSetCollection proxy)
             {
                 Type = H.GetFigurePartType(proxy.Type);
                 PaletteId = proxy.PaletteId;
@@ -116,7 +117,7 @@ namespace Xabbo.Core.Metadata
 
             public bool IsClubRequired => RequiredClubLevel > 0;
 
-            internal PartSet(FigureDataXml.PartSet proxy)
+            internal PartSet(Xml.FigureData.PartSet proxy)
             {
                 Id = proxy.Id;
                 Gender = H.ToGender(proxy.Gender);
@@ -141,7 +142,7 @@ namespace Xabbo.Core.Metadata
             public int Index { get; }
             public int ColorIndex { get; }
 
-            internal Part(FigureDataXml.Part proxy)
+            internal Part(Xml.FigureData.Part proxy)
             {
                 Id = proxy.Id;
                 Type = proxy.Type;

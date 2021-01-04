@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Xabbo.Core.Metadata
+namespace Xabbo.Core.GameData
 {
     public class FurniInfo
     {
@@ -46,8 +46,9 @@ namespace Xabbo.Core.Metadata
         public bool CanSitOn { get; }
         public bool CanLayOn { get; }
         public string Line { get; }
+        public bool IsRare { get; }
 
-        internal FurniInfo(ItemType type, FurniDataXml.FurniInfo proxy)
+        internal FurniInfo(ItemType type, Xml.FurniInfo proxy)
         {
             Type = type;
             Kind = proxy.Id;
@@ -72,6 +73,34 @@ namespace Xabbo.Core.Metadata
             CanSitOn = proxy.CanSitOn;
             CanLayOn = proxy.CanLayOn;
             Line = proxy.FurniLine;
+        }
+
+        internal FurniInfo(ItemType type, Json.FurniInfo proxy)
+        {
+            Type = type;
+            Kind = proxy.Id;
+            Identifier = proxy.ClassName;
+            Revision = proxy.Revision;
+            DefaultDirection = proxy.DefaultDir;
+            XDimension = proxy.XDim;
+            YDimension = proxy.YDim;
+            PartColors = proxy.PartColors.Colors;
+            Name = proxy.Name;
+            Description = proxy.Description;
+            AdUrl = proxy.AdUrl;
+            OfferId = proxy.OfferId;
+            BuyOut = proxy.Buyout;
+            RentOfferId = proxy.RentOfferId;
+            RentBuyOut = proxy.RentBuyout;
+            IsBuildersClub = proxy.BC;
+            ExcludedDynamic = proxy.ExcludedDynamic;
+            CustomParams = proxy.CustomParams;
+            Category = (FurniCategory)proxy.SpecialType;
+            CanStandOn = proxy.CanStandOn;
+            CanSitOn = proxy.CanSitOn;
+            CanLayOn = proxy.CanLayOn;
+            Line = proxy.FurniLine;
+            IsRare = proxy.Rare;
         }
 
         /// <summary>

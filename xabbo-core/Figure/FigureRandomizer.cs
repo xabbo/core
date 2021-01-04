@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Xabbo.Core.Metadata;
+using Xabbo.Core.GameData;
 
 namespace Xabbo.Core
 {
