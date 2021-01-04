@@ -15,7 +15,7 @@ namespace Xabbo.Core.GameData
             PropertyNameCaseInsensitive = true
         };
 
-        public static ProductData Load(string path) => LoadJson(File.ReadAllText(path));
+        public static ProductData LoadJsonFile(string path) => LoadJson(File.ReadAllText(path));
         public static ProductData LoadJson(string json)
         {
             return new ProductData(

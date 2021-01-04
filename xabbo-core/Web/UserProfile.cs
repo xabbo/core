@@ -1,9 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
@@ -12,10 +9,6 @@ namespace Xabbo.Core.Web
         {"error":"not-found"}
     */
 
-    [JsonObject(
-        MemberSerialization = MemberSerialization.OptIn,
-        ItemNullValueHandling = NullValueHandling.Ignore
-    )]
     public class UserProfile
     {
         public string UniqueId => UserInfo.UniqueId;
@@ -24,19 +17,19 @@ namespace Xabbo.Core.Web
         public string Motto => UserInfo.Motto;
         public DateTime Created => UserInfo.Created;
 
-        [JsonProperty("user")]
+        [JsonPropertyName("user")]
         public UserInfo UserInfo { get; set; }
 
-        [JsonProperty("groups")]
+        [JsonPropertyName("groups")]
         public List<GroupInfo> Groups { get; set; }
 
-        [JsonProperty("badges")]
+        [JsonPropertyName("badges")]
         public List<BadgeInfo> Badges { get; set; }
 
-        [JsonProperty("friends")]
+        [JsonPropertyName("friends")]
         public List<BasicUserInfo> Friends { get; set; }
 
-        [JsonProperty("rooms")]
+        [JsonPropertyName("rooms")]
         public List<RoomInfo> Rooms { get; set; }
     }
 }

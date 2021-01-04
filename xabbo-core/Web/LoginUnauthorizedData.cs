@@ -1,34 +1,32 @@
 ﻿using System;
-
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
-    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public class LoginUnauthorizedData
     {
-        [JsonProperty("message")]
+        [JsonPropertyName("message")]
         public string Message { get; set; }
 
-        [JsonProperty("captcha")]
+        [JsonPropertyName("captcha")]
         public bool? Captcha { get; set; }
 
-        [JsonProperty("reason")]
+        [JsonPropertyName("reason")]
         public string Reason { get; set; }
 
-        [JsonProperty("expiryTime")]
+        [JsonPropertyName("expiryTime")]
         public DateTime? ExpiryTime { get; set; }
 
-        [JsonProperty("permanentBan")]
+        [JsonPropertyName("permanentBan")]
         public bool? PermanentBan { get; set; }
 
-        [JsonProperty("avatarName")]
+        [JsonPropertyName("avatarName")]
         public string AvatarName { get; set; }
 
-        [JsonProperty("sanctionReasonId")]
+        [JsonPropertyName("sanctionReasonId")]
         public string SanctionReasonId { get; set; }
 
-        [JsonProperty("provideExtraSupport")]
+        [JsonPropertyName("provideExtraSupport")]
         public bool? ProvideExtraSupport { get; set; }
     }
 }

@@ -1,33 +1,33 @@
 ﻿using System;
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
     public class GroupInfo
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public string UniqueId { get; set; }
 
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("description")]
+        [JsonPropertyName("description")]
         public string Description { get; set; }
 
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string Type { get; set; }
 
-        [JsonProperty("roomId")]
+        [JsonPropertyName("roomId")]
         public string RoomUniqueId { get; set; }
 
-        [JsonProperty("badgeCode")]
+        [JsonPropertyName("badgeCode")]
         public string BadgeCode { get; set; }
 
-        [JsonProperty("primaryColour")]
+        [JsonPropertyName("primaryColour")]
         public string PrimaryColor { get; set; }
 
-        [JsonProperty("secondaryColour")]
+        [JsonPropertyName("secondaryColour")]
         public string SecondaryColor { get; set; }
     }
 }

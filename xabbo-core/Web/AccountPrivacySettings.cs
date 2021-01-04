@@ -1,45 +1,44 @@
 ﻿using System;
-
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
     public class AccountSettings
     {
-        [JsonProperty("profileVisible")]
+        [JsonPropertyName("profileVisible")]
         public bool IsProfileVisible { get; set; }
 
-        [JsonProperty("onlineStatusVisible")]
+        [JsonPropertyName("onlineStatusVisible")]
         public bool ShowOnline { get; set; }
 
-        [JsonProperty("friendCanFollow")]
+        [JsonPropertyName("friendCanFollow")]
         public bool AllowFollow { get; set; }
 
-        [JsonProperty("friendRequestEnabled")]
+        [JsonPropertyName("friendRequestEnabled")]
         public bool AllowFriendRequests { get; set; }
 
-        [JsonProperty("offlineMessagingEnabled")]
+        [JsonPropertyName("offlineMessagingEnabled")]
         public bool AllowOfflineMessaging { get; set; }
 
-        [JsonProperty("emailNewsletterEnabled")]
+        [JsonPropertyName("emailNewsletterEnabled")]
         public bool ReceiveNewsletter { get; set; }
 
-        [JsonProperty("emailMiniMailNotificationEnabled")]
+        [JsonPropertyName("emailMiniMailNotificationEnabled")]
         public bool NotifyMiniMail { get; set; }
 
-        [JsonProperty("emailFriendRequestNotificationEnabled")]
+        [JsonPropertyName("emailFriendRequestNotificationEnabled")]
         public bool NotifyFriendRequest { get; set; }
 
-        [JsonProperty("emailGiftNotificationEnabled")]
+        [JsonPropertyName("emailGiftNotificationEnabled")]
         public bool NotifyGift { get; set; }
 
-        [JsonProperty("emailRoomMessageNotificationEnabled")]
+        [JsonPropertyName("emailRoomMessageNotificationEnabled")]
         public bool NotifyRoomMessage { get; set; }
 
-        [JsonProperty("emailGroupNotificationEnabled")]
+        [JsonPropertyName("emailGroupNotificationEnabled")]
         public bool NotifyGroupRequest { get; set; }
 
-        [JsonProperty("gdprDataReady")]
+        [JsonPropertyName("gdprDataReady")]
         public bool GDPRDataReady { get; set; }
     }
 }

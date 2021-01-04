@@ -1,44 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
-    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public class PhotoData
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public string Id { get; set; }
 
-        [JsonProperty("version")]
+        [JsonPropertyName("version")]
         public int Version { get; set; }
 
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string Type { get; set; }
 
-        [JsonProperty("time")]
+        [JsonPropertyName("time")]
         public long Time { get; set; }
 
-        [JsonProperty("tags")]
+        [JsonPropertyName("tags")]
         public List<string> Tags { get; set; }
 
-        [JsonProperty("room_id")]
+        [JsonPropertyName("room_id")]
         public int RoomId { get; set; }
 
-        [JsonProperty("creator_uniqueId")]
+        [JsonPropertyName("creator_uniqueId")]
         public string CreatorUniqueId { get; set; }
 
-        [JsonProperty("creator_id")]
+        [JsonPropertyName("creator_id")]
         public int CreatorId { get; set; }
 
-        [JsonProperty("creator_name")]
+        [JsonPropertyName("creator_name")]
         public string CreatorName { get; set; }
 
-        [JsonProperty("url")]
+        [JsonPropertyName("url")]
         public string Url { get; set; }
 
-        [JsonProperty("previewUrl")]
+        [JsonPropertyName("previewUrl")]
         public string PreviewUrl { get; set; }
     }
 }

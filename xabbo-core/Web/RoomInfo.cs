@@ -1,61 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
     public class RoomInfo
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("description")]
+        [JsonPropertyName("description")]
         public string Description { get; set; }
 
-        [JsonProperty("creationTime")]
+        [JsonPropertyName("creationTime")]
         public DateTime Created { get; set; }
 
-        [JsonProperty("tags")]
+        [JsonPropertyName("tags")]
         public List<string> Tags { get; set; }
 
-        [JsonProperty("maximumVisitors")]
+        [JsonPropertyName("maximumVisitors")]
         public int MaximumVisitors { get; set; }
 
-        [JsonProperty("showOwnerName")]
+        [JsonPropertyName("showOwnerName")]
         public bool ShowOwnerName { get; set; }
 
-        [JsonProperty("ownerName")]
+        [JsonPropertyName("ownerName")]
         public string OwnerName { get; set; }
 
-        [JsonProperty("ownerUniqueId")]
+        [JsonPropertyName("ownerUniqueId")]
         public string OwnerUniqueId { get; set; }
 
-        [JsonProperty("categories")]
+        [JsonPropertyName("categories")]
         public List<string> Categories { get; set; }
 
-        [JsonProperty("thumbnailUrl")]
+        [JsonPropertyName("thumbnailUrl")]
         public string ThumbnailUrl { get; set; }
 
-        [JsonProperty("imageUrl")]
+        [JsonPropertyName("imageUrl")]
         public string ImageUrl { get; set; }
 
-        [JsonProperty("rating")]
+        [JsonPropertyName("rating")]
         public int Rating { get; set; }
 
-        [JsonProperty("uniqueId")]
+        [JsonPropertyName("uniqueId")]
         public string UniqueId { get; set; }
 
         // The following are not included in user profile,
         // only returned by the room info api
 
-        [JsonProperty("publicRoom")]
+        [JsonPropertyName("publicRoom")]
         public bool IsPublicRoom { get; set; }
 
-        [JsonProperty("doorMode")]
+        [JsonPropertyName("doorMode")]
         public string DoorMode { get; set; }
     }
 }

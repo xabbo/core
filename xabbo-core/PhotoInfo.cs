@@ -1,14 +1,14 @@
 ﻿using System;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core
 {
     public class PhotoInfo
     {
-        [JsonProperty("t")]
+        [JsonPropertyName("t")]
         public ulong Time { get; set; }
         
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public string Id { get; set; }
     }
 }

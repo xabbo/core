@@ -1,6 +1,6 @@
 ﻿using System;
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
@@ -8,13 +8,13 @@ namespace Xabbo.Core.Web
 
     public class ErrorInfo
     {
-        [JsonProperty("param")]
+        [JsonPropertyName("param")]
         public string Parameter { get; set; }
 
-        [JsonProperty("msg")]
+        [JsonPropertyName("msg")]
         public string Message { get; set; }
 
-        [JsonProperty("value")]
+        [JsonPropertyName("value")]
         public string Value { get; set; }
     }
 }

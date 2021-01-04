@@ -1,12 +1,12 @@
 ﻿using System;
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
     public class SelectedBadgeInfo : BadgeInfo
     {
-        [JsonProperty("badgeIndex")]
+        [JsonPropertyName("badgeIndex")]
         public int Index { get; set; }
     }
 }

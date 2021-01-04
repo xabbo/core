@@ -1,12 +1,12 @@
 ﻿using System;
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
     public class CheckNameResponse
     {
-        [JsonProperty("isAvailable")]
+        [JsonPropertyName("isAvailable")]
         public bool IsAvailable { get; set; }
     }
 }

@@ -1,23 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
-    [JsonObject(
-        MemberSerialization = MemberSerialization.OptIn,
-        ItemNullValueHandling = NullValueHandling.Ignore
-    )]
     public class UserInfo : BasicUserInfo
     {
-        [JsonProperty("memberSince")]
+        [JsonPropertyName("memberSince")]
         public DateTime Created { get; set; }
 
-        [JsonProperty("profileVisible")]
+        [JsonPropertyName("profileVisible")]
         public bool IsProfileVisible { get; set; }
 
-        [JsonProperty("selectedBadges")]
+        [JsonPropertyName("selectedBadges")]
         public List<SelectedBadgeInfo> SelectedBadges { get; set; }
     }
 }

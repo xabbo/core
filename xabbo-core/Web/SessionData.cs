@@ -1,78 +1,75 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
-    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public class SessionData
     {
-        [JsonProperty("uniqueId")]
+        [JsonPropertyName("uniqueId")]
         public string UniqueId { get; set; }
 
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("figureString")]
+        [JsonPropertyName("figureString")]
         public string FigureString { get; set; }
 
-        [JsonProperty("motto")]
+        [JsonPropertyName("motto")]
         public string Motto { get; set; }
 
-        [JsonProperty("buildersClubMember")]
+        [JsonPropertyName("buildersClubMember")]
         public bool BuildersClubMember { get; set; }
 
-        [JsonProperty("habboClubMember")]
+        [JsonPropertyName("habboClubMember")]
         public bool HabboClubMember { get; set; }
 
-        [JsonProperty("lastWebAccess")]
+        [JsonPropertyName("lastWebAccess")]
         public DateTime? LastWebAccess { get; set; }
 
-        [JsonProperty("creationTime")]
+        [JsonPropertyName("creationTime")]
         public DateTime CreationTime { get; set; }
 
-        [JsonProperty("sessionLogId")]
+        [JsonPropertyName("sessionLogId")]
         public long SessionLogId { get; set; }
 
-        [JsonProperty("loginLogId")]
+        [JsonPropertyName("loginLogId")]
         public long LoginLogId { get; set; }
 
-        [JsonProperty("email")]
+        [JsonPropertyName("email")]
         public string Email { get; set; }
 
-        [JsonProperty("identityId")]
+        [JsonPropertyName("identityId")]
         public int IdentityId { get; set; }
 
-        [JsonProperty("emailVerified")]
+        [JsonPropertyName("emailVerified")]
         public bool EmailVerified { get; set; }
 
-        [JsonProperty("identityVerified")]
+        [JsonPropertyName("identityVerified")]
         public bool IdentityVerified { get; set; }
 
-        [JsonProperty("identityType")]
+        [JsonPropertyName("identityType")]
         public string IdentityType { get; set; }
 
-        [JsonProperty("trusted")]
+        [JsonPropertyName("trusted")]
         public bool Trusted { get; set; }
 
-        [JsonProperty("force")]
+        [JsonPropertyName("force")]
         public List<string> Force { get; set; }
 
-        [JsonProperty("accountId")]
+        [JsonPropertyName("accountId")]
         public int AccountId { get; set; }
 
-        [JsonProperty("country")]
+        [JsonPropertyName("country")]
         public string Country { get; set; }
 
-        [JsonProperty("traits")]
+        [JsonPropertyName("traits")]
         public List<string> Traits { get; set; }
 
-        [JsonProperty("partner")]
+        [JsonPropertyName("partner")]
         public string Partner { get; set; }
 
-        [JsonProperty("banned")]
+        [JsonPropertyName("banned")]
         public bool Banned { get; set; }
     }
 }

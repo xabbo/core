@@ -1,40 +1,39 @@
 ﻿using System;
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
-    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public class AvatarInfo
     {
-        [JsonProperty("uniqueId")]
+        [JsonPropertyName("uniqueId")]
         public string UniqueId { get; set; }
 
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("figureString")]
+        [JsonPropertyName("figureString")]
         public string FigureString { get; set; }
 
-        [JsonProperty("motto")]
+        [JsonPropertyName("motto")]
         public string Motto { get; set; }
 
-        [JsonProperty("buildersClubMember")]
+        [JsonPropertyName("buildersClubMember")]
         public bool BuildersClubMember { get; set; }
 
-        [JsonProperty("habboClubMember")]
+        [JsonPropertyName("habboClubMember")]
         public bool HabboClubMember { get; set; }
 
-        [JsonProperty("lastWebAccess")]
+        [JsonPropertyName("lastWebAccess")]
         public DateTime? LastAccess { get; set; }
 
-        [JsonProperty("creationTime")]
+        [JsonPropertyName("creationTime")]
         public DateTime Created { get; set; }
 
-        [JsonProperty("banned")]
+        [JsonPropertyName("banned")]
         public bool Banned { get; set; }
 
-        [JsonProperty("errorMsg")]
+        [JsonPropertyName("errorMsg")]
         public string Error { get; set; }
     }
 }

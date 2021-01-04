@@ -1,28 +1,26 @@
 ﻿using System;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
     public class RegistrationRequestData
     {
-        [JsonProperty("captchaToken")]
+        [JsonPropertyName("captchaToken")]
         public string CaptchaToken { get; set; }
 
-        [JsonProperty("email")]
+        [JsonPropertyName("email")]
         public string Email { get; set; }
 
-        [JsonProperty("password")]
+        [JsonPropertyName("password")]
         public string Password { get; set; }
 
-        [JsonProperty("passwordRepeated")]
+        [JsonPropertyName("passwordRepeated")]
         public string PasswordRepeated { get; set; }
 
-        [JsonProperty("birthdate")]
+        [JsonPropertyName("birthdate")]
         public Birthdate Birthdate { get; set; }
 
-        [JsonProperty("termsOfServiceAccepted")]
+        [JsonPropertyName("termsOfServiceAccepted")]
         public bool TermsOfServiceAccepted { get; set; }
 
         public RegistrationRequestData()
@@ -41,13 +39,13 @@ namespace Xabbo.Core.Web
 
     public class Birthdate
     {
-        [JsonProperty("day")]
+        [JsonPropertyName("day")]
         public int Day { get; set; }
 
-        [JsonProperty("month")]
+        [JsonPropertyName("month")]
         public int Month { get; set; }
 
-        [JsonProperty("year")]
+        [JsonPropertyName("year")]
         public int Year { get; set; }
 
         public Birthdate() { }

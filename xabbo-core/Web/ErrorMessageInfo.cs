@@ -1,12 +1,11 @@
 ﻿using System;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
-    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public class ErrorMessageInfo
     {
-        [JsonProperty("errorMsg")]
+        [JsonPropertyName("errorMsg")]
         public string ErrorMsg { get; set; }
     }
 }

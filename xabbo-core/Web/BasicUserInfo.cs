@@ -1,25 +1,20 @@
 ﻿using System;
-
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
-    [JsonObject(
-        MemberSerialization = MemberSerialization.OptIn,
-        ItemNullValueHandling = NullValueHandling.Ignore
-    )]
     public class BasicUserInfo
     {
-        [JsonProperty("uniqueId")]
+        [JsonPropertyName("uniqueId")]
         public string UniqueId { get; set; }
 
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("figureString")]
+        [JsonPropertyName("figureString")]
         public string FigureString { get; set; }
 
-        [JsonProperty("motto")]
+        [JsonPropertyName("motto")]
         public string Motto { get; set; }
     }
 }

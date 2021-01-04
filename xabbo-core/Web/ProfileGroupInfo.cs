@@ -1,12 +1,12 @@
 ﻿using System;
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web
 {
     public class ProfileGroupInfo : GroupInfo
     {
-        [JsonProperty("isAdmin")]
+        [JsonPropertyName("isAdmin")]
         public bool IsAdmin { get; set; }
     }
 }

@@ -8,11 +8,12 @@ namespace Xabbo.Core.GameData
 {
     public class FurniData : IReadOnlyCollection<FurniInfo>
     {
-        public static FurniData Load(Stream stream) => new FurniData(FurniDataXml.Load(stream));
-        public static FurniData Load(string path)
+        public static FurniData LoadJson(string json) => new FurniData(Json.FurniData.Load(json));
+        public static FurniData LoadXml(Stream stream) => new FurniData(Xml.FurniData.Load(stream));
+        public static FurniData LoadXml(string path)
         {
             using (var stream = File.OpenRead(path))
-                return Load(stream);
+                return LoadXml(stream);
         }
 
         private readonly IReadOnlyDictionary<string, FurniInfo> _identifierMap;
@@ -58,7 +59,17 @@ namespace Xabbo.Core.GameData
 
         internal FurniData(Json.FurniData proxy)
         {
-            
+            FloorItems = proxy.RoomItemTypes.FurniType
+                .Select(furniInfoProxy => new FurniInfo(ItemType.Floor, furniInfoProxy))
+                .ToList().AsReadOnly();
+
+            WallItems = proxy.WallItemTypes.FurniType
+                .Select(furniInfoProxy => new FurniInfo(ItemType.Wall, furniInfoProxy))
+                .ToList().AsReadOnly();
+
+            _identifierMap = this.ToDictionary(furniInfo => furniInfo.Identifier, StringComparer.InvariantCultureIgnoreCase);
+            _floorItemMap = FloorItems.ToDictionary(furniInfo => furniInfo.Kind);
+            _wallItemMap = WallItems.ToDictionary(wallItem => wallItem.Kind);
         }
 
         /// <summary>

@@ -4,10 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
-using Newtonsoft.Json;
 
 using Xabbo.Core.Web;
 
@@ -251,7 +250,7 @@ namespace Xabbo.Core
         {
             string json = await DownloadStringAsync(API_USER_LOOKUP.Replace("$name", WebUtility.UrlEncode(name))).ConfigureAwait(false);
 
-            var userInfo = JsonConvert.DeserializeObject<UserInfo>(json);
+            var userInfo = JsonSerializer.Deserialize<UserInfo>(json);
             if (userInfo.UniqueId == null) return null;
 
             return userInfo;
@@ -261,7 +260,7 @@ namespace Xabbo.Core
         {
             string json = await DownloadStringAsync(API_USER_PROFILE.Replace("$uniqueId", uniqueId)).ConfigureAwait(false);
 
-            var userProfile = JsonConvert.DeserializeObject<Web.UserProfile>(json);
+            var userProfile = JsonSerializer.Deserialize<Web.UserProfile>(json);
             if (userProfile.UniqueId == null) return null;
 
             return userProfile;
@@ -282,7 +281,7 @@ namespace Xabbo.Core
         public static async Task<PhotoData> GetPhotoDataAsync(string id)
         {
             string json = await DownloadStringAsync(API_FURNI_EXTRADATA.Replace("$id", id)).ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<PhotoData>(json);
+            return JsonSerializer.Deserialize<PhotoData>(json);
         }
 
         public static async Task<byte[]> DownloadPhotoAsync(string id)
