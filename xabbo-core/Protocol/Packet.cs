@@ -476,6 +476,7 @@ namespace Xabbo.Core.Protocol
                     case short x: WriteShort(x); break;
                     case ushort x: WriteShort((short)x); break;
                     case int x: WriteInt(x); break;
+                    case long x: WriteLong(x); break;
                     case byte[] x:
                         WriteInt(x.Length);
                         WriteBytes(x);
@@ -555,6 +556,7 @@ namespace Xabbo.Core.Protocol
                     case short x: WriteShort(x); break;
                     case ushort x: WriteShort((short)x); break;
                     case int x: WriteInt(x); break;
+                    case long x: WriteLong(x); break;
                     case byte[] x: WriteBytes(x); break;
                     case string x: ReplaceString(x); break;
                     case Type t:
