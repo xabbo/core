@@ -33,7 +33,7 @@ namespace Xabbo.Core.Components
         public event EventHandler<FriendEventArgs> FriendAdded;
         protected virtual void OnFriendAdded(IFriend friend)
             => FriendAdded?.Invoke(this, new FriendEventArgs(friend));
-        
+
         public event EventHandler<FriendEventArgs> FriendRemoved;
         protected virtual void OnFriendRemoved(IFriend friend)
             => FriendRemoved?.Invoke(this, new FriendEventArgs(friend));
@@ -117,8 +117,7 @@ namespace Xabbo.Core.Components
 
         private void RemoveFriend(Friend friend) => RemoveFriend(friend.Id);
 
-        // @Legacy LatencyResponse, RequestInitFriends
-        [Receive(nameof(Incoming.ClientLatencyPingResponse)), RequiredOut(nameof(Outgoing.FriendListUpdate))]
+        [Receive(nameof(Incoming.ClientLatencyPingResponse))]
         private async void HandleLatencyResponse(IReadOnlyPacket packet)
         {
             if (!IsInitialized && !isForceLoading)
