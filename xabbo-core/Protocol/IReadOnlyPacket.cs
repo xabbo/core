@@ -109,6 +109,17 @@ namespace Xabbo.Core.Protocol
         int ReadInt(int position);
 
         /// <summary>
+        /// Reads a long from the current position in the packet.
+        /// </summary>
+        /// <returns></returns>
+        long ReadLong();
+
+        /// <summary>
+        /// Reads a long from the specified positions in the packet.
+        /// </summary>
+        long ReadLong(int position);
+
+        /// <summary>
         /// Reads a string from the current position in the packet.
         /// </summary>
         string ReadString();
