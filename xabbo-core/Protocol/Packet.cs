@@ -65,6 +65,10 @@ namespace Xabbo.Core.Protocol
 
             public int ReadInt(int position) => packet.ReadInt(position);
 
+            public long ReadLong() => packet.ReadLong();
+
+            public long ReadLong(int position) => packet.ReadLong(position);
+
             public short ReadShort() => packet.ReadShort();
 
             public short ReadShort(int position) => packet.ReadShort(position);
@@ -311,6 +315,29 @@ namespace Xabbo.Core.Protocol
         {
             Position = position;
             return ReadInt();
+        }
+
+        public long ReadLong()
+        {
+            if (Available < 8)
+                throw new EndOfStreamException();
+
+            _ms.Read(buffer, 0, 8);
+            return
+                (buffer[0] << 56) |
+                (buffer[1] << 48) |
+                (buffer[2] << 40) |
+                (buffer[3] << 32) |
+                (buffer[4] << 24) |
+                (buffer[5] << 16) |
+                (buffer[6] << 8) |
+                buffer[7];
+        }
+
+        public long ReadLong(int position)
+        {
+            Position = position;
+            return ReadLong();
         }
 
         public double ReadDouble()
