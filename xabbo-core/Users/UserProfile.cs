@@ -12,7 +12,7 @@ namespace Xabbo.Core
     {
         public static UserProfile Parse(IReadOnlyPacket packet) => new UserProfile(packet);
 
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; }
         public string Figure { get; set; }
         public string Motto { get; set; }
@@ -35,16 +35,16 @@ namespace Xabbo.Core
         protected UserProfile(IReadOnlyPacket packet)
             : this()
         {
-            Id = packet.ReadInt();
+            Id = packet.ReadLong();
             Name = packet.ReadString();
             Figure = packet.ReadString();
             Motto = packet.ReadString();
             Created = packet.ReadString();
-            ActivityPoints = packet.ReadInt();
+            // ActivityPoints = packet.ReadInt();
             Friends = packet.ReadInt();
             IsFriend = packet.ReadBool();
-            IsFriendRequestSent = packet.ReadBool();
-            IsOnline = packet.ReadBool();
+            // IsFriendRequestSent = packet.ReadBool();
+            // IsOnline = packet.ReadBool();
 
             int n = packet.ReadInt();
             for (int i = 0; i < n; i++)

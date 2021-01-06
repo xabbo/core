@@ -43,10 +43,10 @@ namespace Xabbo.Core.Tasks
 
                 return await ExecuteAsync().ConfigureAwait(false);
             }
-            catch (OperationCanceledException ex)
+            catch (OperationCanceledException)
             when (!token.IsCancellationRequested)
             {
-                throw ex;
+                throw;
                 // throw new OperationCanceledException($"The interceptor task '{GetType().FullName}' timed out.", ex);
             }
             finally

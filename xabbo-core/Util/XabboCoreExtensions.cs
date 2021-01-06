@@ -180,7 +180,6 @@ namespace Xabbo.Core
         {
             foreach (var e in entities)
             {
-                if (e.Location == null) continue;
                 if (x.HasValue && e.Location.X != x) continue;
                 if (y.HasValue && e.Location.Y != y) continue;
                 if (z.HasValue && Math.Abs(e.Location.Z - z.Value) >= epsilon) continue;

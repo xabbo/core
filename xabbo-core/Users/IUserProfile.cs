@@ -7,7 +7,7 @@ namespace Xabbo.Core
 {
     public interface IUserProfile : IPacketData
     {
-        int Id { get; }
+        long Id { get; }
         string Name { get; }
         string Figure { get; }
         string Motto { get; }
