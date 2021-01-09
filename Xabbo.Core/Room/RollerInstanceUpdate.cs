@@ -8,7 +8,7 @@ namespace Xabbo.Core
     {
         public static RollerObjectUpdate Parse(IReadOnlyPacket packet) => new RollerObjectUpdate(packet);
 
-        public int Id { get; set; }
+        public long Id { get; set; }
         public float LocationZ { get; set; }
         public float TargetZ { get; set; }
 
@@ -16,7 +16,7 @@ namespace Xabbo.Core
 
         protected RollerObjectUpdate(IReadOnlyPacket packet)
         {
-            Id = packet.ReadInt();
+            Id = packet.ReadLong();
             LocationZ = packet.ReadFloat();
             TargetZ = packet.ReadFloat();
         }

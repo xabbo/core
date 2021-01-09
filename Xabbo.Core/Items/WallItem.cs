@@ -15,12 +15,12 @@ namespace Xabbo.Core
         {
             var ownerDictionary = new Dictionary<long, string>();
 
-            int n = packet.ReadInt();
+            int n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 ownerDictionary.Add(packet.ReadLong(), packet.ReadString());
 
-            n = packet.ReadInt();
-            var wallItems = new WallItem[n];
+            n = packet.ReadShort();
+            WallItem[] wallItems = new WallItem[n];
             for (int i = 0; i < n; i++)
             {
                 var item = wallItems[i] = Parse(packet, false);
@@ -102,17 +102,13 @@ namespace Xabbo.Core
         protected WallItem(IReadOnlyPacket packet, bool readName)
             : this()
         {
-            string idString = packet.ReadString();
-            if (!int.TryParse(idString, out int id))
-                throw new FormatException($"Unable to parse wall item id: '{idString}'");
-
-            Id = id;
+            Id = packet.ReadLong();
             Kind = packet.ReadInt();
             Location = WallLocation.Parse(packet.ReadString());
             Data = packet.ReadString();
             SecondsToExpiration = packet.ReadInt();
             Usage = (FurniUsage)packet.ReadInt();
-            OwnerId = packet.ReadInt();
+            OwnerId = packet.ReadLong();
 
             if (readName && packet.CanReadString())
                 OwnerName = packet.ReadString();
@@ -122,7 +118,7 @@ namespace Xabbo.Core
 
         public override void Write(IPacket packet, bool writeOwnerName = true)
         {
-            packet.WriteString(Id.ToString());
+            packet.WriteLong(Id);
             packet.WriteInt(Kind);
             packet.WriteString(Location.ToString());
             packet.WriteString(Data);

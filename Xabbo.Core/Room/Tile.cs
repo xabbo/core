@@ -30,7 +30,7 @@ namespace Xabbo.Core
         {
             packet.WriteInt(X);
             packet.WriteInt(Y);
-            packet.WriteFloat(Z);
+            packet.WriteFloatAsString(Z);
         }
 
         public Tile Add(int x, int y) => Add(x, y, 0);
@@ -109,7 +109,7 @@ namespace Xabbo.Core
         public static implicit operator Tile((int X, int Y) location) => new Tile(location.X, location.Y);
         public static implicit operator (int X, int Y)(Tile tile) => (tile.X, tile.Y);
 
-        public static Tile Parse(IReadOnlyPacket packet) => new Tile(packet.ReadInt(), packet.ReadInt(), packet.ReadFloat());
+        public static Tile Parse(IReadOnlyPacket packet) => new Tile(packet.ReadInt(), packet.ReadInt(), packet.ReadFloatAsString());
         public static Tile Parse(string format)
         {
             var split = format.Split(',');

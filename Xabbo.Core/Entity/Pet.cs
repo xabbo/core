@@ -7,7 +7,7 @@ namespace Xabbo.Core
     public class Pet : Entity, IPet
     {
         public int Breed { get; set; }
-        public int OwnerId { get; set; }
+        public long OwnerId { get; set; }
         public string OwnerName { get; set; }
         public int RarityLevel { get; set; }
         public bool Bool1 { get; set; }
@@ -19,7 +19,7 @@ namespace Xabbo.Core
         public int Level { get; set; }
         public string Stance { get; set; }
 
-        public Pet(int id, int index)
+        public Pet(long id, int index)
             : base(EntityType.Pet, id, index)
         {
             OwnerId = -1;
@@ -27,11 +27,11 @@ namespace Xabbo.Core
             Stance = "";
         }
 
-        internal Pet(int id, int index, IReadOnlyPacket packet)
+        internal Pet(long id, int index, IReadOnlyPacket packet)
             : this(id, index)
         {
             Breed = packet.ReadInt();
-            OwnerId = packet.ReadInt();
+            OwnerId = packet.ReadLong();
             OwnerName = packet.ReadString();
             RarityLevel = packet.ReadInt();
             Bool1 = packet.ReadBool();

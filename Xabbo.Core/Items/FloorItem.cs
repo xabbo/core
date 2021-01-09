@@ -66,7 +66,7 @@ namespace Xabbo.Core
         [JsonIgnore] public (int X, int Y, double Z) XYZ => Location.XYZ;
         public int Direction { get; set; }
         public float Height { get; set; }
-        public int Extra { get; set; }
+        public long Extra { get; set; }
 
         public ItemData Data { get; set; }
         IItemData IFloorItem.Data => Data;
@@ -94,7 +94,7 @@ namespace Xabbo.Core
             float z = packet.ReadFloat();
             Location = new Tile(x, y, z);
             Height = packet.ReadFloat();
-            Extra = packet.ReadInt();
+            Extra = packet.ReadLong();
             // - consumable state e.g. cabbage 0: full, 1: partly eaten, 2: mostly eaten
             // - linked teleport id
 
@@ -102,7 +102,7 @@ namespace Xabbo.Core
 
             SecondsToExpiration = packet.ReadInt();
             Usage = (FurniUsage)packet.ReadInt();
-            OwnerId = packet.ReadInt();
+            OwnerId = packet.ReadLong();
 
             if (Kind < 0) // ?
                 UnknownStringA = packet.ReadString();
@@ -124,7 +124,7 @@ namespace Xabbo.Core
             packet.WriteInt(Direction);
             packet.WriteFloat(Location.Z);
             packet.WriteFloat(Height);
-            packet.WriteInt(Extra);
+            packet.WriteLong(Extra);
             Data.Write(packet);
             packet.WriteInt(SecondsToExpiration);
             packet.WriteInt((int)Usage);

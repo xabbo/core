@@ -17,6 +17,8 @@ namespace Xabbo.Core
             Value = value;
         }
 
+        public override string ToString() => Value.ToString();
+
         public static WallOrientation FromChar(char c)
         {
             switch (c)

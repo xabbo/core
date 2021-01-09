@@ -14,7 +14,7 @@ namespace Xabbo.Core
         public int TargetX { get; set; }
         public int TargetY { get; set; }
         public List<RollerObjectUpdate> ObjectUpdates { get; set; }
-        public int RollerId { get; set; }
+        public long RollerId { get; set; }
         public RollerUpdateType Type { get; set; }
         public int EntityIndex { get; set; }
         public float EntityLocationZ { get; set; }
@@ -33,10 +33,10 @@ namespace Xabbo.Core
             LocationY = packet.ReadInt();
             TargetX = packet.ReadInt();
             TargetY = packet.ReadInt();
-            int n = packet.ReadInt();
+            int n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 ObjectUpdates.Add(RollerObjectUpdate.Parse(packet));
-            RollerId = packet.ReadInt();
+            RollerId = packet.ReadLong();
 
             if (packet.Available > 0)
             {
@@ -44,6 +44,9 @@ namespace Xabbo.Core
                 if (Type == RollerUpdateType.MovingEntity ||
                     Type == RollerUpdateType.StationaryEntity)
                 {
+                    packet.ReadInt();
+                    // Entity index may have changed to long here
+                    // but it's int everywhere else ???
                     EntityIndex = packet.ReadInt();
                     EntityLocationZ = packet.ReadFloat();
                     EntityTargetZ = packet.ReadFloat();
@@ -58,16 +61,16 @@ namespace Xabbo.Core
             packet.WriteInt(TargetX);
             packet.WriteInt(TargetY);
 
-            packet.WriteInt(ObjectUpdates.Count);
+            packet.WriteShort((short)ObjectUpdates.Count);
             foreach (var update in ObjectUpdates)
                 update.Write(packet);
 
-            packet.WriteInt(RollerId);
+            packet.WriteLong(RollerId);
 
             if (Type != RollerUpdateType.None)
             {
                 packet.WriteInt((int)Type);
-                packet.WriteInt(EntityIndex);
+                packet.WriteLong(EntityIndex);
                 packet.WriteFloat(EntityLocationZ);
                 packet.WriteFloat(EntityTargetZ);
             }

@@ -263,18 +263,18 @@ namespace Xabbo.Core.Components
             }
         }
 
-        [InterceptIn(nameof(Incoming.RoomUsers))]
-        private void HandleRoomUsers(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.UsersInRoom))]
+        private void HandleUsersInRoom(InterceptArgs e)
         {
             if (!roomManager.IsLoadingRoom && !roomManager.IsInRoom)
                 return;
 
-            var newEntities = new List<Entity>();
+            List<Entity> newEntities = new List<Entity>();
 
-            int n = e.Packet.ReadInt();
+            int n = e.Packet.ReadShort();
             for (int i = 0; i < n; i++)
             {
-                var entity = Entity.Parse(e.Packet);
+                Entity entity = Entity.Parse(e.Packet);
                 if (entities.TryAdd(entity.Index, entity))
                 {
                     newEntities.Add(entity);

@@ -14,7 +14,7 @@ namespace Xabbo.Core
 
         public EntityType Type { get; }
 
-        public int Id { get; }
+        public long Id { get; }
         public int Index { get;  }
 
         public string Name { get; set; }
@@ -25,8 +25,8 @@ namespace Xabbo.Core
         [JsonIgnore] public int X => Location.X;
         [JsonIgnore] public int Y => Location.Y;
         [JsonIgnore] public (int X, int Y) XY => Location.XY;
-        [JsonIgnore] public double Z => Location.Z;
-        [JsonIgnore] public (int X, int Y, double Z) XYZ => Location.XYZ;
+        [JsonIgnore] public float Z => Location.Z;
+        [JsonIgnore] public (int X, int Y, float Z) XYZ => Location.XYZ;
         public int Direction { get; set; }
 
         // States
@@ -36,12 +36,12 @@ namespace Xabbo.Core
         public int HandItem { get; set; }
         public int Effect { get; set; }
 
-        public EntityStatusUpdate CurrentUpdate { get; private set; }
-        IEntityStatusUpdate IEntity.CurrentUpdate => CurrentUpdate;
-        public EntityStatusUpdate PreviousUpdate { get; private set; }
-        IEntityStatusUpdate IEntity.PreviousUpdate => PreviousUpdate;
+        public EntityStatusUpdate? CurrentUpdate { get; private set; }
+        IEntityStatusUpdate? IEntity.CurrentUpdate => CurrentUpdate;
+        public EntityStatusUpdate? PreviousUpdate { get; private set; }
+        IEntityStatusUpdate? IEntity.PreviousUpdate => PreviousUpdate;
 
-        protected Entity(EntityType type, int id, int index)
+        protected Entity(EntityType type, long id, int index)
         {
             Type = type;
             Id = id;
@@ -86,7 +86,7 @@ namespace Xabbo.Core
 
         public static Entity Parse(IReadOnlyPacket packet)
         {
-            int id = packet.ReadInt();
+            long id = packet.ReadLong();
             string name = packet.ReadString();
             string motto = packet.ReadString();
             string figure = packet.ReadString();

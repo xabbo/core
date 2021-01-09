@@ -7,7 +7,7 @@ namespace Xabbo.Core
     public class RoomUser : Entity, IRoomUser
     {
         public Gender Gender { get; set; }
-        public int GroupId { get; set; }
+        public long GroupId { get; set; }
         public int Int8 { get; set; }
         public string GroupName { get; set; } 
         public string FigureExtra { get; set; }
@@ -17,7 +17,7 @@ namespace Xabbo.Core
         public int RightsLevel => CurrentUpdate?.ControlLevel ?? 0;
         public bool HasRights => RightsLevel > 0;
 
-        public RoomUser(int id, int index)
+        public RoomUser(long id, int index)
             : base(EntityType.User, id, index)
         {
             Gender = Gender.Unisex;
@@ -26,11 +26,11 @@ namespace Xabbo.Core
             FigureExtra = "";
         }
 
-        internal RoomUser(int id, int index, IReadOnlyPacket packet)
+        internal RoomUser(long id, int index, IReadOnlyPacket packet)
             : this(id, index)
         {
             Gender = H.ToGender(packet.ReadString());
-            GroupId = packet.ReadInt();
+            GroupId = packet.ReadLong();
             Int8 = packet.ReadInt();
             GroupName = packet.ReadString();
             FigureExtra = packet.ReadString();

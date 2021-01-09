@@ -13,7 +13,7 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the owner of the bot's ID.
         /// </summary>
-        int OwnerId { get; }
+        long OwnerId { get; }
 
         /// <summary>
         /// Gets the owner of the bot's name.

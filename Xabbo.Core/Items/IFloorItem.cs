@@ -41,7 +41,7 @@ namespace Xabbo.Core
         /// This may be the consumed state (of perishable items like cabbages),
         /// or if this is a teleporter, the linked teleporter ID.
         /// </summary>
-        int Extra { get;  }
+        long Extra { get;  }
         /// <summary>
         /// Gets the data of the floor item.
         /// </summary>

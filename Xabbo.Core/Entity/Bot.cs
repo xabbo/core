@@ -10,12 +10,12 @@ namespace Xabbo.Core
         public bool IsPrivateBot => Type == EntityType.PrivateBot;
 
         public Gender Gender { get; set; }
-        public int OwnerId { get; set; }
+        public long OwnerId { get; set; }
         public string OwnerName { get; set; }
         public List<short> Data { get; set; }
         IReadOnlyList<short> IBot.Data => Data;
 
-        public Bot(EntityType type, int id, int index)
+        public Bot(EntityType type, long id, int index)
             : base(type, id, index)
         {
             if (type != EntityType.PublicBot &&
@@ -26,20 +26,20 @@ namespace Xabbo.Core
 
             Gender = Gender.Unisex;
             OwnerId = -1;
-            OwnerName = null;
+            OwnerName = string.Empty;
             Data = new List<short>();
         }
 
-        public Bot(EntityType type, int id, int index, IReadOnlyPacket packet)
+        public Bot(EntityType type, long id, int index, IReadOnlyPacket packet)
             : this(type, id, index)
         {
             if (type == EntityType.PrivateBot)
             {
                 Gender = H.ToGender(packet.ReadString());
-                OwnerId = packet.ReadInt();
+                OwnerId = packet.ReadLong();
                 OwnerName = packet.ReadString();
 
-                int n = packet.ReadInt();
+                int n = packet.ReadShort();
                 for (int i = 0; i < n; i++)
                     Data.Add(packet.ReadShort());
             }

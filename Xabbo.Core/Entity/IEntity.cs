@@ -25,7 +25,7 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the ID of the entity.
         /// </summary>
-        int Id { get; }
+        long Id { get; }
 
         /// <summary>
         /// Gets the index of the entity.
@@ -70,12 +70,12 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the Z coordinate of the entity.
         /// </summary>
-        double Z { get; }
+        float Z { get; }
 
         /// <summary>
         /// Gets the XYZ coordinates of the entity.
         /// </summary>
-        (int X, int Y, double Z) XYZ { get; }
+        (int X, int Y, float Z) XYZ { get; }
 
         /// <summary>
         /// Gets the direction of the entity.
@@ -110,11 +110,11 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the current update of the entity.
         /// </summary>
-        IEntityStatusUpdate CurrentUpdate { get; }
+        IEntityStatusUpdate? CurrentUpdate { get; }
 
         /// <summary>
         /// Gets the previous update of the entity.
         /// </summary>
-        IEntityStatusUpdate PreviousUpdate { get; }
+        IEntityStatusUpdate? PreviousUpdate { get; }
     }
 }

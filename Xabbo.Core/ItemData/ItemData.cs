@@ -51,30 +51,26 @@ namespace Xabbo.Core
 
         public static ItemData Parse(IReadOnlyPacket packet)
         {
-            ItemData stuffData;
-
             int value = packet.ReadInt();
             var type = (ItemDataType)(value & 0xFF);
-            switch (type)
-            {
-                case ItemDataType.Basic: stuffData = new BasicData(); break;
-                case ItemDataType.Map: stuffData = new MapData(); break;
-                case ItemDataType.StringArray: stuffData = new StringArrayData(); break;
-                case ItemDataType.VoteResult: stuffData = new VoteResultData(); break;
-                case ItemDataType.ItemData4: stuffData = new ItemData4(); break;
-                case ItemDataType.IntArray: stuffData = new IntArrayData(); break;
-                case ItemDataType.HighScore: stuffData = new HighScoreData(); break;
-                case ItemDataType.CrackableFurni: stuffData = new CrackableFurniData(); break;
-                default: throw new Exception($"Unknown ItemData type: {type}");
-            }
 
-            if (stuffData != null)
+            ItemData data = type switch
             {
-                stuffData.Flags = (ItemDataFlags)(value >> 8);
-                stuffData.Initialize(packet);
-            }
+                ItemDataType.Basic => new BasicData(),
+                ItemDataType.Map => new MapData(),
+                ItemDataType.StringArray => new StringArrayData(),
+                ItemDataType.VoteResult => new VoteResultData(),
+                ItemDataType.ItemData4 => new ItemData4(),
+                ItemDataType.IntArray => new IntArrayData(),
+                ItemDataType.HighScore => new HighScoreData(),
+                ItemDataType.CrackableFurni => new CrackableFurniData(),
+                _ => throw new Exception($"Unknown ItemData type: {type}"),
+            };
 
-            return stuffData;
+            data.Flags = (ItemDataFlags)(value >> 8);
+            data.Initialize(packet);
+
+            return data;
         }
     }
 }
