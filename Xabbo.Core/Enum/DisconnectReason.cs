@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Xabbo.Core.Enum
+namespace Xabbo.Core
 {
     public enum DisconnectReason
     {

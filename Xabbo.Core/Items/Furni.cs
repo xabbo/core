@@ -12,8 +12,8 @@ namespace Xabbo.Core
         public bool IsWallItem => Type == ItemType.Wall;
 
         public int Kind { get; set; }
-        public int Id { get; set; }
-        public int OwnerId { get; set; }
+        public long Id { get; set; }
+        public long OwnerId { get; set; }
         public string OwnerName { get; set; }
 
         public abstract int State { get; }
@@ -25,5 +25,10 @@ namespace Xabbo.Core
 
         public abstract void Write(IPacket packet);
         public abstract void Write(IPacket packet, bool writeName = true);
+
+        public Furni()
+        {
+            OwnerName = string.Empty;
+        }
     }
 }

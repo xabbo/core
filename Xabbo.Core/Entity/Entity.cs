@@ -36,10 +36,10 @@ namespace Xabbo.Core
         public int HandItem { get; set; }
         public int Effect { get; set; }
 
-        public EntityUpdate CurrentUpdate { get; private set; }
-        IEntityUpdate IEntity.CurrentUpdate => CurrentUpdate;
-        public EntityUpdate PreviousUpdate { get; private set; }
-        IEntityUpdate IEntity.PreviousUpdate => PreviousUpdate;
+        public EntityStatusUpdate CurrentUpdate { get; private set; }
+        IEntityStatusUpdate IEntity.CurrentUpdate => CurrentUpdate;
+        public EntityStatusUpdate PreviousUpdate { get; private set; }
+        IEntityStatusUpdate IEntity.PreviousUpdate => PreviousUpdate;
 
         protected Entity(EntityType type, int id, int index)
         {
@@ -54,7 +54,7 @@ namespace Xabbo.Core
             Direction = 0;
         }
 
-        public void Update(EntityUpdate update)
+        public void Update(EntityStatusUpdate update)
         {
             if (update.Index != Index)
                 throw new InvalidOperationException("Entity update index does not match the index of this entity.");
@@ -68,7 +68,7 @@ namespace Xabbo.Core
             CurrentUpdate = update;
         }
 
-        protected virtual void OnUpdate(EntityUpdate update) { }
+        protected virtual void OnUpdate(EntityStatusUpdate update) { }
 
         public virtual void Write(IPacket packet)
         {

@@ -38,7 +38,7 @@ namespace Xabbo.Core
             Bool1 = packet.ReadBool();
         }
 
-        protected override void OnUpdate(EntityUpdate update) { }
+        protected override void OnUpdate(EntityStatusUpdate update) { }
 
         public override void Write(IPacket packet)
         {

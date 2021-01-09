@@ -9,16 +9,16 @@ namespace Xabbo.Core
         public static RollerObjectUpdate Parse(IReadOnlyPacket packet) => new RollerObjectUpdate(packet);
 
         public int Id { get; set; }
-        public double LocationZ { get; set; }
-        public double TargetZ { get; set; }
+        public float LocationZ { get; set; }
+        public float TargetZ { get; set; }
 
         public RollerObjectUpdate() { }
 
         protected RollerObjectUpdate(IReadOnlyPacket packet)
         {
             Id = packet.ReadInt();
-            LocationZ = packet.ReadDouble();
-            TargetZ = packet.ReadDouble();
+            LocationZ = packet.ReadFloat();
+            TargetZ = packet.ReadFloat();
         }
 
         public void Write(IPacket packet) => packet.WriteValues(

@@ -110,11 +110,11 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the current update of the entity.
         /// </summary>
-        IEntityUpdate CurrentUpdate { get; }
+        IEntityStatusUpdate CurrentUpdate { get; }
 
         /// <summary>
         /// Gets the previous update of the entity.
         /// </summary>
-        IEntityUpdate PreviousUpdate { get; }
+        IEntityStatusUpdate PreviousUpdate { get; }
     }
 }

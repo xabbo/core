@@ -17,6 +17,6 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the ID of the item.
         /// </summary>
-        int Id { get; }
+        long Id { get; }
     }
 }

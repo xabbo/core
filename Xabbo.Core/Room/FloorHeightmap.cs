@@ -6,7 +6,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class FloorPlan : IFloorPlan
+    public class FloorHeightmap : IFloorPlan
     {
         public string OriginalString { get; }
 
@@ -25,13 +25,13 @@ namespace Xabbo.Core
             set => SetHeight(x, y, value);
         }
 
-        public FloorPlan(int width, int length)
+        public FloorHeightmap(int width, int length)
         {
             Width = width;
             Length = length;
         }
 
-        protected FloorPlan(string map)
+        protected FloorHeightmap(string map)
         {
             OriginalString = map;
 
@@ -43,7 +43,7 @@ namespace Xabbo.Core
             Length = length;
         }
 
-        protected FloorPlan(IReadOnlyPacket packet)
+        protected FloorHeightmap(IReadOnlyPacket packet)
         {
             UseLegacyScale = packet.ReadBool();
 
@@ -114,9 +114,9 @@ namespace Xabbo.Core
             return sb.ToString();
         }
 
-        public static FloorPlan Parse(IReadOnlyPacket packet) => new FloorPlan(packet);
+        public static FloorHeightmap Parse(IReadOnlyPacket packet) => new FloorHeightmap(packet);
 
-        public static FloorPlan Parse(string map) => new FloorPlan(map);
+        public static FloorHeightmap Parse(string map) => new FloorHeightmap(map);
 
         private static int[] ParseString(string map, out int width, out int length)
         {

@@ -8,7 +8,7 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the ID of the inventory item.
         /// </summary>
-        int ItemId { get; }
+        long ItemId { get; }
         /// <summary>
         /// Gets the furni category of the inventory item.
         /// </summary>
@@ -40,7 +40,7 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the room ID that the inventory item is in.
         /// </summary>
-        int RoomId { get; }
+        long RoomId { get; }
         /// <summary>
         /// Gets the extra state of the inventory item which is used for
         /// consumable state, linked teleporter ID, etc.

@@ -1,5 +1,5 @@
 ﻿using System;
-
+using Xabbo.Core.Messages;
 using Xabbo.Core.Protocol;
 
 /*
@@ -42,7 +42,12 @@ namespace Xabbo.Core
         public int MaxLevel { get; set; }
         public int Int9 { get; set; }
 
-        public Achievement() { }
+        public Achievement()
+        {
+            BadgeName = string.Empty;
+            Category = string.Empty;
+            String3 = string.Empty;
+        }
 
         protected Achievement(IReadOnlyPacket packet)
         {

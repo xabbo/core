@@ -35,7 +35,7 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the height of the floor item.
         /// </summary>
-        double Height { get; }
+        float Height { get; }
         /// <summary>
         /// Gets the extra field of the floor item.
         /// This may be the consumed state (of perishable items like cabbages),

@@ -35,6 +35,8 @@ namespace Xabbo.Core
 
             ShowMuteButton = packet.ReadBool();
             ChatSettings = ChatSettings.Parse(packet);
+
+            // TODO extra 8 bytes ?
         }
 
         public override void Write(IPacket packet)

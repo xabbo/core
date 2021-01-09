@@ -13,18 +13,18 @@ namespace Xabbo.Core
 
         public static WallItem[] ParseAll(IReadOnlyPacket packet)
         {
-            var ownerDictionary = new Dictionary<int, string>();
+            var ownerDictionary = new Dictionary<long, string>();
 
             int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
-                ownerDictionary.Add(packet.ReadInt(), packet.ReadString());
+                ownerDictionary.Add(packet.ReadLong(), packet.ReadString());
 
             n = packet.ReadInt();
             var wallItems = new WallItem[n];
             for (int i = 0; i < n; i++)
             {
                 var item = wallItems[i] = Parse(packet, false);
-                if (ownerDictionary.TryGetValue(item.OwnerId, out string ownerName))
+                if (ownerDictionary.TryGetValue(item.OwnerId, out string? ownerName))
                     item.OwnerName = ownerName;
             }
 
@@ -33,7 +33,7 @@ namespace Xabbo.Core
 
         public static void WriteAll(IPacket packet, IEnumerable<IWallItem> items)
         {
-            var ownerIds = new HashSet<int>();
+            var ownerIds = new HashSet<long>();
             var ownerDictionary = items
                 .Where(x => ownerIds.Add(x.OwnerId))
                 .ToDictionary(
@@ -44,7 +44,7 @@ namespace Xabbo.Core
             packet.WriteInt(ownerDictionary.Count);
             foreach (var pair in ownerDictionary)
             {
-                packet.WriteInt(pair.Key);
+                packet.WriteLong(pair.Key);
                 packet.WriteString(pair.Value);
             }
 
@@ -128,7 +128,7 @@ namespace Xabbo.Core
             packet.WriteString(Data);
             packet.WriteInt(SecondsToExpiration);
             packet.WriteInt((int)Usage);
-            packet.WriteInt(OwnerId);
+            packet.WriteLong(OwnerId);
             if (writeOwnerName)
                 packet.WriteString(OwnerName);
         }

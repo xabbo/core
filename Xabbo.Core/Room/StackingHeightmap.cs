@@ -4,7 +4,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class HeightMap : IHeightMap
+    public class StackingHeightmap : IHeightMap
     {
         public int Width { get; }
         public int Length { get; }
@@ -28,17 +28,17 @@ namespace Xabbo.Core
             }
         }
 
-        public HeightMap(int width, int length)
+        public StackingHeightmap(int width, int length)
         {
             Width = width;
             Length = length;
             Values = new short[width * length];
         }
 
-        private HeightMap(IReadOnlyPacket packet)
+        private StackingHeightmap(IReadOnlyPacket packet)
         {
             Width = packet.ReadInt();
-            int n = packet.ReadInt();
+            int n = packet.ReadShort();
             Length = n / Width;
 
             Values = new short[n];
@@ -100,7 +100,7 @@ namespace Xabbo.Core
         public bool IsFree(int x, int y) => IsTile(x, y) && !IsBlocked(x, y);
         public bool IsFree((int X, int Y) location) => IsFree(location.X, location.Y);
 
-        public static HeightMap Parse(IReadOnlyPacket packet) => new HeightMap(packet);
+        public static StackingHeightmap Parse(IReadOnlyPacket packet) => new StackingHeightmap(packet);
 
         public void Write(IPacket packet)
         {

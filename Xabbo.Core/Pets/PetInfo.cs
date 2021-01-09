@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using Xabbo.Core.Messages;
 using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core

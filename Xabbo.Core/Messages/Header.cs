@@ -4,7 +4,7 @@ namespace Xabbo.Core.Messages
 {
     public class Header : Identifier
     {
-        public static readonly Header Unknown = -1;
+        public static readonly Header Unknown = new Header(Destination.Unknown, -1);
 
         public bool HasName { get; }
         public short Value { get; }

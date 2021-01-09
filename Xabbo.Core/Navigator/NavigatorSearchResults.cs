@@ -30,7 +30,7 @@ namespace Xabbo.Core
 
         public IEnumerable<RoomInfo> GetRooms()
         {
-            var hashSet = new HashSet<int>();
+            var hashSet = new HashSet<long>();
             foreach (var roomInfo in this.SelectMany(list => list))
             {
                 if (hashSet.Add(roomInfo.Id))

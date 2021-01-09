@@ -17,8 +17,8 @@ namespace Xabbo.Core
         public int RollerId { get; set; }
         public RollerUpdateType Type { get; set; }
         public int EntityIndex { get; set; }
-        public double EntityLocationZ { get; set; }
-        public double EntityTargetZ { get; set; }
+        public float EntityLocationZ { get; set; }
+        public float EntityTargetZ { get; set; }
 
         public RollerUpdate()
         {
@@ -45,8 +45,8 @@ namespace Xabbo.Core
                     Type == RollerUpdateType.StationaryEntity)
                 {
                     EntityIndex = packet.ReadInt();
-                    EntityLocationZ = packet.ReadDouble();
-                    EntityTargetZ = packet.ReadDouble();
+                    EntityLocationZ = packet.ReadFloat();
+                    EntityTargetZ = packet.ReadFloat();
                 }
             }
         }
@@ -68,8 +68,8 @@ namespace Xabbo.Core
             {
                 packet.WriteInt((int)Type);
                 packet.WriteInt(EntityIndex);
-                packet.WriteDouble(EntityLocationZ);
-                packet.WriteDouble(EntityTargetZ);
+                packet.WriteFloat(EntityLocationZ);
+                packet.WriteFloat(EntityTargetZ);
             }
         }
     }

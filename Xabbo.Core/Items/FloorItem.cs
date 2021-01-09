@@ -14,18 +14,18 @@ namespace Xabbo.Core
 
         public static FloorItem[] ParseAll(IReadOnlyPacket packet)
         {
-            var ownerDictionary = new Dictionary<int, string>();
+            var ownerDictionary = new Dictionary<long, string>();
 
-            int n = packet.ReadInt();
+            int n = packet.ReadShort();
             for (int i = 0; i < n; i++)
-                ownerDictionary.Add(packet.ReadInt(), packet.ReadString());
+                ownerDictionary.Add(packet.ReadLong(), packet.ReadString());
 
-            n = packet.ReadInt();
+            n = packet.ReadShort();
             var items = new FloorItem[n];
             for (int i = 0; i < n; i++)
             {
                 var item = items[i] = Parse(packet, false);
-                if (ownerDictionary.TryGetValue(item.OwnerId, out string ownerName))
+                if (ownerDictionary.TryGetValue(item.OwnerId, out string? ownerName))
                     item.OwnerName = ownerName;
             }
 
@@ -34,7 +34,7 @@ namespace Xabbo.Core
 
         public static void WriteAll(IPacket packet, IEnumerable<IFloorItem> items)
         {
-            var ownerIds = new HashSet<int>();
+            var ownerIds = new HashSet<long>();
             var ownerDictionary = items
                 .Where(x => ownerIds.Add(x.OwnerId))
                 .ToDictionary(
@@ -42,14 +42,14 @@ namespace Xabbo.Core
                     val => val.OwnerName
                 );
 
-            packet.WriteInt(ownerDictionary.Count);
+            packet.WriteShort((short)ownerDictionary.Count);
             foreach (var pair in ownerDictionary)
             {
-                packet.WriteInt(pair.Key);
+                packet.WriteLong(pair.Key);
                 packet.WriteString(pair.Value);
             }
 
-            packet.WriteInt(items.Count());
+            packet.WriteShort((short)items.Count());
             foreach (var item in items)
                 item.Write(packet, false);
         }
@@ -65,23 +65,13 @@ namespace Xabbo.Core
         [JsonIgnore] public double Z => Location.Z;
         [JsonIgnore] public (int X, int Y, double Z) XYZ => Location.XYZ;
         public int Direction { get; set; }
-        public double Height { get; set; }
+        public float Height { get; set; }
         public int Extra { get; set; }
 
-        private ItemData data;
-        public ItemData Data
-        {
-            get => data;
-            set
-            {
-                if (value is null)
-                    throw new ArgumentNullException("Data");
-                data = value;
-            }
-        }
+        public ItemData Data { get; set; }
         IItemData IFloorItem.Data => Data;
 
-        public override int State => double.TryParse(data.Value, out double state) ? (int)state : -1;
+        public override int State => double.TryParse(Data.Value, out double state) ? (int)state : -1;
 
         public string UnknownStringA { get; set; }
 
@@ -91,18 +81,19 @@ namespace Xabbo.Core
             Data = new BasicData();
             SecondsToExpiration = -1;
             Usage = FurniUsage.None;
+            UnknownStringA = string.Empty;
         }
 
         protected FloorItem(IReadOnlyPacket packet, bool readName)
         {
-            Id = packet.ReadInt();
+            Id = packet.ReadLong();
             Kind = packet.ReadInt();
             int x = packet.ReadInt();
             int y = packet.ReadInt();
             Direction = packet.ReadInt();
-            double z = packet.ReadDouble();
+            float z = packet.ReadFloat();
             Location = new Tile(x, y, z);
-            Height = packet.ReadDouble();
+            Height = packet.ReadFloat();
             Extra = packet.ReadInt();
             // - consumable state e.g. cabbage 0: full, 1: partly eaten, 2: mostly eaten
             // - linked teleport id
@@ -115,6 +106,8 @@ namespace Xabbo.Core
 
             if (Kind < 0) // ?
                 UnknownStringA = packet.ReadString();
+            else
+                UnknownStringA = string.Empty;
 
             if (readName && packet.CanReadString())
                 OwnerName = packet.ReadString();
@@ -124,18 +117,18 @@ namespace Xabbo.Core
 
         public override void Write(IPacket packet, bool writeOwnerName = true)
         {
-            packet.WriteInt(Id);
+            packet.WriteLong(Id);
             packet.WriteInt(Kind);
             packet.WriteInt(Location.X);
             packet.WriteInt(Location.Y);
             packet.WriteInt(Direction);
-            packet.WriteDouble(Location.Z);
-            packet.WriteDouble(Height);
+            packet.WriteFloat(Location.Z);
+            packet.WriteFloat(Height);
             packet.WriteInt(Extra);
             Data.Write(packet);
             packet.WriteInt(SecondsToExpiration);
             packet.WriteInt((int)Usage);
-            packet.WriteInt(OwnerId);
+            packet.WriteLong(OwnerId);
 
             if (Kind < 0) packet.WriteString(UnknownStringA);
             if (writeOwnerName) packet.WriteString(OwnerName);

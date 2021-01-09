@@ -1,10 +1,11 @@
 ﻿using System;
+using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
     internal static class XabboConst
     {
-        public const double DEFAULT_EPSILON = 0.01;
+        public const float DEFAULT_EPSILON = 0.01f;
 
         public const string DEFAULT_USER_AGENT =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36";

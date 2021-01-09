@@ -6,11 +6,11 @@ namespace Xabbo.Core
 {
     public class TradeItem : ITradeItem
     {
-        public int ItemId { get; set; }
+        public long ItemId { get; set; }
         public ItemType Type { get; set; }
         public bool IsFloorItem => Type == ItemType.Floor;
         public bool IsWallItem => Type == ItemType.Wall;
-        public int Id { get; set; }
+        public long Id { get; set; }
         public int Kind { get; set; }
         public FurniCategory Category { get; set; }
         public bool IsGroupable { get; set; }
@@ -25,15 +25,15 @@ namespace Xabbo.Core
         bool IInventoryItem.IsSellable => true;
         int IInventoryItem.SecondsToExpiration => -1;
         bool IInventoryItem.HasRentPeriodStarted => false;
-        int IInventoryItem.RoomId => -1;
+        long IInventoryItem.RoomId => -1;
 
         public TradeItem() { }
 
         protected TradeItem(IReadOnlyPacket packet)
         {
-            ItemId = packet.ReadInt();
+            ItemId = packet.ReadLong();
             Type = H.ToItemType(packet.ReadString());
-            Id = packet.ReadInt();
+            Id = packet.ReadLong();
             Kind = packet.ReadInt();
             Category = (FurniCategory)packet.ReadInt();
             IsGroupable = packet.ReadBool();
@@ -52,9 +52,9 @@ namespace Xabbo.Core
 
         public void Write(IPacket packet)
         {
-            packet.WriteInt(ItemId);
+            packet.WriteLong(ItemId);
             packet.WriteString(Type.ToShortString());
-            packet.WriteInt(Id);
+            packet.WriteLong(Id);
             packet.WriteInt(Kind);
             packet.WriteInt((int)Category);
             packet.WriteBool(IsGroupable);

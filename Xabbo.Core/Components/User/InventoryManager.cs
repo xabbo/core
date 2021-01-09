@@ -16,7 +16,7 @@ namespace Xabbo.Core.Components
     {
         class InventoryInternal : IInventory
         {
-            private readonly ConcurrentDictionary<int, IInventoryItem> _items;
+            private readonly ConcurrentDictionary<long, IInventoryItem> _items;
 
             public int Count => _items.Count;
 
@@ -25,8 +25,8 @@ namespace Xabbo.Core.Components
 
             public InventoryInternal(IInventory inventory)
             {
-                _items = new ConcurrentDictionary<int, IInventoryItem>(
-                    inventory.Select(x => new KeyValuePair<int, IInventoryItem>(
+                _items = new ConcurrentDictionary<long, IInventoryItem>(
+                    inventory.Select(x => new KeyValuePair<long, IInventoryItem>(
                         x.ItemId, x
                     ))
                 );

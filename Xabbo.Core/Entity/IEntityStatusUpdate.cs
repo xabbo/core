@@ -3,7 +3,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public interface IEntityUpdate : IPacketData
+    public interface IEntityStatusUpdate : IPacketData
     {
         int Index { get; }
         Tile Location { get; }

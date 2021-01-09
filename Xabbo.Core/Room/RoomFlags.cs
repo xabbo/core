@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core
 {
+    [Flags]
     public enum RoomFlags
     {
         None = 0,

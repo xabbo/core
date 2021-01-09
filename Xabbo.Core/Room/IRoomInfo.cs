@@ -6,9 +6,9 @@ namespace Xabbo.Core
 {
     public interface IRoomInfo : IPacketData
     {
-        int Id { get; }
+        long Id { get; }
         string Name { get; }
-        int OwnerId { get; }
+        long OwnerId { get; }
         string OwnerName { get; }
         RoomAccess Access { get; }
         bool IsOpen { get; }

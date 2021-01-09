@@ -23,26 +23,26 @@ namespace Xabbo.Core.Components
 
         private RoomManager roomManager;
 
-        private readonly ConcurrentDictionary<int, FloorItem> floorItems;
-        private readonly ConcurrentDictionary<int, WallItem> wallItems;
+        private readonly ConcurrentDictionary<long, FloorItem> _floorItems;
+        private readonly ConcurrentDictionary<long, WallItem> _wallItems;
 
-        public IEnumerable<IFloorItem> FloorItems => floorItems.Select(item => item.Value);
-        public IEnumerable<IWallItem> WallItems => wallItems.Select(item => item.Value);
+        public IEnumerable<IFloorItem> FloorItems => _floorItems.Select(item => item.Value);
+        public IEnumerable<IWallItem> WallItems => _wallItems.Select(item => item.Value);
         public IEnumerable<IFurni> Furni => FloorItems.Concat<IFurni>(WallItems);
 
         /// <summary>
         /// Gets whether the floor item with the specified ID exists in the room or not.
         /// </summary>
-        public bool FloorItemExists(int itemId) => floorItems.ContainsKey(itemId);
+        public bool FloorItemExists(long itemId) => _floorItems.ContainsKey(itemId);
         /// <summary>
         /// Gets whether the wall item with the specified ID exists in the room or not.
         /// </summary>
-        public bool WallItemExists(int itemId) => wallItems.ContainsKey(itemId);
+        public bool WallItemExists(long itemId) => _wallItems.ContainsKey(itemId);
 
         /// <summary>
         /// Gets the furni of the specified type with the specified ID, or <c>null</c> if it does not exist.
         /// </summary>
-        public IFurni GetFurni(ItemType type, int itemId)
+        public IFurni? GetFurni(ItemType type, long itemId)
         {
             if (type == ItemType.Floor) return GetFloorItem(itemId);
             else if (type == ItemType.Wall) return GetWallItem(itemId);
@@ -52,11 +52,11 @@ namespace Xabbo.Core.Components
         /// <summary>
         /// Gets the floor item with the specified ID or <c>null</c> if it does not exist.
         /// </summary>
-        public IFloorItem GetFloorItem(int itemId) => floorItems.TryGetValue(itemId, out FloorItem item) ? item : null;
+        public IFloorItem? GetFloorItem(long itemId) => _floorItems.TryGetValue(itemId, out FloorItem? item) ? item : null;
         /// <summary>
         /// Gets the wall item with the specified ID or <c>null</c> if it does not exist.
         /// </summary>
-        public IWallItem GetWallItem(int itemId) => wallItems.TryGetValue(itemId, out WallItem item) ? item : null;
+        public IWallItem? GetWallItem(long itemId) => _wallItems.TryGetValue(itemId, out WallItem? item) ? item : null;
 
         #region - Events -
         /// <summary>
@@ -64,51 +64,51 @@ namespace Xabbo.Core.Components
         /// This may happen multiple times depending on
         /// how many items are in the room.
         /// </summary>
-        public event EventHandler<FloorItemsEventArgs> FloorItemsLoaded;
+        public event EventHandler<FloorItemsEventArgs>? FloorItemsLoaded;
         /// <summary>
         /// Invoked when a floor item is added to the room.
         /// </summary>
-        public event EventHandler<FloorItemEventArgs> FloorItemAdded;
+        public event EventHandler<FloorItemEventArgs>? FloorItemAdded;
         /// <summary>
         /// Invoked when a floor item is updated.
         /// </summary>
-        public event EventHandler<FloorItemUpdatedEventArgs> FloorItemUpdated;
+        public event EventHandler<FloorItemUpdatedEventArgs>? FloorItemUpdated;
         /// <summary>
         /// Invoked when a floor item's data is updated.
         /// </summary>
-        public event EventHandler<FloorItemDataUpdatedEventArgs> FloorItemDataUpdated;
+        public event EventHandler<FloorItemDataUpdatedEventArgs>? FloorItemDataUpdated;
         /// <summary>
         /// Invoked when a floor item slides due to a roller or wired update.
         /// </summary>
-        public event EventHandler<FloorItemSlideEventArgs> FloorItemSlide;
+        public event EventHandler<FloorItemSlideEventArgs>? FloorItemSlide;
         /// <summary>
         /// Invoked when a floor item is removed from the room.
         /// </summary>
-        public event EventHandler<FloorItemEventArgs> FloorItemRemoved;
+        public event EventHandler<FloorItemEventArgs>? FloorItemRemoved;
 
         /// <summary>
         /// Invoked when the wall items are loaded.
         /// This may happen multiple times depending on
         /// how many items are in the room.
         /// </summary>
-        public event EventHandler<WallItemsEventArgs> WallItemsLoaded;
+        public event EventHandler<WallItemsEventArgs>? WallItemsLoaded;
         /// <summary>
         /// Invoked when a wall item is added to the room.
         /// </summary>
-        public event EventHandler<WallItemEventArgs> WallItemAdded;
+        public event EventHandler<WallItemEventArgs>? WallItemAdded;
         /// <summary>
         /// Invoked when a wall item is udpated.
         /// </summary>
-        public event EventHandler<WallItemUpdatedEventArgs> WallItemUpdated;
+        public event EventHandler<WallItemUpdatedEventArgs>? WallItemUpdated;
         /// <summary>
         /// Invoked when a wall item is removed from the room.
         /// </summary>
-        public event EventHandler<WallItemEventArgs> WallItemRemoved;
+        public event EventHandler<WallItemEventArgs>? WallItemRemoved;
 
         /// <summary>
         /// Invoked when a furni's visibility is toggled using <see cref="Hide(IFurni)"/> or <see cref="Show(IFurni)"/>.
         /// </summary>
-        public event EventHandler<FurniEventArgs> FurniVisibilityToggled;
+        public event EventHandler<FurniEventArgs>? FurniVisibilityToggled;
 
         protected virtual void OnFloorItemsLoaded(IEnumerable<IFloorItem> items)
             => FloorItemsLoaded?.Invoke(this, new FloorItemsEventArgs(items));
@@ -138,12 +138,13 @@ namespace Xabbo.Core.Components
 
         public FurniManager()
         {
-            floorItems = new ConcurrentDictionary<int, FloorItem>();
-            wallItems = new ConcurrentDictionary<int, WallItem>();
+            _floorItems = new ConcurrentDictionary<long, FloorItem>();
+            _wallItems = new ConcurrentDictionary<long, WallItem>();
         }
 
         protected override void OnInitialize()
         {
+            // TODO DI ?
             roomManager = GetComponent<RoomManager>();
 
             roomManager.Left += Room_Left;
@@ -151,8 +152,8 @@ namespace Xabbo.Core.Components
 
         private void Room_Left(object sender, EventArgs e)
         {
-            floorItems.Clear();
-            wallItems.Clear();
+            _floorItems.Clear();
+            _wallItems.Clear();
         }
 
         private void SetHidden(ItemType type, int id, bool hide)
@@ -161,13 +162,13 @@ namespace Xabbo.Core.Components
 
             if (type == ItemType.Floor)
             {
-                if (!floorItems.TryGetValue(id, out FloorItem item))
+                if (!_floorItems.TryGetValue(id, out FloorItem? item))
                     return;
 
                 if (item.IsHidden == hide) return;
 
                 item.IsHidden = hide;
-                furni = floorItems.AddOrUpdate(
+                furni = _floorItems.AddOrUpdate(
                     id,
                     item,
                     (key, existing) =>
@@ -179,13 +180,13 @@ namespace Xabbo.Core.Components
             }
             else if (type == ItemType.Wall)
             {
-                if (!wallItems.TryGetValue(id, out WallItem item))
+                if (!_wallItems.TryGetValue(id, out WallItem item))
                     return;
 
                 if (item.IsHidden == hide) return;
 
                 item.IsHidden = hide;
-                furni = wallItems.AddOrUpdate(
+                furni = _wallItems.AddOrUpdate(
                     id,
                     item,
                     (key, existing) =>
@@ -225,7 +226,7 @@ namespace Xabbo.Core.Components
         public void Hide(ItemType type, int id) => SetHidden(type, id, true);
 
         #region - Floor items -
-        // @Update [Group(Features.FloorItemManagement), Receive("RoomFloorItems")]
+        [Receive(nameof(Incoming.ActiveObjects))]
         protected void HandleRoomFloorItems(IReadOnlyPacket packet)
         {
             if (!roomManager.IsLoadingRoom)
@@ -237,9 +238,9 @@ namespace Xabbo.Core.Components
             var newItems = new List<FloorItem>();
 
             var items = FloorItem.ParseAll(packet);
-            foreach (var item in items)
+            foreach (FloorItem item in items)
             {
-                if (floorItems.TryAdd(item.Id, item))
+                if (_floorItems.TryAdd(item.Id, item))
                 {
                     newItems.Add(item);
                 }
@@ -264,7 +265,7 @@ namespace Xabbo.Core.Components
 
             var item = FloorItem.Parse(packet);
 
-            if (floorItems.TryAdd(item.Id, item))
+            if (_floorItems.TryAdd(item.Id, item))
             {
                 OnFloorItemAdded(item);
             }
@@ -290,7 +291,7 @@ namespace Xabbo.Core.Components
             string idString = packet.ReadString();
             if (!int.TryParse(idString, out int id)) return;
 
-            if (floorItems.TryRemove(id, out FloorItem item))
+            if (_floorItems.TryRemove(id, out FloorItem item))
             {
                 OnFloorItemRemoved(item);
             }
@@ -308,12 +309,12 @@ namespace Xabbo.Core.Components
 
             var updatedItem = FloorItem.Parse(packet);
 
-            if (floorItems.TryGetValue(updatedItem.Id, out FloorItem previousItem))
+            if (_floorItems.TryGetValue(updatedItem.Id, out FloorItem previousItem))
             {
                 updatedItem.OwnerName = previousItem.OwnerName;
                 updatedItem.IsHidden = previousItem.IsHidden;
 
-                if (floorItems.TryUpdate(updatedItem.Id, updatedItem, previousItem))
+                if (_floorItems.TryUpdate(updatedItem.Id, updatedItem, previousItem))
                 {
                     OnFloorItemUpdated(previousItem, updatedItem);
                 }
@@ -337,7 +338,7 @@ namespace Xabbo.Core.Components
             var rollerUpdate = RollerUpdate.Parse(packet);
             foreach (var objectUpdate in rollerUpdate.ObjectUpdates)
             {
-                if (floorItems.TryGetValue(objectUpdate.Id, out FloorItem item))
+                if (_floorItems.TryGetValue(objectUpdate.Id, out FloorItem item))
                 {
                     var previousTile = item.Location;
                     item.Location = new Tile(rollerUpdate.TargetX, rollerUpdate.TargetY, objectUpdate.TargetZ);
@@ -359,7 +360,7 @@ namespace Xabbo.Core.Components
             string idString = packet.ReadString();
             if (!int.TryParse(idString, out int id)) return;
 
-            if (!floorItems.TryGetValue(id, out FloorItem item))
+            if (!_floorItems.TryGetValue(id, out FloorItem item))
             {
                 DebugUtil.Log($"unable to find floor item {id} to update");
                 return;
@@ -382,7 +383,7 @@ namespace Xabbo.Core.Components
             {
                 int itemId = packet.ReadInt();
                 var data = ItemData.Parse(packet);
-                if (!floorItems.TryGetValue(itemId, out FloorItem item)) continue;
+                if (!_floorItems.TryGetValue(itemId, out FloorItem item)) continue;
 
                 var previousData = item.Data;
                 item.Data = data;
@@ -407,7 +408,7 @@ namespace Xabbo.Core.Components
             var items = WallItem.ParseAll(packet);
             foreach (var item in items)
             {
-                if (wallItems.TryAdd(item.Id, item))
+                if (_wallItems.TryAdd(item.Id, item))
                 {
                     newItems.Add(item);
                 }
@@ -432,7 +433,7 @@ namespace Xabbo.Core.Components
             
 
             var item = WallItem.Parse(packet);
-            if (wallItems.TryAdd(item.Id, item))
+            if (_wallItems.TryAdd(item.Id, item))
             {
                 OnWallItemAdded(item);
             }
@@ -452,7 +453,7 @@ namespace Xabbo.Core.Components
             string idString = packet.ReadString();
             if (!int.TryParse(idString, out int id)) return;
 
-            if (wallItems.TryRemove(id, out WallItem item))
+            if (_wallItems.TryRemove(id, out WallItem item))
             {
                 OnWallItemRemoved(item);
             }
@@ -472,7 +473,7 @@ namespace Xabbo.Core.Components
             var updatedItem = WallItem.Parse(packet);
             WallItem previousItem = null;
 
-            updatedItem = wallItems.AddOrUpdate(
+            updatedItem = _wallItems.AddOrUpdate(
                 updatedItem.Id,
                 updatedItem,
                 (id, existing) =>
@@ -516,36 +517,36 @@ namespace Xabbo.Core.Components
         #endregion
 
         #region - Interaction -
-        public void Place(int itemId, int x, int y, int direction)
+        public void Place(long itemId, int x, int y, int direction)
             => throw new NotImplementedException(); // @Update SendAsync(Out.RoomPlaceItem, $"{itemId} {x} {y} {direction}");
-        public void Place(int itemId, (int X, int Y) location, int direction)
+        public void Place(long itemId, (int X, int Y) location, int direction)
             => throw new NotImplementedException(); // @Update SendAsync(Out.RoomPlaceItem, $"{itemId} {location.X} {location.Y} {direction}");
         public void Place(IInventoryItem item, int x, int y, int direction)
             => Place(item.Id, x, y, direction);
         public void Place(IInventoryItem item, (int X, int Y) location, int direction)
             => Place(item.Id, location, direction);
 
-        public void Place(int itemId, WallLocation location)
+        public void Place(long itemId, WallLocation location)
             => throw new NotImplementedException(); // @Update SendAsync(Out.RoomPlaceItem, $"{itemId} {location}");
         public void Place(IInventoryItem item, WallLocation location)
             => Place(item.Id, location);
 
-        public void Move(int floorItemId, int x, int y, int direction)
+        public void Move(long floorItemId, int x, int y, int direction)
             => throw new NotImplementedException(); // @Update SendAsync(Out.RotateMoveItem, floorItemId, x, y, direction);
-        public void Move(int floorItemId, (int X, int Y) location, int direction)
+        public void Move(long floorItemId, (int X, int Y) location, int direction)
             => throw new NotImplementedException(); // @Update SendAsync(Out.RotateMoveItem, floorItemId, location.X, location.Y, direction);
         public void Move(IFloorItem item, int x, int y, int direction)
             => Move(item.Id, x, y, direction);
         public void Move(IFloorItem item, (int X, int Y) location, int direction)
             => Move(item.Id, location.X, location.Y, direction);
 
-        public void Move(int wallItemId, WallLocation location)
+        public void Move(long wallItemId, WallLocation location)
             => SendAsync(Out.MoveWallItem, wallItemId, location);
         public void Move(IWallItem item, WallLocation location)
             => Move(item.Id, location);
 
         public void Pickup(IFurni item) => Pickup(item.Type, item.Id);
-        public void Pickup(ItemType type, int id)
+        public void Pickup(ItemType type, long id)
         {
             if (type == ItemType.Floor)
                 throw new NotImplementedException(); // @Update SendAsync(Out.RoomPickupItem, 2, id);
@@ -553,8 +554,8 @@ namespace Xabbo.Core.Components
                 throw new NotImplementedException(); // @Update SendAsync(Out.RoomPickupItem, 1, id);
         }
 
-        public void UpdateStackTile(IFloorItem stackTile, double height) => UpdateStackTile(stackTile.Id, height);
-        public void UpdateStackTile(int stackTileId, double height)
+        public void UpdateStackTile(IFloorItem stackTile, float height) => UpdateStackTile(stackTile.Id, height);
+        public void UpdateStackTile(long stackTileId, float height)
             => throw new NotImplementedException(); // @Update SendAsync(Out.SetStackHelperHeight, stackTileId, (int)Math.Round(height * 100.0));
         #endregion
     }

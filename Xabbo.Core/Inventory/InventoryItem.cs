@@ -8,9 +8,9 @@ namespace Xabbo.Core
     {
         public static InventoryItem Parse(IReadOnlyPacket packet) => new InventoryItem(packet);
 
-        public int ItemId { get; set; }
+        public long ItemId { get; set; }
         public ItemType Type { get; set; }
-        public int Id { get; set; }
+        public long Id { get; set; }
         public int Kind { get; set; }
         public FurniCategory Category { get; set; }
         public ItemData Data { get; set; }
@@ -21,7 +21,7 @@ namespace Xabbo.Core
         public bool IsSellable { get; set; } // ?
         public int SecondsToExpiration { get; set; }
         public bool HasRentPeriodStarted { get; set; }
-        public int RoomId { get; set; }
+        public long RoomId { get; set; }
         public string String2 { get; set; }
         public int Extra { get; set; }
 
@@ -55,9 +55,9 @@ namespace Xabbo.Core
 
         public void Write(IPacket packet)
         {
-            packet.WriteInt(ItemId);
+            packet.WriteLong(ItemId);
             packet.WriteString(Type.ToShortString());
-            packet.WriteInt(Id);
+            packet.WriteLong(Id);
             packet.WriteInt(Kind);
             packet.WriteInt((int)Category);
             Data.Write(packet);
@@ -67,7 +67,7 @@ namespace Xabbo.Core
             packet.WriteBool(IsSellable);
             packet.WriteInt(SecondsToExpiration);
             packet.WriteBool(HasRentPeriodStarted);
-            packet.WriteInt(RoomId);
+            packet.WriteLong(RoomId);
 
             if (Type == ItemType.Floor)
             {

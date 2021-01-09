@@ -6,7 +6,7 @@ namespace Xabbo.Core
 {
     public class MarketplaceItem : IMarketplaceItem
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public int UnknownInt2 { get; set; }
         public ItemType Type { get; set; }
         public int Kind { get; set; }
@@ -20,7 +20,7 @@ namespace Xabbo.Core
 
         protected MarketplaceItem(IReadOnlyPacket packet)
         {
-            Id = packet.ReadInt();
+            Id = packet.ReadLong();
             UnknownInt2 = packet.ReadInt();
 
             int itemType = packet.ReadInt();
@@ -60,7 +60,7 @@ namespace Xabbo.Core
             if (Data == null)
                 throw new Exception("Data cannot be null");
 
-            packet.WriteInt(Id);
+            packet.WriteLong(Id);
             packet.WriteInt(UnknownInt2);
 
             if (Type == ItemType.Floor)

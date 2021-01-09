@@ -11,12 +11,11 @@ namespace Xabbo.Core.Messages
 
         public Identifier(Destination destination, string name)
         {
-            if (name == null)
-                throw new ArgumentNullException("name");
-
             Destination = destination;
-            Name = name;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
         }
+
+        public Identifier WithDestination(Destination destination) => new Identifier(destination, Name);
 
         public override int GetHashCode()
         {
@@ -24,7 +23,7 @@ namespace Xabbo.Core.Messages
             return IsOutgoing ? hashCode : ~hashCode;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return
                 obj is Identifier other &&
@@ -48,5 +47,7 @@ namespace Xabbo.Core.Messages
         }
 
         public static bool operator !=(Identifier a, Identifier b) => !(a == b);
+
+        public static implicit operator Identifier(string name) => new Identifier(Destination.Unknown, name);
     }
 }

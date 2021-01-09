@@ -18,9 +18,12 @@ namespace Xabbo.Core
 
         public bool IsFloorItem => Type == ItemType.Floor;
         public bool IsWallItem => Type == ItemType.Wall;
-        int IItem.Id => -1;
+        long IItem.Id => -1;
 
-        public CatalogProduct() { }
+        public CatalogProduct()
+        {
+            Variant = string.Empty;
+        }
 
         protected CatalogProduct(IReadOnlyPacket packet)
         {

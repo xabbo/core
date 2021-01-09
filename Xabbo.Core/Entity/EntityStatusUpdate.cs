@@ -8,7 +8,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class EntityUpdate : IEntityUpdate, IReadOnlyDictionary<string, IReadOnlyList<string>>
+    public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<string, IReadOnlyList<string>>
     {
         private readonly Dictionary<string, string[]> fragments
             = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
@@ -20,7 +20,7 @@ namespace Xabbo.Core
         public string Status
         {
             get => CompileStatus();
-            set => DecompileStatus(value);
+            set => ParseStatus(value);
         }
 
         // sit, lay
@@ -93,7 +93,7 @@ namespace Xabbo.Core
         // mv
         public Tile? MovingTo
         {
-            get => fragments.TryGetValue("mv", out string[] args) ? Tile.Parse(args[0]) : (Tile?)null;
+            get => fragments.TryGetValue("mv", out string[]? args) ? Tile.Parse(args[0]) : (Tile?)null;
             set
             {
                 if (value == null)
@@ -102,7 +102,7 @@ namespace Xabbo.Core
                 }
                 else
                 {
-                    fragments["mv"] = new string[] { value.ToString() };
+                    fragments["mv"] = new string[] { value.ToString() ?? string.Empty };
                 }
             }
         }
@@ -112,14 +112,14 @@ namespace Xabbo.Core
         {
             get
             {
-                if (!fragments.TryGetValue("sit", out string[] args))
+                if (!fragments.TryGetValue("sit", out string[]? args))
                     return false;
                 return args.Length > 1 && args[1] == "1";
             }
 
             set
             {
-                if (fragments.TryGetValue("sit", out string[] args))
+                if (fragments.TryGetValue("sit", out string[]? args))
                 {
                     if (args.Length < 2)
                     {
@@ -144,7 +144,7 @@ namespace Xabbo.Core
                 {
                     case Stances.Sit:
                     case Stances.Lay:
-                        if (fragments.TryGetValue(Stance.ToString(), out string[] args))
+                        if (fragments.TryGetValue(Stance.ToString(), out string[]? args))
                         {
                             if (args.Length > 0)
                                 return double.Parse(args[0]);
@@ -193,24 +193,23 @@ namespace Xabbo.Core
         IEnumerable<IReadOnlyList<string>> IReadOnlyDictionary<string, IReadOnlyList<string>>.Values => fragments.Values;
         int IReadOnlyCollection<KeyValuePair<string, IReadOnlyList<string>>>.Count => fragments.Count;
 
-        public IReadOnlyList<string> this[string key] 
-            => fragments.TryGetValue(key, out string[] args) ? args : null;
+        public IReadOnlyList<string> this[string key] => fragments[key];
 
-        public EntityUpdate()
+        public EntityStatusUpdate()
         {
             Location = Tile.Zero;
             HeadDirection = 0;
             Direction = 0;
         }
 
-        private EntityUpdate(IReadOnlyPacket packet)
+        private EntityStatusUpdate(IReadOnlyPacket packet)
         {
             Index = packet.ReadInt();
             Location = Tile.Parse(packet);
             HeadDirection = packet.ReadInt();
             Direction = packet.ReadInt();
 
-            DecompileStatus(packet.ReadString());
+            ParseStatus(packet.ReadString());
         }
 
         public void Write(IPacket packet)
@@ -222,7 +221,7 @@ namespace Xabbo.Core
             packet.WriteString(CompileStatus());
         }
 
-        private void DecompileStatus(string status)
+        private void ParseStatus(string status)
         {
             fragments.Clear();
 
@@ -292,19 +291,19 @@ namespace Xabbo.Core
         IEnumerator IEnumerable.GetEnumerator()
             => ((IEnumerable<KeyValuePair<string, IReadOnlyCollection<string>>>)this).GetEnumerator();
 
-        public static EntityUpdate Parse(IReadOnlyPacket packet) => new EntityUpdate(packet);
-        public static EntityUpdate[] ParseAll(IReadOnlyPacket packet)
+        public static EntityStatusUpdate Parse(IReadOnlyPacket packet) => new EntityStatusUpdate(packet);
+        public static EntityStatusUpdate[] ParseAll(IReadOnlyPacket packet)
         {
-            int n = packet.ReadInt();
-            EntityUpdate[] entityUpdates = new EntityUpdate[n];
+            int n = packet.ReadShort();
+            EntityStatusUpdate[] entityUpdates = new EntityStatusUpdate[n];
             for (int i = 0; i < n; i++)
                 entityUpdates[i] = Parse(packet);
             return entityUpdates;
         }
 
-        public static void WriteAll(IPacket packet, IEnumerable<IEntityUpdate> updates)
+        public static void WriteAll(IPacket packet, IEnumerable<IEntityStatusUpdate> updates)
         {
-            packet.WriteInt(updates.Count());
+            packet.WriteShort((short)updates.Count());
             foreach (var update in updates)
                 update.Write(packet);
         }

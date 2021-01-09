@@ -322,7 +322,7 @@ namespace Xabbo.Core.Components
             int n = e.Packet.ReadInt();
             for (int i = 0; i < n; i++)
             {
-                var entityUpdate = EntityUpdate.Parse(e.Packet);
+                var entityUpdate = EntityStatusUpdate.Parse(e.Packet);
                 if (!entities.TryGetValue(entityUpdate.Index, out Entity entity))
                 {
                     DebugUtil.Log($"failed to find entity {entityUpdate.Index} to update");

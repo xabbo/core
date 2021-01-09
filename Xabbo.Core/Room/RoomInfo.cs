@@ -7,9 +7,9 @@ namespace Xabbo.Core
 {
     public class RoomInfo : IRoomInfo
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; }
-        public int OwnerId { get; set; }
+        public long OwnerId { get; set; }
         public string OwnerName { get; set; }
         public RoomAccess Access { get; set; }
         public bool IsOpen => Access == RoomAccess.Open;
@@ -49,9 +49,9 @@ namespace Xabbo.Core
         protected RoomInfo(IReadOnlyPacket packet)
             : this()
         {
-            Id = packet.ReadInt();
+            Id = packet.ReadLong();
             Name = packet.ReadString();
-            OwnerId = packet.ReadInt();
+            OwnerId = packet.ReadLong();
             OwnerName = packet.ReadString();
             Access = (RoomAccess)packet.ReadInt();
             Users = packet.ReadInt();
@@ -62,7 +62,7 @@ namespace Xabbo.Core
             Ranking = packet.ReadInt();
             Category = (RoomCategory)packet.ReadInt();
 
-            int n = packet.ReadInt();
+            int n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 Tags.Add(packet.ReadString());
 
@@ -90,10 +90,10 @@ namespace Xabbo.Core
 
         public virtual void Write(IPacket packet)
         {
-            packet.WriteInt(Id);
+            packet.WriteLong(Id);
             packet.WriteString(Name);
 
-            packet.WriteInt(OwnerId);
+            packet.WriteLong(OwnerId);
             packet.WriteString(OwnerName);
             packet.WriteInt((int)Access);
             packet.WriteInt(Users);
@@ -104,7 +104,7 @@ namespace Xabbo.Core
             packet.WriteInt(Ranking);
             packet.WriteInt((int)Category);
 
-            packet.WriteInt(Tags.Count);
+            packet.WriteShort((short)Tags.Count);
             foreach (string tag in Tags)
                 packet.WriteString(tag);
 

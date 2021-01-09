@@ -146,7 +146,7 @@ namespace Xabbo.Core.Components
                 e.Block();
             }
 
-            Credits = (int)e.Packet.ReadDouble();
+            Credits = (int)e.Packet.ReadFloat();
 
             OnCreditsUpdated();
         }
