@@ -18,24 +18,10 @@ namespace Xabbo.Core.Messages
 
         public bool IsBlocked { get; private set; }
 
-        public bool IsModified
-        {
-            get
-            {
-                if (packet.Header != _originalHeader) return true;
-                if (packet.Length != _originalDataOwner.Memory.Length) return true;
-
-                ReadOnlySpan<byte> data = packet.GetBuffer();
-
-                for (int i = 0; i < _originalData.Length; i++)
-                {
-                    if (_originalData.Span[i] != data[i])
-                        return true;
-                }
-
-                return false;
-            }
-        }
+        public bool IsModified => 
+            packet.Header != _originalHeader ||
+            packet.Length != _originalData.Length ||
+            !packet.GetBuffer().SequenceEqual(_originalData.Span);
 
         private IPacket packet;
         public IPacket Packet
