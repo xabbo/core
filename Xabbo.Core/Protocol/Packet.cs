@@ -519,7 +519,7 @@ namespace Xabbo.Core.Protocol
                     case IPacketData x: x.Write(this); break;
                     case ICollection x:
                         {
-                            WriteInt(x.Count);
+                            WriteShort((short)x.Count);
                             foreach (object o in x)
                                 WriteValues(o);
                         }
@@ -527,14 +527,14 @@ namespace Xabbo.Core.Protocol
                     case IEnumerable x:
                         {
                             int count = 0, startPosition = Position;
-                            WriteInt(-1);
+                            WriteShort(-1);
                             foreach (object o in x)
                             {
                                 WriteValues(o);
                                 count++;
                             }
                             int endPosition = Position;
-                            WriteInt(count, startPosition);
+                            WriteShort((short)count, startPosition);
                             Position = endPosition;
                         }
                         break;
