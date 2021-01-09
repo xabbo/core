@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Text;
 using System.Globalization;
+using System.Buffers.Binary;
 
 using Xabbo.Core.Messages;
 
@@ -10,74 +11,80 @@ namespace Xabbo.Core.Protocol
 {
     public class Packet : IPacket
     {
-        private class ReadOnlyWrapper : IReadOnlyPacket
+        private class ReadOnlyPacket : IReadOnlyPacket
         {
-            private readonly Packet packet;
+            private readonly Packet _packet;
 
-            public Header Header => packet.Header;
+            public Header Header => _packet.Header;
 
             public int Position
             {
-                get => packet.Position;
-                set => packet.Position = value;
+                get => _packet.Position;
+                set => _packet.Position = value;
             }
 
-            public int Length => packet.Length;
+            public int Length => _packet.Length;
 
-            public int Available => packet.Available;
+            public int Available => _packet.Available;
 
-            public ReadOnlyMemory<byte> GetBuffer() => packet.GetData();
+            public ReadOnlySpan<byte> GetBuffer() => _packet.GetBuffer();
 
-            public ReadOnlyWrapper(Packet packet)
+            public ReadOnlyPacket(Packet packet)
             {
-                this.packet = packet;
+                this._packet = packet;
             }
 
-            public bool CanReadBool() => packet.CanReadBool();
+            public bool CanReadBool() => _packet.CanReadBool();
 
-            public bool CanReadByte() => packet.CanReadByte();
+            public bool CanReadByte() => _packet.CanReadByte();
 
-            public bool CanReadDouble() => packet.CanReadDouble();
+            public bool CanReadDouble() => _packet.CanReadDouble();
 
-            public bool CanReadInt() => packet.CanReadInt();
+            public bool CanReadInt() => _packet.CanReadInt();
 
-            public bool CanReadShort() => packet.CanReadShort();
+            public bool CanReadShort() => _packet.CanReadShort();
 
-            public bool CanReadString() => packet.CanReadString();
+            public bool CanReadString() => _packet.CanReadString();
 
-            public byte[] GetData() => packet.GetData();
+            public void CopyTo(Span<byte> destination) => _packet.CopyTo(destination);
 
-            public bool ReadBool() => packet.ReadBool();
+            public bool ReadBool() => _packet.ReadBool();
 
-            public bool ReadBool(int position) => packet.ReadBool(position);
+            public bool ReadBool(int position) => _packet.ReadBool(position);
 
-            public byte ReadByte() => packet.ReadByte();
+            public byte ReadByte() => _packet.ReadByte();
 
-            public byte ReadByte(int position) => packet.ReadByte(position);
+            public byte ReadByte(int position) => _packet.ReadByte(position);
 
-            public byte[] ReadBytes(int count) => packet.ReadBytes(count);
+            public void ReadBytes(Span<byte> buffer) => _packet.ReadBytes(buffer);
 
-            public double ReadDouble() => packet.ReadDouble();
+            public void ReadBytes(Span<byte> buffer, int position) => _packet.ReadBytes(buffer, position);
 
-            public double ReadDouble(int position) => packet.ReadDouble(position);
+            public int ReadInt() => _packet.ReadInt();
 
-            public int ReadInt() => packet.ReadInt();
+            public int ReadInt(int position) => _packet.ReadInt(position);
 
-            public int ReadInt(int position) => packet.ReadInt(position);
+            public float ReadFloat() => _packet.ReadFloat();
 
-            public long ReadLong() => packet.ReadLong();
+            public float ReadFloat(int position) => _packet.ReadFloat(position);
 
-            public long ReadLong(int position) => packet.ReadLong(position);
+            public long ReadLong() => _packet.ReadLong();
 
-            public short ReadShort() => packet.ReadShort();
+            public long ReadLong(int position) => _packet.ReadLong(position);
 
-            public short ReadShort(int position) => packet.ReadShort(position);
+            public short ReadShort() => _packet.ReadShort();
 
-            public string ReadString() => packet.ReadString();
+            public short ReadShort(int position) => _packet.ReadShort(position);
 
-            public string ReadString(int position) => packet.ReadString(position);
+            public string ReadString() => _packet.ReadString();
 
-            public byte[] ToBytes() => packet.ToBytes();
+            public string ReadString(int position) => _packet.ReadString(position);
+
+            public float ReadFloatAsString() => _packet.ReadFloatAsString();
+
+            public float ReadFloatAsString(int position) => _packet.ReadFloatAsString(position);
+
+            public byte[] ToBytes() => _packet.ToBytes();
         }
 
         public static readonly Type
@@ -85,66 +92,47 @@ namespace Xabbo.Core.Protocol
             Bool = typeof(bool),
             Short = typeof(short),
             Int = typeof(int),
+            Float = typeof(float),
             Long = typeof(long),
-            ByteArray = typeof(byte[]),
-            String = typeof(string);
+            String = typeof(string),
+            ByteArray = typeof(byte[]);
 
-        private readonly MemoryStream _ms;
-
-        public ReadOnlyMemory<byte> GetBuffer()
-        {
-            return new ReadOnlyMemory<byte>(_ms.GetBuffer(), 0, Length);
-        }
+        public ReadOnlySpan<byte> GetBuffer() => _buffer.Span[0..Length];
 
         /// <summary>
         /// Gets the data in the packet including the length and message ID headers.
         /// </summary>
         public byte[] ToBytes()
         {
-            byte[] data = new byte[6 + Length];
+            byte[] buffer = new byte[6 + Length];
 
-            int len = 2 + Length;
-            data[0] = (byte)((len >> 24) & 0xFF);
-            data[1] = (byte)((len >> 16) & 0xFF);
-            data[2] = (byte)((len >> 8) & 0xFF);
-            data[3] = (byte)(len & 0xFF);
+            Span<byte> span = buffer.AsSpan();
+            BinaryPrimitives.WriteInt32BigEndian(span[0..4], 2 + Length);
+            BinaryPrimitives.WriteInt16BigEndian(span[4..6], Header.Value);
+            _buffer.Span[0..Length].CopyTo(span[6..]);
 
-            data[4] = (byte)((Header >> 8) & 0xFF);
-            data[5] = (byte)(Header & 0xFF);
-
-            if (Length > 0)
-            {
-                int position = Position;
-                Position = 0;
-                _ms.Read(data, 6, Length);
-                Position = position;
-            }
-
-            return data;
+            return buffer;
         }
 
         /// <summary>
-        /// Gets the data in the packet excluding the length and message ID header.
+        /// Copies the data of this <see cref="Packet"/> to a destination <see cref="Span{T}"/>.
         /// </summary>
-        public byte[] GetData()
-        {
-            byte[] data = new byte[Length];
-            int pos = Position;
-            Position = 0;
-            _ms.Read(data, 0, Length);
-            Position = pos;
-            return data;
-        }
+        public void CopyTo(Span<byte> destination) => _buffer.Span[0..Length].CopyTo(destination);
 
+        /// <summary>
+        /// Gets or sets the message header of this <see cref="Packet"/>.
+        /// </summary>
         public Header Header { get; set; } = Header.Unknown;
 
+        private int _position;
         public int Position
         {
-            get => (int)_ms.Position;
+            get => _position;
             set
             {
-                if (value < 0 || value > Length) throw new IndexOutOfRangeException();
-                _ms.Position = value;
+                if (value < 0 || value > Length)
+                    throw new IndexOutOfRangeException();
+                _position = value;
             }
         }
 
@@ -152,66 +140,72 @@ namespace Xabbo.Core.Protocol
 
         public int Available => Length - Position;
 
-        private byte[] buffer = new byte[8];
-
         public Packet()
         {
-            _ms = new MemoryStream();
+            Header = Header.Unknown;
+            _buffer = new byte[8];
+        }
+
+        private Memory<byte> _buffer;
+
+        public Packet(ReadOnlySpan<byte> buffer)
+        {
+            Header = Header.Unknown;
+            _buffer = new Memory<byte>(buffer.ToArray());
+        }
+
+        private void Grow(int length) => GrowToSize(Position + length);
+
+        private void GrowToSize(int minSize)
+        {
+            if (_buffer.Length < minSize)
+            {
+                int size = _buffer.Length;
+                while (size < minSize)
+                    size <<= 1;
+
+                Memory<byte> oldMemory = _buffer;
+                _buffer = new Memory<byte>(new byte[size]);
+                oldMemory.CopyTo(_buffer);
+            }
+
+            if (Length < minSize)
+                Length = minSize;
         }
 
         public Packet(Header header)
-            : this()
         {
             Header = header;
+            _buffer = new byte[32];
         }
 
-        public Packet(byte[] data, int offset, int count, bool includesHeader = true, Destination destination = Destination.Unknown)
-            : this()
+        public Packet(Header header, ReadOnlySpan<byte> span)
         {
-            if (offset < 0 || offset > data.Length)
-                throw new ArgumentOutOfRangeException("offset");
-            if (count < 0 || (offset + count) > data.Length || (includesHeader && count < 2))
-                throw new ArgumentOutOfRangeException("count");
-
-            if (includesHeader)
-            {
-                Header = new Header(
-                    destination,
-                    (short)(
-                        (data[offset] << 8) |
-                        data[offset + 1]
-                    )
-                );
-                _ms.Write(data, offset + 2, count - 2);
-            }
-            else
-            {
-                _ms.Write(data, offset, count);
-            }
+            Header = header;
+            _buffer = span.ToArray();
 
             Position = 0;
-            Length = (int)_ms.Length;
+            Length = span.Length;
         }
-
-        public Packet(byte[] data, bool includesHeader = true)
-            : this(data, 0, data.Length, includesHeader)
-        { }
 
         public Packet(Header header, params object[] values)
         {
-            _ms = new MemoryStream();
-
             Header = header;
+            _buffer = new byte[32];
+
             WriteValues(values);
+
+            Position = 0;
         }
 
         public Packet(IReadOnlyPacket packet)
-            : this(packet.Header)
         {
-            byte[] data = packet.GetData();
-            _ms.Write(data, 0, data.Length);
-            _ms.Position = 0;
-            Length = (int)_ms.Length;
+            Header = packet.Header;
+            _buffer = new byte[packet.Length];
+            packet.CopyTo(_buffer.Span);
+
+            Position = 0;
+            Length = packet.Length;
         }
 
         public static Packet Compose(Header header, params object[] values)
@@ -237,10 +231,9 @@ namespace Xabbo.Core.Protocol
 
         public bool CanReadString()
         {
-            if (!CanReadShort()) return false;
-            int len = ReadShort();
-            Position -= 2;
-            return Available >= (2 + len);
+            if (Available < 2) return false;
+
+            return Available >= (2 + BinaryPrimitives.ReadUInt16BigEndian(_buffer.Span[Position..]));
         }
 
         public bool CanReadDouble()
@@ -259,8 +252,8 @@ namespace Xabbo.Core.Protocol
             if (Available < 1)
                 throw new EndOfStreamException();
 
-            _ms.Read(buffer, 0, 1);
-            return buffer[0];
+            Position++;
+            return _buffer.Span[Position - 1];
         }
 
         public byte ReadByte(int position)
@@ -270,6 +263,21 @@ namespace Xabbo.Core.Protocol
 
             Position = position;
             return ReadByte();
+        }
+
+        public void ReadBytes(Span<byte> buffer)
+        {
+            if (Available < buffer.Length)
+                throw new EndOfStreamException();
+
+            Position += buffer.Length;
+            _buffer.Span[(Position - buffer.Length)..Position].CopyTo(buffer);
+        }
+
+        public void ReadBytes(Span<byte> buffer, int position)
+        {
+            Position = position;
+            ReadBytes(buffer);
         }
 
         public bool ReadBool() => ReadByte() != 0;
@@ -285,10 +293,9 @@ namespace Xabbo.Core.Protocol
             if (Available < 2)
                 throw new EndOfStreamException();
 
-            _ms.Read(buffer, 0, 2);
-            return (short)(
-                (buffer[0] << 8) |
-                buffer[1]
+            Position += 2;
+            return BinaryPrimitives.ReadInt16BigEndian(
+                _buffer.Span[(Position - 2)..]
             );
         }
 
@@ -303,12 +310,10 @@ namespace Xabbo.Core.Protocol
             if (Available < 4)
                 throw new EndOfStreamException();
 
-            _ms.Read(buffer, 0, 4);
-            return
-                (buffer[0] << 24) |
-                (buffer[1] << 16) |
-                (buffer[2] << 8) |
-                buffer[3];
+            Position += 4;
+            return BinaryPrimitives.ReadInt32BigEndian(
+                _buffer.Span[(Position - 4)..]
+            );
         }
 
         public int ReadInt(int position)
@@ -317,21 +322,32 @@ namespace Xabbo.Core.Protocol
             return ReadInt();
         }
 
+        public float ReadFloat()
+        {
+            if (Available < 4)
+                throw new EndOfStreamException();
+
+            Position += 4;
+            return BinaryPrimitives.ReadSingleBigEndian(
+                _buffer.Span[(Position - 4)..]
+            );
+        }
+
+        public float ReadFloat(int position)
+        {
+            Position = position;
+            return ReadFloat();
+        }
+
         public long ReadLong()
         {
             if (Available < 8)
                 throw new EndOfStreamException();
 
-            _ms.Read(buffer, 0, 8);
-            return
-                (buffer[0] << 56) |
-                (buffer[1] << 48) |
-                (buffer[2] << 40) |
-                (buffer[3] << 32) |
-                (buffer[4] << 24) |
-                (buffer[5] << 16) |
-                (buffer[6] << 8) |
-                buffer[7];
+            Position += 8;
+            return BinaryPrimitives.ReadInt64BigEndian(
+                _buffer.Span[(Position - 8)..]
+            );
         }
 
         public long ReadLong(int position)
@@ -340,42 +356,15 @@ namespace Xabbo.Core.Protocol
             return ReadLong();
         }
 
-        public double ReadDouble()
-        {
-            return double.Parse(ReadString(), CultureInfo.InvariantCulture);
-        }
-
-        public double ReadDouble(int position)
-        {
-            Position = position;
-            return ReadDouble();
-        }
-
-        public byte[] ReadBytes(int count)
-        {
-            if (Available < count)
-                throw new EndOfStreamException();
-
-            byte[] bytes = new byte[count];
-            _ms.Read(bytes, 0, count);
-            return bytes;
-        }
-
-        public byte[] ReadBytes(int count, int position)
-        {
-            Position = position;
-            return ReadBytes(count);
-        }
-
         public string ReadString()
         {
             if (!CanReadString())
                 throw new EndOfStreamException();
 
             int len = (ushort)ReadShort();
-            byte[] bytes = ReadBytes(len);
+            Position += len;
 
-            return Encoding.UTF8.GetString(bytes);
+            return Encoding.UTF8.GetString(_buffer.Span[(Position - len)..Position]);
         }
 
         public string ReadString(int position)
@@ -384,22 +373,40 @@ namespace Xabbo.Core.Protocol
             return ReadString();
         }
 
-        private void Write(byte[] buffer, int offset, int count)
+        public float ReadFloatAsString()
         {
-            _ms.Write(buffer, offset, count);
-            if (Length < Position) Length = Position;
+            return float.Parse(ReadString(), CultureInfo.InvariantCulture);
+        }
+
+        public float ReadFloatAsString(int position)
+        {
+            Position = position;
+            return ReadFloatAsString();
         }
 
         public void WriteByte(byte value)
         {
-            buffer[0] = value;
-            Write(buffer, 0, 1);
+            Grow(1);
+            _buffer.Span[Position++] = value;
         }
 
         public void WriteByte(byte value, int position)
         {
             Position = position;
             WriteByte(value);
+        }
+
+        public void WriteBytes(ReadOnlySpan<byte> bytes)
+        {
+            Grow(bytes.Length);
+            bytes.CopyTo(_buffer.Span[Position..]);
+            Position += bytes.Length;
+        }
+
+        public void WriteBytes(ReadOnlySpan<byte> bytes, int position)
+        {
+            Position = position;
+            WriteBytes(bytes);
         }
 
         public void WriteBool(bool value) => WriteByte((byte)(value ? 1 : 0));
@@ -412,9 +419,9 @@ namespace Xabbo.Core.Protocol
 
         public void WriteShort(short value)
         {
-            buffer[0] = (byte)((value >> 8) & 0xFF);
-            buffer[1] = (byte)(value & 0xFF);
-            Write(buffer, 0, 2);
+            Grow(2);
+            BinaryPrimitives.WriteInt16BigEndian(_buffer.Span[Position..], value);
+            Position += 2;
         }
 
         public void WriteShort(short value, int position)
@@ -425,11 +432,9 @@ namespace Xabbo.Core.Protocol
 
         public void WriteInt(int value)
         {
-            buffer[0] = (byte)((value >> 24) & 0xFF);
-            buffer[1] = (byte)((value >> 16) & 0xFF);
-            buffer[2] = (byte)((value >> 8) & 0xFF);
-            buffer[3] = (byte)(value & 0xFF);
-            Write(buffer, 0, 4);
+            Grow(4);
+            BinaryPrimitives.WriteInt32BigEndian(_buffer.Span[Position..], value);
+            Position += 4;
         }
 
         public void WriteInt(int value, int position)
@@ -440,15 +445,9 @@ namespace Xabbo.Core.Protocol
 
         public void WriteLong(long value)
         {
-            buffer[0] = (byte)((value >> 56) & 0xFF);
-            buffer[1] = (byte)((value >> 48) & 0xFF);
-            buffer[2] = (byte)((value >> 40) & 0xFF);
-            buffer[3] = (byte)((value >> 32) & 0xFF);
-            buffer[4] = (byte)((value >> 24) & 0xFF);
-            buffer[5] = (byte)((value >> 16) & 0xFF);
-            buffer[6] = (byte)((value >> 8) & 0xFF);
-            buffer[7] = (byte)(value >> 0 & 0xFF);
-            Write(buffer, 0, 8);
+            Grow(8);
+            BinaryPrimitives.WriteInt64BigEndian(_buffer.Span[Position..], value);
+            Position += 8;
         }
 
         public void WriteLong(long value, int position)
@@ -457,33 +456,40 @@ namespace Xabbo.Core.Protocol
             WriteLong(value);
         }
 
-        public void WriteDouble(double value)
+        public void WriteFloat(float value)
+        {
+            Grow(4);
+            BinaryPrimitives.WriteSingleBigEndian(_buffer.Span[Position..], value);
+            Position += 4;
+        }
+
+        public void WriteFloat(float value, int position)
+        {
+            Position = position;
+            WriteFloat(value);
+        }
+
+        public void WriteFloatAsString(float value)
         {
             WriteString(value.ToString("0.0##############", CultureInfo.InvariantCulture));
         }
 
-        public void WriteDouble(double value, int position)
+        public void WriteFloatAsString(float value, int position)
         {
             Position = position;
-            WriteDouble(value);
+            WriteFloatAsString(value);
         }
 
-        public void WriteBytes(byte[] bytes)
-        {
-            Write(bytes, 0, bytes.Length);
-        }
 
-        public void WriteBytes(byte[] bytes, int position)
-        {
-            Position = position;
-            WriteBytes(bytes);
-        }
 
         public void WriteString(string value)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(value ?? string.Empty);
-            WriteShort((short)bytes.Length);
-            WriteBytes(bytes);
+            int len = Encoding.UTF8.GetByteCount(value);
+            WriteShort((short)len);
+
+            Grow(len);
+            Encoding.UTF8.GetBytes(value, _buffer.Span[Position..]);
+            Position += len;
         }
 
         public void WriteString(string value, int position)
@@ -509,7 +515,7 @@ namespace Xabbo.Core.Protocol
                         WriteBytes(x);
                         break;
                     case string x: WriteString(x); break;
-                    case double x: WriteDouble(x); break;
+                    case float x: WriteFloat(x); break;
                     case IPacketData x: x.Write(this); break;
                     case ICollection x:
                         {
@@ -546,30 +552,36 @@ namespace Xabbo.Core.Protocol
 
         public void ReplaceString(string newValue, int position)
         {
-            Position = position;
-            if (!CanReadString())
-                throw new InvalidOperationException($"Cannot read string at position {position}");
+            int previousLen = BinaryPrimitives.ReadInt16BigEndian(_buffer.Span[position..]);
+            if (Length < (position + 2 + previousLen))
+                throw new InvalidOperationException($"Cannot replace string at position {position}");
 
-            int len = ReadShort();
+            int newLen = Encoding.UTF8.GetByteCount(newValue);
 
-            byte[] stringBytes = Encoding.UTF8.GetBytes(newValue);
+            int diff = newLen - previousLen;
 
-            if (len == stringBytes.Length)
+            if (diff == 0)
             {
-                WriteBytes(stringBytes);
+                Encoding.UTF8.GetBytes(newValue, _buffer.Span[Position..]);
+                Position = position + 2 + newLen;
                 return;
             }
+            else if (diff > 0)
+            {
+                GrowToSize(Length + (newLen - previousLen));
+            }
+            else if (diff < 0)
+            {
+                Length -= (newLen - previousLen);
+            }
 
-            Position += len;
-            byte[] temp = ReadBytes(Length - Position);
-            Position = position;
-            WriteShort((short)stringBytes.Length);
-            WriteBytes(stringBytes);
+            byte[] tail = _buffer.Span[(position + 2 + previousLen)..].ToArray();
 
-            int finalPosition = Position;
-            WriteBytes(temp);
-            Length = Position;
-            Position = finalPosition;
+            BinaryPrimitives.WriteInt16BigEndian(_buffer.Span[position..], (short)newLen);
+            Encoding.UTF8.GetBytes(newValue, _buffer.Span[(position + 2)..]);
+            tail.CopyTo(_buffer[(position + 2 + newLen)..]);
+
+            Position = position + 2 + newLen;
         }
 
         public void ReplaceValues(params object[] newValues)
@@ -608,7 +620,7 @@ namespace Xabbo.Core.Protocol
             ReplaceValues(newValues);
         }
 
-        public IReadOnlyPacket AsReadOnly() => new ReadOnlyWrapper(this);
+        public IReadOnlyPacket AsReadOnly() => new ReadOnlyPacket(this);
         #endregion
     }
 }

@@ -17,48 +17,53 @@ namespace Xabbo.Core.Protocol
         new int Position { get; set; }
 
         /// <summary>
-        /// Writes a boolean at the current position in the packet.
+        /// Writes a boolean to the current position in the packet.
         /// </summary>
         void WriteBool(bool value);
 
         /// <summary>
-        /// Writes a byte at the current position in the packet.
+        /// Writes a byte to the current position in the packet.
         /// </summary>
         void WriteByte(byte value);
 
         /// <summary>
-        /// Writes a short at the current position in the packet.
+        /// Writes a short to the current position in the packet.
         /// </summary>
         void WriteShort(short value);
 
         /// <summary>
-        /// Writes an integer at the current position in the packet.
+        /// Writes an integer to the current position in the packet.
         /// </summary>
         void WriteInt(int value);
 
         /// <summary>
-        /// Writes a long at the current position in the packet.
+        /// Writes a double (as a string) to the current position in the packet.
+        /// </summary>
+        void WriteFloat(float value);
+
+        /// <summary>
+        /// Writes a long to the current position in the packet.
         /// </summary>
         /// <param name="value"></param>
         void WriteLong(long value);
 
         /// <summary>
-        /// Writes a string at the current position in the packet.
+        /// Writes a string to the current position in the packet.
         /// </summary>
         void WriteString(string value);
 
         /// <summary>
-        /// Writes a double (as a string) at the current position in the packet.
+        /// Writes a floating point number as a string to the current position in the packet.
         /// </summary>
-        void WriteDouble(double value);
+        void WriteFloatAsString(float value);
 
         /// <summary>
-        /// Writes an array of bytes at the current position in the packet.
+        /// Writes the specified bytes to the current position in the packet.
         /// </summary>
-        void WriteBytes(byte[] bytes);
+        void WriteBytes(ReadOnlySpan<byte> bytes);
 
         /// <summary>
-        /// Writes values at the current position in the packet.
+        /// Writes the specified values to the current position in the packet.
         /// </summary>
         void WriteValues(params object[] values);
 
@@ -73,12 +78,12 @@ namespace Xabbo.Core.Protocol
         void ReplaceString(string newValue, int position);
 
         /// <summary>
-        /// Replaces values at the current position in the packet.
+        /// Replaces the specified values at the current position in the packet.
         /// </summary>
         void ReplaceValues(params object[] newValues);
 
         /// <summary>
-        /// Replaces values at the specified position in the packet.
+        /// Replaces the specified values at the specified position in the packet.
         /// </summary>
         void ReplaceValues(object[] newValues, int position);
     }

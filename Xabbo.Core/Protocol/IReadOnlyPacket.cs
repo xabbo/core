@@ -7,16 +7,14 @@ namespace Xabbo.Core.Protocol
     public interface IReadOnlyPacket
     {
         /// <summary>
-        /// Gets a byte array of the packet, including the 4-byte length and 2-byte message ID headers.
+        /// Gets the data in the packet as a <see cref="ReadOnlySpan{T}"/>.
         /// </summary>
-        byte[] ToBytes();
+        ReadOnlySpan<byte> GetBuffer();
 
         /// <summary>
-        /// Gets a byte array of the data in the packet.
+        /// Copies the data of this <see cref="Packet"/> into a <see cref="Span{T}"/>.
         /// </summary>
-        byte[] GetData();
-
-        ReadOnlyMemory<byte> GetBuffer();
+        void CopyTo(Span<byte> destination);
 
         /// <summary>
         /// Gets the message header of the packet.
@@ -109,6 +107,16 @@ namespace Xabbo.Core.Protocol
         int ReadInt(int position);
 
         /// <summary>
+        /// Reads a 32-bit floating point number from the current position in the packet.
+        /// </summary>
+        float ReadFloat();
+
+        /// <summary>
+        /// Reads a 32-bit floating point number from the specified position in the packet.
+        /// </summary>
+        float ReadFloat(int position);
+
+        /// <summary>
         /// Reads a long from the current position in the packet.
         /// </summary>
         /// <returns></returns>
@@ -130,18 +138,23 @@ namespace Xabbo.Core.Protocol
         string ReadString(int position);
 
         /// <summary>
-        /// Reads a double from the current position in the packet.
+        /// Reads a string from the current position in the packet and parses it as a floating point number.
         /// </summary>
-        double ReadDouble();
+        float ReadFloatAsString();
 
         /// <summary>
-        /// Reads a double from the specified position in the packet.
+        /// Reads a string from the specified position in the packet and parses it as a floating point number.
         /// </summary>
-        double ReadDouble(int position);
+        float ReadFloatAsString(int position);
 
         /// <summary>
-        /// Reads the specified number of bytes from the current position in the packet.
+        /// Copies from the current position in the packet into the <see cref="Span{T}"/>.
         /// </summary>
-        byte[] ReadBytes(int count);
+        void ReadBytes(Span<byte> buffer);
+
+        /// <summary>
+        /// Copies from the specified position in this <see cref="Packet"/> into the <see cref="Span{T}"/>
+        /// </summary>
+        void ReadBytes(Span<byte> buffer, int position);
     }
 }
