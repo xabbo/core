@@ -4,13 +4,13 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class CrackableFurniData : ItemData, ICrackableFurniData
+    public class CrackableFurniData : StuffData, ICrackableFurniData
     {
         public int Hits { get; set; }
         public int Target { get; set; }
 
         public CrackableFurniData()
-            : base(ItemDataType.CrackableFurni)
+            : base(StuffDataType.CrackableFurni)
         { }
 
         protected override void Initialize(IReadOnlyPacket packet)

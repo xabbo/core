@@ -363,7 +363,7 @@ namespace Xabbo.Core.Components
             }
 
             var previousData = item.Data;
-            item.Data = ItemData.Parse(packet);
+            item.Data = StuffData.Parse(packet);
 
             OnFloorItemDataUpdated(item, previousData);
         }
@@ -378,7 +378,7 @@ namespace Xabbo.Core.Components
             for (int i = 0; i < n; i++)
             {
                 long itemId = packet.ReadLong();
-                var data = ItemData.Parse(packet);
+                var data = StuffData.Parse(packet);
                 if (!_floorItems.TryGetValue(itemId, out FloorItem? item)) continue;
 
                 var previousData = item.Data;
@@ -553,7 +553,7 @@ namespace Xabbo.Core.Components
 
         public void UpdateStackTile(IFloorItem stackTile, float height) => UpdateStackTile(stackTile.Id, height);
         public void UpdateStackTile(long stackTileId, float height)
-            => throw new NotImplementedException(); // @Update SendAsync(Out.SetStackHelperHeight, stackTileId, (int)Math.Round(height * 100.0));
+            => SendAsync(Out.StackingHelperSetCaretHeight, stackTileId, (int)Math.Round(height * 100.0)); // TODO this may be float ?
         #endregion
     }
 }

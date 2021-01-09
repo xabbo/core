@@ -6,7 +6,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class IntArrayData : ItemData, IIntArrayData, IList<int>
+    public class IntArrayData : StuffData, IIntArrayData, IList<int>
     {
         private readonly List<int> list;
 
@@ -19,14 +19,14 @@ namespace Xabbo.Core
         }
 
         public IntArrayData()
-            : base(ItemDataType.IntArray)
+            : base(StuffDataType.IntArray)
         {
             list = new List<int>();
         }
 
         protected override void Initialize(IReadOnlyPacket packet)
         {
-            int n = packet.ReadInt();
+            short n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 list.Add(packet.ReadInt());
 
@@ -35,7 +35,7 @@ namespace Xabbo.Core
 
         protected override void WriteData(IPacket packet)
         {
-            packet.WriteInt(Count);
+            packet.WriteShort((short)Count);
             foreach (int value in this)
                 packet.WriteInt(value);
 

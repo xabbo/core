@@ -120,59 +120,59 @@ namespace Xabbo.Core.Components
         /// <summary>
         /// Invoked when an entity has been added to the room.
         /// </summary>
-        public event EventHandler<EntityEventArgs> EntityAdded;
+        public event EventHandler<EntityEventArgs>? EntityAdded;
         /// <summary>
         /// Invoked when entities have been added to the room.
         /// </summary>
-        public event EventHandler<EntitiesEventArgs> EntitiesAdded;
+        public event EventHandler<EntitiesEventArgs>? EntitiesAdded;
         /// <summary>
         /// Invoked when an entity in the room is updated.
         /// </summary>
-        public event EventHandler<EntityEventArgs> EntityUpdated;
+        public event EventHandler<EntityEventArgs>? EntityUpdated;
         /// <summary>
         /// Invoked when entities in the room are updated.
         /// </summary>
-        public event EventHandler<EntitiesEventArgs> EntitiesUpdated;
+        public event EventHandler<EntitiesEventArgs>? EntitiesUpdated;
         /// <summary>
         /// Invoked when an entity slides along a roller.
         /// </summary>
-        public event EventHandler<EntitySlideEventArgs> EntitySlide;
+        public event EventHandler<EntitySlideEventArgs>? EntitySlide;
         /// <summary>
         /// Invoked when a user's figure, motto or achievement score is updated.
         /// </summary>
-        public event EventHandler<UserDataUpdatedEventArgs> UserDataUpdated;
+        public event EventHandler<UserDataUpdatedEventArgs>? UserDataUpdated;
         /// <summary>
         /// Invoked when an entity's name changes.
         /// </summary>
-        public event EventHandler<EntityNameChangedEventArgs> EntityNameChanged;
+        public event EventHandler<EntityNameChangedEventArgs>? EntityNameChanged;
         /// <summary>
         /// Invoked when an entity's idle status updates.
         /// </summary>
-        public event EventHandler<EntityIdleEventArgs> EntityIdle;
+        public event EventHandler<EntityIdleEventArgs>? EntityIdle;
         /// <summary>
         /// Invoked when an entity's dance updates.
         /// </summary>
-        public event EventHandler<EntityDanceEventArgs> EntityDance;
+        public event EventHandler<EntityDanceEventArgs>? EntityDance;
         /// <summary>
         /// Invoked when an entity's hand item updates.
         /// </summary>
-        public event EventHandler<EntityHandItemEventArgs> EntityHandItem;
+        public event EventHandler<EntityHandItemEventArgs>? EntityHandItem;
         /// <summary>
         /// Invoked when an entity's effect updates.
         /// </summary>
-        public event EventHandler<EntityEffectEventArgs> EntityEffect;
+        public event EventHandler<EntityEffectEventArgs>? EntityEffect;
         /// <summary>
         /// Invoked when an entity performs an action.
         /// </summary>
-        public event EventHandler<EntityActionEventArgs> EntityAction;
+        public event EventHandler<EntityExpressionEventArgs>? EntityAction;
         /// <summary>
         /// Invoked when an entity's typing status updates.
         /// </summary>
-        public event EventHandler<EntityTypingEventArgs> EntityTyping;
+        public event EventHandler<EntityTypingEventArgs>? EntityTyping;
         /// <summary>
         /// Invoked when an entity is removed from the room.
         /// </summary>
-        public event EventHandler<EntityEventArgs> EntityRemoved;
+        public event EventHandler<EntityEventArgs>? EntityRemoved;
 
         protected virtual void OnEntityAdded(IEntity entity)
             => EntityAdded?.Invoke(this, new EntityEventArgs(entity));
@@ -201,23 +201,28 @@ namespace Xabbo.Core.Components
             => EntityHandItem?.Invoke(this, new EntityHandItemEventArgs(entity, previousItem));
         protected virtual void OnEntityEffect(IEntity entity, int previousEffect)
             => EntityEffect?.Invoke(this, new EntityEffectEventArgs(entity, previousEffect));
-        protected virtual void OnEntityAction(IEntity entity, Actions action)
-            => EntityAction?.Invoke(this, new EntityActionEventArgs(entity, action));
+        protected virtual void OnEntityExpression(IEntity entity, Expressions action)
+            => EntityAction?.Invoke(this, new EntityExpressionEventArgs(entity, action));
         protected virtual void OnEntityTyping(IEntity entity, bool wasTyping)
             => EntityTyping?.Invoke(this, new EntityTypingEventArgs(entity, wasTyping));
         protected virtual void OnEntityRemoved(IEntity entity)
             => EntityRemoved?.Invoke(this, new EntityEventArgs(entity));
         #endregion
 
-        public EntityManager() { }
+        public EntityManager()
+        {
+
+        }
 
         protected override void OnInitialize()
         {
+            // TODO add to constructor
+
             roomManager = GetComponent<RoomManager>();
             roomManager.Left += Room_Left;
         }
 
-        private void Room_Left(object sender, EventArgs e)
+        private void Room_Left(object? sender, EventArgs e)
         {
             DebugUtil.Log("clearing entities");
 
@@ -232,7 +237,7 @@ namespace Xabbo.Core.Components
             if (e.IsHidden)
             {
                 e.IsHidden = false;
-                SendLocalAsync(In.RoomUsers, 1, e);
+                SendLocalAsync(In.UsersInRoom, 1, e);
             }
         }
 
@@ -248,7 +253,7 @@ namespace Xabbo.Core.Components
                 }
             }
 
-            SendLocalAsync(In.RoomUsers, shown);
+            SendLocalAsync(In.UsersInRoom, shown);
         }
 
         public void Hide(IEntity entity)
@@ -259,7 +264,7 @@ namespace Xabbo.Core.Components
             if (!e.IsHidden)
             {
                 e.IsHidden = true;
-                // @Update SendLocalAsync(In.RoomUserRemove, e.Index.ToString());
+                SendLocalAsync(In.UserLoggedOut, e.Index);
             }
         }
 
@@ -292,8 +297,8 @@ namespace Xabbo.Core.Components
             }
         }
 
-        // @Update [InterceptIn(nameof(Incoming.RoomUserRemove))]
-        private void HandleEntityRemove(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.UserLoggedOut))]
+        private void HandleUserLoggedOut(InterceptArgs e)
         {
             if (!roomManager.IsInRoom)
             {
@@ -301,8 +306,8 @@ namespace Xabbo.Core.Components
                 return;
             }
 
-            int index = int.Parse(e.Packet.ReadString());
-            if (entities.TryRemove(index, out Entity entity))
+            int index = e.Packet.ReadInt();
+            if (entities.TryRemove(index, out Entity? entity))
             {
                 OnEntityRemoved(entity);
             }
@@ -312,24 +317,24 @@ namespace Xabbo.Core.Components
             }
         }
 
-        // @Update [Group(Features.Tracking), InterceptIn(nameof(Incoming.RoomUserStatus))]
-        private void HandleEntityUpdate(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.Status))]
+        private void HandleStatus(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
 
             var updatedEntities = new List<IEntity>();
 
-            int n = e.Packet.ReadInt();
+            int n = e.Packet.ReadShort();
             for (int i = 0; i < n; i++)
             {
-                var entityUpdate = EntityStatusUpdate.Parse(e.Packet);
-                if (!entities.TryGetValue(entityUpdate.Index, out Entity entity))
+                EntityStatusUpdate update = EntityStatusUpdate.Parse(e.Packet);
+                if (!entities.TryGetValue(update.Index, out Entity? entity))
                 {
-                    DebugUtil.Log($"failed to find entity {entityUpdate.Index} to update");
+                    DebugUtil.Log($"failed to find entity {update.Index} to update");
                     continue;
                 }
 
-                entity.Update(entityUpdate);
+                entity.Update(update);
                 updatedEntities.Add(entity);
 
                 OnEntityUpdated(entity);
@@ -338,8 +343,8 @@ namespace Xabbo.Core.Components
             OnEntitiesUpdated(updatedEntities);
         }
 
-        // @Update [Group(Features.Tracking), InterceptIn(nameof(Incoming.ObjectOnRoller))]
-        private void HandleObjectOnRoller(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.QueueMoveUpdate))]
+        private void HandleQueueMoveUpdate(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
 
@@ -348,7 +353,7 @@ namespace Xabbo.Core.Components
             if (rollerUpdate.Type == RollerUpdateType.MovingEntity ||
                 rollerUpdate.Type == RollerUpdateType.StationaryEntity)
             {
-                if (entities.TryGetValue(rollerUpdate.EntityIndex, out Entity entity))
+                if (entities.TryGetValue(rollerUpdate.EntityIndex, out Entity? entity))
                 {
                     var previousTile = entity.Location;
                     entity.Location = new Tile(rollerUpdate.TargetX, rollerUpdate.TargetY, rollerUpdate.EntityTargetZ);
@@ -362,8 +367,8 @@ namespace Xabbo.Core.Components
             }
         }
 
-        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserData))]
-        private void HandleUserDataUpdated(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.UpdateAvatar))]
+        private void HandleUpdateAvatar(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
 
@@ -391,12 +396,12 @@ namespace Xabbo.Core.Components
             }
         }
 
-        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserNameChanged))]
-        private void HandleRoomUserNameChanged(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.UserNameChanged))] // @Check
+        private void HandleUserNameChanged(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
 
-            int id = e.Packet.ReadInt();
+            long id = e.Packet.ReadLong();
             int index = e.Packet.ReadInt();
             string newName = e.Packet.ReadString();
 
@@ -412,8 +417,8 @@ namespace Xabbo.Core.Components
             }
         }
 
-        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUnitIdle))]
-        private void HandleEntityIdle(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.RoomAvatarSleeping))]
+        private void HandleRoomAvatarSleeping(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
 
@@ -430,14 +435,13 @@ namespace Xabbo.Core.Components
             }
         }
 
-        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserDance))]
-        private void HandleEntityDance(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.RoomDance))]
+        private void HandleRoomDance(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
-            var entity = GetEntityByIndex(index) as Entity;
-            if (entity == null)
+            if (!TryGetEntityByIndex(index, out Entity entity))
             {
                 DebugUtil.Log($"failed to find entity {index} to update");
                 return;
@@ -449,75 +453,73 @@ namespace Xabbo.Core.Components
             OnEntityDance(entity, previousDance);
         }
 
-        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserAction))]
-        private void HandleEntityAction(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.RoomExpression))]
+        private void HandleRoomExpression(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
-            if (TryGetEntityByIndex(index, out Entity entity))
-            {
-                OnEntityAction(entity, (Actions)e.Packet.ReadInt());
-            }
-            else
+            if (!TryGetEntityByIndex(index, out Entity entity))
             {
                 DebugUtil.Log($"failed to find entity {index} to update");
+                return;
             }
+
+            OnEntityExpression(entity, (Expressions)e.Packet.ReadInt());
         }
 
-        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserHandItem))]
-        private void HandleEntityHandItem(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.RoomCarryObject))]
+        private void HandleRoomCarryObject(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
-            if (TryGetEntityByIndex(index, out Entity entity))
-            {
-                int previousItem = entity.HandItem;
-                entity.HandItem = e.Packet.ReadInt();
-                OnEntityHandItem(entity, previousItem);
-            }
-            else
+            if (!TryGetEntityByIndex(index, out Entity entity))
             {
                 DebugUtil.Log($"failed to find entity {index} to update");
+                return;
             }
+
+            int previousItem = entity.HandItem;
+            entity.HandItem = e.Packet.ReadInt();
+            OnEntityHandItem(entity, previousItem);
         }
 
-        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserEffect))]
-        private void HandleEntityEffect(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.RoomAvatarEffect))]
+        private void HandleRoomAvatarEffect(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
-            if (TryGetEntityByIndex(index, out Entity entity))
-            {
-                int previousEffect = entity.Effect;
-                entity.Effect = e.Packet.ReadInt();
-                OnEntityEffect(entity, previousEffect);
-            }
-            else
+            if (!TryGetEntityByIndex(index, out Entity entity))
             {
                 DebugUtil.Log($"failed to find entity {index} to update");
+                return;
             }
+
+            int previousEffect = entity.Effect;
+            entity.Effect = e.Packet.ReadInt();
+            OnEntityEffect(entity, previousEffect);
+
+            // + int delay
         }
 
-        // @Update [Group(Features.StateTracking), InterceptIn(nameof(Incoming.RoomUserTyping))]
-        private void HandleEntityTyping(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.UserTypingStatusChange))]
+        private void HandleUserTypingStatusChange(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
 
-            if (TryGetEntityByIndex(index, out Entity entity))
-            {
-                bool wasTyping = entity.IsTyping;
-                entity.IsTyping = e.Packet.ReadInt() != 0;
-                OnEntityTyping(entity, wasTyping);
-            }
-            else
+            if (!TryGetEntityByIndex(index, out Entity entity))
             {
                 DebugUtil.Log($"failed to find entity {index} to update");
+                return;
             }
+
+            bool wasTyping = entity.IsTyping;
+            entity.IsTyping = e.Packet.ReadInt() != 0;
+            OnEntityTyping(entity, wasTyping);
         }
     }
 }

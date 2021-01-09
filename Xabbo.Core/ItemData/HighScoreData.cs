@@ -6,7 +6,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class HighScoreData : ItemData, IHighScoreData, IList<HighScoreData.HighScore>
+    public class HighScoreData : StuffData, IHighScoreData, IList<HighScoreData.HighScore>
     {
         private readonly List<HighScore> list;
 
@@ -24,7 +24,7 @@ namespace Xabbo.Core
         IEnumerator<IHighScore> IEnumerable<IHighScore>.GetEnumerator() => GetEnumerator();
 
         public HighScoreData()
-            : base(ItemDataType.HighScore)
+            : base(StuffDataType.HighScore)
         {
             list = new List<HighScore>();
         }
@@ -35,13 +35,13 @@ namespace Xabbo.Core
             Int1 = packet.ReadInt();
             Int2 = packet.ReadInt();
 
-            int n = packet.ReadInt();
+            short n = packet.ReadShort();
             for (int i = 0; i < n; i++)
             {
                 var highScore = new HighScore();
                 highScore.Value = packet.ReadInt(); 
 
-                int k = packet.ReadInt();
+                short k = packet.ReadShort();
                 for (int j = 0; j < k; j++)
                     highScore.Names.Add(packet.ReadString());
 
@@ -65,7 +65,7 @@ namespace Xabbo.Core
             public void Write(IPacket packet)
             {
                 packet.WriteInt(Value);
-                packet.WriteInt(Names?.Count ?? 0);
+                packet.WriteShort((short)(Names?.Count ?? 0));
                 if (Names != null)
                 {
                     foreach (string name in Names)
@@ -80,7 +80,7 @@ namespace Xabbo.Core
             packet.WriteInt(Int1);
             packet.WriteInt(Int2);
 
-            packet.WriteInt(Count);
+            packet.WriteShort((short)Count);
             foreach (var highScore in this)
                 highScore.Write(packet);
         }

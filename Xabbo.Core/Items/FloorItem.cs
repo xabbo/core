@@ -68,7 +68,7 @@ namespace Xabbo.Core
         public float Height { get; set; }
         public long Extra { get; set; }
 
-        public ItemData Data { get; set; }
+        public StuffData Data { get; set; }
         IItemData IFloorItem.Data => Data;
 
         public override int State => double.TryParse(Data.Value, out double state) ? (int)state : -1;
@@ -78,7 +78,7 @@ namespace Xabbo.Core
         public FloorItem()
         {
             Location = Tile.Zero;
-            Data = new BasicData();
+            Data = new LegacyData();
             SecondsToExpiration = -1;
             Usage = FurniUsage.None;
             UnknownStringA = string.Empty;
@@ -98,7 +98,7 @@ namespace Xabbo.Core
             // - consumable state e.g. cabbage 0: full, 1: partly eaten, 2: mostly eaten
             // - linked teleport id
 
-            Data = ItemData.Parse(packet);
+            Data = StuffData.Parse(packet);
 
             SecondsToExpiration = packet.ReadInt();
             Usage = (FurniUsage)packet.ReadInt();

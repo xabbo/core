@@ -29,17 +29,17 @@ namespace Xabbo.Core
                 case 1:
                     Type = ItemType.Floor;
                     Kind = packet.ReadInt();
-                    Data = ItemData.Parse(packet);
+                    Data = StuffData.Parse(packet);
                     break;
                 case 2:
                     Type = ItemType.Wall;
                     Kind = packet.ReadInt();
-                    Data = new BasicData() { Value = packet.ReadString() };
+                    Data = new LegacyData() { Value = packet.ReadString() };
                     break;
                 case 3:
                     Type = ItemType.Floor;
                     Kind = packet.ReadInt();
-                    Data = new BasicData()
+                    Data = new LegacyData()
                     {
                         Flags = ItemDataFlags.IsLimitedRare,
                         LimitedNumber = packet.ReadInt(),

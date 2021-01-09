@@ -13,7 +13,7 @@ namespace Xabbo.Core
         public long Id { get; set; }
         public int Kind { get; set; }
         public FurniCategory Category { get; set; }
-        public ItemData Data { get; set; }
+        public StuffData Data { get; set; }
         IItemData IInventoryItem.Data => Data;
         public bool Bool1 { get; set; }
         public bool IsTradeable { get; set; }
@@ -37,7 +37,7 @@ namespace Xabbo.Core
             Id = packet.ReadInt();
             Kind = packet.ReadInt();
             Category = (FurniCategory)packet.ReadInt();
-            Data = ItemData.Parse(packet);
+            Data = StuffData.Parse(packet);
             Bool1 = packet.ReadBool();
             IsTradeable = packet.ReadBool();
             IsGroupable = packet.ReadBool();

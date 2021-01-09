@@ -6,7 +6,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class MapData : ItemData, IMapData, IDictionary<string, string>
+    public class MapData : StuffData, IMapData, IDictionary<string, string>
     {
         private readonly Dictionary<string, string> dict;
 
@@ -24,14 +24,14 @@ namespace Xabbo.Core
         }
 
         public MapData()
-            : base(ItemDataType.Map)
+            : base(StuffDataType.Map)
         {
             dict = new Dictionary<string, string>();
         }
 
         protected override void Initialize(IReadOnlyPacket packet)
         {
-            int n = packet.ReadInt();
+            short n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 dict.Add(packet.ReadString(), packet.ReadString());
 
@@ -40,7 +40,7 @@ namespace Xabbo.Core
 
         protected override void WriteData(IPacket packet)
         {
-            packet.WriteInt(dict.Count);
+            packet.WriteShort((short)dict.Count);
             foreach (var item in dict)
             {
                 packet.WriteString(item.Key);
@@ -53,7 +53,7 @@ namespace Xabbo.Core
         public bool ContainsKey(string key) => dict.ContainsKey(key);
         public void Add(string key, string value) => dict.Add(key, value);
         public bool Remove(string key) => dict.Remove(key);
-        public bool TryGetValue(string key, out string value) => dict.TryGetValue(key, out value);
+        public bool TryGetValue(string key, out string value) => TryGetValue(key, out value!);
         public void Add(KeyValuePair<string, string> item) => ((IDictionary<string, string>)dict).Add(item);
         public void Clear() => dict.Clear();
         public bool Contains(KeyValuePair<string, string> item) => ((IDictionary<string, string>)dict).Contains(item);

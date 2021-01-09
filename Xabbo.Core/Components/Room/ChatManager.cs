@@ -11,7 +11,7 @@ namespace Xabbo.Core.Components
         private RoomManager roomManager;
         private EntityManager entities;
 
-        public event EventHandler<EntityChatEventArgs> EntityChat;
+        public event EventHandler<EntityChatEventArgs>? EntityChat;
 
         protected virtual void OnEntityChat(EntityChatEventArgs e)
             => EntityChat?.Invoke(this, e);
@@ -22,8 +22,8 @@ namespace Xabbo.Core.Components
             entities = GetComponent<EntityManager>();
         }
 
-        // @Update [InterceptIn("RoomUserWhisper", "RoomUserTalk", "RoomUserShout")]
-        private void HandleEntityChat(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.Whisper), nameof(Incoming.Chat), nameof(Incoming.Shout))]
+        private void HandleChat(InterceptArgs e)
         {
             if (!roomManager.IsInRoom) return;
 
@@ -48,8 +48,10 @@ namespace Xabbo.Core.Components
             }
 
             string message = packet.ReadString();
-            packet.ReadInt();
+            int expression = packet.ReadInt();
             int bubbleStyle = packet.ReadInt();
+
+            // string? int
 
             var eventArgs = new EntityChatEventArgs(entity, chatType, message, bubbleStyle);
             OnEntityChat(eventArgs);

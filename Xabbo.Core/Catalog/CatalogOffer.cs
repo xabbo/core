@@ -23,7 +23,12 @@ namespace Xabbo.Core
         public bool IsPet { get; set; }
         public string PreviewImage { get; set; }
 
-        public CatalogOffer() { }
+        public CatalogOffer()
+        {
+            FurniLine = string.Empty;
+            Products = new List<CatalogProduct>();
+            PreviewImage = string.Empty;
+        }
 
         protected CatalogOffer(IReadOnlyPacket packet)
         {

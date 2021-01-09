@@ -4,9 +4,9 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public abstract class ItemData : IItemData
+    public abstract class StuffData : IItemData
     {
-        public ItemDataType Type { get; }
+        public StuffDataType Type { get; }
 
         public ItemDataFlags Flags { get; set; }
 
@@ -17,7 +17,7 @@ namespace Xabbo.Core
 
         public int State => int.TryParse(Value, out int state) ? state : -1;
 
-        protected ItemData(ItemDataType type)
+        protected StuffData(StuffDataType type)
         {
             Type = type;
             Value = string.Empty;
@@ -49,21 +49,21 @@ namespace Xabbo.Core
 
         protected abstract void WriteData(IPacket packet);
 
-        public static ItemData Parse(IReadOnlyPacket packet)
+        public static StuffData Parse(IReadOnlyPacket packet)
         {
             int value = packet.ReadInt();
-            var type = (ItemDataType)(value & 0xFF);
+            var type = (StuffDataType)(value & 0xFF);
 
-            ItemData data = type switch
+            StuffData data = type switch
             {
-                ItemDataType.Basic => new BasicData(),
-                ItemDataType.Map => new MapData(),
-                ItemDataType.StringArray => new StringArrayData(),
-                ItemDataType.VoteResult => new VoteResultData(),
-                ItemDataType.ItemData4 => new ItemData4(),
-                ItemDataType.IntArray => new IntArrayData(),
-                ItemDataType.HighScore => new HighScoreData(),
-                ItemDataType.CrackableFurni => new CrackableFurniData(),
+                StuffDataType.Legacy => new LegacyData(),
+                StuffDataType.Map => new MapData(),
+                StuffDataType.StringArray => new StringArrayData(),
+                StuffDataType.VoteResult => new VoteResultData(),
+                StuffDataType.ItemData4 => new ItemData4(),
+                StuffDataType.IntArray => new IntArrayData(),
+                StuffDataType.HighScore => new HighScoreData(),
+                StuffDataType.CrackableFurni => new CrackableFurniData(),
                 _ => throw new Exception($"Unknown ItemData type: {type}"),
             };
 

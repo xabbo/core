@@ -4,10 +4,10 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class BasicData : ItemData, ILegacyData
+    public class LegacyData : StuffData, ILegacyData
     {
-        public BasicData()
-            : base(ItemDataType.Basic)
+        public LegacyData()
+            : base(StuffDataType.Legacy)
         { }
 
         protected override void Initialize(IReadOnlyPacket packet)

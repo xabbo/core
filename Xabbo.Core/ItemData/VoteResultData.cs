@@ -4,12 +4,12 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class VoteResultData : ItemData, IVoteResultData
+    public class VoteResultData : StuffData, IVoteResultData
     {
         public int Result { get; set; }
 
         public VoteResultData()
-            : base(ItemDataType.VoteResult)
+            : base(StuffDataType.VoteResult)
         { }
 
         protected override void Initialize(IReadOnlyPacket packet)

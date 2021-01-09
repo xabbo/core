@@ -2,9 +2,9 @@
 
 namespace Xabbo.Core
 {
-    public enum ItemDataType
+    public enum StuffDataType
     {
-        Basic = 0,
+        Legacy = 0,
         Map = 1,
         StringArray = 2,
         VoteResult = 3,

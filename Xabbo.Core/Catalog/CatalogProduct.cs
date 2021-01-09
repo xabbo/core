@@ -28,6 +28,8 @@ namespace Xabbo.Core
         protected CatalogProduct(IReadOnlyPacket packet)
         {
             Type = H.ToItemType(packet.ReadString());
+            // short ? 
+            // 1 = floor item
             if (Type == ItemType.Badge)
             {
                 Variant = packet.ReadString();
@@ -38,6 +40,7 @@ namespace Xabbo.Core
                 Kind = packet.ReadInt();
                 Variant = packet.ReadString();
                 Count = packet.ReadInt();
+                // int ?
                 IsLimited = packet.ReadBool();
                 if (IsLimited)
                 {

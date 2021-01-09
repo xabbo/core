@@ -6,7 +6,7 @@ namespace Xabbo.Core
 {
     public interface IItemData : IPacketData
     {
-        ItemDataType Type { get; }
+        StuffDataType Type { get; }
 
         /// <summary>
         /// Gets the flags of the item data.

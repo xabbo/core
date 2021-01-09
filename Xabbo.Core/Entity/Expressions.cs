@@ -2,7 +2,7 @@
 
 namespace Xabbo.Core
 {
-    public enum Actions
+    public enum Expressions
     {
         None = 0,
         Wave = 1,

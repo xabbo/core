@@ -14,7 +14,7 @@ namespace Xabbo.Core
         public int Kind { get; set; }
         public FurniCategory Category { get; set; }
         public bool IsGroupable { get; set; }
-        public ItemData Data { get; set; }
+        public StuffData Data { get; set; }
         IItemData IInventoryItem.Data => Data;
         public int CreationDay { get; set; }
         public int CreationMonth { get; set; }
@@ -37,7 +37,7 @@ namespace Xabbo.Core
             Kind = packet.ReadInt();
             Category = (FurniCategory)packet.ReadInt();
             IsGroupable = packet.ReadBool();
-            Data = ItemData.Parse(packet);
+            Data = StuffData.Parse(packet);
             CreationDay = packet.ReadInt();
             CreationMonth = packet.ReadInt();
             CreationYear = packet.ReadInt();

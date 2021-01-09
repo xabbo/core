@@ -31,15 +31,19 @@ namespace Xabbo.Core
             Id = packet.ReadInt();
             Mode = packet.ReadString();
             LayoutCode = packet.ReadString();
-            int n = packet.ReadInt();
+
+            int n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 Images.Add(packet.ReadString());
-            n = packet.ReadInt();
+
+            n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 Texts.Add(packet.ReadString());
-            n = packet.ReadInt();
+
+            n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 Offers.Add(CatalogOffer.Parse(packet));
+
             UnknownIntA = packet.ReadInt();
             AcceptSeasonCurrencyAsCredits = packet.ReadBool();
             if (packet.Available > 0)
