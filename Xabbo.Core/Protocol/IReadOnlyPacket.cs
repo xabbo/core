@@ -7,9 +7,9 @@ namespace Xabbo.Core.Protocol
     public interface IReadOnlyPacket
     {
         /// <summary>
-        /// Gets the data in the packet as a <see cref="ReadOnlySpan{T}"/>.
+        /// Gets the buffer of the data in this <see cref="IReadOnlyPacket"/> as <see cref="ReadOnlyMemory{T}"/>.
         /// </summary>
-        ReadOnlySpan<byte> GetBuffer();
+        ReadOnlyMemory<byte> GetBuffer();
 
         /// <summary>
         /// Copies the data of this <see cref="Packet"/> into a <see cref="Span{T}"/>.

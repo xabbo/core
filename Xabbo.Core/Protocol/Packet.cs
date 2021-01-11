@@ -27,7 +27,7 @@ namespace Xabbo.Core.Protocol
 
             public int Available => _packet.Available;
 
-            public ReadOnlySpan<byte> GetBuffer() => _packet.GetBuffer();
+            public ReadOnlyMemory<byte> GetBuffer() => _packet.GetBuffer();
 
             public ReadOnlyPacket(Packet packet)
             {
@@ -97,7 +97,7 @@ namespace Xabbo.Core.Protocol
             String = typeof(string),
             ByteArray = typeof(byte[]);
 
-        public ReadOnlySpan<byte> GetBuffer() => _buffer.Span[0..Length];
+        public ReadOnlyMemory<byte> GetBuffer() => _buffer[0..Length];
 
         /// <summary>
         /// Gets the data in the packet including the length and message ID headers.

@@ -21,7 +21,7 @@ namespace Xabbo.Core.Messages
         public bool IsModified => 
             packet.Header != _originalHeader ||
             packet.Length != _originalData.Length ||
-            !packet.GetBuffer().SequenceEqual(_originalData.Span);
+            !packet.GetBuffer().Span.SequenceEqual(_originalData.Span);
 
         private IPacket packet;
         public IPacket Packet
