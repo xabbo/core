@@ -9,12 +9,13 @@ namespace Xabbo.Core
     {
         public static RoomSettings Parse(IReadOnlyPacket packet) => new RoomSettings(packet);
 
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public RoomAccess Access { get; set; }
         public string Password { get; set; }
         public int MaxVisitors { get; set; }
+        public int UnknownIntA { get; set; }
         public RoomCategory Category { get; set; }
         public List<string> Tags { get; set; }
         public TradePermissions Trading { get; set; }
@@ -65,14 +66,14 @@ namespace Xabbo.Core
             moderationSettings
             */
 
-            Id = packet.ReadInt();
+            Id = packet.ReadLong();
             Name = packet.ReadString();
             Description = packet.ReadString();
             Access = (RoomAccess)packet.ReadInt();
             Category = (RoomCategory)packet.ReadInt();
             MaxVisitors = packet.ReadInt();
-            packet.ReadInt();
-            int n = packet.ReadInt();
+            UnknownIntA = packet.ReadInt();
+            short n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 Tags.Add(packet.ReadString());
             Trading = (TradePermissions)packet.ReadInt();

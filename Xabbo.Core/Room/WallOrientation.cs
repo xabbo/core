@@ -21,16 +21,12 @@ namespace Xabbo.Core
 
         public static WallOrientation FromChar(char c)
         {
-            switch (c)
+            return c switch
             {
-                case 'l':
-                case 'L':
-                    return Left;
-                case 'r':
-                case 'R':
-                    return Right;
-                default: throw new InvalidCastException($"Invalid wall orientation '{c}', must be 'l' or 'r'");
-            }
+                'l' or 'L' => Left,
+                'r' or 'R' => Right,
+                _ => throw new InvalidCastException($"Invalid wall orientation '{c}', must be 'l' or 'r'"),
+            };
         }
 
         public static implicit operator WallOrientation(char c) => FromChar(c);

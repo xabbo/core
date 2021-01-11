@@ -7,6 +7,7 @@ namespace Xabbo.Core
         Open = 0,
         Doorbell = 1,
         Password = 2,
-        Invisible = 3
+        Invisible = 3,
+        Friends = 7
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core
 {
+    [Flags]
     public enum Gender
     {
         Male = 0x01,
@@ -13,24 +14,24 @@ namespace Xabbo.Core
     {
         public static string ToShortString(this Gender gender)
         {
-            switch (gender)
+            return gender switch
             {
-                case Gender.Male: return "M";
-                case Gender.Female: return "F";
-                case Gender.Unisex: return "U";
-                default: throw new Exception($"Unknown gender '{gender}'.");
-            }
+                Gender.Male => "M",
+                Gender.Female => "F",
+                Gender.Unisex => "U",
+                _ => throw new Exception($"Unknown gender '{gender}'."),
+            };
         }
 
         public static int GetValue(this Gender gender)
         {
-            switch (gender)
+            return gender switch
             {
-                case Gender.Male: return 1;
-                case Gender.Female: return 0;
-                case Gender.Unisex: return 2;
-                default: return -1;
-            }
+                Gender.Male => 1,
+                Gender.Female => 0,
+                Gender.Unisex => 2,
+                _ => -1,
+            };
         }
     }
 }

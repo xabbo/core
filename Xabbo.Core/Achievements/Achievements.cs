@@ -23,7 +23,7 @@ namespace Xabbo.Core
 
         public Achievement this[int id]
         {
-            get => _dict.TryGetValue(id, out Achievement ach) ? ach : null;
+            get => _dict.TryGetValue(id, out Achievement? ach) ? ach : null;
         }
 
         IAchievement IAchievements.this[int id] => this[id];
@@ -31,12 +31,14 @@ namespace Xabbo.Core
         public Achievements()
         {
             _dict = new ConcurrentDictionary<int, Achievement>();
+
+            String1 = string.Empty;
         }
 
         protected Achievements(IReadOnlyPacket packet)
             : this()
         {
-            int n = packet.ReadInt();
+            short n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 Update(Achievement.Parse(packet));
 

@@ -15,7 +15,11 @@ namespace Xabbo.Core
         public bool BoolA { get; set; }
         public int ViewMode { get; set; }
 
-        public NavigatorSearchResultList() { }
+        public NavigatorSearchResultList()
+        {
+            Category =
+            Text = string.Empty;
+        }
 
         protected NavigatorSearchResultList(IReadOnlyPacket packet)
         {
@@ -24,7 +28,7 @@ namespace Xabbo.Core
             ActionAllowed = packet.ReadInt();
             BoolA = packet.ReadBool();
             ViewMode = packet.ReadInt();
-            int n = packet.ReadInt();
+            short n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 Add(RoomInfo.Parse(packet));
         }

@@ -43,6 +43,14 @@ namespace Xabbo.Core
 
         public RoomInfo()
         {
+            Name =
+            OwnerName =
+            Description =
+            OfficialRoomPicRef =
+            GroupName =
+            GroupBadge =
+            EventName = 
+            EventDescription = string.Empty;
             Tags = new List<string>();
         }
 

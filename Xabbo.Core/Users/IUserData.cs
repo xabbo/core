@@ -9,7 +9,7 @@ namespace Xabbo.Core
     /// </summary>
     public interface IUserData : IPacketData
     {
-        int Id { get; }
+        long Id { get; }
         string Name { get; }
         string Figure { get; }
         Gender Gender { get; }

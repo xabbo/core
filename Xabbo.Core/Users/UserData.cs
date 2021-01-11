@@ -11,7 +11,7 @@ namespace Xabbo.Core
     {
         public static UserData Parse(IReadOnlyPacket packet) => new UserData(packet);
 
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; }
         public string Figure { get; set; }
         public Gender Gender { get; set; }
@@ -26,11 +26,20 @@ namespace Xabbo.Core
         public bool IsNameChangeable { get; set; }
         public bool IsSafetyLocked { get; set; }
 
-        public UserData() { }
+        public UserData()
+        {
+            Name =
+            Figure =
+            Motto =
+            String4 =
+            LastLogin = string.Empty;
+
+            Gender = Gender.Unisex;
+        }
 
         protected UserData(IReadOnlyPacket packet)
         {
-            Id = packet.ReadInt();
+            Id = packet.ReadLong();
             Name = packet.ReadString();
             Figure = packet.ReadString();
             Gender = H.ToGender(packet.ReadString());
@@ -44,6 +53,7 @@ namespace Xabbo.Core
             LastLogin = packet.ReadString();
             IsNameChangeable = packet.ReadBool();
             IsSafetyLocked = packet.ReadBool();
+            // Extra bool - ?
         }
 
         public void Write(IPacket packet) => packet.WriteValues(

@@ -537,7 +537,7 @@ namespace Xabbo.Core.Components
             Out.MoveWallItem, wallItemId,
             location.WallX, location.WallY,
             location.X, location.Y,
-            location.Orientation.ToString()!
+            location.Orientation.Value.ToString()
         );
         public void Move(IWallItem item, WallLocation location)
             => Move(item.Id, location);
@@ -553,7 +553,7 @@ namespace Xabbo.Core.Components
 
         public void UpdateStackTile(IFloorItem stackTile, float height) => UpdateStackTile(stackTile.Id, height);
         public void UpdateStackTile(long stackTileId, float height)
-            => SendAsync(Out.StackingHelperSetCaretHeight, stackTileId, (int)Math.Round(height * 100.0)); // TODO this may be float ?
+            => SendAsync(Out.StackingHelperSetCaretHeight, stackTileId, (int)Math.Round(height * 100.0));
         #endregion
     }
 }

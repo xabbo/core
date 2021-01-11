@@ -41,6 +41,7 @@ namespace Xabbo.Core
         public string String3 { get; set; }
         public int MaxLevel { get; set; }
         public int Int9 { get; set; }
+        public short Short1 { get; set; }
 
         public Achievement()
         {
@@ -64,6 +65,7 @@ namespace Xabbo.Core
             String3 = packet.ReadString();
             MaxLevel = packet.ReadInt();
             Int9 = packet.ReadInt();
+            Short1 = packet.ReadShort();
         }
 
         public void Write(IPacket packet)
