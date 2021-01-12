@@ -16,6 +16,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resources\figure_part_genders" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\figure_part_genders" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Serialization\" />
   </ItemGroup>
 
