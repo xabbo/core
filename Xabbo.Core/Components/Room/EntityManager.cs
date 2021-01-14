@@ -45,37 +45,37 @@ namespace Xabbo.Core.Components
         /// <summary>
         /// Gets the entity of the specified type with the specified index, or <c>null</c> if it does not exist.
         /// </summary>
-        public T GetEntityByIndex<T>(int index) where T : class, IEntity => GetEntityByIndex(index) as T;
+        public T? GetEntityByIndex<T>(int index) where T : class, IEntity => GetEntityByIndex(index) as T;
         /// <summary>
         /// Gets the entity of the specified type with the specified ID, or <c>null</c> if it does not exist.
         /// </summary>
-        public T GetEntity<T>(int id) where T : IEntity
+        public T? GetEntity<T>(long id) where T : IEntity
             => Entities.OfType<T>().FirstOrDefault(e => e.Id == id);
         /// <summary>
         /// Gets the entity of the specified type with the specified name, or <c>null</c> if it does not exist.
         /// </summary>
-        public T GetEntity<T>(string name) where T : IEntity
+        public T? GetEntity<T>(string name) where T : IEntity
             => Entities.OfType<T>().FirstOrDefault(e => e.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
 
         /// <summary>
         /// Gets the entity with the specified index, or <c>null</c> if it does not exist.
         /// </summary>
-        public IEntity GetEntityByIndex(int index) => entities.TryGetValue(index, out Entity e) ? e : null;
+        public IEntity? GetEntityByIndex(int index) => entities.TryGetValue(index, out Entity? e) ? e : null;
         /// <summary>
         /// Gets the entity with the specified ID, or <c>null</c> if it does not exist.
         /// </summary>
-        public IEntity GetEntity(int id) => Entities.FirstOrDefault(e => e.Id == id);
+        public IEntity? GetEntity(int id) => Entities.FirstOrDefault(e => e.Id == id);
         /// <summary>
         /// Gets the entity with the specified name, or <c>null</c> if it does not exist.
         /// </summary>
-        public IEntity GetEntity(string name) => Entities.FirstOrDefault(e => e.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+        public IEntity? GetEntity(string name) => Entities.FirstOrDefault(e => e.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
 
         /// <summary>
         /// Attempts to get the entity with the specified index.
         /// </summary>
-        public bool TryGetEntityByIndex(int index, out IEntity entity)
+        public bool TryGetEntityByIndex(int index, out IEntity? entity)
         {
-            if (entities.TryGetValue(index, out Entity result))
+            if (entities.TryGetValue(index, out Entity? result))
             {
                 entity = result;
                 return true;
@@ -90,9 +90,9 @@ namespace Xabbo.Core.Components
         /// <summary>
         /// Attempts to get the entity of the specified type with the specified index.
         /// </summary>
-        public bool TryGetEntityByIndex<T>(int index, out T entity) where T : IEntity
+        public bool TryGetEntityByIndex<T>(int index, out T? entity) where T : IEntity
         {
-            if (entities.TryGetValue(index, out Entity e))
+            if (entities.TryGetValue(index, out Entity? e))
             {
                 entity = (T)(IEntity)e;
                 return true;
@@ -107,13 +107,13 @@ namespace Xabbo.Core.Components
         /// <summary>
         /// Attempts to get the entity of the specified type with the specified ID.
         /// </summary>
-        public bool TryGetEntity<T>(int id, out T entity) where T : IEntity
+        public bool TryGetEntity<T>(int id, out T? entity) where T : IEntity
             => (entity = GetEntity<T>(id)) != null;
 
         /// <summary>
         /// Attempts to get the entity of the specified type with the specified name.
         /// </summary>
-        public bool TryGetEntity<T>(string name, out T entity) where T : IEntity
+        public bool TryGetEntity<T>(string name, out T? entity) where T : IEntity
             => (entity = GetEntity<T>(name)) != null;
 
         #region - Events -
