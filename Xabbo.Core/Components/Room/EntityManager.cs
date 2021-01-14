@@ -64,7 +64,7 @@ namespace Xabbo.Core.Components
         /// <summary>
         /// Gets the entity with the specified ID, or <c>null</c> if it does not exist.
         /// </summary>
-        public IEntity? GetEntity(int id) => Entities.FirstOrDefault(e => e.Id == id);
+        public IEntity? GetEntity(long id) => Entities.FirstOrDefault(e => e.Id == id);
         /// <summary>
         /// Gets the entity with the specified name, or <c>null</c> if it does not exist.
         /// </summary>
