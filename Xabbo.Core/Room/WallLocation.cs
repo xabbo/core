@@ -63,11 +63,6 @@ namespace Xabbo.Core
                 -(wallOffsetX - wallOffsetY) * halfTileWidth,
                 -(wallOffsetX + wallOffsetY) * halfTileWidth / 2
             );
-            
-            /*WallX += offsetX;
-            WallY += offsetY;
-            X -= (offsetX - offsetY) * halfTileWidth;
-            Y -= (offsetX + offsetY) * halfTileWidth / 2;*/
         }
 
         /// <summary>
@@ -155,13 +150,20 @@ namespace Xabbo.Core
                 Orientation == other.Orientation;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
             => obj is WallLocation loc && Equals(loc);
 
         public override string ToString() => ToString(WallX, WallY, X, Y, Orientation);
         public static string ToString(int wallX, int wallY, int x, int y, WallOrientation orientation) => $":w={wallX},{wallY} l={x},{y} {orientation.Value}";
 
-        public void Write(IPacket packet) => packet.WriteString(ToString());
+        public void Write(IPacket packet)
+        {
+            packet.WriteInt(WallX);
+            packet.WriteInt(WallY);
+            packet.WriteInt(X);
+            packet.WriteInt(Y);
+            packet.WriteString(Orientation.Value.ToString());
+        }
 
         public static WallLocation Parse(IReadOnlyPacket packet) => Parse(packet.ReadString());
 
