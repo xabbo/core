@@ -30,11 +30,11 @@ namespace Xabbo.Core
             Name = packet.ReadString();
             Text = packet.ReadString();
 
-            int n = packet.ReadInt();
+            short n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 OfferIds.Add(packet.ReadInt());
 
-            n = packet.ReadInt();
+            n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 Children.Add(Parse(packet));
         }

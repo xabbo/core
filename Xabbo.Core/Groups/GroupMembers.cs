@@ -9,9 +9,9 @@ namespace Xabbo.Core
     {
         public static GroupMembers Parse(IReadOnlyPacket packet) => new GroupMembers(packet);
 
-        public int GroupId { get; set; }
+        public long GroupId { get; set; }
         public string GroupName { get; set; }
-        public int HomeRoomId { get; set; }
+        public long HomeRoomId { get; set; }
         public string BadgeCode { get; set; }
         public int TotalMatches { get; set; }
         public bool Bool1 { get; set; }
@@ -27,12 +27,12 @@ namespace Xabbo.Core
 
         protected GroupMembers(IReadOnlyPacket packet)
         {
-            GroupId = packet.ReadInt();
+            GroupId = packet.ReadLong();
             GroupName = packet.ReadString();
-            HomeRoomId = packet.ReadInt();
+            HomeRoomId = packet.ReadLong();
             BadgeCode = packet.ReadString();
             TotalMatches = packet.ReadInt();
-            int n = packet.ReadInt();
+            short n = packet.ReadShort();
             for (int i = 0; i < n; i++)
                 Add(GroupMember.Parse(packet));
             Bool1 = packet.ReadBool();

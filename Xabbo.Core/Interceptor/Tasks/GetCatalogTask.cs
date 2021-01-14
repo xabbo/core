@@ -16,9 +16,9 @@ namespace Xabbo.Core.Tasks
             this.mode = mode;
         }
 
-        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update  SendAsync(Out.RequestCatalogMode, mode);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetCatalogIndex, mode);
 
-        // @Update [InterceptIn(nameof(Incoming.CatalogPagesList))]
+        [InterceptIn(nameof(Incoming.CatalogIndex))]
         protected void OnCatalogPagesList(InterceptArgs e)
         {
             try

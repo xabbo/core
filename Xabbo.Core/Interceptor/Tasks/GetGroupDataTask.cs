@@ -8,18 +8,18 @@ namespace Xabbo.Core.Tasks
     // @Update [RequiredOut(nameof(Outgoing.RequestGuildInfo))]
     public class GetGroupDataTask : InterceptorTask<IGroupData>
     {
-        private readonly int groupId;
+        private readonly long groupId;
 
-        public GetGroupDataTask(IInterceptor interceptor, int groupId)
+        public GetGroupDataTask(IInterceptor interceptor, long groupId)
             : base(interceptor)
         {
             this.groupId = groupId;
         }
 
-        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.RequestGuildInfo, groupId, false);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetHabboGroupDetails, groupId, false);
 
-        // @Update [InterceptIn(nameof(Incoming.GuildInfo))]
-        protected void OnGuildInfo(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.HabboGroupDetails))]
+        protected void OnHabboGroupDetails(InterceptArgs e)
         {
             try
             {

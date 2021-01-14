@@ -27,9 +27,8 @@ namespace Xabbo.Core
 
         protected CatalogProduct(IReadOnlyPacket packet)
         {
-            Type = H.ToItemType(packet.ReadString());
-            // short ? 
-            // 1 = floor item
+            Type = H.ToItemType(packet.ReadShort());
+
             if (Type == ItemType.Badge)
             {
                 Variant = packet.ReadString();

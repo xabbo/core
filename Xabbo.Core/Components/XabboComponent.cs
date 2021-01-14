@@ -52,7 +52,7 @@ namespace Xabbo.Core.Components
         protected Incoming In => Headers.Incoming;
         protected Outgoing Out => Headers.Outgoing;
 
-        protected T GetComponent<T>() where T : XabboComponent => Manager.GetComponent<T>();
+        protected T? GetComponent<T>() where T : XabboComponent => Manager.GetComponent<T>();
 
         internal void Initialize()
         {

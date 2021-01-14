@@ -5,7 +5,6 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    // @Update [RequiredOut(nameof(Outgoing.RequestCatalogPage))]
     public class GetCatalogPageTask : InterceptorTask<ICatalogPage>
     {
         private readonly int pageId;
@@ -18,7 +17,7 @@ namespace Xabbo.Core.Tasks
             this.mode = mode;
         }
 
-        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update  SendAsync(Out.RequestCatalogPage, pageId, -1, mode);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetCatalogPage, pageId, -1, mode);
 
         [InterceptIn(nameof(Incoming.CatalogPage))]
         protected void OnCatalogPage(InterceptArgs e)

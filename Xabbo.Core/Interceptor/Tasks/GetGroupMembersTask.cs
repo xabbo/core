@@ -5,35 +5,34 @@ using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Tasks
 {
-    // @Update [RequiredOut(nameof(Outgoing.RequestGuildMembers))]
     public class GetGroupMembersTask : InterceptorTask<IGroupMembers>
     {
-        private readonly int groupId;
-        private readonly int page;
-        private readonly string filter;
-        private readonly GroupMemberSearchType searchType;
+        private readonly long _groupId;
+        private readonly int _page;
+        private readonly string _filter;
+        private readonly GroupMemberSearchType _searchType;
 
-        public GetGroupMembersTask(IInterceptor interceptor, int groupId, int page, string filter, GroupMemberSearchType searchType)
+        public GetGroupMembersTask(IInterceptor interceptor, long groupId, int page, string filter, GroupMemberSearchType searchType)
             : base(interceptor)
         {
-            this.groupId = groupId;
-            this.page = page;
-            this.filter = filter;
-            this.searchType = searchType;
+            _groupId = groupId;
+            _page = page;
+            _filter = filter;
+            _searchType = searchType;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetGuildMembers, groupId, page, filter, (int)searchType);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetGuildMembers, _groupId, _page, _filter, (int)_searchType);
 
-        [InterceptIn(nameof(Incoming.GuildMembers))] // @Update 
+        [InterceptIn(nameof(Incoming.GuildMembers))] 
         protected void OnGuildMembers(InterceptArgs e)
         {
             try
             {
                 var groupMembers = GroupMembers.Parse(e.Packet);
-                if (groupMembers.GroupId == groupId &&
-                    groupMembers.CurrentPage == page &&
-                    groupMembers.Filter == filter &&
-                    groupMembers.SearchType == searchType)
+                if (groupMembers.GroupId == _groupId &&
+                    groupMembers.CurrentPage == _page &&
+                    groupMembers.Filter == _filter &&
+                    groupMembers.SearchType == _searchType)
                 {
                     if (SetResult(groupMembers))
                         e.Block();

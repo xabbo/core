@@ -4,13 +4,13 @@ namespace Xabbo.Core
 {
     public interface IGroupData
     {
-        int Id { get; }
+        long Id { get; }
         bool CanLeave { get; }
         GroupType Type { get; }
         string Name { get; }
         string Description { get; }
         string Badge { get; }
-        int HomeRoomId { get; }
+        long HomeRoomId { get; }
         string HomeRoomName { get; }
         GroupMemberStatus MemberStatus { get; }
         int MemberCount { get; }

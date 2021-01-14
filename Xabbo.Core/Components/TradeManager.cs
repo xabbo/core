@@ -13,16 +13,16 @@ namespace Xabbo.Core.Components
     )]
     public class TradeManager : XabboComponent
     {
-        private ProfileManager profileManager;
-        private RoomManager roomManager;
-        private EntityManager entityManager;
+        private ProfileManager _profileManager;
+        private RoomManager _roomManager;
+        private EntityManager _entityManager;
 
         public bool IsTrading { get; private set; }
         public bool IsTrader { get; private set; }
-        public IRoomUser Self { get; private set; }
-        public IRoomUser Partner { get; private set; }
-        public ITradeOffer OwnOffer { get; private set; }
-        public ITradeOffer PartnerOffer { get; private set; }
+        public IRoomUser? Self { get; private set; }
+        public IRoomUser? Partner { get; private set; }
+        public ITradeOffer? OwnOffer { get; private set; }
+        public ITradeOffer? PartnerOffer { get; private set; }
 
         public bool HasAccepted { get; private set; }
         public bool HasPartnerAccepted { get; private set; }
@@ -51,11 +51,13 @@ namespace Xabbo.Core.Components
             ITradeOffer ownOffer, ITradeOffer partnerOffer)
             => Complete?.Invoke(this, new TradeCompleteEventArgs(wasTrader, self, partner, ownOffer, partnerOffer));
 
+        public TradeManager() { }
+
         protected override void OnInitialize()
         {
-            profileManager = GetComponent<ProfileManager>();
-            roomManager = GetComponent<RoomManager>();
-            entityManager = GetComponent<EntityManager>();
+            _profileManager = GetComponent<ProfileManager>() ?? throw new InvalidOperationException("Profile manager is null");
+            _roomManager = GetComponent<RoomManager>() ?? throw new InvalidOperationException("Room manager is null");
+            _entityManager = GetComponent<EntityManager>() ?? throw new InvalidOperationException("Entity manager is null");
         }
 
         private void ResetTrade()
@@ -76,13 +78,13 @@ namespace Xabbo.Core.Components
         [Receive("TradeStart")]
         private void HandleTradeStart(IReadOnlyPacket packet)
         {
-            if (profileManager.UserData == null)
+            if (_profileManager.UserData == null)
             {
                 DebugUtil.Log("user data not loaded");
                 return;
             }
 
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
             {
                 DebugUtil.Log("not in room");
                 return;
@@ -93,13 +95,13 @@ namespace Xabbo.Core.Components
             int tradeeId = packet.ReadInt();
             int unknownB = packet.ReadInt(); // ?
 
-            if (!entityManager.TryGetEntity(traderId, out IRoomUser trader))
+            if (!_entityManager.TryGetEntity(traderId, out IRoomUser trader))
             {
                 DebugUtil.Log($"failed to find user with id {traderId}");
                 return;
             }
 
-            if (!entityManager.TryGetEntity(tradeeId, out IRoomUser tradee))
+            if (!_entityManager.TryGetEntity(tradeeId, out IRoomUser tradee))
             {
                 DebugUtil.Log($"failed to find user with id {tradeeId}");
                 return;
@@ -107,7 +109,7 @@ namespace Xabbo.Core.Components
 
             ResetTrade();
 
-            IsTrader = profileManager.UserData.Id == traderId;
+            IsTrader = _profileManager.UserData.Id == traderId;
             Self = IsTrader ? trader : tradee;
             Partner = IsTrader ? tradee : trader;
 
@@ -119,7 +121,7 @@ namespace Xabbo.Core.Components
         [Receive("TradeStartFail")]
         private void HandleTradeStartFail(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
             {
                 DebugUtil.Log("not in room");
                 return;
@@ -135,7 +137,7 @@ namespace Xabbo.Core.Components
         [Receive("TradeUpdate")]
         private void HandleTradeUpdate(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
             {
                 DebugUtil.Log("not in room");
                 return;
@@ -167,7 +169,7 @@ namespace Xabbo.Core.Components
         [Receive("TradeAccepted")]
         private void HandleTradeAccepted(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
             {
                 DebugUtil.Log("not in room");
                 return;
@@ -183,12 +185,12 @@ namespace Xabbo.Core.Components
             int userId = packet.ReadInt();
             bool accepted = packet.ReadInt() == 1;
 
-            if (userId == Self.Id)
+            if (userId == Self?.Id)
             {
                 user = Self;
                 HasAccepted = accepted;
             }
-            else if (userId == Partner.Id)
+            else if (userId == Partner?.Id)
             {
                 user = Partner;
                 HasPartnerAccepted = accepted;
@@ -206,7 +208,7 @@ namespace Xabbo.Core.Components
         [Receive("TradingWaitingConfirm")]
         private void HandleTradingWaitingConfirm(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
             {
                 DebugUtil.Log("not in room");
                 return;
@@ -225,21 +227,27 @@ namespace Xabbo.Core.Components
         [Receive("TradeStopped")]
         private void HandleTradeStopped(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsInRoom || !IsTrading)
+            if (!_roomManager.IsInRoom || !IsTrading)
                 return;
 
             int userId = packet.ReadInt();
             int reason = packet.ReadInt();
 
             bool wasTrader = IsTrader;
-            IRoomUser self = Self;
-            IRoomUser partner = Partner;
-            ITradeOffer ownOffer = OwnOffer;
-            ITradeOffer partnerOffer = PartnerOffer;
+            IRoomUser? self = Self;
+            IRoomUser? partner = Partner;
+            ITradeOffer? ownOffer = OwnOffer;
+            ITradeOffer? partnerOffer = PartnerOffer;
+
+            if (self == null || partner == null ||
+                ownOffer == null || partnerOffer == null)
+            {
+                return;
+            }
 
             IRoomUser user;
-            if (userId == Self.Id) user = Self;
-            else if (userId == Partner.Id) user = Partner;
+            if (userId == self.Id) user = self;
+            else if (userId == partner.Id) user = partner;
             else
             {
                 DebugUtil.Log($"user id {userId} does not match self {Self} or partner {Partner} ids");

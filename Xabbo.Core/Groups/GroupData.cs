@@ -8,13 +8,13 @@ namespace Xabbo.Core
     {
         public static GroupData Parse(IReadOnlyPacket packet) => new GroupData(packet);
 
-        public int Id { get; set; }
+        public long Id { get; set; }
         public bool CanLeave { get; set; }
         public GroupType Type { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string Badge { get; set; }
-        public int HomeRoomId { get; set; }
+        public long HomeRoomId { get; set; }
         public string HomeRoomName { get; set; }
         public GroupMemberStatus MemberStatus { get; set; }
         public int MemberCount { get; set; }
@@ -30,13 +30,13 @@ namespace Xabbo.Core
 
         protected GroupData(IReadOnlyPacket packet)
         {
-            Id = packet.ReadInt();
+            Id = packet.ReadLong();
             CanLeave = packet.ReadBool();
             Type = (GroupType)packet.ReadInt();
             Name = packet.ReadString();
             Description = packet.ReadString();
             Badge = packet.ReadString();
-            HomeRoomId = packet.ReadInt();
+            HomeRoomId = packet.ReadLong();
             HomeRoomName = packet.ReadString();
             MemberStatus = (GroupMemberStatus)packet.ReadInt();
             MemberCount = packet.ReadInt();
@@ -49,6 +49,8 @@ namespace Xabbo.Core
             CanDecorateHomeRoom = packet.ReadBool();
             PendingRequests = packet.ReadInt();
             CanViewForum = packet.ReadBool();
+
+            // TODO extra 8 bytes
         }
     }
 }

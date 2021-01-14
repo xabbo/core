@@ -63,7 +63,7 @@ namespace Xabbo.Core.Components
         {
             EnsureIsComponent(componentType);
             return 
-                components.TryGetValue(componentType, out XabboComponent component) &&
+                components.TryGetValue(componentType, out XabboComponent? component) &&
                 component.IsAvailable;
         }
         
@@ -72,7 +72,7 @@ namespace Xabbo.Core.Components
         {
             EnsureIsComponent(componentType);
             return
-                components.TryGetValue(componentType, out XabboComponent component) &&
+                components.TryGetValue(componentType, out XabboComponent? component) &&
                 Interceptor.Dispatcher.IsAttached(component, messageGroups);
         }
 
@@ -121,7 +121,7 @@ namespace Xabbo.Core.Components
                 }
             }
 
-            XabboComponent c;
+            XabboComponent? c;
 
             if (!components.TryGetValue(componentType, out c))
             {
@@ -200,13 +200,13 @@ namespace Xabbo.Core.Components
             }
         }
 
-        public T GetComponent<T>() where T : XabboComponent
-            => components.TryGetValue(typeof(T), out XabboComponent component) ? (T)component : null;
+        public T? GetComponent<T>() where T : XabboComponent
+            => components.TryGetValue(typeof(T), out XabboComponent? component) ? (T)component : null;
 
-        public XabboComponent GetComponent(Type componentType)
+        public XabboComponent? GetComponent(Type componentType)
         {
             EnsureIsComponent(componentType);
-            return components.TryGetValue(componentType, out XabboComponent component) ? component : null;
+            return components.TryGetValue(componentType, out XabboComponent? component) ? component : null;
         }
 
         public void Dispose() => Dispose(true);
