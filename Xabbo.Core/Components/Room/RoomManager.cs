@@ -315,7 +315,7 @@ namespace Xabbo.Core.Components
         }
 
         [Receive(nameof(Incoming.StackingHeightmapDiff))]
-        private void HandleUpdateStackHeight(IReadOnlyPacket packet)
+        private void HandleStackingHeightmapDiff(IReadOnlyPacket packet)
         {
             if (Heightmap == null) return;
 
