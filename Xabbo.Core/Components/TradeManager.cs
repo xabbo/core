@@ -2,7 +2,6 @@
 
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
-using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Components
 {

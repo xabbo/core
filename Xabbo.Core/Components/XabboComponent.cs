@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 using Xabbo.Core.Messages;
-using Xabbo.Core.Protocol;
+using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Components
 {

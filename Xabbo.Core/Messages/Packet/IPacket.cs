@@ -1,8 +1,6 @@
 ﻿using System;
 
-using Xabbo.Core.Messages;
-
-namespace Xabbo.Core.Protocol
+namespace Xabbo.Core.Messages
 {
     public interface IPacket : IReadOnlyPacket
     {

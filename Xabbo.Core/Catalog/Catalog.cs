@@ -1,6 +1,6 @@
 ﻿using System;
 
-using Xabbo.Core.Protocol;
+using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
@@ -13,7 +13,11 @@ namespace Xabbo.Core
         public bool UnknownBoolA { get; set; }
         public string Mode { get; set; }
 
-        public Catalog() { }
+        public Catalog()
+        {
+            Root = new CatalogPageNode();
+            Mode = string.Empty;
+        }
         
         protected Catalog(IReadOnlyPacket packet)
         {

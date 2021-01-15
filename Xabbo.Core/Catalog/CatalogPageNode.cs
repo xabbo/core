@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Xabbo.Core.Protocol;
+using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {
@@ -20,7 +20,14 @@ namespace Xabbo.Core
         public List<CatalogPageNode> Children { get; set; } = new List<CatalogPageNode>();
         IReadOnlyList<ICatalogPageNode> ICatalogPageNode.Children => Children;
 
-        public CatalogPageNode() { }
+        public CatalogPageNode()
+        {
+            Name =
+            Text = string.Empty;
+
+            OfferIds = new List<int>();
+            Children = new List<CatalogPageNode>();
+        }
 
         protected CatalogPageNode(IReadOnlyPacket packet)
         {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Xabbo.Core.Protocol;
+using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {

@@ -3,19 +3,17 @@ using System.Collections.Generic;
 
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
-using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Components
 {
     public class RoomManager : XabboComponent
     {
-        public enum Features { Paint, DoorTile, HeightMap, FloorPlan, Rating, Permissions }
-
         private readonly Dictionary<long, RoomData> _roomDataCache = new Dictionary<long, RoomData>();
 
         public bool IsRingingDoorbell { get; private set; }
         public bool IsInQueue { get; private set; }
         public int QueuePosition { get; private set; }
+
         // TODO public bool IsSpectating { get; private set; }
         public bool IsLoadingRoom { get; private set; }
         public bool IsInRoom { get; private set; }

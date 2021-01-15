@@ -17,11 +17,5 @@ namespace Xabbo.Core.Components
         {
             achievements = new Achievements();
         }
-
-        [InterceptIn("AchievementList")]
-        private void HandleAchievementList(InterceptArgs e)
-        {
-
-        }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 
 using Xabbo.Core.Components;
-using Xabbo.Core.Protocol;
+using Xabbo.Core.Messages;
 
 namespace Xabbo.Core
 {

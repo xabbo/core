@@ -5,88 +5,10 @@ using System.Text;
 using System.Globalization;
 using System.Buffers.Binary;
 
-using Xabbo.Core.Messages;
-
-namespace Xabbo.Core.Protocol
+namespace Xabbo.Core.Messages
 {
     public class Packet : IPacket
     {
-        private class ReadOnlyPacket : IReadOnlyPacket
-        {
-            private readonly Packet _packet;
-
-            public Header Header => _packet.Header;
-
-            public int Position
-            {
-                get => _packet.Position;
-                set => _packet.Position = value;
-            }
-
-            public int Length => _packet.Length;
-
-            public int Available => _packet.Available;
-
-            public ReadOnlyMemory<byte> GetBuffer() => _packet.GetBuffer();
-
-            public ReadOnlyPacket(Packet packet)
-            {
-                this._packet = packet;
-            }
-
-            public bool CanReadBool() => _packet.CanReadBool();
-
-            public bool CanReadByte() => _packet.CanReadByte();
-
-            public bool CanReadDouble() => _packet.CanReadDouble();
-
-            public bool CanReadInt() => _packet.CanReadInt();
-
-            public bool CanReadShort() => _packet.CanReadShort();
-
-            public bool CanReadString() => _packet.CanReadString();
-
-            public void CopyTo(Span<byte> destination) => _packet.CopyTo(destination);
-
-            public bool ReadBool() => _packet.ReadBool();
-
-            public bool ReadBool(int position) => _packet.ReadBool(position);
-
-            public byte ReadByte() => _packet.ReadByte();
-
-            public byte ReadByte(int position) => _packet.ReadByte(position);
-
-            public void ReadBytes(Span<byte> buffer) => _packet.ReadBytes(buffer);
-
-            public void ReadBytes(Span<byte> buffer, int position) => _packet.ReadBytes(buffer, position);
-
-            public int ReadInt() => _packet.ReadInt();
-
-            public int ReadInt(int position) => _packet.ReadInt(position);
-
-            public float ReadFloat() => _packet.ReadFloat();
-
-            public float ReadFloat(int position) => _packet.ReadFloat(position);
-
-            public long ReadLong() => _packet.ReadLong();
-
-            public long ReadLong(int position) => _packet.ReadLong(position);
-
-            public short ReadShort() => _packet.ReadShort();
-
-            public short ReadShort(int position) => _packet.ReadShort(position);
-
-            public string ReadString() => _packet.ReadString();
-
-            public string ReadString(int position) => _packet.ReadString(position);
-
-            public float ReadFloatAsString() => _packet.ReadFloatAsString();
-
-            public float ReadFloatAsString(int position) => _packet.ReadFloatAsString(position);
-
-            public byte[] ToBytes() => _packet.ToBytes();
-        }
-
         public static readonly Type
             Byte = typeof(byte),
             Bool = typeof(bool),
@@ -99,29 +21,8 @@ namespace Xabbo.Core.Protocol
 
         public ReadOnlyMemory<byte> GetBuffer() => _buffer[0..Length];
 
-        /// <summary>
-        /// Gets the data in the packet including the length and message ID headers.
-        /// </summary>
-        public byte[] ToBytes()
-        {
-            byte[] buffer = new byte[6 + Length];
-
-            Span<byte> span = buffer.AsSpan();
-            BinaryPrimitives.WriteInt32BigEndian(span[0..4], 2 + Length);
-            BinaryPrimitives.WriteInt16BigEndian(span[4..6], Header.Value);
-            _buffer.Span[0..Length].CopyTo(span[6..]);
-
-            return buffer;
-        }
-
-        /// <summary>
-        /// Copies the data of this <see cref="Packet"/> to a destination <see cref="Span{T}"/>.
-        /// </summary>
         public void CopyTo(Span<byte> destination) => _buffer.Span[0..Length].CopyTo(destination);
 
-        /// <summary>
-        /// Gets or sets the message header of this <see cref="Packet"/>.
-        /// </summary>
         public Header Header { get; set; } = Header.Unknown;
 
         private int _position;

@@ -2,55 +2,53 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
+
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
-using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Components
 {
     public class FriendManager : XabboComponent
     {
-        private int totalExpected = -1, currentIndex = 0;
-        private readonly List<Friend> loadList = new List<Friend>();
-        private bool isLoadingFriends = true, isForceLoading;
+        private int _totalFragments = -1, _currentFragment = 0;
+        private readonly List<Friend> _loadList = new();
+        private bool _isLoading = true, _isForceLoading;
 
-        private readonly ConcurrentDictionary<int, Friend> friends;
-        private readonly ConcurrentDictionary<string, Friend> nameMap;
+        private readonly ConcurrentDictionary<int, Friend> _friends = new();
+        private readonly ConcurrentDictionary<string, Friend> _nameMap = new();
 
         public bool IsInitialized { get; private set; }
-        public IEnumerable<IFriend> Friends => friends.Select(x => x.Value);
-        public bool IsFriend(int id) => friends.ContainsKey(id);
-        public bool IsFriend(string name) => nameMap.ContainsKey(name.ToLower());
-        public IFriend GetFriend(int id) => friends.TryGetValue(id, out Friend friend) ? friend : null;
-        public IFriend GetFriend(string name) => nameMap.TryGetValue(name.ToLower(), out Friend friend) ? friend : null;
+        public IEnumerable<IFriend> Friends => _friends.Select(x => x.Value);
+        public bool IsFriend(int id) => _friends.ContainsKey(id);
+        public bool IsFriend(string name) => _nameMap.ContainsKey(name.ToLower());
+        public IFriend? GetFriend(int id) => _friends.TryGetValue(id, out Friend? friend) ? friend : null;
+        public IFriend? GetFriend(string name) => _nameMap.TryGetValue(name.ToLower(), out Friend? friend) ? friend : null;
 
         #region - Events -
-        public event EventHandler Loaded;
+        public event EventHandler? Loaded;
         protected virtual void OnLoaded()
             => Loaded?.Invoke(this, EventArgs.Empty);
 
-        public event EventHandler<FriendEventArgs> FriendAdded;
+        public event EventHandler<FriendEventArgs>? FriendAdded;
         protected virtual void OnFriendAdded(IFriend friend)
             => FriendAdded?.Invoke(this, new FriendEventArgs(friend));
 
-        public event EventHandler<FriendEventArgs> FriendRemoved;
+        public event EventHandler<FriendEventArgs>? FriendRemoved;
         protected virtual void OnFriendRemoved(IFriend friend)
             => FriendRemoved?.Invoke(this, new FriendEventArgs(friend));
 
-        public event EventHandler<FriendUpdatedEventArgs> FriendUpdated;
+        public event EventHandler<FriendUpdatedEventArgs>? FriendUpdated;
         protected virtual void OnFriendUpdated(IFriend previous, IFriend current)
             => FriendUpdated?.Invoke(this, new FriendUpdatedEventArgs(previous, current));
 
-        public event EventHandler<FriendMessageEventArgs> MessageReceived;
+        public event EventHandler<FriendMessageEventArgs>? MessageReceived;
         protected virtual void OnMessageReceived(Friend friend, string message)
             => MessageReceived?.Invoke(this, new FriendMessageEventArgs(this, friend, message));
         #endregion
 
         public FriendManager()
         {
-            friends = new ConcurrentDictionary<int, Friend>();
-            nameMap = new ConcurrentDictionary<string, Friend>(StringComparer.OrdinalIgnoreCase);
+
         }
 
         protected override void OnInitialize() { }
@@ -60,9 +58,9 @@ namespace Xabbo.Core.Components
 
         private void AddFriend(Friend friend, bool raiseEvent = true)
         {
-            if (friends.TryAdd(friend.Id, friend))
+            if (_friends.TryAdd(friend.Id, friend))
             {
-                if (!nameMap.TryAdd(friend.Name, friend))
+                if (!_nameMap.TryAdd(friend.Name, friend))
                     DebugUtil.Log($"failed to add friend {friend} to name map");
 
                 if (raiseEvent)
@@ -82,13 +80,16 @@ namespace Xabbo.Core.Components
 
         private void UpdateFriend(Friend friend, bool raiseEvent = true)
         {
-            if (friends.TryGetValue(friend.Id, out Friend previous) &&
-                friends.TryUpdate(friend.Id, friend, previous))
+            if (_friends.TryGetValue(friend.Id, out Friend? previous) &&
+                _friends.TryUpdate(friend.Id, friend, previous))
             {
-                if (!nameMap.TryRemove(previous.Name, out _) ||
-                    !nameMap.TryAdd(friend.Name, friend))
+                if (previous.Name != friend.Name)
                 {
-                    DebugUtil.Log($"failed to update friend {friend} in name map");
+                    if (!_nameMap.TryRemove(previous.Name, out _) ||
+                        !_nameMap.TryAdd(friend.Name, friend))
+                    {
+                        DebugUtil.Log($"failed to update friend {friend} in name map");
+                    }
                 }
 
                 if (raiseEvent)
@@ -102,9 +103,9 @@ namespace Xabbo.Core.Components
 
         private void RemoveFriend(int id)
         {
-            if (friends.TryRemove(id, out Friend friend))
+            if (_friends.TryRemove(id, out Friend? friend))
             {
-                if (!nameMap.TryRemove(friend.Name, out _))
+                if (!_nameMap.TryRemove(friend.Name, out _))
                     DebugUtil.Log("failed to remove friend from name map");
 
                 OnFriendRemoved(friend);
@@ -117,52 +118,50 @@ namespace Xabbo.Core.Components
 
         private void RemoveFriend(Friend friend) => RemoveFriend(friend.Id);
 
-        [Receive(nameof(Incoming.ClientLatencyPingResponse))]
-        private async void HandleLatencyResponse(IReadOnlyPacket packet)
+        [InterceptIn(nameof(Incoming.ClientLatencyPingResponse))]
+        private async void HandleLatencyResponse(InterceptArgs e)
         {
-            if (!IsInitialized && !isForceLoading)
+            if (!IsInitialized && !_isForceLoading && e.Step > 50)
             {
-                DebugUtil.Log("force loading friends");
-
-                isForceLoading = true;
+                _isForceLoading = true;
                 await SendAsync(Out.MessengerInit);
             }
         }
 
-        [InterceptIn(nameof(Incoming.FriendBarEventNotification))] // @Legacy InitFriends
+        [InterceptIn(nameof(Incoming.FriendBarEventNotification))]
         protected virtual void HandleInitFriends(InterceptArgs e)
         {
-            if (isLoadingFriends && isForceLoading)
+            if (_isLoading && _isForceLoading)
                 e.Block();
         }
 
-        [InterceptIn(nameof(Incoming.FriendListFragment))] // @Legacy Friends
+        [InterceptIn(nameof(Incoming.FriendListFragment))]
         protected virtual void HandleFriends(InterceptArgs e)
         {
-            if (!isLoadingFriends)
+            if (!_isLoading)
                 return;
 
             int total = e.Packet.ReadInt();
             int current = e.Packet.ReadInt();
 
-            if (current != currentIndex) return;
-            if (totalExpected == -1) totalExpected = total;
-            else if (totalExpected != total) return;
-            currentIndex++;
+            if (current != _currentFragment) return;
+            if (_totalFragments == -1) _totalFragments = total;
+            else if (_totalFragments != total) return;
+            _currentFragment++;
 
-            if (isForceLoading)
+            if (_isForceLoading)
                 e.Block();
 
             int n = e.Packet.ReadInt();
             for (int i = 0; i < n; i++)
-                loadList.Add(Friend.Parse(e.Packet));
+                _loadList.Add(Friend.Parse(e.Packet));
 
-            if (currentIndex == total)
+            if (_currentFragment == total)
             {
-                AddFriends(loadList, false);
+                AddFriends(_loadList, false);
 
-                isLoadingFriends = false;
-                isForceLoading = false;
+                _isLoading = false;
+                _isForceLoading = false;
                 IsInitialized = true;
                 OnLoaded();
             }
@@ -204,7 +203,7 @@ namespace Xabbo.Core.Components
         protected virtual void OnReceivePrivateMessage(InterceptArgs e)
         {
             int id = e.Packet.ReadInt();
-            if (!friends.TryGetValue(id, out Friend friend))
+            if (!_friends.TryGetValue(id, out Friend? friend))
             {
                 DebugUtil.Log($"failed to get friend {friend} from id map");
                 return;

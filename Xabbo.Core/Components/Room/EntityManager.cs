@@ -5,7 +5,6 @@ using System.Linq;
 
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
-using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Components
 {
@@ -229,10 +228,41 @@ namespace Xabbo.Core.Components
             entities.Clear();
         }
 
+        /// <summary>
+        /// Hides the entity client-side.
+        /// </summary>
+        public void Hide(IEntity entity)
+        {
+            if (entity is not Entity e)
+                return;
+
+            if (!e.IsHidden)
+            {
+                e.IsHidden = true;
+                SendLocalAsync(In.UserLoggedOut, e.Index);
+            }
+        }
+
+        /// <summary>
+        /// Hides the entities client-side.
+        /// </summary>
+        /// <param name="entities"></param>
+        public void Hide(IEnumerable<IEntity> entities)
+        {
+            foreach (Entity e in entities.OfType<Entity>())
+            {
+                
+            }
+        }
+
+        /// <summary>
+        /// Shows the entity after hiding it client-side.
+        /// </summary>
+        /// <param name="entity"></param>
         public void Show(IEntity entity)
         {
-            var e = entity as Entity;
-            if (e == null) return;
+            if (entity is not Entity e)
+                return;
 
             if (e.IsHidden)
             {
@@ -241,10 +271,13 @@ namespace Xabbo.Core.Components
             }
         }
 
+        /// <summary>
+        /// Shows the entities after hiding them client-side.
+        /// </summary>
         public void Show(IEnumerable<IEntity> entities)
         {
-            var shown = new List<IEntity>();
-            foreach (var entity in entities.OfType<Entity>())
+            List<IEntity> shown = new();
+            foreach (Entity entity in entities.OfType<Entity>())
             {
                 if (entity.IsHidden)
                 {
@@ -254,18 +287,6 @@ namespace Xabbo.Core.Components
             }
 
             SendLocalAsync(In.UsersInRoom, shown);
-        }
-
-        public void Hide(IEntity entity)
-        {
-            var e = entity as Entity;
-            if (e == null) return;
-
-            if (!e.IsHidden)
-            {
-                e.IsHidden = true;
-                SendLocalAsync(In.UserLoggedOut, e.Index);
-            }
         }
 
         [InterceptIn(nameof(Incoming.UsersInRoom))]
