@@ -1,6 +1,6 @@
 ﻿using System;
 
-using Xabbo.Core.Components;
+using Xabbo.Core.Game;
 
 namespace Xabbo.Core.Events
 {

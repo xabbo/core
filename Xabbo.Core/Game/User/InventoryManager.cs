@@ -10,9 +10,10 @@ using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
 using Xabbo.Core.Tasks;
 
-namespace Xabbo.Core.Components
+namespace Xabbo.Core.Game
 {
-    public class InventoryManager : XabboComponent
+#if FALSE
+    public class InventoryManager : GameStateManager
     {
         class InventoryInternal : IInventory
         {
@@ -190,4 +191,5 @@ namespace Xabbo.Core.Components
             return Inventory;
         }
     }
+#endif
 }

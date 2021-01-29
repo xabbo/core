@@ -3,29 +3,30 @@
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
 
-namespace Xabbo.Core.Components
+namespace Xabbo.Core.Game
 {
-    [Dependencies(typeof(RoomManager), typeof(EntityManager))]
-    public class ChatManager : XabboComponent
+    public class ChatManager : GameStateManager
     {
-        private RoomManager roomManager;
-        private EntityManager entities;
+        private readonly RoomManager _room;
+        private readonly EntityManager _entities;
 
         public event EventHandler<EntityChatEventArgs>? EntityChat;
 
         protected virtual void OnEntityChat(EntityChatEventArgs e)
             => EntityChat?.Invoke(this, e);
 
-        protected override void OnInitialize()
+        public ChatManager(IInterceptor interceptor,
+            RoomManager roomManager, EntityManager entityManager)
+            : base(interceptor)
         {
-            roomManager = GetComponent<RoomManager>();
-            entities = GetComponent<EntityManager>();
+            _room = roomManager;
+            _entities = entityManager;
         }
 
         [InterceptIn(nameof(Incoming.Whisper), nameof(Incoming.Chat), nameof(Incoming.Shout))]
         private void HandleChat(InterceptArgs e)
         {
-            if (!roomManager.IsInRoom) return;
+            if (!_room.IsInRoom) return;
 
             var packet = e.Packet;
 
@@ -40,7 +41,7 @@ namespace Xabbo.Core.Components
                 throw new Exception($"Unable to detect chat type from incoming header: {packet.Header}");
 
             int index = packet.ReadInt();
-            var entity = entities.GetEntityByIndex(index);
+            var entity = _entities.GetEntityByIndex(index);
             if (entity == null)
             {
                 DebugUtil.Log($"unable to find entity {index}");

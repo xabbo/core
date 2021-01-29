@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
-
-using Xabbo.Core.Messages;
+using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
@@ -104,7 +103,7 @@ namespace Xabbo.Core
             Usage = (FurniUsage)packet.ReadInt();
             OwnerId = packet.ReadLong();
 
-            if (Kind < 0) // ?
+            if (Kind < 0) // ? idk
                 UnknownStringA = packet.ReadString();
             else
                 UnknownStringA = string.Empty;

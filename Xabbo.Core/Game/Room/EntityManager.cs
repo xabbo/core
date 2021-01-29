@@ -6,28 +6,20 @@ using System.Linq;
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
 
-namespace Xabbo.Core.Components
+namespace Xabbo.Core.Game
 {
     /// <summary>
     /// Manages and tracks entities in the room.
     /// </summary>
-    [Dependencies(typeof(RoomManager))]
-    public class EntityManager : XabboComponent
+    public class EntityManager : GameStateManager
     {
-        public enum Features
-        {
-            Tracking,
-            StateTracking
-        }
-
-        private RoomManager roomManager;
-
-        private readonly ConcurrentDictionary<int, Entity> entities = new ConcurrentDictionary<int, Entity>();
+        private readonly RoomManager _roomManager;
+        private readonly ConcurrentDictionary<int, Entity> _entities = new();
 
         /// <summary>
         /// Gets the entities in the room.
         /// </summary>
-        public IEnumerable<IEntity> Entities => entities.Select(x => x.Value);
+        public IEnumerable<IEntity> Entities => _entities.Select(x => x.Value);
         /// <summary>
         /// Gets the users in the room.
         /// </summary>
@@ -59,7 +51,7 @@ namespace Xabbo.Core.Components
         /// <summary>
         /// Gets the entity with the specified index, or <c>null</c> if it does not exist.
         /// </summary>
-        public IEntity? GetEntityByIndex(int index) => entities.TryGetValue(index, out Entity? e) ? e : null;
+        public IEntity? GetEntityByIndex(int index) => _entities.TryGetValue(index, out Entity? e) ? e : null;
         /// <summary>
         /// Gets the entity with the specified ID, or <c>null</c> if it does not exist.
         /// </summary>
@@ -74,7 +66,7 @@ namespace Xabbo.Core.Components
         /// </summary>
         public bool TryGetEntityByIndex(int index, out IEntity? entity)
         {
-            if (entities.TryGetValue(index, out Entity? result))
+            if (_entities.TryGetValue(index, out Entity? result))
             {
                 entity = result;
                 return true;
@@ -91,7 +83,7 @@ namespace Xabbo.Core.Components
         /// </summary>
         public bool TryGetEntityByIndex<T>(int index, out T? entity) where T : IEntity
         {
-            if (entities.TryGetValue(index, out Entity? e))
+            if (_entities.TryGetValue(index, out Entity? e))
             {
                 entity = (T)(IEntity)e;
                 return true;
@@ -208,24 +200,18 @@ namespace Xabbo.Core.Components
             => EntityRemoved?.Invoke(this, new EntityEventArgs(entity));
         #endregion
 
-        public EntityManager()
+        public EntityManager(IInterceptor interceptor, RoomManager roomManager)
+            : base(interceptor)
         {
-
-        }
-
-        protected override void OnInitialize()
-        {
-            // TODO add to constructor
-
-            roomManager = GetComponent<RoomManager>();
-            roomManager.Left += Room_Left;
+            _roomManager = roomManager;
+            _roomManager.Left += Room_Left;
         }
 
         private void Room_Left(object? sender, EventArgs e)
         {
             DebugUtil.Log("clearing entities");
 
-            entities.Clear();
+            _entities.Clear();
         }
 
         /// <summary>
@@ -292,7 +278,7 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.UsersInRoom))]
         private void HandleUsersInRoom(InterceptArgs e)
         {
-            if (!roomManager.IsLoadingRoom && !roomManager.IsInRoom)
+            if (!_roomManager.IsLoadingRoom && !_roomManager.IsInRoom)
                 return;
 
             List<Entity> newEntities = new List<Entity>();
@@ -301,7 +287,7 @@ namespace Xabbo.Core.Components
             for (int i = 0; i < n; i++)
             {
                 Entity entity = Entity.Parse(e.Packet);
-                if (entities.TryAdd(entity.Index, entity))
+                if (_entities.TryAdd(entity.Index, entity))
                 {
                     newEntities.Add(entity);
                     OnEntityAdded(entity);
@@ -321,14 +307,14 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.UserLoggedOut))]
         private void HandleUserLoggedOut(InterceptArgs e)
         {
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
             {
                 DebugUtil.Log("not in room");
                 return;
             }
 
             int index = e.Packet.ReadInt();
-            if (entities.TryRemove(index, out Entity? entity))
+            if (_entities.TryRemove(index, out Entity? entity))
             {
                 OnEntityRemoved(entity);
             }
@@ -341,7 +327,7 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.Status))]
         private void HandleStatus(InterceptArgs e)
         {
-            if (!roomManager.IsInRoom) return;
+            if (!_roomManager.IsInRoom) return;
 
             var updatedEntities = new List<IEntity>();
 
@@ -349,7 +335,7 @@ namespace Xabbo.Core.Components
             for (int i = 0; i < n; i++)
             {
                 EntityStatusUpdate update = EntityStatusUpdate.Parse(e.Packet);
-                if (!entities.TryGetValue(update.Index, out Entity? entity))
+                if (!_entities.TryGetValue(update.Index, out Entity? entity))
                 {
                     DebugUtil.Log($"failed to find entity {update.Index} to update");
                     continue;
@@ -367,14 +353,14 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.QueueMoveUpdate))]
         private void HandleQueueMoveUpdate(InterceptArgs e)
         {
-            if (!roomManager.IsInRoom) return;
+            if (!_roomManager.IsInRoom) return;
 
             var rollerUpdate = RollerUpdate.Parse(e.Packet);
 
             if (rollerUpdate.Type == RollerUpdateType.MovingEntity ||
                 rollerUpdate.Type == RollerUpdateType.StationaryEntity)
             {
-                if (entities.TryGetValue(rollerUpdate.EntityIndex, out Entity? entity))
+                if (_entities.TryGetValue(rollerUpdate.EntityIndex, out Entity? entity))
                 {
                     var previousTile = entity.Location;
                     entity.Location = new Tile(rollerUpdate.TargetX, rollerUpdate.TargetY, rollerUpdate.EntityTargetZ);
@@ -391,7 +377,7 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.UpdateAvatar))]
         private void HandleUpdateAvatar(InterceptArgs e)
         {
-            if (!roomManager.IsInRoom) return;
+            if (!_roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
             if (TryGetEntityByIndex(index, out RoomUser user))
@@ -420,7 +406,7 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.UserNameChanged))] // @Check
         private void HandleUserNameChanged(InterceptArgs e)
         {
-            if (!roomManager.IsInRoom) return;
+            if (!_roomManager.IsInRoom) return;
 
             long id = e.Packet.ReadLong();
             int index = e.Packet.ReadInt();
@@ -441,7 +427,7 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.RoomAvatarSleeping))]
         private void HandleRoomAvatarSleeping(InterceptArgs e)
         {
-            if (!roomManager.IsInRoom) return;
+            if (!_roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
             if (TryGetEntityByIndex(index, out Entity entity))
@@ -459,7 +445,7 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.RoomDance))]
         private void HandleRoomDance(InterceptArgs e)
         {
-            if (!roomManager.IsInRoom) return;
+            if (!_roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
             if (!TryGetEntityByIndex(index, out Entity entity))
@@ -477,7 +463,7 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.RoomExpression))]
         private void HandleRoomExpression(InterceptArgs e)
         {
-            if (!roomManager.IsInRoom) return;
+            if (!_roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
             if (!TryGetEntityByIndex(index, out Entity entity))
@@ -492,7 +478,7 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.RoomCarryObject))]
         private void HandleRoomCarryObject(InterceptArgs e)
         {
-            if (!roomManager.IsInRoom) return;
+            if (!_roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
             if (!TryGetEntityByIndex(index, out Entity entity))
@@ -509,7 +495,7 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.RoomAvatarEffect))]
         private void HandleRoomAvatarEffect(InterceptArgs e)
         {
-            if (!roomManager.IsInRoom) return;
+            if (!_roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
             if (!TryGetEntityByIndex(index, out Entity entity))
@@ -528,7 +514,7 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.UserTypingStatusChange))]
         private void HandleUserTypingStatusChange(InterceptArgs e)
         {
-            if (!roomManager.IsInRoom) return;
+            if (!_roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
 

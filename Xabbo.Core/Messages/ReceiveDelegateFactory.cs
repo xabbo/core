@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Reflection;
-
-using Xabbo.Core.Messages;
+using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Messages
 {

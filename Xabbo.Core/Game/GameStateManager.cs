@@ -5,23 +5,23 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 using Xabbo.Core.Messages;
-using Xabbo.Core.Messages;
+using Xabbo.Core.Protocol;
 
-namespace Xabbo.Core.Components
+namespace Xabbo.Core.Game
 {
-    public abstract class XabboComponent : INotifyPropertyChanged, IListener, IDisposable
+    public abstract class GameStateManager : INotifyPropertyChanged, IListener, IDisposable
     {
-        public static IEnumerable<Type> GetCoreComponentTypes()
+        public static IEnumerable<Type> GetManagerTypes()
         {
-            foreach (var type in typeof(XabboComponent).Assembly.GetExportedTypes())
+            foreach (var type in typeof(GameStateManager).Assembly.GetExportedTypes())
             {
-                if (type.IsSubclassOf(typeof(XabboComponent)))
+                if (type.IsSubclassOf(typeof(GameStateManager)))
                     yield return type;
             }
         }
 
         #region - INotifyPropertyChanged -
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         protected bool _set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
@@ -34,38 +34,19 @@ namespace Xabbo.Core.Components
         }
         #endregion
 
-        private bool isInitialized;
+        private bool _disposed;
 
-        public ComponentManager Manager { get; internal set; }
-
-        private bool isAvailable;
-        public bool IsAvailable
-        {
-            get => isAvailable;
-            internal set => _set(ref isAvailable, value);
-        }
-        internal bool IsFaulted { get; set; }
-
-        protected IInterceptor Interceptor => Manager.Interceptor;
+        protected IInterceptor Interceptor { get; }
         protected MessageDispatcher Dispatcher => Interceptor.Dispatcher;
         protected Headers Headers => Dispatcher.Headers;
         protected Incoming In => Headers.Incoming;
         protected Outgoing Out => Headers.Outgoing;
 
-        protected T? GetComponent<T>() where T : XabboComponent => Manager.GetComponent<T>();
-
-        internal void Initialize()
+        public GameStateManager(IInterceptor interceptor)
         {
-            if (isInitialized)
-                throw new InvalidOperationException($"The component {GetType().FullName} has already been initialized");
-            isInitialized = true;
-
-            OnInitialize();
+            Interceptor = interceptor;
+            Interceptor.Dispatcher.Attach(this);
         }
-        internal bool CheckAvailability() => OnCheckAvailability();
-
-        protected virtual bool OnCheckAvailability() => true;
-        protected abstract void OnInitialize();
 
         protected Task SendAsync(Header header, params object[] values) => Interceptor.SendToServerAsync(header, values);
         protected Task SendAsync(IReadOnlyPacket packet) => Interceptor.SendToServerAsync(packet);
@@ -73,7 +54,21 @@ namespace Xabbo.Core.Components
         protected Task SendLocalAsync(Header header, params object[] values) => Interceptor.SendToClientAsync(header, values);
         protected Task SendLocalAsync(IReadOnlyPacket packet) => Interceptor.SendToClientAsync(packet);
 
-        protected virtual void Dispose(bool disposing) { }
-        public void Dispose() => Dispose(true);
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            _disposed = true;
+
+            if (disposing)
+            {
+                Interceptor.Dispatcher.Detach(this);
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

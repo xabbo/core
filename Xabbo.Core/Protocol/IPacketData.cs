@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Xabbo.Core.Messages
+namespace Xabbo.Core.Protocol
 {
     public interface IPacketData
     {

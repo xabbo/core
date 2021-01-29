@@ -3,10 +3,11 @@ using System.Collections.Generic;
 
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
+using Xabbo.Core.Protocol;
 
-namespace Xabbo.Core.Components
+namespace Xabbo.Core.Game
 {
-    public class RoomManager : XabboComponent
+    public class RoomManager : GameStateManager
     {
         private readonly Dictionary<long, RoomData> _roomDataCache = new Dictionary<long, RoomData>();
 
@@ -70,7 +71,9 @@ namespace Xabbo.Core.Components
         protected virtual void OnDoorbell(DoorbellEventArgs e) => Doorbell?.Invoke(this, e);
         #endregion
 
-        protected override void OnInitialize() { }
+        public RoomManager(IInterceptor interceptor)
+            : base(interceptor)
+        { }
 
         private void Reset()
         {

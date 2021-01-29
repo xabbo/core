@@ -1,6 +1,6 @@
 ﻿using System;
 using Xabbo.Core;
-using Xabbo.Core.Messages;
+using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
@@ -8,7 +8,7 @@ namespace Xabbo.Core
     {
         public static Friend Parse(IReadOnlyPacket packet) => new Friend(packet);
 
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; }
         public Gender Gender { get; set; }
         public bool IsOnline { get; set; }
@@ -27,7 +27,7 @@ namespace Xabbo.Core
 
         protected Friend(IReadOnlyPacket packet)
         {
-            Id = packet.ReadInt();
+            Id = packet.ReadLong();
             Name = packet.ReadString();
             Gender = H.ToGender(packet.ReadInt());
             IsOnline = packet.ReadBool();

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
-
-using Xabbo.Core.Messages;
+using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {

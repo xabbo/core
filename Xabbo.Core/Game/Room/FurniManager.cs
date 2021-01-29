@@ -5,11 +5,11 @@ using System.Linq;
 
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
+using Xabbo.Core.Protocol;
 
-namespace Xabbo.Core.Components
+namespace Xabbo.Core.Game
 {
-    [Dependencies(typeof(RoomManager))]
-    public class FurniManager : XabboComponent
+    public class FurniManager : GameStateManager
     {
         public enum Features
         {
@@ -20,10 +20,10 @@ namespace Xabbo.Core.Components
             WallItemUpdates
         }
 
-        private RoomManager roomManager;
+        private readonly RoomManager _roomManager;
 
-        private readonly ConcurrentDictionary<long, FloorItem> _floorItems;
-        private readonly ConcurrentDictionary<long, WallItem> _wallItems;
+        private readonly ConcurrentDictionary<long, FloorItem> _floorItems = new();
+        private readonly ConcurrentDictionary<long, WallItem> _wallItems = new();
 
         public IEnumerable<IFloorItem> FloorItems => _floorItems.Select(item => item.Value);
         public IEnumerable<IWallItem> WallItems => _wallItems.Select(item => item.Value);
@@ -135,27 +135,20 @@ namespace Xabbo.Core.Components
             => FurniVisibilityToggled?.Invoke(this, new FurniEventArgs(furni));
         #endregion
 
-        public FurniManager()
+        public FurniManager(IInterceptor interceptor, RoomManager roomManager)
+            : base(interceptor)
         {
-            _floorItems = new ConcurrentDictionary<long, FloorItem>();
-            _wallItems = new ConcurrentDictionary<long, WallItem>();
+            _roomManager = roomManager;
+            _roomManager.Left += Room_Left;
         }
 
-        protected override void OnInitialize()
-        {
-            // TODO DI ?
-            roomManager = GetComponent<RoomManager>();
-
-            roomManager.Left += Room_Left;
-        }
-
-        private void Room_Left(object sender, EventArgs e)
+        private void Room_Left(object? sender, EventArgs e)
         {
             _floorItems.Clear();
             _wallItems.Clear();
         }
 
-        private void SetHidden(ItemType type, int id, bool hide)
+        private void SetHidden(ItemType type, long id, bool hide)
         {
             Furni furni;
 
@@ -226,7 +219,7 @@ namespace Xabbo.Core.Components
         [Receive(nameof(Incoming.ActiveObjects))]
         protected void HandleActiveObjects(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsLoadingRoom)
+            if (!_roomManager.IsLoadingRoom)
             {
                 DebugUtil.Log("not entering room");
                 return;
@@ -257,7 +250,7 @@ namespace Xabbo.Core.Components
         [Receive(nameof(Incoming.ActiveObjectAdd))]
         protected void HandleAddFloorItem(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
                 return;
 
             FloorItem item = FloorItem.Parse(packet);
@@ -282,7 +275,7 @@ namespace Xabbo.Core.Components
                 int delay
             */
 
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
                 return;
 
             long id = packet.ReadLong();
@@ -300,7 +293,7 @@ namespace Xabbo.Core.Components
         [Receive(nameof(Incoming.ActiveObjectUpdate))]
         protected void HandleActiveObjectUpdate(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
                 return;
 
             var updatedItem = FloorItem.Parse(packet);
@@ -328,7 +321,7 @@ namespace Xabbo.Core.Components
         [Receive(nameof(Incoming.QueueMoveUpdate))]
         protected void HandleObjectOnRoller(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
                 return;
 
             var rollerUpdate = RollerUpdate.Parse(packet);
@@ -350,7 +343,7 @@ namespace Xabbo.Core.Components
         [Receive(nameof(Incoming.StuffDataUpdate))]
         protected void HandleItemExtraData(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
                 return;
 
             long id = packet.ReadLong();
@@ -370,7 +363,7 @@ namespace Xabbo.Core.Components
         [Receive(nameof(Incoming.MultipleStuffDataUpdate))]
         protected void HandleItemsDataUpdate(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
                 return;
 
             int n = packet.ReadShort();
@@ -392,7 +385,7 @@ namespace Xabbo.Core.Components
         [Receive(nameof(Incoming.Items))]
         protected void HandleItems(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsLoadingRoom)
+            if (!_roomManager.IsLoadingRoom)
             {
                 DebugUtil.Log("not entering room");
                 return;
@@ -423,7 +416,7 @@ namespace Xabbo.Core.Components
         [Receive(nameof(Incoming.AddItem))]
         protected void HandleAddItem(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
                 return;
 
             var item = WallItem.Parse(packet);
@@ -440,7 +433,7 @@ namespace Xabbo.Core.Components
         [Receive(nameof(Incoming.RemoveItem))]
         protected void HandleRemoveItem(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
                 return;
 
             long id = packet.ReadLong();
@@ -459,7 +452,7 @@ namespace Xabbo.Core.Components
         [Receive(nameof(Incoming.UpdateItem))]
         protected void HandleUpdateItem(IReadOnlyPacket packet)
         {
-            if (!roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom)
                 return;
             
             var updatedItem = WallItem.Parse(packet);

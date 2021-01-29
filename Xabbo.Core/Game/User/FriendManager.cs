@@ -6,23 +6,23 @@ using System.Linq;
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
 
-namespace Xabbo.Core.Components
+namespace Xabbo.Core.Game
 {
-    public class FriendManager : XabboComponent
+    public class FriendManager : GameStateManager
     {
         private int _totalFragments = -1, _currentFragment = 0;
         private readonly List<Friend> _loadList = new();
         private bool _isLoading = true, _isForceLoading;
 
-        private readonly ConcurrentDictionary<int, Friend> _friends = new();
-        private readonly ConcurrentDictionary<string, Friend> _nameMap = new();
+        private readonly ConcurrentDictionary<long, Friend> _friends = new();
+        private readonly ConcurrentDictionary<string, Friend> _nameMap = new(StringComparer.OrdinalIgnoreCase);
 
         public bool IsInitialized { get; private set; }
         public IEnumerable<IFriend> Friends => _friends.Select(x => x.Value);
-        public bool IsFriend(int id) => _friends.ContainsKey(id);
-        public bool IsFriend(string name) => _nameMap.ContainsKey(name.ToLower());
-        public IFriend? GetFriend(int id) => _friends.TryGetValue(id, out Friend? friend) ? friend : null;
-        public IFriend? GetFriend(string name) => _nameMap.TryGetValue(name.ToLower(), out Friend? friend) ? friend : null;
+        public bool IsFriend(long id) => _friends.ContainsKey(id);
+        public bool IsFriend(string name) => _nameMap.ContainsKey(name);
+        public IFriend? GetFriend(long id) => _friends.TryGetValue(id, out Friend? friend) ? friend : null;
+        public IFriend? GetFriend(string name) => _nameMap.TryGetValue(name, out Friend? friend) ? friend : null;
 
         #region - Events -
         public event EventHandler? Loaded;
@@ -46,14 +46,13 @@ namespace Xabbo.Core.Components
             => MessageReceived?.Invoke(this, new FriendMessageEventArgs(this, friend, message));
         #endregion
 
-        public FriendManager()
+        public FriendManager(IInterceptor interceptor)
+            : base(interceptor)
         {
 
         }
 
-        protected override void OnInitialize() { }
-
-        public void SendMessage(int id, string message) => SendAsync(Out.SendMessage, id, message);
+        public void SendMessage(long id, string message) => SendAsync(Out.SendMessage, id, message);
         public void SendMessage(Friend friend, string message) => SendMessage(friend.Id, message);
 
         private void AddFriend(Friend friend, bool raiseEvent = true)
@@ -101,7 +100,7 @@ namespace Xabbo.Core.Components
             }
         }
 
-        private void RemoveFriend(int id)
+        private void RemoveFriend(long id)
         {
             if (_friends.TryRemove(id, out Friend? friend))
             {
@@ -152,7 +151,7 @@ namespace Xabbo.Core.Components
             if (_isForceLoading)
                 e.Block();
 
-            int n = e.Packet.ReadInt();
+            short n = e.Packet.ReadShort();
             for (int i = 0; i < n; i++)
                 _loadList.Add(Friend.Parse(e.Packet));
 
@@ -170,30 +169,30 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.FriendListUpdate))] // @Legacy UpdateFriend
         protected virtual void OnUpdateFriend(InterceptArgs e)
         {
-            int n = e.Packet.ReadInt();
+            short n = e.Packet.ReadShort();
             for (int i = 0; i < n; i++)
             {
                 e.Packet.ReadInt(); // -1 = offline, 0 = online
                 e.Packet.ReadString(); // group name
             }
 
-            n = e.Packet.ReadInt();
+            n = e.Packet.ReadShort();
             for (int i = 0; i < n; i++)
             {
                 int updateType = e.Packet.ReadInt();
                 if (updateType == -1) // removed
                 {
-                    int id = e.Packet.ReadInt();
+                    long id = e.Packet.ReadLong();
                     RemoveFriend(id);
                 }
                 else if (updateType == 0) // updated
                 {
-                    var friend = Friend.Parse(e.Packet);
+                    Friend friend = Friend.Parse(e.Packet);
                     UpdateFriend(friend);
                 }
                 else if (updateType == 1) // added
                 {
-                    var friend = Friend.Parse(e.Packet);
+                    Friend friend = Friend.Parse(e.Packet);
                     AddFriend(friend);
                 }
             }
@@ -202,7 +201,7 @@ namespace Xabbo.Core.Components
         [InterceptIn(nameof(Incoming.MessengerNewConsoleMessage))] // @Legacy ReceivePrivateMessage
         protected virtual void OnReceivePrivateMessage(InterceptArgs e)
         {
-            int id = e.Packet.ReadInt();
+            long id = e.Packet.ReadLong();
             if (!_friends.TryGetValue(id, out Friend? friend))
             {
                 DebugUtil.Log($"failed to get friend {friend} from id map");

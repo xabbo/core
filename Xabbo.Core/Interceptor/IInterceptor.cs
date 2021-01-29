@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 
 using Xabbo.Core.Messages;
-using Xabbo.Core.Messages;
+using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {

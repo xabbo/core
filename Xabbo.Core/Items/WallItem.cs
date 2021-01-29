@@ -2,8 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-
-using Xabbo.Core.Messages;
+using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {

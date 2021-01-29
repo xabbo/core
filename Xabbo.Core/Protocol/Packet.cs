@@ -5,7 +5,9 @@ using System.Text;
 using System.Globalization;
 using System.Buffers.Binary;
 
-namespace Xabbo.Core.Messages
+using Xabbo.Core.Messages;
+
+namespace Xabbo.Core.Protocol
 {
     public class Packet : IPacket
     {
@@ -134,7 +136,7 @@ namespace Xabbo.Core.Messages
         {
             if (Available < 2) return false;
 
-            return Available >= (2 + BinaryPrimitives.ReadUInt16BigEndian(_buffer.Span[Position..]));
+            return Available >= 2 + BinaryPrimitives.ReadUInt16BigEndian(_buffer.Span[Position..]);
         }
 
         public bool CanReadDouble()
@@ -454,7 +456,7 @@ namespace Xabbo.Core.Messages
         public void ReplaceString(string newValue, int position)
         {
             int previousLen = BinaryPrimitives.ReadInt16BigEndian(_buffer.Span[position..]);
-            if (Length < (position + 2 + previousLen))
+            if (Length < position + 2 + previousLen)
                 throw new InvalidOperationException($"Cannot replace string at position {position}");
 
             int newLen = Encoding.UTF8.GetByteCount(newValue);
@@ -473,7 +475,7 @@ namespace Xabbo.Core.Messages
             }
             else if (diff < 0)
             {
-                Length -= (newLen - previousLen);
+                Length -= newLen - previousLen;
             }
 
             byte[] tail = _buffer.Span[(position + 2 + previousLen)..].ToArray();
@@ -520,8 +522,6 @@ namespace Xabbo.Core.Messages
             Position = position;
             ReplaceValues(newValues);
         }
-
-        public IReadOnlyPacket AsReadOnly() => new ReadOnlyPacket(this);
         #endregion
     }
 }

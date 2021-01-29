@@ -1,6 +1,8 @@
 ﻿using System;
 
-namespace Xabbo.Core.Messages
+using Xabbo.Core.Messages;
+
+namespace Xabbo.Core.Protocol
 {
     public interface IReadOnlyPacket
     {
@@ -49,7 +51,7 @@ namespace Xabbo.Core.Messages
         /// Reads a boolean from the current position in the packet.
         /// </summary>
         bool ReadBool();
-        
+
         /// <summary>
         /// Reads a boolean from the specified position in the packet.
         /// </summary>

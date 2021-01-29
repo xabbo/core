@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Messages\Packet\" />
     <Folder Include="Serialization\" />
   </ItemGroup>
 

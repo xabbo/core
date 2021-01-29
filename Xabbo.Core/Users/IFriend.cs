@@ -1,5 +1,5 @@
 ﻿using System;
-using Xabbo.Core.Messages;
+using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
@@ -11,7 +11,7 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the ID of the friend.
         /// </summary>
-        int Id { get; }
+        long Id { get; }
         /// <summary>
         /// Gets the name of the friend.
         /// </summary>

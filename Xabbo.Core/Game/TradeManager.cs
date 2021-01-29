@@ -2,19 +2,16 @@
 
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
+using Xabbo.Core.Protocol;
 
-namespace Xabbo.Core.Components
+namespace Xabbo.Core.Game
 {
-    [Dependencies(
-        typeof(ProfileManager),
-        typeof(RoomManager),
-        typeof(EntityManager)
-    )]
-    public class TradeManager : XabboComponent
+#if FALSE
+    public class TradeManager : GameStateManager
     {
-        private ProfileManager _profileManager;
-        private RoomManager _roomManager;
-        private EntityManager _entityManager;
+        private readonly ProfileManager _profileManager;
+        private readonly RoomManager _roomManager;
+        private readonly EntityManager _entityManager;
 
         public bool IsTrading { get; private set; }
         public bool IsTrader { get; private set; }
@@ -27,13 +24,13 @@ namespace Xabbo.Core.Components
         public bool HasPartnerAccepted { get; private set; }
         public bool IsWaitingConfirmation { get; private set; }
 
-        public event EventHandler<TradeStartEventArgs> Start;
-        public event EventHandler<TradeStartFailEventArgs> StartFail;
-        public event EventHandler<TradeOfferEventArgs> Update;
-        public event EventHandler<TradeAcceptEventArgs> Accept;
-        public event EventHandler WaitingConfirm;
-        public event EventHandler<TradeStopEventArgs> Stop;
-        public event EventHandler<TradeCompleteEventArgs> Complete;
+        public event EventHandler<TradeStartEventArgs>? Start;
+        public event EventHandler<TradeStartFailEventArgs>? StartFail;
+        public event EventHandler<TradeOfferEventArgs>? Update;
+        public event EventHandler<TradeAcceptEventArgs>? Accept;
+        public event EventHandler? WaitingConfirm;
+        public event EventHandler<TradeStopEventArgs>? Stop;
+        public event EventHandler<TradeCompleteEventArgs>? Complete;
 
         protected virtual void OnStart(bool isTrader, IRoomUser partner)
             => Start?.Invoke(this, new TradeStartEventArgs(isTrader, partner));
@@ -50,13 +47,13 @@ namespace Xabbo.Core.Components
             ITradeOffer ownOffer, ITradeOffer partnerOffer)
             => Complete?.Invoke(this, new TradeCompleteEventArgs(wasTrader, self, partner, ownOffer, partnerOffer));
 
-        public TradeManager() { }
-
-        protected override void OnInitialize()
+        public TradeManager(IInterceptor interceptor, ProfileManager profileManager,
+            RoomManager roomManager, EntityManager entityManager)
+            : base(interceptor)
         {
-            _profileManager = GetComponent<ProfileManager>() ?? throw new InvalidOperationException("Profile manager is null");
-            _roomManager = GetComponent<RoomManager>() ?? throw new InvalidOperationException("Room manager is null");
-            _entityManager = GetComponent<EntityManager>() ?? throw new InvalidOperationException("Entity manager is null");
+            _profileManager = profileManager;
+            _roomManager = roomManager;
+            _entityManager = entityManager;
         }
 
         private void ResetTrade()
@@ -74,7 +71,7 @@ namespace Xabbo.Core.Components
             PartnerOffer = null;
         }
 
-        [Receive("TradeStart")]
+        [Receive(nameof(Incoming.TradeOpen)]
         private void HandleTradeStart(IReadOnlyPacket packet)
         {
             if (_profileManager.UserData == null)
@@ -94,13 +91,13 @@ namespace Xabbo.Core.Components
             int tradeeId = packet.ReadInt();
             int unknownB = packet.ReadInt(); // ?
 
-            if (!_entityManager.TryGetEntity(traderId, out IRoomUser trader))
+            if (!_entityManager.TryGetEntity(traderId, out IRoomUser? trader))
             {
                 DebugUtil.Log($"failed to find user with id {traderId}");
                 return;
             }
 
-            if (!_entityManager.TryGetEntity(tradeeId, out IRoomUser tradee))
+            if (!_entityManager.TryGetEntity(tradeeId, out IRoomUser? tradee))
             {
                 DebugUtil.Log($"failed to find user with id {tradeeId}");
                 return;
@@ -267,4 +264,5 @@ namespace Xabbo.Core.Components
             }
         }
     }
+#endif
 }

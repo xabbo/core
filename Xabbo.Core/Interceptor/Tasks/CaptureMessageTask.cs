@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Xabbo.Core.Messages;
+using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Tasks
 {
@@ -46,7 +47,7 @@ namespace Xabbo.Core.Tasks
         {
             try
             {
-                if (SetResult(new Packet(e.Packet).AsReadOnly()))
+                if (SetResult(new Packet(e.Packet)))
                 {
                     if (blockPacket)
                         e.Block();

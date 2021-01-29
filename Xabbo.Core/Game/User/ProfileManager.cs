@@ -4,20 +4,18 @@ using System.Threading.Tasks;
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages;
 
-namespace Xabbo.Core.Components
+namespace Xabbo.Core.Game
 {
-    public class ProfileManager : XabboComponent
+    public class ProfileManager : GameStateManager
     {
-        public enum Features { Autoload, UserData, HomeRoom, Credits, Points, Achievements, AchievementScore }
-
         private Task<IUserData> _taskUserData;
-        private TaskCompletionSource<IUserData> _tcsUserData;
+        private TaskCompletionSource<IUserData>? _tcsUserData;
 
         private bool _loadingCredits;
 
-        public UserData UserData { get; private set; }
+        public UserData? UserData { get; private set; }
         public int? HomeRoom { get; private set; }
-        public Achievements Achievements { get; private set; }
+        public Achievements? Achievements { get; private set; }
 
         public int? AchievementScore { get; private set; }
         public int? Credits { get; private set; }
@@ -26,36 +24,37 @@ namespace Xabbo.Core.Components
         public int? Duckets => Points.TryGetValue(ActivityPointType.Ducket, out int value) ? (int?)value : null;
 
         #region - Events -
-        public event EventHandler LoadedUserData;
+        public event EventHandler? LoadedUserData;
         protected virtual void OnLoadedUserData() => LoadedUserData?.Invoke(this, EventArgs.Empty);
 
-        public event EventHandler UserDataUpdated;
+        public event EventHandler? UserDataUpdated;
         protected virtual void OnUserDataUpdated() => UserDataUpdated?.Invoke(this, EventArgs.Empty);
 
-        public event EventHandler HomeRoomUpdated;
+        public event EventHandler? HomeRoomUpdated;
         protected virtual void OnHomeRoomUpdated() => HomeRoomUpdated?.Invoke(this, EventArgs.Empty);
 
-        public event EventHandler LoadedAchievements;
+        public event EventHandler? LoadedAchievements;
         protected virtual void OnLoadedAchievements() => LoadedAchievements?.Invoke(this, EventArgs.Empty);
 
-        public event EventHandler AchievementUpdated;
+        public event EventHandler? AchievementUpdated;
         protected virtual void OnAchievementUpdated(IAchievement achievement)
             => AchievementUpdated?.Invoke(this, EventArgs.Empty); // TODO AchievementEventArgs
 
-        public event EventHandler CreditsUpdated;
+        public event EventHandler? CreditsUpdated;
         protected virtual void OnCreditsUpdated() => CreditsUpdated?.Invoke(this, EventArgs.Empty);
 
-        public event EventHandler LoadedPoints;
+        public event EventHandler? LoadedPoints;
         protected virtual void OnLoadedPoints() => LoadedPoints?.Invoke(this, EventArgs.Empty);
 
-        public event EventHandler<PointsUpdatedEventArgs> PointsUpdated;
+        public event EventHandler<PointsUpdatedEventArgs>? PointsUpdated;
         protected virtual void OnPointsUpdated(ActivityPointType type, int amount, int change)
             => PointsUpdated?.Invoke(this, new PointsUpdatedEventArgs(type, amount, change));
 
         // LoadedFriends, FriendAdded, FriendRemoved, FriendUpdated
         #endregion
 
-        public ProfileManager()
+        public ProfileManager(IInterceptor interceptor)
+            : base(interceptor)
         {
             _tcsUserData = new TaskCompletionSource<IUserData>();
             _taskUserData = _tcsUserData.Task;
@@ -63,38 +62,25 @@ namespace Xabbo.Core.Components
             Points = new ActivityPoints();
         }
 
-        protected override void OnInitialize()
-        {
-            if (!Dispatcher.IsAttached(this, Features.UserData))
-                _tcsUserData?.TrySetException(new Exception("User data is unavailable"));
-        }
-
         /// <summary>
         /// Waits for the user data load, or returns the user's data instantly if it has already loaded.
         /// </summary>
         public Task<IUserData> GetUserDataAsync() => _taskUserData;
 
-        // @Update [Group(Features.Autoload), InterceptIn("LatencyResponse")]
+        [InterceptIn(nameof(Incoming.ClientLatencyPingResponse))]
         private async void HandleLatencyResponse(InterceptArgs e)
         {
-            if (UserData == null && Dispatcher.IsAttached(this, Features.UserData))
-            {
-                await SendAsync(Out.InfoRetrieve);
-            }
+            if (UserData is null) await SendAsync(Out.InfoRetrieve);
+            if (Achievements is null) await SendAsync(Out.GetUserAchievements);
 
-            if (!Credits.HasValue && Dispatcher.IsAttached(this, Features.Credits) && !_loadingCredits)
+            if (Credits is null && !_loadingCredits)
             {
                 _loadingCredits = true;
                 await SendAsync(Out.GetCredits);
             }
-
-            if (Achievements == null && Dispatcher.IsAttached(this, Features.Achievements))
-            {
-                await SendAsync(Out.GetUserAchievements);
-            }
         }
 
-        // @Update [Group(Features.UserData), InterceptIn("UserData")]
+        [InterceptIn(nameof(Incoming.UserObject))]
         private void HandleUserData(InterceptArgs e)
         {
             UserData = UserData.Parse(e.Packet);
@@ -107,18 +93,22 @@ namespace Xabbo.Core.Components
             OnLoadedUserData();
         }
 
-        // @Update [Group(Features.UserData), InterceptIn(nameof(Incoming.UpdateUserLook))]
-        private void HandleUpdateUserLook(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.UpdateFigure))]
+        private void HandleUpdateFigure(InterceptArgs e)
         {
+            if (UserData is null) return;
+
             UserData.Figure = e.Packet.ReadString();
             UserData.Gender = H.ToGender(e.Packet.ReadString());
 
             OnUserDataUpdated();
         }
 
-        // @Update [Group(Features.UserData), InterceptIn(nameof(Incoming.RoomUserData))]
-        private void HandleRoomUserdata(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.UpdateAvatar))]
+        private void HandleUpdateAvatar(InterceptArgs e)
         {
+            if (UserData is null) return;
+
             int index = e.Packet.ReadInt();
             if (index == -1)
             {
@@ -131,13 +121,13 @@ namespace Xabbo.Core.Components
             }
         }
 
-        // @Update [Group(Features.HomeRoom), InterceptIn("UserHomeRoom")]
+        // @Update [InterceptIn(nameof(Incoming.?)]
         private void HandleUserHomeRoom(InterceptArgs e)
         {
             HomeRoom = e.Packet.ReadInt();
         }
 
-        // @Update [Group(Features.Credits), InterceptIn("UserCredits")]
+        // @Update [InterceptIn(nameof(Incoming.?)]
         private void HandleUserCredits(InterceptArgs e)
         {
             if (_loadingCredits)
@@ -151,7 +141,7 @@ namespace Xabbo.Core.Components
             OnCreditsUpdated();
         }
 
-        // @Update [Group(Features.Points), InterceptIn("UserCurrency")]
+        // @Update [InterceptIn(nameof(Incoming.?))]
         private void HandleUserPoints(InterceptArgs e)
         {
             Points = ActivityPoints.Parse(e.Packet);
