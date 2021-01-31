@@ -40,14 +40,14 @@ namespace Xabbo.Core
                     val => val.OwnerName
                 );
 
-            packet.WriteInt(ownerDictionary.Count);
+            packet.WriteShort((short)ownerDictionary.Count);
             foreach (var pair in ownerDictionary)
             {
                 packet.WriteLong(pair.Key);
                 packet.WriteString(pair.Value);
             }
 
-            packet.WriteInt(items.Count());
+            packet.WriteShort((short)items.Count());
             foreach (var item in items)
                 item.Write(packet, false);
         }
