@@ -1,12 +1,11 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class RollerObjectUpdate : IPacketData
+    public class RollerObjectUpdate : IComposable
     {
-        public static RollerObjectUpdate Parse(IReadOnlyPacket packet) => new RollerObjectUpdate(packet);
-
         public long Id { get; set; }
         public float LocationZ { get; set; }
         public float TargetZ { get; set; }
@@ -15,15 +14,16 @@ namespace Xabbo.Core
 
         protected RollerObjectUpdate(IReadOnlyPacket packet)
         {
-            Id = packet.ReadLong();
-            LocationZ = packet.ReadFloat();
-            TargetZ = packet.ReadFloat();
+            Id = packet.ReadLegacyLong();
+            LocationZ = packet.ReadLegacyFloat();
+            TargetZ = packet.ReadLegacyFloat();
         }
 
-        public void Write(IPacket packet) => packet.WriteValues(
-            Id,
-            LocationZ,
-            TargetZ
-        );
+        public void Compose(IPacket packet) => packet
+            .WriteLegacyLong(Id)
+            .WriteLegacyFloat(LocationZ)
+            .WriteLegacyFloat(TargetZ);
+
+        public static RollerObjectUpdate Parse(IReadOnlyPacket packet) => new RollerObjectUpdate(packet);
     }
 }

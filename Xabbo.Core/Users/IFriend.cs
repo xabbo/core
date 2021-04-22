@@ -1,12 +1,12 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     /// <summary>
     /// Contains information about the user's friend.
     /// </summary>
-    public interface IFriend : IPacketData
+    public interface IFriend : IComposable
     {
         /// <summary>
         /// Gets the ID of the friend.

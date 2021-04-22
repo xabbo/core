@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class RoomSettings : IPacketData
+    public class RoomSettings : IComposable
     {
-        public static RoomSettings Parse(IReadOnlyPacket packet) => new RoomSettings(packet);
-
         public long Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
@@ -136,7 +134,7 @@ namespace Xabbo.Core
         /// Writes the values of this <see cref="RoomSettings"/> to the specified packet
         /// to be sent to the server with <c>RoomSettingsSave</c>.
         /// </summary>
-        public void Write(IPacket packet)
+        public void Compose(IPacket packet)
         {
             packet.WriteValues(
                 Id,
@@ -147,9 +145,11 @@ namespace Xabbo.Core
                 MaxVisitors,
                 (int)Category,
                 AllowPets ? 1 : 0,
-                // @TODO Structure
+                // TODO Structure
                 0, 0, 0, 0, ""
             );
         }
+
+        public static RoomSettings Parse(IReadOnlyPacket packet) => new RoomSettings(packet);
     }
 }

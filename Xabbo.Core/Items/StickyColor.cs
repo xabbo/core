@@ -1,9 +1,9 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class StickyColor : IPacketData
+    public class StickyColor : IComposable
     {
         public string Name { get; }
         public string Value { get; }
@@ -16,6 +16,6 @@ namespace Xabbo.Core
 
         public static implicit operator string(StickyColor color) => color.Value;
 
-        public void Write(IPacket packet) => packet.WriteString(Value);
+        public void Compose(IPacket packet) => packet.WriteString(Value);
     }
 }

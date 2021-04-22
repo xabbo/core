@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class PetInfo : IPacketData
+    public class PetInfo : IComposable
     {
         public static PetInfo Parse(IReadOnlyPacket packet) => new PetInfo(packet);
 
@@ -77,7 +77,7 @@ namespace Xabbo.Core
             UnknownBoolF = packet.ReadBool();
         }
 
-        public void Write(IPacket packet)
+        public void Compose(IPacket packet)
         {
             packet.WriteInt(Id);
             packet.WriteString(Name);

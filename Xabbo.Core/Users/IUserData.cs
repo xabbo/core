@@ -1,12 +1,12 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     /// <summary>
     /// The user's own data that is sent upon requesting user data.
     /// </summary>
-    public interface IUserData : IPacketData
+    public interface IUserData : IComposable
     {
         long Id { get; }
         string Name { get; }

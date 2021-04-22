@@ -1,5 +1,6 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
@@ -22,8 +23,8 @@ namespace Xabbo.Core
 
         public bool IsHidden { get; set; }
 
-        public abstract void Write(IPacket packet);
-        public abstract void Write(IPacket packet, bool writeName = true);
+        public abstract void Compose(IPacket packet);
+        public abstract void Compose(IPacket packet, bool writeName = true);
 
         public Furni()
         {

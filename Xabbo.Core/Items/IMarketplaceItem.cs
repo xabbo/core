@@ -1,9 +1,9 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public interface IMarketplaceItem : IItem, IPacketData
+    public interface IMarketplaceItem : IItem, IComposable
     {
         IItemData Data { get; set; }
         int Price { get; set; }

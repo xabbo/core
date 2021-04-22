@@ -1,5 +1,5 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
@@ -31,7 +31,7 @@ namespace Xabbo.Core
             }
         }
 
-        public void Write(IPacket packet)
+        public void Compose(IPacket packet)
         {
             packet.WriteInt(((int)Type & 0xFF) | ((int)Flags << 8));
             WriteData(packet);

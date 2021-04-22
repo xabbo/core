@@ -1,11 +1,15 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public interface IFloorPlan : IPacketData
+    public interface IFloorPlan : IComposable
     {
-        string OriginalString { get; }
+        /// <summary>
+        /// Gets the original string that this floor plan was parsed from.
+        /// </summary>
+        string? OriginalString { get; }
 
         int Scale { get; }
         int WallHeight { get; }

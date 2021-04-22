@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
@@ -9,8 +9,6 @@ namespace Xabbo.Core
     /// </summary>
     public class UserProfile : IUserProfile
     {
-        public static UserProfile Parse(IReadOnlyPacket packet) => new UserProfile(packet);
-
         public long Id { get; set; }
         public string Name { get; set; }
         public string Figure { get; set; }
@@ -62,7 +60,7 @@ namespace Xabbo.Core
             DisplayInClient = packet.ReadBool();
         }
 
-        public void Write(IPacket packet) => packet.WriteValues(
+        public void Compose(IPacket packet) => packet.WriteValues(
             Id,
             Name,
             Figure,
@@ -77,5 +75,8 @@ namespace Xabbo.Core
             (int)LastLogin.TotalSeconds,
             DisplayInClient
         );
+
+
+        public static UserProfile Parse(IReadOnlyPacket packet) => new UserProfile(packet);
     }
 }

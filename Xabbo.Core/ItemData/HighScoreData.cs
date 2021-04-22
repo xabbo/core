@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
@@ -34,15 +34,19 @@ namespace Xabbo.Core
             Int1 = packet.ReadInt();
             Int2 = packet.ReadInt();
 
-            short n = packet.ReadShort();
+            short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
             {
-                var highScore = new HighScore();
-                highScore.Value = packet.ReadInt(); 
+                var highScore = new HighScore
+                {
+                    Value = packet.ReadInt()
+                };
 
-                short k = packet.ReadShort();
+                short k = packet.ReadLegacyShort();
                 for (int j = 0; j < k; j++)
+                {
                     highScore.Names.Add(packet.ReadString());
+                }
 
                 Add(highScore);
             }
@@ -61,14 +65,18 @@ namespace Xabbo.Core
                 Names = new List<string>();
             }
 
-            public void Write(IPacket packet)
+            public void Compose(IPacket packet)
             {
                 packet.WriteInt(Value);
-                packet.WriteShort((short)(Names?.Count ?? 0));
+
+                packet.WriteLegacyShort((short)(Names?.Count ?? 0));
+
                 if (Names != null)
                 {
                     foreach (string name in Names)
+                    {
                         packet.WriteString(name);
+                    }
                 }
             }
         }
@@ -79,9 +87,10 @@ namespace Xabbo.Core
             packet.WriteInt(Int1);
             packet.WriteInt(Int2);
 
-            packet.WriteShort((short)Count);
+            packet.WriteLegacyShort((short)Count);
+
             foreach (var highScore in this)
-                highScore.Write(packet);
+                highScore.Compose(packet);
         }
 
         public int IndexOf(HighScore item) => list.IndexOf(item);

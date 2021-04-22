@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+using Xabbo.Messages;
+using Xabbo.Interceptor;
+
 using Xabbo.Core.Events;
-using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Game
 {

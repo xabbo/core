@@ -1,5 +1,6 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
@@ -29,7 +30,7 @@ namespace Xabbo.Core
             : this(id, index)
         {
             Gender = H.ToGender(packet.ReadString());
-            GroupId = packet.ReadLong();
+            GroupId = packet.ReadLegacyLong();
             Int8 = packet.ReadInt();
             GroupName = packet.ReadString();
             FigureExtra = packet.ReadString();
@@ -39,19 +40,18 @@ namespace Xabbo.Core
 
         protected override void OnUpdate(EntityStatusUpdate update) { }
 
-        public override void Write(IPacket packet)
+        public override void Compose(IPacket packet)
         {
-            base.Write(packet);
+            base.Compose(packet);
 
-            packet.WriteValues(
-                Gender.ToShortString(),
-                GroupId,
-                Int8,
-                GroupName,
-                FigureExtra,
-                AchievementScore,
-                Bool1
-            );
+            packet
+                .WriteString(Gender.ToShortString())
+                .WriteLegacyLong(GroupId)
+                .WriteInt(Int8)
+                .WriteString(GroupName)
+                .WriteString(FigureExtra)
+                .WriteInt(AchievementScore)
+                .WriteBool(Bool1);
         }
     }
 }

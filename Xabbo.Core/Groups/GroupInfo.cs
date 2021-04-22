@@ -1,5 +1,5 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
@@ -7,38 +7,38 @@ namespace Xabbo.Core
     {
         public static GroupInfo Parse(IReadOnlyPacket packet) => new GroupInfo(packet);
 
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; }
         public string BadgeCode { get; set; }
         public string PrimaryColor { get; set; }
         public string SecondaryColor { get; set; }
         public bool IsFavorite { get; set; }
-        public int OwnerId { get; set; }
+        public long OwnerId { get; set; }
         public bool HasForum { get; set; }
 
         public GroupInfo() { }
 
         protected GroupInfo(IReadOnlyPacket packet)
         {
-            Id = packet.ReadInt();
+            Id = packet.ReadLegacyLong();
             Name = packet.ReadString();
             BadgeCode = packet.ReadString();
             PrimaryColor = packet.ReadString();
             SecondaryColor = packet.ReadString();
             IsFavorite = packet.ReadBool();
-            OwnerId = packet.ReadInt();
+            OwnerId = packet.ReadLegacyLong();
             HasForum = packet.ReadBool();
         }
 
-        public void Write(IPacket packet)
+        public void Compose(IPacket packet)
         {
-            packet.WriteInt(Id);
+            packet.WriteLegacyLong(Id);
             packet.WriteString(Name);
             packet.WriteString(BadgeCode);
             packet.WriteString(PrimaryColor);
             packet.WriteString(SecondaryColor);
             packet.WriteBool(IsFavorite);
-            packet.WriteInt(OwnerId);
+            packet.WriteLegacyLong(OwnerId);
             packet.WriteBool(HasForum);
         }
     }

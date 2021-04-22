@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
@@ -36,27 +37,33 @@ namespace Xabbo.Core
             if (type == EntityType.PrivateBot)
             {
                 Gender = H.ToGender(packet.ReadString());
-                OwnerId = packet.ReadLong();
+                OwnerId = packet.ReadLegacyLong();
                 OwnerName = packet.ReadString();
 
-                int n = packet.ReadShort();
+                short n = packet.ReadLegacyShort();
                 for (int i = 0; i < n; i++)
+                {
                     Data.Add(packet.ReadShort());
+                }
             }
         }
 
-        public override void Write(IPacket packet)
+        public override void Compose(IPacket packet)
         {
-            base.Write(packet);
+            base.Compose(packet);
 
             if (Type == EntityType.PrivateBot)
             {
-                packet.WriteValues(
-                    Gender.ToShortString(),
-                    OwnerId,
-                    OwnerName,
-                    Data
-                );
+                packet
+                    .WriteString(Gender.ToShortString())
+                    .WriteLegacyLong(OwnerId)
+                    .WriteString(OwnerName);
+
+                packet.WriteLegacyShort((short)Data.Count);
+                foreach (short value in Data)
+                {
+                    packet.WriteShort(value);
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
@@ -30,16 +30,18 @@ namespace Xabbo.Core
 
         protected override void Initialize(IReadOnlyPacket packet)
         {
-            short n = packet.ReadShort();
+            short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
+            {
                 dict.Add(packet.ReadString(), packet.ReadString());
+            }
 
             base.Initialize(packet);
         }
 
         protected override void WriteData(IPacket packet)
         {
-            packet.WriteShort((short)dict.Count);
+            packet.WriteLegacyShort((short)dict.Count);
             foreach (var item in dict)
             {
                 packet.WriteString(item.Key);

@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public abstract class Entity : IEntity, IPacketData
+    public abstract class Entity : IEntity, IComposable
     {
         public bool IsRemoved { get; set; }
         public bool IsHidden { get; set; }
@@ -69,23 +70,24 @@ namespace Xabbo.Core
 
         protected virtual void OnUpdate(EntityStatusUpdate update) { }
 
-        public virtual void Write(IPacket packet)
+        public virtual void Compose(IPacket packet)
         {
-            packet.WriteValues(
-                Id,
-                Name,
-                Motto,
-                Figure,
-                Index,
-                Location,
-                Direction,
-                (int)Type
-            );
+            packet
+                .WriteLegacyLong(Id)
+                .WriteString(Name)
+                .WriteString(Motto)
+                .WriteString(Figure)
+                .WriteInt(Index)
+                .Write(Location)
+                .WriteInt(Direction)
+                .WriteInt((int)Type);
         }
+
+        public override string ToString() => Name;
 
         public static Entity Parse(IReadOnlyPacket packet)
         {
-            long id = packet.ReadLong();
+            long id = packet.ReadLegacyLong();
             string name = packet.ReadString();
             string motto = packet.ReadString();
             string figure = packet.ReadString();
@@ -94,18 +96,13 @@ namespace Xabbo.Core
             int dir = packet.ReadInt();
             var type = (EntityType)packet.ReadInt();
 
-            Entity entity;
-
-            switch (type)
+            Entity entity = type switch
             {
-                case EntityType.User: entity = new RoomUser(id, index, packet); break;
-                case EntityType.Pet: entity = new Pet(id, index, packet); break;
-                case EntityType.PublicBot: 
-                case EntityType.PrivateBot:
-                    entity = new Bot(type, id, index, packet);
-                    break;
-                default: throw new Exception($"Unknown entity type: {type}");
-            }
+                EntityType.User => new RoomUser(id, index, packet),
+                EntityType.Pet => new Pet(id, index, packet),
+                EntityType.PublicBot or EntityType.PrivateBot => new Bot(type, id, index, packet),
+                _ => throw new Exception($"Unknown entity type: {type}"),
+            };
 
             entity.Name = name;
             entity.Motto = motto;
@@ -118,22 +115,29 @@ namespace Xabbo.Core
 
         public static Entity[] ParseAll(IReadOnlyPacket packet)
         {
-            int n = packet.ReadInt();
-            var entities = new Entity[n];
+            short n = packet.ReadLegacyShort();
+
+            Entity[] entities = new Entity[n];
             for (int i = 0; i < n; i++)
+            {
                 entities[i] = Parse(packet);
+            }
+
             return entities;
         }
 
-        public static void WriteAll(IPacket packet, IEnumerable<IEntity> entities)
+        public static void ComposeAll(IPacket packet, IEnumerable<IEntity> entities)
         {
-            packet.WriteInt(entities.Count());
+            packet.WriteLegacyShort((short)entities.Count());
             foreach (var entity in entities)
-                entity.Write(packet);
+            {
+                entity.Compose(packet);
+            }
         }
 
-        public static void WriteAll(IPacket packet, params IEntity[] entities) => WriteAll(packet, (IEnumerable<IEntity>)entities);
-
-        public override string ToString() => Name;
+        public static void ComposeAll(IPacket packet, params IEntity[] entities)
+        { 
+            ComposeAll(packet, (IEnumerable<IEntity>)entities);
+        }
     }
 }

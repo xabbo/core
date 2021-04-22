@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class Heightmap : IHeightMap
+    public class Heightmap : IHeightmap
     {
         public int Width { get; }
         public int Length { get; }
         public short[] Values { get; }
-        IReadOnlyList<short> IHeightMap.Values => Values;
+        IReadOnlyList<short> IHeightmap.Values => Values;
 
         public short this[int x, int y]
         {
@@ -38,7 +38,7 @@ namespace Xabbo.Core
         private Heightmap(IReadOnlyPacket packet)
         {
             Width = packet.ReadInt();
-            int n = packet.ReadShort();
+            short n = packet.ReadLegacyShort();
             Length = n / Width;
 
             Values = new short[n];
@@ -100,9 +100,7 @@ namespace Xabbo.Core
         public bool IsFree(int x, int y) => IsTile(x, y) && !IsBlocked(x, y);
         public bool IsFree((int X, int Y) location) => IsFree(location.X, location.Y);
 
-        public static Heightmap Parse(IReadOnlyPacket packet) => new Heightmap(packet);
-
-        public void Write(IPacket packet)
+        public void Compose(IPacket packet)
         {
             if (Values == null)
                 throw new NullReferenceException("Values cannot be null.");
@@ -114,5 +112,7 @@ namespace Xabbo.Core
             for (int i = 0; i < Values.Length; i++)
                 packet.WriteShort(Values[i]);
         }
+
+        public static Heightmap Parse(IReadOnlyPacket packet) => new Heightmap(packet);
     }
 }

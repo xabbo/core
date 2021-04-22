@@ -1,12 +1,12 @@
 ﻿using System;
 
+using Xabbo.Messages;
+using Xabbo.Interceptor;
+
 using Xabbo.Core.Events;
-using Xabbo.Core.Messages;
-using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Game
 {
-#if FALSE
     public class TradeManager : GameStateManager
     {
         private readonly ProfileManager _profileManager;
@@ -71,7 +71,7 @@ namespace Xabbo.Core.Game
             PartnerOffer = null;
         }
 
-        [Receive(nameof(Incoming.TradeOpen)]
+        [Receive(nameof(Incoming.TradeOpen))]
         private void HandleTradeStart(IReadOnlyPacket packet)
         {
             if (_profileManager.UserData == null)
@@ -264,5 +264,4 @@ namespace Xabbo.Core.Game
             }
         }
     }
-#endif
 }

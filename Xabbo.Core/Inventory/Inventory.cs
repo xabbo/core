@@ -2,34 +2,26 @@
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     public class Inventory : IInventory, ICollection<InventoryItem>
     {
-        public static Inventory Parse(IReadOnlyPacket packet) => new Inventory(packet);
-
-        public static IEnumerable<InventoryItem> ParseItems(IReadOnlyPacket packet)
-        {
-            short n = packet.ReadShort();
-            for (int i = 0; i < n; i++)
-                yield return InventoryItem.Parse(packet);
-        }
-
-        private readonly List<InventoryItem> list = new List<InventoryItem>();
+        private readonly List<InventoryItem> _list = new List<InventoryItem>();
 
         public int TotalPackets { get; set; }
         public int PacketIndex { get; set; }
 
         bool ICollection<InventoryItem>.IsReadOnly => false;
 
-        public int Count => list.Count;
+        public int Count => _list.Count;
 
         public InventoryItem this[int index]
         {
-            get => list[index];
-            set => list[index] = value;
+            get => _list[index];
+            set => _list[index] = value;
         }
 
         public IEnumerable<InventoryItem> FloorItems => this.Where<InventoryItem>(item => item.IsFloorItem);
@@ -44,19 +36,34 @@ namespace Xabbo.Core
             TotalPackets = packet.ReadInt();
             PacketIndex = packet.ReadInt();
 
-            int n = packet.ReadInt();
-            for (int i = 0; i < n; i++)
-                Add(InventoryItem.Parse(packet));
+            foreach (InventoryItem item in ParseItems(packet))
+            {
+                Add(item);
+            }
         }
 
-        public void Add(InventoryItem item) => list.Add(item);
-        public bool Remove(InventoryItem item) => list.Remove(item);
-        public void Clear() => list.Clear();
-        public bool Contains(InventoryItem item) => list.Contains(item);
-        public void CopyTo(InventoryItem[] array, int arrayIndex) => list.CopyTo(array, arrayIndex);
+        public void Add(InventoryItem item) => _list.Add(item);
+        public bool Remove(InventoryItem item) => _list.Remove(item);
+        public void Clear() => _list.Clear();
+        public bool Contains(InventoryItem item) => _list.Contains(item);
+        public void CopyTo(InventoryItem[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
 
-        public IEnumerator<InventoryItem> GetEnumerator() => list.GetEnumerator();
+        public IEnumerator<InventoryItem> GetEnumerator() => _list.GetEnumerator();
         IEnumerator<IInventoryItem> IEnumerable<IInventoryItem>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public static Inventory Parse(IReadOnlyPacket packet)
+        {
+            return new Inventory(packet);
+        }
+
+        public static IEnumerable<InventoryItem> ParseItems(IReadOnlyPacket packet)
+        {
+            int n = packet.ReadLegacyShort();
+            for (int i = 0; i < n; i++)
+            {
+                yield return InventoryItem.Parse(packet);
+            }
+        }
     }
 }

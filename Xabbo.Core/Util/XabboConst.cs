@@ -1,5 +1,5 @@
 ﻿using System;
-using Xabbo.Core.Messages;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {

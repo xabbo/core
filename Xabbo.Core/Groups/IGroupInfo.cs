@@ -1,17 +1,18 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public interface IGroupInfo : IPacketData
+    public interface IGroupInfo : IComposable
     {
-        int Id { get; }
+        long Id { get; }
         string Name { get; }
         string BadgeCode { get;}
         string PrimaryColor { get; }
         string SecondaryColor { get; }
         bool IsFavorite { get; }
-        int OwnerId { get; }
+        long OwnerId { get; }
         bool HasForum { get; }
     }
 }

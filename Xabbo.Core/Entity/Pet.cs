@@ -1,5 +1,6 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
@@ -30,7 +31,7 @@ namespace Xabbo.Core
             : this(id, index)
         {
             Breed = packet.ReadInt();
-            OwnerId = packet.ReadLong();
+            OwnerId = packet.ReadLegacyLong();
             OwnerName = packet.ReadString();
             RarityLevel = packet.ReadInt();
             Bool1 = packet.ReadBool();
@@ -43,24 +44,22 @@ namespace Xabbo.Core
             Stance = packet.ReadString();
         }
 
-        public override void Write(IPacket packet)
+        public override void Compose(IPacket packet)
         {
-            base.Write(packet);
+            base.Compose(packet);
 
-            packet.WriteValues(
-                Breed,
-                OwnerId,
-                OwnerName,
-                RarityLevel,
-                Bool1,
-                Bool2,
-                Bool3,
-                Bool4,
-                Bool5,
-                Bool6,
-                Level,
-                Stance
-            );
+            packet
+                .WriteInt(Breed)
+                .WriteLegacyLong(OwnerId)
+                .WriteInt(RarityLevel)
+                .WriteBool(Bool1)
+                .WriteBool(Bool2)
+                .WriteBool(Bool3)
+                .WriteBool(Bool4)
+                .WriteBool(Bool5)
+                .WriteBool(Bool6)
+                .WriteInt(Level)
+                .WriteString(Stance);
         }
     }
 }

@@ -2,69 +2,23 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     public class WallItem : Furni, IWallItem
     {
-        public static WallItem Parse(IReadOnlyPacket packet, bool readName = true) => new WallItem(packet, readName);
-
-        public static WallItem[] ParseAll(IReadOnlyPacket packet)
-        {
-            var ownerDictionary = new Dictionary<long, string>();
-
-            int n = packet.ReadShort();
-            for (int i = 0; i < n; i++)
-                ownerDictionary.Add(packet.ReadLong(), packet.ReadString());
-
-            n = packet.ReadShort();
-            WallItem[] wallItems = new WallItem[n];
-            for (int i = 0; i < n; i++)
-            {
-                var item = wallItems[i] = Parse(packet, false);
-                if (ownerDictionary.TryGetValue(item.OwnerId, out string? ownerName))
-                    item.OwnerName = ownerName;
-            }
-
-            return wallItems;
-        }
-
-        public static void WriteAll(IPacket packet, IEnumerable<IWallItem> items)
-        {
-            var ownerIds = new HashSet<long>();
-            var ownerDictionary = items
-                .Where(x => ownerIds.Add(x.OwnerId))
-                .ToDictionary(
-                    key => key.OwnerId,
-                    val => val.OwnerName
-                );
-
-            packet.WriteShort((short)ownerDictionary.Count);
-            foreach (var pair in ownerDictionary)
-            {
-                packet.WriteLong(pair.Key);
-                packet.WriteString(pair.Value);
-            }
-
-            packet.WriteShort((short)items.Count());
-            foreach (var item in items)
-                item.Write(packet, false);
-        }
-
-        public static void WriteAll(IPacket packet, params WallItem[] items) => WriteAll(packet, (IEnumerable<IWallItem>)items);
-
         public override ItemType Type => ItemType.Wall;
 
-        private string data;
+        private string _data;
         public string Data
         {
-            get => data;
+            get => _data;
             set
             {
                 if (value is null)
                     throw new ArgumentNullException("Data");
-                data = value;
+                _data = value;
             }
         }
 
@@ -92,7 +46,7 @@ namespace Xabbo.Core
             OwnerId = -1;
             OwnerName = "(unknown)";
 
-            Data = string.Empty;
+            _data = string.Empty;
             SecondsToExpiration = -1;
             Usage = FurniUsage.None;
             Location = WallLocation.Zero;
@@ -113,19 +67,78 @@ namespace Xabbo.Core
                 OwnerName = packet.ReadString();
         }
 
-        public override void Write(IPacket packet) => Write(packet, true);
-
-        public override void Write(IPacket packet, bool writeOwnerName = true)
+        public override void Compose(IPacket packet)
         {
-            packet.WriteLong(Id);
+            Compose(packet, true);
+        }
+
+        public override void Compose(IPacket packet, bool writeOwnerName = true)
+        {
+            packet.WriteLegacyLong(Id);
             packet.WriteInt(Kind);
             packet.WriteString(Location.ToString());
             packet.WriteString(Data);
             packet.WriteInt(SecondsToExpiration);
             packet.WriteInt((int)Usage);
-            packet.WriteLong(OwnerId);
+            packet.WriteLegacyLong(OwnerId);
+
             if (writeOwnerName)
+            {
                 packet.WriteString(OwnerName);
+            }
         }
+
+        public static WallItem Parse(IReadOnlyPacket packet, bool readName = true)
+        {
+            return new WallItem(packet, readName);
+        }
+
+        public static WallItem[] ParseAll(IReadOnlyPacket packet)
+        {
+            var ownerDictionary = new Dictionary<long, string>();
+
+            int n = packet.ReadLegacyShort();
+            for (int i = 0; i < n; i++)
+                ownerDictionary.Add(packet.ReadLegacyLong(), packet.ReadString());
+
+            n = packet.ReadLegacyShort();
+            WallItem[] wallItems = new WallItem[n];
+            for (int i = 0; i < n; i++)
+            {
+                var item = wallItems[i] = Parse(packet, false);
+                if (ownerDictionary.TryGetValue(item.OwnerId, out string? ownerName))
+                    item.OwnerName = ownerName;
+            }
+
+            return wallItems;
+        }
+
+        public static void WriteAll(IPacket packet, IEnumerable<IWallItem> items)
+        {
+            var ownerIds = new HashSet<long>();
+            var ownerDictionary = items
+                .Where(x => ownerIds.Add(x.OwnerId))
+                .ToDictionary(
+                    key => key.OwnerId,
+                    val => val.OwnerName
+                );
+
+            packet.WriteLegacyShort((short)ownerDictionary.Count);
+            foreach (var pair in ownerDictionary)
+            {
+                packet.WriteLegacyLong(pair.Key);
+                packet.WriteString(pair.Value);
+            }
+
+            packet.WriteLegacyShort((short)items.Count());
+            foreach (var item in items)
+                item.Compose(packet, false);
+        }
+
+        public static void WriteAll(IPacket packet, params WallItem[] items)
+        {
+            WriteAll(packet, (IEnumerable<IWallItem>)items);
+        }
+
     }
 }

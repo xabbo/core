@@ -1,12 +1,11 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     public class CatalogPageData : ICatalogPageData
     {
-        public static CatalogPageData Parse(IReadOnlyPacket packet) => new CatalogPageData(packet);
-
         public int Position { get; set; }
         public string String1 { get; set; }
         public string String2 { get; set; }
@@ -16,9 +15,16 @@ namespace Xabbo.Core
         public string String4 { get; set; }
         public int SecondsToExpiration { get; set; }
 
-        public CatalogPageData() { }
+        public CatalogPageData()
+        {
+            String1 =
+            String2 =
+            String3 =
+            String4 = string.Empty;
+        }
 
-        protected CatalogPageData(IReadOnlyPacket packet)
+        protected CatalogPageData(IReadOnlyPacket packet, ClientType clientType)
+            : this()
         {
             Position = packet.ReadInt();
             String1 = packet.ReadString();
@@ -41,6 +47,11 @@ namespace Xabbo.Core
             }
 
             SecondsToExpiration = packet.ReadInt();
+        }
+
+        public static CatalogPageData Parse(IReadOnlyPacket packet, ClientType clientType = ClientType.Unknown)
+        {
+            return new CatalogPageData(packet, clientType);
         }
     }
 }

@@ -1,12 +1,11 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     public class RoomData : RoomInfo, IRoomData
     {
-        public static new RoomData Parse(IReadOnlyPacket packet) => new RoomData(packet.ReadBool(), packet);
-
         public bool IsUpdating { get; set; }
         public bool ForceLoad { get; set; }
         public bool Bool3 { get; set; }
@@ -21,7 +20,11 @@ namespace Xabbo.Core
         public int UnknownInt1 { get; set; }
         public int UnknownInt2 { get; set; }
 
-        public RoomData() { }
+        public RoomData()
+        {
+            Moderation = new ModerationSettings();
+            ChatSettings = new ChatSettings();
+        }
 
         protected RoomData(bool isUpdating, IReadOnlyPacket packet)
             : base(packet)
@@ -38,26 +41,34 @@ namespace Xabbo.Core
             ShowMuteButton = packet.ReadBool();
             ChatSettings = ChatSettings.Parse(packet);
 
-            UnknownInt1 = packet.ReadInt();
-            UnknownInt2 = packet.ReadInt();
+            if (packet.Protocol == ClientType.Unity)
+            {
+                UnknownInt1 = packet.ReadInt();
+                UnknownInt2 = packet.ReadInt();
+            }
         }
 
-        public override void Write(IPacket packet)
+        public override void Compose(IPacket packet)
         {
             packet.WriteBool(IsUpdating);
 
-            base.Write(packet);
+            base.Compose(packet);
 
             packet.WriteBool(ForceLoad);
             packet.WriteBool(Bool3);
             packet.WriteBool(BypassAccess);
             packet.WriteBool(IsRoomMuted);
 
-            Moderation.Write(packet);
+            Moderation.Compose(packet);
 
             packet.WriteBool(ShowMuteButton);
 
-            ChatSettings.Write(packet);
+            ChatSettings.Compose(packet);
+        }
+
+        public static new RoomData Parse(IReadOnlyPacket packet)
+        {
+            return new RoomData(packet.ReadBool(), packet);
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Xabbo.Core.Messages;
+using Xabbo.Messages;
+using Xabbo.Interceptor;
+using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks
 {
@@ -15,6 +17,10 @@ namespace Xabbo.Core.Tasks
         {
             this.pageId = pageId;
             this.mode = mode;
+        }
+
+        public GetCatalogPageTask(IInterceptor interceptor) : base(interceptor)
+        {
         }
 
         protected override Task OnExecuteAsync() => SendAsync(Out.GetCatalogPage, pageId, -1, mode);

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class RollerUpdate : IPacketData
+    public class RollerUpdate : IComposable
     {
-        public static RollerUpdate Parse(IReadOnlyPacket packet) => new RollerUpdate(packet);
-
         public int LocationX { get; set; }
         public int LocationY { get; set; }
         public int TargetX { get; set; }
@@ -32,10 +31,14 @@ namespace Xabbo.Core
             LocationY = packet.ReadInt();
             TargetX = packet.ReadInt();
             TargetY = packet.ReadInt();
-            int n = packet.ReadShort();
+
+            int n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
+            {
                 ObjectUpdates.Add(RollerObjectUpdate.Parse(packet));
-            RollerId = packet.ReadLong();
+            }
+
+            RollerId = packet.ReadLegacyLong();
 
             if (packet.Available > 0)
             {
@@ -43,36 +46,43 @@ namespace Xabbo.Core
                 if (Type == RollerUpdateType.MovingEntity ||
                     Type == RollerUpdateType.StationaryEntity)
                 {
-                    packet.ReadInt();
+                    if (packet.Protocol == ClientType.Unity)
+                    {
+                        packet.ReadInt();
+                    }
                     // Entity index may have changed to long here
                     // but it's int everywhere else ???
                     EntityIndex = packet.ReadInt();
-                    EntityLocationZ = packet.ReadFloat();
-                    EntityTargetZ = packet.ReadFloat();
+                    EntityLocationZ = packet.ReadLegacyFloat();
+                    EntityTargetZ = packet.ReadLegacyFloat();
                 }
             }
         }
 
-        public void Write(IPacket packet)
+        public void Compose(IPacket packet)
         {
             packet.WriteInt(LocationX);
             packet.WriteInt(LocationY);
             packet.WriteInt(TargetX);
             packet.WriteInt(TargetY);
 
-            packet.WriteShort((short)ObjectUpdates.Count);
+            packet.WriteLegacyShort((short)ObjectUpdates.Count);
             foreach (var update in ObjectUpdates)
-                update.Write(packet);
+            {
+                update.Compose(packet);
+            }
 
-            packet.WriteLong(RollerId);
+            packet.WriteLegacyLong(RollerId);
 
             if (Type != RollerUpdateType.None)
             {
                 packet.WriteInt((int)Type);
-                packet.WriteLong(EntityIndex);
-                packet.WriteFloat(EntityLocationZ);
+                packet.WriteLegacyLong(EntityIndex);
+                packet.WriteFloat(EntityLocationZ); // WriteLegacyFloat ?
                 packet.WriteFloat(EntityTargetZ);
             }
         }
+
+        public static RollerUpdate Parse(IReadOnlyPacket packet) => new RollerUpdate(packet);
     }
 }

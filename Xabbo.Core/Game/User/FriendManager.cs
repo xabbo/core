@@ -3,8 +3,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
+using Xabbo.Messages;
+using Xabbo.Interceptor;
+
 using Xabbo.Core.Events;
-using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Game
 {

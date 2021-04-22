@@ -1,9 +1,9 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public interface IItemData : IPacketData
+    public interface IItemData : IComposable
     {
         StuffDataType Type { get; }
 

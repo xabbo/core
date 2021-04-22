@@ -1,5 +1,6 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 /*
 	Achievement {
@@ -25,7 +26,7 @@ using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public class Achievement : IAchievement, IPacketData
+    public class Achievement : IAchievement, IComposable
     {
         public int Id { get; set; }
         public int Level { get; set; }
@@ -40,7 +41,7 @@ namespace Xabbo.Core
         public string String3 { get; set; }
         public int MaxLevel { get; set; }
         public int Int9 { get; set; }
-        public short Short1 { get; set; }
+        public short _Short1 { get; set; }
 
         public Achievement()
         {
@@ -64,10 +65,14 @@ namespace Xabbo.Core
             String3 = packet.ReadString();
             MaxLevel = packet.ReadInt();
             Int9 = packet.ReadInt();
-            Short1 = packet.ReadShort();
+
+            if (packet.Protocol == ClientType.Unity)
+            {
+                _Short1 = packet.ReadShort();
+            }
         }
 
-        public void Write(IPacket packet)
+        public void Compose(IPacket packet)
         {
             packet.WriteValues(
                 Id,
@@ -84,6 +89,11 @@ namespace Xabbo.Core
                 MaxLevel,
                 Int9
             );
+
+            if (packet.Protocol == ClientType.Unity)
+            {
+                packet.WriteShort(_Short1);
+            }
         }
 
         public static Achievement Parse(IReadOnlyPacket packet) => new Achievement(packet);

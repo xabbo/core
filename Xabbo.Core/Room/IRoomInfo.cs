@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public interface IRoomInfo : IPacketData
+    public interface IRoomInfo : IComposable
     {
         long Id { get; }
         string Name { get; }
@@ -32,7 +33,7 @@ namespace Xabbo.Core
         bool AllowPets { get; }
 
         string OfficialRoomPicRef { get; }
-        int GroupId { get; }
+        long GroupId { get; }
         string GroupName { get; }
         string GroupBadge { get; }
         string EventName { get; }

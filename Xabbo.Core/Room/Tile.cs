@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Globalization;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public struct Tile : IPacketData
+    public struct Tile : IComposable
     {
         public static readonly Tile Zero = new Tile(0, 0, 0);
 
@@ -25,7 +26,7 @@ namespace Xabbo.Core
             : this(x, y, 0)
         { }
 
-        public void Write(IPacket packet)
+        public void Compose(IPacket packet)
         {
             packet.WriteInt(X);
             packet.WriteInt(Y);
@@ -108,7 +109,11 @@ namespace Xabbo.Core
         public static implicit operator Tile((int X, int Y) location) => new Tile(location.X, location.Y);
         public static implicit operator (int X, int Y)(Tile tile) => (tile.X, tile.Y);
 
-        public static Tile Parse(IReadOnlyPacket packet) => new Tile(packet.ReadInt(), packet.ReadInt(), packet.ReadFloatAsString());
+        public static Tile Parse(IReadOnlyPacket packet)
+        {
+            return new Tile(packet.ReadInt(), packet.ReadInt(), packet.ReadFloatAsString());
+        }
+
         public static Tile Parse(string format)
         {
             var split = format.Split(',');

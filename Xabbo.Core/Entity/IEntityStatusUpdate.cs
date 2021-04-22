@@ -1,9 +1,10 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public interface IEntityStatusUpdate : IPacketData
+    public interface IEntityStatusUpdate : IComposable
     {
         int Index { get; }
         Tile Location { get; }

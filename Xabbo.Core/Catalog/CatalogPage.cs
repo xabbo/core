@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     public class CatalogPage : ICatalogPage
     {
-        public static CatalogPage Parse(IReadOnlyPacket packet) => new CatalogPage(packet);
-
         public int Id { get; set; }
         public string Mode { get; set; }
         public string LayoutCode { get; set; }
@@ -33,7 +32,7 @@ namespace Xabbo.Core
             Data = new List<CatalogPageData>();
         }
 
-        protected CatalogPage(IReadOnlyPacket packet)
+        protected CatalogPage(IReadOnlyPacket packet, ClientType clientType)
         {
             Id = packet.ReadInt();
             Mode = packet.ReadString();
@@ -49,7 +48,7 @@ namespace Xabbo.Core
 
             n = packet.ReadShort();
             for (int i = 0; i < n; i++)
-                Offers.Add(CatalogOffer.Parse(packet));
+                Offers.Add(CatalogOffer.Parse(packet, clientType));
 
             UnknownIntA = packet.ReadInt();
             AcceptSeasonCurrencyAsCredits = packet.ReadBool();
@@ -57,8 +56,13 @@ namespace Xabbo.Core
             {
                 n = packet.ReadInt();
                 for (int i = 0; i < n; i++)
-                    Data.Add(CatalogPageData.Parse(packet));
+                    Data.Add(CatalogPageData.Parse(packet, clientType));
             }
+        }
+
+        public static CatalogPage Parse(IReadOnlyPacket packet, ClientType clientType = ClientType.Unknown)
+        {
+            return new CatalogPage(packet, clientType);
         }
     }
 }

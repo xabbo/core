@@ -4,12 +4,13 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-using Xabbo.Core.Messages;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
+using Xabbo.Interceptor;
+using Xabbo.Interceptor.Dispatcher;
 
 namespace Xabbo.Core.Game
 {
-    public abstract class GameStateManager : INotifyPropertyChanged, IListener, IDisposable
+    public abstract class GameStateManager : INotifyPropertyChanged, IDisposable
     {
         public static IEnumerable<Type> GetManagerTypes()
         {
@@ -37,15 +38,14 @@ namespace Xabbo.Core.Game
         private bool _disposed;
 
         protected IInterceptor Interceptor { get; }
-        protected MessageDispatcher Dispatcher => Interceptor.Dispatcher;
-        protected Headers Headers => Dispatcher.Headers;
-        protected Incoming In => Headers.Incoming;
-        protected Outgoing Out => Headers.Outgoing;
+        protected IInterceptDispatcher Dispatcher => Interceptor.Dispatcher;
+        protected Incoming In => Interceptor.Messages.In;
+        protected Outgoing Out => Interceptor.Messages.Out;
 
         public GameStateManager(IInterceptor interceptor)
         {
             Interceptor = interceptor;
-            Interceptor.Dispatcher.Attach(this);
+            Interceptor.Dispatcher.Bind(this);
         }
 
         protected Task SendAsync(Header header, params object[] values) => Interceptor.SendToServerAsync(header, values);
@@ -61,7 +61,7 @@ namespace Xabbo.Core.Game
 
             if (disposing)
             {
-                Interceptor.Dispatcher.Detach(this);
+                Interceptor.Dispatcher.Release(this);
             }
         }
 

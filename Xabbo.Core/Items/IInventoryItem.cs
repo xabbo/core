@@ -1,9 +1,9 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public interface IInventoryItem : IItem, IPacketData
+    public interface IInventoryItem : IItem, IComposable
     {
         /// <summary>
         /// Gets the ID of the inventory item.
@@ -45,6 +45,6 @@ namespace Xabbo.Core
         /// Gets the extra state of the inventory item which is used for
         /// consumable state, linked teleporter ID, etc.
         /// </summary>
-        int Extra { get; }
+        long Extra { get; }
     }
 }

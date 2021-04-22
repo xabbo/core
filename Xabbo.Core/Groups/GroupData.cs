@@ -1,11 +1,13 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     public class GroupData : IGroupData
     {
-        public static GroupData Parse(IReadOnlyPacket packet) => new GroupData(packet);
+        public static GroupData Parse(IReadOnlyPacket packet, ClientType clientType = ClientType.Unknown)
+            => new GroupData(packet, clientType);
 
         public long Id { get; set; }
         public bool CanLeave { get; set; }
@@ -27,7 +29,7 @@ namespace Xabbo.Core
         public int PendingRequests { get; set; }
         public bool CanViewForum { get; set; }
 
-        protected GroupData(IReadOnlyPacket packet)
+        protected GroupData(IReadOnlyPacket packet, ClientType clientType)
         {
             Id = packet.ReadLong();
             CanLeave = packet.ReadBool();

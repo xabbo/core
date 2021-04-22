@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
@@ -211,13 +213,14 @@ namespace Xabbo.Core
             ParseStatus(packet.ReadString());
         }
 
-        public void Write(IPacket packet)
+        public void Compose(IPacket packet)
         {
-            packet.WriteInt(Index);
-            Location.Write(packet);
-            packet.WriteInt(HeadDirection);
-            packet.WriteInt(Direction);
-            packet.WriteString(CompileStatus());
+            packet
+                .WriteInt(Index)
+                .Write(Location)
+                .WriteInt(HeadDirection)
+                .WriteInt(Direction)
+                .WriteString(CompileStatus());
         }
 
         private void ParseStatus(string status)
@@ -265,9 +268,10 @@ namespace Xabbo.Core
         }
 
         bool IReadOnlyDictionary<string, IReadOnlyList<string>>.ContainsKey(string key) => fragments.ContainsKey(key);
-        bool IReadOnlyDictionary<string, IReadOnlyList<string>>.TryGetValue(string key, out IReadOnlyList<string> value)
+        bool IReadOnlyDictionary<string, IReadOnlyList<string>>.TryGetValue(string key,
+            [NotNullWhen(true)] out IReadOnlyList<string>? value)
         {
-            if (fragments.TryGetValue(key, out string[] array))
+            if (fragments.TryGetValue(key, out string[]? array))
             {
                 value = array;
                 return true;
@@ -288,23 +292,31 @@ namespace Xabbo.Core
         }
 
         IEnumerator IEnumerable.GetEnumerator()
-            => ((IEnumerable<KeyValuePair<string, IReadOnlyCollection<string>>>)this).GetEnumerator();
+        { 
+            return ((IEnumerable<KeyValuePair<string, IReadOnlyCollection<string>>>)this).GetEnumerator();
+        }
 
         public static EntityStatusUpdate Parse(IReadOnlyPacket packet) => new EntityStatusUpdate(packet);
         public static EntityStatusUpdate[] ParseAll(IReadOnlyPacket packet)
         {
-            int n = packet.ReadShort();
+            short n = packet.ReadLegacyShort();
+
             EntityStatusUpdate[] entityUpdates = new EntityStatusUpdate[n];
             for (int i = 0; i < n; i++)
+            {
                 entityUpdates[i] = Parse(packet);
+            }
+
             return entityUpdates;
         }
 
-        public static void WriteAll(IPacket packet, IEnumerable<IEntityStatusUpdate> updates)
+        public static void ComposeAll(IPacket packet, IEnumerable<IEntityStatusUpdate> updates)
         {
-            packet.WriteShort((short)updates.Count());
+            packet.WriteLegacyShort((short)updates.Count());
             foreach (var update in updates)
-                update.Write(packet);
+            {
+                update.Compose(packet);
+            }
         }
     }
 }

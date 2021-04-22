@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xabbo.Core.Events;
-using Xabbo.Core.Messages;
+using Xabbo.Messages;
 using Xabbo.Core.Tasks;
 
 namespace Xabbo.Core.Game

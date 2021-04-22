@@ -3,23 +3,15 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
+using Xabbo.Messages;
+using Xabbo.Interceptor;
+
 using Xabbo.Core.Events;
-using Xabbo.Core.Messages;
-using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core.Game
 {
     public class FurniManager : GameStateManager
     {
-        public enum Features
-        {
-            Management,
-            FloorItemManagement,
-            FloorItemUpdates,
-            WallItemManagement,
-            WallItemUpdates
-        }
-
         private readonly RoomManager _roomManager;
 
         private readonly ConcurrentDictionary<long, FloorItem> _floorItems = new();
@@ -33,6 +25,7 @@ namespace Xabbo.Core.Game
         /// Gets whether the floor item with the specified ID exists in the room or not.
         /// </summary>
         public bool FloorItemExists(long itemId) => _floorItems.ContainsKey(itemId);
+
         /// <summary>
         /// Gets whether the wall item with the specified ID exists in the room or not.
         /// </summary>
@@ -219,6 +212,7 @@ namespace Xabbo.Core.Game
         [Receive(nameof(Incoming.ActiveObjects))]
         protected void HandleActiveObjects(IReadOnlyPacket packet)
         {
+            Room? room = _roomManager.Room as Room;
             if (!_roomManager.IsLoadingRoom)
             {
                 DebugUtil.Log("not entering room");

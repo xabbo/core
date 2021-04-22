@@ -1,12 +1,11 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class ChatSettings : IChatSettings, IPacketData
+    public class ChatSettings : IChatSettings, IComposable
     {
-        public static ChatSettings Parse(IReadOnlyPacket packet) => new ChatSettings(packet);
-
         public ChatFlow Flow { get; set; }
         public ChatBubbleWidth BubbleWidth { get; set; }
         public ChatScrollSpeed ScrollSpeed { get;  set; }
@@ -31,12 +30,17 @@ namespace Xabbo.Core
             FloodProtection = (ChatFloodProtection)packet.ReadInt();
         }
 
-        public void Write(IPacket packet) => packet.WriteValues(
+        public void Compose(IPacket packet) => packet.WriteValues(
             (int)Flow,
             (int)BubbleWidth,
             (int)ScrollSpeed,
             TalkHearingDistance,
             (int)FloodProtection
         );
+
+        public static ChatSettings Parse(IReadOnlyPacket packet)
+        {
+            return new ChatSettings(packet);
+        }
     }
 }

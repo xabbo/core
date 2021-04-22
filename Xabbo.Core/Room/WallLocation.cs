@@ -1,9 +1,10 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+using System.Diagnostics.CodeAnalysis;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public struct WallLocation : IPacketData
+    public struct WallLocation : IComposable
     {
         /// <summary>
         /// Represents a wall location with all coordinates at zero, and the orientation set to the left wall.
@@ -155,7 +156,7 @@ namespace Xabbo.Core
         public override string ToString() => ToString(WallX, WallY, X, Y, Orientation);
         public static string ToString(int wallX, int wallY, int x, int y, WallOrientation orientation) => $":w={wallX},{wallY} l={x},{y} {orientation.Value}";
 
-        public void Write(IPacket packet)
+        public void Compose(IPacket packet)
         {
             packet.WriteInt(WallX);
             packet.WriteInt(WallY);
@@ -168,14 +169,20 @@ namespace Xabbo.Core
 
         public static WallLocation Parse(string locationString)
         {
-            if (locationString == null)
-                return default;
-            if (!TryParse(locationString, out WallLocation wallLocation))
+            // TODO ?
+            // if (locationString == null)
+            // return default;
+            if (TryParse(locationString, out WallLocation? wallLocation))
+            {
+                return wallLocation.Value;
+            }
+            else
+            {
                 throw new FormatException("Wall location string is of an invalid format");
-            return wallLocation;
+            }
         }
 
-        public static bool TryParse(string locationString, out WallLocation location)
+        public static bool TryParse(string locationString, [NotNullWhen(true)] out WallLocation? location)
         {
             location = null;
 

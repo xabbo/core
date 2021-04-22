@@ -1,9 +1,9 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public interface IModerationSettings : IPacketData
+    public interface IModerationSettings : IComposable
     {
         ModerationPermissions WhoCanMute { get; }
         ModerationPermissions WhoCanKick { get; }

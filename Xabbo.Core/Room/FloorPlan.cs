@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     public class FloorPlan : IFloorPlan
     {
-        public string OriginalString { get; }
+        public string? OriginalString { get; private set; }
 
         public bool UseLegacyScale { get; set; }
         public int Scale => UseLegacyScale ? 32 : 64;
@@ -15,8 +16,8 @@ namespace Xabbo.Core
         public int Width { get; set; }
         public int Length { get; set; }
 
-        private readonly int[] tiles;
-        public IReadOnlyList<int> Tiles => tiles;
+        private int[] _tiles;
+        public IReadOnlyList<int> Tiles => _tiles;
 
         public int this[int x, int y]
         {
@@ -26,30 +27,23 @@ namespace Xabbo.Core
 
         public FloorPlan(int width, int length)
         {
+            if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width));
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
+
             Width = width;
             Length = length;
+
+            _tiles = new int[width * length];
         }
 
-        protected FloorPlan(string map)
+        public FloorPlan(string map)
         {
             OriginalString = map;
 
             UseLegacyScale = false;
             WallHeight = -1;
 
-            tiles = ParseString(map, out int width, out int length);
-            Width = width;
-            Length = length;
-        }
-
-        protected FloorPlan(IReadOnlyPacket packet)
-        {
-            UseLegacyScale = packet.ReadBool();
-
-            WallHeight = packet.ReadInt();
-            OriginalString = packet.ReadString();
-
-            tiles = ParseString(OriginalString, out int width, out int length);
+            _tiles = ParseString(map, out int width, out int length);
             Width = width;
             Length = length;
         }
@@ -57,27 +51,31 @@ namespace Xabbo.Core
         public int GetHeight(int x, int y)
         {
             if (x < 0 || x >= Width)
-                throw new ArgumentOutOfRangeException("x");
+                throw new ArgumentOutOfRangeException(nameof(x));
             if (y < 0 || y >= Length)
-                throw new ArgumentOutOfRangeException("y");
+                throw new ArgumentOutOfRangeException(nameof(y));
 
-            return tiles[y * Width + x];
+            return _tiles[y * Width + x];
         }
+
         public int GetHeight((int X, int Y) location) => GetHeight(location.X, location.Y);
+
         public int GetHeight(Tile tile) => GetHeight(tile.X, tile.Y);
 
         public void SetHeight(int x, int y, int height)
         {
             if (x < 0 || x >= Width)
-                throw new ArgumentOutOfRangeException("x");
+                throw new ArgumentOutOfRangeException(nameof(x));
             if (y < 0 || y >= Length)
-                throw new ArgumentOutOfRangeException("y");
+                throw new ArgumentOutOfRangeException(nameof(y));
             if (height < -1)
-                throw new ArgumentOutOfRangeException("height");
+                throw new ArgumentOutOfRangeException(nameof(height));
 
-            tiles[y * Width + x] = height;
+            _tiles[y * Width + x] = height;
         }
+
         public void SetHeight((int X, int Y) location, int height) => SetHeight(location.X, location.Y, height);
+
         public void SetHeight(Tile location, int height) => SetHeight(location.X, location.Y, height);
 
         public bool IsWalkable(int x, int y)
@@ -87,15 +85,10 @@ namespace Xabbo.Core
 
             return GetHeight(x, y) >= 0;
         }
-        public bool IsWalkable((int X, int Y) location) => IsWalkable(location.X, location.Y);
-        public bool IsWalkable(Tile location) => IsWalkable(location.X, location.Y);
 
-        public void Write(IPacket packet)
-        {
-            packet.WriteBool(UseLegacyScale);
-            packet.WriteInt(WallHeight);
-            packet.WriteString(ToString());
-        }
+        public bool IsWalkable((int X, int Y) location) => IsWalkable(location.X, location.Y);
+
+        public bool IsWalkable(Tile location) => IsWalkable(location.X, location.Y);
 
         public override string ToString()
         {
@@ -106,14 +99,32 @@ namespace Xabbo.Core
                 if (y > 0) sb.Append('\r');
                 for (int x = 0; x < Width; x++)
                 {
-                    sb.Append(H.GetCharacterFromHeight(tiles[y * Width + x]));
+                    sb.Append(H.GetCharacterFromHeight(_tiles[y * Width + x]));
                 }
             }
 
             return sb.ToString();
         }
 
-        public static FloorPlan Parse(IReadOnlyPacket packet) => new FloorPlan(packet);
+        public void Compose(IPacket packet)
+        {
+            packet.WriteBool(UseLegacyScale);
+            packet.WriteInt(WallHeight);
+            packet.WriteString(ToString());
+        }
+
+        public static FloorPlan Parse(IReadOnlyPacket packet)
+        {
+            bool useLegacyScale = packet.ReadBool();
+            int wallHeight = packet.ReadInt();
+            string map = packet.ReadString();
+
+            return new FloorPlan(map)
+            {
+                UseLegacyScale = useLegacyScale,
+                WallHeight = wallHeight
+            };
+        }
 
         public static FloorPlan Parse(string map) => new FloorPlan(map);
 

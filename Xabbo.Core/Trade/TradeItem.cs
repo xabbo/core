@@ -1,5 +1,5 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
@@ -18,7 +18,7 @@ namespace Xabbo.Core
         public int CreationDay { get; set; }
         public int CreationMonth { get; set; }
         public int CreationYear { get; set; }
-        public int Extra { get; set; }
+        public long Extra { get; set; }
 
         bool IInventoryItem.IsTradeable => true;
         bool IInventoryItem.IsSellable => true;
@@ -30,9 +30,9 @@ namespace Xabbo.Core
 
         protected TradeItem(IReadOnlyPacket packet)
         {
-            ItemId = packet.ReadLong();
+            ItemId = packet.ReadLegacyLong();
             Type = H.ToItemType(packet.ReadString());
-            Id = packet.ReadLong();
+            Id = packet.ReadLegacyLong();
             Kind = packet.ReadInt();
             Category = (FurniCategory)packet.ReadInt();
             IsGroupable = packet.ReadBool();
@@ -42,29 +42,38 @@ namespace Xabbo.Core
             CreationYear = packet.ReadInt();
 
             if (Type == ItemType.Floor)
-                Extra = packet.ReadInt();
+            {
+                Extra = packet.ReadLegacyLong();
+            }
             else
+            {
                 Extra = -1;
+            }
         }
 
-        public static TradeItem Parse(IReadOnlyPacket packet) => new TradeItem(packet);
-
-        public void Write(IPacket packet)
+        public void Compose(IPacket packet)
         {
-            packet.WriteLong(ItemId);
-            packet.WriteString(Type.ToShortString());
-            packet.WriteLong(Id);
-            packet.WriteInt(Kind);
-            packet.WriteInt((int)Category);
-            packet.WriteBool(IsGroupable);
-            Data.Write(packet);
-            packet.WriteInt(CreationDay);
-            packet.WriteInt(CreationMonth);
-            packet.WriteInt(CreationYear);
+            packet
+                .WriteLegacyLong(ItemId)
+                .WriteString(Type.ToShortString())
+                .WriteLegacyLong(Id)
+                .WriteInt(Kind)
+                .WriteInt((int)Category)
+                .WriteBool(IsGroupable)
+                .Write(Data)
+                .WriteInt(CreationDay)
+                .WriteInt(CreationMonth)
+                .WriteInt(CreationYear);
 
             if (Type == ItemType.Floor)
-                packet.WriteInt(Extra);
+            {
+                packet.WriteLegacyLong(Extra);
+            }
+        }
 
+        public static TradeItem Parse(IReadOnlyPacket packet)
+        {
+            return new TradeItem(packet);
         }
     }
 }

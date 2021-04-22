@@ -1,5 +1,5 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
@@ -8,8 +8,6 @@ namespace Xabbo.Core
     /// </summary>
     public class UserData : IUserData
     {
-        public static UserData Parse(IReadOnlyPacket packet) => new UserData(packet);
-
         public long Id { get; set; }
         public string Name { get; set; }
         public string Figure { get; set; }
@@ -56,7 +54,7 @@ namespace Xabbo.Core
             Bool3 = packet.ReadBool();
         }
 
-        public void Write(IPacket packet) => packet.WriteValues(
+        public void Compose(IPacket packet) => packet.WriteValues(
             Id,
             Name,
             Figure,
@@ -72,5 +70,7 @@ namespace Xabbo.Core
             IsNameChangeable,
             IsSafetyLocked
         );
+
+        public static UserData Parse(IReadOnlyPacket packet) => new UserData(packet);
     }
 }

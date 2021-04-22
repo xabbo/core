@@ -1,6 +1,6 @@
 ﻿using System;
 using Xabbo.Core;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
@@ -43,7 +43,7 @@ namespace Xabbo.Core
             Relation = (Relation)packet.ReadShort();
         }
 
-        public void Write(IPacket packet) => packet.WriteValues(
+        public void Compose(IPacket packet) => packet.WriteValues(
             Id,
             Name,
             Gender.GetValue(),

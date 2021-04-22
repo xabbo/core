@@ -23,29 +23,23 @@ namespace Xabbo.Core
 
         public static Gender ToGender(int gender)
         {
-            switch (gender)
+            return gender switch
             {
-                case 0: return Gender.Female;
-                case 1: return Gender.Male;
-                default: return Gender.Unisex;
-            }
+                0 => Gender.Female,
+                1 => Gender.Male,
+                _ => Gender.Unisex,
+            };
         }
 
         public static Gender ToGender(string gender)
         {
-            switch (gender.ToLower())
+            return (gender.ToLower()) switch
             {
-                case "m":
-                case "male":
-                    return Gender.Male;
-                case "f":
-                case "female":
-                    return Gender.Female;
-                case "u":
-                case "unisex":
-                    return Gender.Unisex;
-                default: throw new FormatException($"Unknown gender: {gender}");
-            }
+                "m" or "male" => Gender.Male,
+                "f" or "female" => Gender.Female,
+                "u" or "unisex" => Gender.Unisex,
+                _ => throw new FormatException($"Unknown gender: {gender}"),
+            };
         }
 
         public static ItemType ToItemType(string s)
@@ -130,7 +124,7 @@ namespace Xabbo.Core
 
         /// <summary>
         /// Gets a vector that can be used to face the specified direction
-        /// regardless of where your character is in the room.
+        /// regardless of the position of the user in the room.
         /// </summary>
         /// <param name="direction">The direction to face.</param>
         public static (int X, int Y) GetMagicVector(int direction)
@@ -141,23 +135,29 @@ namespace Xabbo.Core
 
         public static (int X, int Y) GetMagicVector(Directions direction) => GetMagicVector((int)direction);
 
-        public static (int X, int Y) GetVector(Directions direction)
+        /// <summary>
+        /// Gets a vector that points in the specified direction by one tile space.
+        /// </summary>
+        public static (int X, int Y) GetDirectionVector(Directions direction)
         {
-            switch (direction)
+            return direction switch
             {
-                case Directions.North: return (0, -1);
-                case Directions.NorthEast: return (1, -1);
-                case Directions.East: return (1, 0);
-                case Directions.SouthEast: return (1, 1);
-                case Directions.South: return (0, 1);
-                case Directions.SouthWest: return (-1, 1);
-                case Directions.West: return (-1, 0);
-                case Directions.NorthWest: return (-1, -1);
-                default: return (0, 0);
-            }
+                Directions.North => (0, -1),
+                Directions.NorthEast => (1, -1),
+                Directions.East => (1, 0),
+                Directions.SouthEast => (1, 1),
+                Directions.South => (0, 1),
+                Directions.SouthWest => (-1, 1),
+                Directions.West => (-1, 0),
+                Directions.NorthWest => (-1, -1),
+                _ => (0, 0),
+            };
         }
 
-        public static (int X, int Y) GetVector(int direction) => GetVector((Directions)direction);
+        /// <summary>
+        /// Gets a vector that points in the specified direction by one tile space.
+        /// </summary>
+        public static (int X, int Y) GetDirectionVector(int direction) => GetDirectionVector((Directions)direction);
         #endregion
 
         #region - Room -
@@ -185,7 +185,7 @@ namespace Xabbo.Core
         #endregion
 
         #region - Text -
-        private static readonly Dictionary<char, string> altCharacterMap = new Dictionary<char, string>()
+        private static readonly Dictionary<char, string> _altCharacterMap = new Dictionary<char, string>()
         {
             { '‡', "🚫" },
             { '|', "❤️" },
@@ -206,15 +206,15 @@ namespace Xabbo.Core
             { '»', "♣️" }
         };
 
-        public static IReadOnlyDictionary<char, string> GetAltCharacterMap() => altCharacterMap.ToDictionary(x => x.Key, x => x.Value);
+        public static IReadOnlyDictionary<char, string> GetAltCharacterMap() => _altCharacterMap.ToDictionary(x => x.Key, x => x.Value);
 
         public static string ReplaceSpecialCharacters(string text)
         {
             var sb = new StringBuilder();
             foreach (char c in text)
             {
-                if (altCharacterMap.ContainsKey(c))
-                    sb.Append(altCharacterMap[c]);
+                if (_altCharacterMap.ContainsKey(c))
+                    sb.Append(_altCharacterMap[c]);
                 else
                     sb.Append(c);
             }

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     public class CatalogOffer : ICatalogOffer
     {
-        public static CatalogOffer Parse(IReadOnlyPacket packet) => new CatalogOffer(packet);
-
         public int Id { get; set; }
         public string FurniLine { get; set; }
         public bool IsRentable { get; set; } // @Sulakore
@@ -29,7 +28,7 @@ namespace Xabbo.Core
             PreviewImage = string.Empty;
         }
 
-        protected CatalogOffer(IReadOnlyPacket packet)
+        protected CatalogOffer(IReadOnlyPacket packet, ClientType clientType)
         {
             Id = packet.ReadInt();
             FurniLine = packet.ReadString();
@@ -41,12 +40,17 @@ namespace Xabbo.Core
 
             int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
-                Products.Add(CatalogProduct.Parse(packet));
+                Products.Add(CatalogProduct.Parse(packet, clientType));
 
             ClubLevel = packet.ReadInt();
             CanPurchaseMultiple = packet.ReadBool();
             IsPet = packet.ReadBool();
             PreviewImage = packet.ReadString();
+        }
+
+        public static CatalogOffer Parse(IReadOnlyPacket packet, ClientType clientType = ClientType.Unknown)
+        {
+            return new CatalogOffer(packet, clientType);
         }
     }
 }

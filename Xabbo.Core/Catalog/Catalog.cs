@@ -1,12 +1,11 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     public class Catalog : ICatalog
     {
-        public static Catalog Parse(IReadOnlyPacket packet) => new Catalog(packet);
-
         public CatalogPageNode Root { get; set; }
         ICatalogPageNode ICatalog.Root => Root;
         public bool UnknownBoolA { get; set; }
@@ -18,9 +17,9 @@ namespace Xabbo.Core
             Mode = string.Empty;
         }
         
-        protected Catalog(IReadOnlyPacket packet)
+        protected Catalog(IReadOnlyPacket packet, ClientType clientType)
         {
-            Root = CatalogPageNode.Parse(packet);
+            Root = CatalogPageNode.Parse(packet, clientType);
             UnknownBoolA = packet.ReadBool();
             Mode = packet.ReadString();
         }
@@ -31,5 +30,10 @@ namespace Xabbo.Core
         ICatalogPageNode ICatalog.Find(string name) => Find(name);
         public CatalogPageNode Find(int? id = null, string name = null, string text = null) => Root.Find(id, name, text);
         ICatalogPageNode ICatalog.Find(int? id, string name, string text) => Find(id, name, text);
+
+        public static Catalog Parse(IReadOnlyPacket packet, ClientType clientType = ClientType.Unknown)
+        {
+            return new Catalog(packet, clientType);
+        }
     }
 }

@@ -4,9 +4,9 @@ namespace Xabbo.Core.Events
 {
     public class HeightMapEventArgs : EventArgs
     {
-        public IHeightMap Map { get; }
+        public IHeightmap Map { get; }
 
-        public HeightMapEventArgs(IHeightMap map)
+        public HeightMapEventArgs(IHeightmap map)
         {
             Map = map;
         }

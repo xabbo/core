@@ -1,7 +1,9 @@
 ﻿using System;
 
+using Xabbo.Messages;
+using Xabbo.Interceptor;
+
 using Xabbo.Core.Events;
-using Xabbo.Core.Messages;
 
 namespace Xabbo.Core.Game
 {
@@ -31,14 +33,23 @@ namespace Xabbo.Core.Game
             var packet = e.Packet;
 
             ChatType chatType;
+
             if (packet.Header == In.Whisper)
+            {
                 chatType = ChatType.Whisper;
+            }
             else if (packet.Header == In.Chat)
+            {
                 chatType = ChatType.Talk;
+            }
             else if (packet.Header == In.Shout)
+            {
                 chatType = ChatType.Shout;
+            }
             else
+            {
                 throw new Exception($"Unable to detect chat type from incoming header: {packet.Header}");
+            }
 
             int index = packet.ReadInt();
             var entity = _entities.GetEntityByIndex(index);

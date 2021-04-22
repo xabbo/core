@@ -1,11 +1,11 @@
 ﻿using System;
 
 using Xabbo.Core.Game;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public interface IFurni : IItem, IPacketData
+    public interface IFurni : IItem, IComposable
     {
         /// <summary>
         /// Gets the owner of the furni's ID
@@ -35,6 +35,6 @@ namespace Xabbo.Core
         /// </summary>
         bool IsHidden { get; }
 
-        void Write(IPacket packet, bool writeOwnerName);
+        void Compose(IPacket packet, bool writeOwnerName);
     }
 }

@@ -10,5 +10,10 @@ namespace Xabbo.Core
         
         [JsonPropertyName("id")]
         public string Id { get; set; }
+
+        public PhotoInfo()
+        {
+            Id = string.Empty;
+        }
     }
 }

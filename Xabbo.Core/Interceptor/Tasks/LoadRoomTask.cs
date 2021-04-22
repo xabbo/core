@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Xabbo.Core.Messages;
+using Xabbo.Messages;
+using Xabbo.Interceptor;
+using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks
 {

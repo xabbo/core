@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     public class CatalogPageNode : ICatalogPageNode
     {
-        public static CatalogPageNode Parse(IReadOnlyPacket packet) => new CatalogPageNode(packet);
-
         public bool IsVisible { get; set; }
         public int Icon { get; set; }
         public int Id { get; set; }
@@ -28,7 +27,7 @@ namespace Xabbo.Core
             Children = new List<CatalogPageNode>();
         }
 
-        protected CatalogPageNode(IReadOnlyPacket packet)
+        protected CatalogPageNode(IReadOnlyPacket packet, ClientType clientType)
         {
             IsVisible = packet.ReadBool();
             Icon = packet.ReadInt();
@@ -42,7 +41,7 @@ namespace Xabbo.Core
 
             n = packet.ReadShort();
             for (int i = 0; i < n; i++)
-                Children.Add(Parse(packet));
+                Children.Add(Parse(packet, clientType));
         }
 
         public IEnumerable<CatalogPageNode> EnumerateDescendants()
@@ -75,5 +74,10 @@ namespace Xabbo.Core
             );
         }
         ICatalogPageNode ICatalogPageNode.Find(int? id, string name, string text) => Find(id, name, text);
+
+        public static CatalogPageNode Parse(IReadOnlyPacket packet, ClientType clientType)
+        {
+            return new CatalogPageNode(packet, clientType);
+        }
     }
 }

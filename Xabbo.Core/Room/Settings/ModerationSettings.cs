@@ -1,12 +1,10 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     public class ModerationSettings : IModerationSettings
     {
-        public static ModerationSettings Parse(IReadOnlyPacket packet) => new ModerationSettings(packet);
-
         public ModerationPermissions WhoCanMute { get; set; }
         public ModerationPermissions WhoCanKick { get; set; }
         public ModerationPermissions WhoCanBan { get; set; }
@@ -20,10 +18,15 @@ namespace Xabbo.Core
             WhoCanBan = (ModerationPermissions)packet.ReadInt();
         }
 
-        public void Write(IPacket packet) => packet.WriteValues(
+        public void Compose(IPacket packet) => packet.WriteValues(
             (int)WhoCanMute,
             (int)WhoCanKick,
             (int)WhoCanBan
         );
+
+        public static ModerationSettings Parse(IReadOnlyPacket packet)
+        {
+            return new ModerationSettings(packet);
+        }
     }
 }

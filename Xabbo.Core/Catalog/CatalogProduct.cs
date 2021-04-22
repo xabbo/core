@@ -1,11 +1,13 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     public class CatalogProduct : ICatalogProduct
     {
-        public static CatalogProduct Parse(IReadOnlyPacket packet) => new CatalogProduct(packet);
+        public static CatalogProduct Parse(IReadOnlyPacket packet, ClientType clientType)
+            => new CatalogProduct(packet, clientType);
 
         public ItemType Type { get; set; }
         public int Kind { get; set; }
@@ -24,7 +26,7 @@ namespace Xabbo.Core
             Variant = string.Empty;
         }
 
-        protected CatalogProduct(IReadOnlyPacket packet)
+        protected CatalogProduct(IReadOnlyPacket packet, ClientType clientType)
         {
             Type = H.ToItemType(packet.ReadShort());
 

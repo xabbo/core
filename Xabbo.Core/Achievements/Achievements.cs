@@ -3,15 +3,14 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     public class Achievements : IAchievements, IReadOnlyCollection<Achievement>
     {
         private readonly ConcurrentDictionary<int, Achievement> _dict;
-
-        public static Achievements Parse(IReadOnlyPacket packet) => new Achievements(packet);
 
         public string String1 { get; set; }
 
@@ -52,5 +51,7 @@ namespace Xabbo.Core
                 (id, ach) => ach
             );
         }
+
+        public static Achievements Parse(IReadOnlyPacket packet) => new Achievements(packet);
     }
 }

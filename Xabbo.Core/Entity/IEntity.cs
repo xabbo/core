@@ -1,11 +1,12 @@
 ﻿using System;
 
+using Xabbo.Messages;
+
 using Xabbo.Core.Game;
-using Xabbo.Core.Protocol;
 
 namespace Xabbo.Core
 {
-    public interface IEntity : IPacketData
+    public interface IEntity : IComposable
     {
         /// <summary>
         /// Gets if the entity has been removed from the room.

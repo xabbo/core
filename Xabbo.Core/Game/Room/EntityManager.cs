@@ -3,8 +3,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
+using Xabbo.Messages;
+using Xabbo.Interceptor;
+
 using Xabbo.Core.Events;
-using Xabbo.Core.Messages;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Xabbo.Core.Game
 {
@@ -81,7 +84,7 @@ namespace Xabbo.Core.Game
         /// <summary>
         /// Attempts to get the entity of the specified type with the specified index.
         /// </summary>
-        public bool TryGetEntityByIndex<T>(int index, out T? entity) where T : IEntity
+        public bool TryGetEntityByIndex<T>(int index, [NotNullWhen(true)] out T? entity) where T : IEntity
         {
             if (_entities.TryGetValue(index, out Entity? e))
             {
@@ -283,10 +286,8 @@ namespace Xabbo.Core.Game
 
             List<Entity> newEntities = new List<Entity>();
 
-            int n = e.Packet.ReadShort();
-            for (int i = 0; i < n; i++)
+            foreach (Entity entity in Entity.ParseAll(e.Packet))
             {
-                Entity entity = Entity.Parse(e.Packet);
                 if (_entities.TryAdd(entity.Index, entity))
                 {
                     newEntities.Add(entity);
@@ -313,7 +314,12 @@ namespace Xabbo.Core.Game
                 return;
             }
 
-            int index = e.Packet.ReadInt();
+            int index = e.Client switch
+            {
+                ClientType.Flash => int.Parse(e.Packet.ReadString()),
+                _ => e.Packet.ReadInt()
+            };
+
             if (_entities.TryRemove(index, out Entity? entity))
             {
                 OnEntityRemoved(entity);
@@ -331,7 +337,7 @@ namespace Xabbo.Core.Game
 
             var updatedEntities = new List<IEntity>();
 
-            int n = e.Packet.ReadShort();
+            short n = e.Packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
             {
                 EntityStatusUpdate update = EntityStatusUpdate.Parse(e.Packet);
@@ -380,7 +386,7 @@ namespace Xabbo.Core.Game
             if (!_roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
-            if (TryGetEntityByIndex(index, out RoomUser user))
+            if (TryGetEntityByIndex(index, out RoomUser? user))
             {
                 string previousFigure = user.Figure;
                 Gender previousGender = user.Gender;
@@ -408,11 +414,11 @@ namespace Xabbo.Core.Game
         {
             if (!_roomManager.IsInRoom) return;
 
-            long id = e.Packet.ReadLong();
+            long id = e.Packet.ReadLegacyLong();
             int index = e.Packet.ReadInt();
             string newName = e.Packet.ReadString();
 
-            if (TryGetEntityByIndex(index, out Entity entity))
+            if (TryGetEntityByIndex(index, out Entity? entity))
             {
                 string previousName = entity.Name;
                 entity.Name = newName;
@@ -430,7 +436,7 @@ namespace Xabbo.Core.Game
             if (!_roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
-            if (TryGetEntityByIndex(index, out Entity entity))
+            if (TryGetEntityByIndex(index, out Entity? entity))
             {
                 bool wasIdle = entity.IsIdle;
                 entity.IsIdle = e.Packet.ReadBool();
@@ -448,7 +454,7 @@ namespace Xabbo.Core.Game
             if (!_roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
-            if (!TryGetEntityByIndex(index, out Entity entity))
+            if (!TryGetEntityByIndex(index, out Entity? entity))
             {
                 DebugUtil.Log($"failed to find entity {index} to update");
                 return;
@@ -466,7 +472,7 @@ namespace Xabbo.Core.Game
             if (!_roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
-            if (!TryGetEntityByIndex(index, out Entity entity))
+            if (!TryGetEntityByIndex(index, out Entity? entity))
             {
                 DebugUtil.Log($"failed to find entity {index} to update");
                 return;
@@ -481,7 +487,7 @@ namespace Xabbo.Core.Game
             if (!_roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
-            if (!TryGetEntityByIndex(index, out Entity entity))
+            if (!TryGetEntityByIndex(index, out Entity? entity))
             {
                 DebugUtil.Log($"failed to find entity {index} to update");
                 return;
@@ -498,7 +504,7 @@ namespace Xabbo.Core.Game
             if (!_roomManager.IsInRoom) return;
 
             int index = e.Packet.ReadInt();
-            if (!TryGetEntityByIndex(index, out Entity entity))
+            if (!TryGetEntityByIndex(index, out Entity? entity))
             {
                 DebugUtil.Log($"failed to find entity {index} to update");
                 return;
@@ -518,7 +524,7 @@ namespace Xabbo.Core.Game
 
             int index = e.Packet.ReadInt();
 
-            if (!TryGetEntityByIndex(index, out Entity entity))
+            if (!TryGetEntityByIndex(index, out Entity? entity))
             {
                 DebugUtil.Log($"failed to find entity {index} to update");
                 return;

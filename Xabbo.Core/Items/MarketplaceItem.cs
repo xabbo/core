@@ -1,5 +1,6 @@
 ﻿using System;
-using Xabbo.Core.Protocol;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
@@ -19,7 +20,7 @@ namespace Xabbo.Core
 
         protected MarketplaceItem(IReadOnlyPacket packet)
         {
-            Id = packet.ReadLong();
+            Id = packet.ReadLegacyLong();
             UnknownInt2 = packet.ReadInt();
 
             int itemType = packet.ReadInt();
@@ -54,43 +55,49 @@ namespace Xabbo.Core
             Offers = packet.ReadInt();
         }
 
-        public void Write(IPacket packet)
+        public void Compose(IPacket packet)
         {
             if (Data == null)
                 throw new Exception("Data cannot be null");
 
-            packet.WriteLong(Id);
-            packet.WriteInt(UnknownInt2);
+            packet
+                .WriteLegacyLong(Id)
+                .WriteInt(UnknownInt2);
 
             if (Type == ItemType.Floor)
             {
                 if (Data.Flags.HasFlag(ItemDataFlags.IsLimitedRare))
                 {
-                    packet.WriteInt(3);
-                    packet.WriteInt(Kind);
-                    packet.WriteInt(Data.LimitedNumber);
-                    packet.WriteInt(Data.LimitedTotal);
+                    packet
+                        .WriteInt(3)
+                        .WriteInt(Kind)
+                        .WriteInt(Data.LimitedNumber)
+                        .WriteInt(Data.LimitedTotal);
                 }
                 else
                 {
-                    packet.WriteInt(1);
-                    packet.WriteInt(Kind);
-                    Data.Write(packet);
+                    packet
+                        .WriteInt(1)
+                        .WriteInt(Kind)
+                        .Write(Data);
                 }
             }
             else if (Type == ItemType.Wall)
             {
-                packet.WriteInt(2);
-                packet.WriteInt(Kind);
-                packet.WriteString(Data.Value);
+                packet
+                    .WriteInt(2)
+                    .WriteInt(Kind)
+                    .WriteString(Data.Value);
             }
             else
             {
-                throw new Exception($"Invlaid MarketplaceItem type: {Type}");
+                throw new Exception($"Invalid MarketplaceItem type: {Type}");
             }
         }
 
         public static MarketplaceItem Parse(IReadOnlyPacket packet)
-          => new MarketplaceItem(packet);
+        { 
+            return new MarketplaceItem(packet);
+        }
     }
 }

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xabbo.Core.Protocol;
+using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public interface IHeightMap : IPacketData
+    public interface IHeightmap : IComposable
     {
         int Width { get; }
         int Length { get; }
