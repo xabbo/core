@@ -37,7 +37,7 @@ namespace Xabbo.Core
 
         protected UserData(IReadOnlyPacket packet)
         {
-            Id = packet.ReadLong();
+            Id = packet.ReadLegacyLong();
             Name = packet.ReadString();
             Figure = packet.ReadString();
             Gender = H.ToGender(packet.ReadString());

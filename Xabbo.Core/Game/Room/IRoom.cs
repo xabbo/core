@@ -11,9 +11,9 @@ namespace Xabbo.Core.Game
         IRoomData? Data { get; }
 
         string Model { get; }
-        string Floor { get; }
-        string Wallpaper { get; }
-        string Landscape { get; }
+        string? Floor { get; }
+        string? Wallpaper { get; }
+        string? Landscape { get; }
 
         Tile DoorTile { get; }
         int EntryDirection { get; }

@@ -45,14 +45,28 @@ namespace Xabbo.Core.Game
         public GameStateManager(IInterceptor interceptor)
         {
             Interceptor = interceptor;
-            Interceptor.Dispatcher.Bind(this);
+            Interceptor.Connected += OnInterceptorConnected;
+            Interceptor.Disconnected += OnInterceptorDisconnected;
+        }
+
+        protected virtual void OnInterceptorConnected(object? sender, EventArgs e)
+        {
+            if (!Interceptor.Dispatcher.IsBound(this))
+            {
+                Interceptor.Dispatcher.Bind(this);
+            }
+        }
+
+        protected virtual void OnInterceptorDisconnected(object? sender, EventArgs e)
+        {
+            Interceptor.Dispatcher.Release(this);
         }
 
         protected Task SendAsync(Header header, params object[] values) => Interceptor.SendToServerAsync(header, values);
         protected Task SendAsync(IReadOnlyPacket packet) => Interceptor.SendToServerAsync(packet);
 
-        protected Task SendLocalAsync(Header header, params object[] values) => Interceptor.SendToClientAsync(header, values);
-        protected Task SendLocalAsync(IReadOnlyPacket packet) => Interceptor.SendToClientAsync(packet);
+        protected Task SendClientAsync(Header header, params object[] values) => Interceptor.SendToClientAsync(header, values);
+        protected Task SendClientAsync(IReadOnlyPacket packet) => Interceptor.SendToClientAsync(packet);
 
         protected virtual void Dispose(bool disposing)
         {

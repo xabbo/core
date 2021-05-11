@@ -101,7 +101,7 @@ namespace Xabbo.Core.Game
         /// <summary>
         /// Attempts to get the entity of the specified type with the specified ID.
         /// </summary>
-        public bool TryGetEntity<T>(int id, out T? entity) where T : IEntity
+        public bool TryGetEntity<T>(long id, [NotNullWhen(true)] out T? entity) where T : IEntity
             => (entity = GetEntity<T>(id)) != null;
 
         /// <summary>
@@ -110,98 +110,7 @@ namespace Xabbo.Core.Game
         public bool TryGetEntity<T>(string name, out T? entity) where T : IEntity
             => (entity = GetEntity<T>(name)) != null;
 
-        #region - Events -
-        /// <summary>
-        /// Invoked when an entity has been added to the room.
-        /// </summary>
-        public event EventHandler<EntityEventArgs>? EntityAdded;
-        /// <summary>
-        /// Invoked when entities have been added to the room.
-        /// </summary>
-        public event EventHandler<EntitiesEventArgs>? EntitiesAdded;
-        /// <summary>
-        /// Invoked when an entity in the room is updated.
-        /// </summary>
-        public event EventHandler<EntityEventArgs>? EntityUpdated;
-        /// <summary>
-        /// Invoked when entities in the room are updated.
-        /// </summary>
-        public event EventHandler<EntitiesEventArgs>? EntitiesUpdated;
-        /// <summary>
-        /// Invoked when an entity slides along a roller.
-        /// </summary>
-        public event EventHandler<EntitySlideEventArgs>? EntitySlide;
-        /// <summary>
-        /// Invoked when a user's figure, motto or achievement score is updated.
-        /// </summary>
-        public event EventHandler<UserDataUpdatedEventArgs>? UserDataUpdated;
-        /// <summary>
-        /// Invoked when an entity's name changes.
-        /// </summary>
-        public event EventHandler<EntityNameChangedEventArgs>? EntityNameChanged;
-        /// <summary>
-        /// Invoked when an entity's idle status updates.
-        /// </summary>
-        public event EventHandler<EntityIdleEventArgs>? EntityIdle;
-        /// <summary>
-        /// Invoked when an entity's dance updates.
-        /// </summary>
-        public event EventHandler<EntityDanceEventArgs>? EntityDance;
-        /// <summary>
-        /// Invoked when an entity's hand item updates.
-        /// </summary>
-        public event EventHandler<EntityHandItemEventArgs>? EntityHandItem;
-        /// <summary>
-        /// Invoked when an entity's effect updates.
-        /// </summary>
-        public event EventHandler<EntityEffectEventArgs>? EntityEffect;
-        /// <summary>
-        /// Invoked when an entity performs an action.
-        /// </summary>
-        public event EventHandler<EntityExpressionEventArgs>? EntityAction;
-        /// <summary>
-        /// Invoked when an entity's typing status updates.
-        /// </summary>
-        public event EventHandler<EntityTypingEventArgs>? EntityTyping;
-        /// <summary>
-        /// Invoked when an entity is removed from the room.
-        /// </summary>
-        public event EventHandler<EntityEventArgs>? EntityRemoved;
-
-        protected virtual void OnEntityAdded(IEntity entity)
-            => EntityAdded?.Invoke(this, new EntityEventArgs(entity));
-        protected virtual void OnEntitiesAdded(IEnumerable<IEntity> entities)
-            => EntitiesAdded?.Invoke(this, new EntitiesEventArgs(entities));
-        protected virtual void OnEntityUpdated(IEntity entity)
-            => EntityUpdated?.Invoke(this, new EntityEventArgs(entity));
-        protected virtual void OnEntitiesUpdated(IEnumerable<IEntity> entities)
-            => EntitiesUpdated?.Invoke(this, new EntitiesEventArgs(entities));
-        protected virtual void OnEntitySlide(IEntity entity, Tile previousTile)
-            => EntitySlide?.Invoke(this, new EntitySlideEventArgs(entity, previousTile));
-        protected virtual void OnUserDataUpdated(IRoomUser user,
-            string previousFigure, Gender previousGender,
-            string previousMotto, int previousAchievementScore)
-            => UserDataUpdated?.Invoke(this, new UserDataUpdatedEventArgs(
-                user, previousFigure, previousGender,
-                previousMotto, previousAchievementScore
-            ));
-        protected virtual void OnEntityNameChanged(IEntity entity, string previousName)
-            => EntityNameChanged?.Invoke(this, new EntityNameChangedEventArgs(entity, previousName));
-        protected virtual void OnEntityIdle(IEntity entity, bool wasIdle)
-            => EntityIdle?.Invoke(this, new EntityIdleEventArgs(entity, wasIdle));
-        protected virtual void OnEntityDance(IEntity entity, int previousDance)
-            => EntityDance?.Invoke(this, new EntityDanceEventArgs(entity, previousDance));
-        protected virtual void OnEntityHandItem(IEntity entity, int previousItem)
-            => EntityHandItem?.Invoke(this, new EntityHandItemEventArgs(entity, previousItem));
-        protected virtual void OnEntityEffect(IEntity entity, int previousEffect)
-            => EntityEffect?.Invoke(this, new EntityEffectEventArgs(entity, previousEffect));
-        protected virtual void OnEntityExpression(IEntity entity, Expressions action)
-            => EntityAction?.Invoke(this, new EntityExpressionEventArgs(entity, action));
-        protected virtual void OnEntityTyping(IEntity entity, bool wasTyping)
-            => EntityTyping?.Invoke(this, new EntityTypingEventArgs(entity, wasTyping));
-        protected virtual void OnEntityRemoved(IEntity entity)
-            => EntityRemoved?.Invoke(this, new EntityEventArgs(entity));
-        #endregion
+        
 
         public EntityManager(IInterceptor interceptor, RoomManager roomManager)
             : base(interceptor)
@@ -228,7 +137,7 @@ namespace Xabbo.Core.Game
             if (!e.IsHidden)
             {
                 e.IsHidden = true;
-                SendLocalAsync(In.UserLoggedOut, e.Index);
+                SendClientAsync(In.UserLoggedOut, e.Index);
             }
         }
 
@@ -256,7 +165,7 @@ namespace Xabbo.Core.Game
             if (e.IsHidden)
             {
                 e.IsHidden = false;
-                SendLocalAsync(In.UsersInRoom, 1, e);
+                SendClientAsync(In.UsersInRoom, 1, e);
             }
         }
 
@@ -275,10 +184,13 @@ namespace Xabbo.Core.Game
                 }
             }
 
-            SendLocalAsync(In.UsersInRoom, shown);
+            SendClientAsync(In.UsersInRoom, shown);
         }
 
-        [InterceptIn(nameof(Incoming.UsersInRoom))]
+        [InterceptIn(nameof(Incoming.Ping))]
+        private void DeleteThis(InterceptArgs e) { }
+
+        /*[InterceptIn(nameof(Incoming.UsersInRoom))]
         private void HandleUsersInRoom(InterceptArgs e)
         {
             if (!_roomManager.IsLoadingRoom && !_roomManager.IsInRoom)
@@ -533,6 +445,6 @@ namespace Xabbo.Core.Game
             bool wasTyping = entity.IsTyping;
             entity.IsTyping = e.Packet.ReadInt() != 0;
             OnEntityTyping(entity, wasTyping);
-        }
+        }*/
     }
 }

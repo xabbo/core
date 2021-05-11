@@ -8,6 +8,11 @@
     <FileVersion>0.9.0.0</FileVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  
+  <PropertyGroup>
+    <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
+    <PathMap>$(AppOutputBase)=Xabbo.Core\</PathMap>
+  </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Properties\**" />
@@ -18,6 +23,10 @@
   <ItemGroup>
     <None Remove="Resources\figure_part_genders" />
     <EmbeddedResource Include="Resources\figure_part_genders" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
