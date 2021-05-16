@@ -209,7 +209,7 @@ namespace Xabbo.Core
             }
             else
             {
-                throw new InvalidOperationException("Unknown protocol type.");
+                throw new InvalidOperationException("Unknown protocol.");
             }
         }
 
@@ -217,5 +217,7 @@ namespace Xabbo.Core
         {
             return new InventoryItem(packet);
         }
+
+        public override string ToString() => $"[{Id}:{Type.ToShortString()}{Kind}]";
     }
 }

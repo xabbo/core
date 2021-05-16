@@ -99,5 +99,7 @@ namespace Xabbo.Core
         { 
             return new MarketplaceItem(packet);
         }
+
+        public override string ToString() => $"[{Id}:{Type.ToShortString()}{Kind}]";
     }
 }

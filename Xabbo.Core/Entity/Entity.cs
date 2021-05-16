@@ -83,7 +83,7 @@ namespace Xabbo.Core
                 .WriteInt((int)Type);
         }
 
-        public override string ToString() => $"{Name} (id:{Id}, index:{Index})";
+        public override string ToString() => $"{Name} [{Id}:{Index}]";
 
         public static Entity Parse(IReadOnlyPacket packet)
         {

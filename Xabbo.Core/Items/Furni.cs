@@ -30,5 +30,7 @@ namespace Xabbo.Core
         {
             OwnerName = string.Empty;
         }
+
+        public override string ToString() => $"[{Id}:{Type.ToShortString()}{Kind}]";
     }
 }

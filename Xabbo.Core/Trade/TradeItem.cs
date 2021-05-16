@@ -75,5 +75,7 @@ namespace Xabbo.Core
         {
             return new TradeItem(packet);
         }
+
+        public override string ToString() => $"[{ItemId}:{Type.ToShortString()}{Kind}]";
     }
 }
