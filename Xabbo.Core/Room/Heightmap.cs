@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core
@@ -108,7 +109,7 @@ namespace Xabbo.Core
                 throw new FormatException($"The length of Values must be equal to Width * Height");
 
             packet.WriteInt(Width);
-            packet.WriteInt(Width * Length);
+            packet.WriteLegacyShort((short)(Width * Length));
             for (int i = 0; i < Values.Length; i++)
                 packet.WriteShort(Values[i]);
         }

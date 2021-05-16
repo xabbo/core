@@ -55,13 +55,18 @@ namespace Xabbo.Core
         protected WallItem(IReadOnlyPacket packet, bool readName)
             : this()
         {
-            Id = packet.ReadLong();
+            Id = packet.Protocol switch
+            {
+                ClientType.Flash => long.Parse(packet.ReadString()),
+                ClientType.Unity => packet.ReadLong(),
+                _ => throw new InvalidOperationException("Unknown protocol.")
+            };
             Kind = packet.ReadInt();
             Location = WallLocation.Parse(packet.ReadString());
             Data = packet.ReadString();
             SecondsToExpiration = packet.ReadInt();
             Usage = (FurniUsage)packet.ReadInt();
-            OwnerId = packet.ReadLong();
+            OwnerId = packet.ReadLegacyLong();
 
             if (readName && packet.CanReadString())
                 OwnerName = packet.ReadString();
@@ -74,7 +79,10 @@ namespace Xabbo.Core
 
         public override void Compose(IPacket packet, bool writeOwnerName = true)
         {
-            packet.WriteLegacyLong(Id);
+            if (packet.Protocol == ClientType.Flash) packet.WriteString(Id.ToString());
+            else if (packet.Protocol == ClientType.Unity) packet.WriteLong(Id);
+            else throw new InvalidOperationException("Unknown protocol");
+
             packet.WriteInt(Kind);
             packet.WriteString(Location.ToString());
             packet.WriteString(Data);

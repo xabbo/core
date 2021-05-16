@@ -55,7 +55,7 @@ namespace Xabbo.Core
 
             SecondsToExpiration = packet.ReadInt();
             Usage = (FurniUsage)packet.ReadInt();
-            OwnerId = packet.ReadLong();
+            OwnerId = packet.ReadLegacyLong();
 
             if (Kind < 0) // ? idk
                 UnknownStringA = packet.ReadString();
@@ -122,7 +122,7 @@ namespace Xabbo.Core
             return items;
         }
 
-        public static void WriteAll(IPacket packet, IEnumerable<IFloorItem> items)
+        public static void ComposeAll(IPacket packet, IEnumerable<IFloorItem> items)
         {
             var ownerIds = new HashSet<long>();
             var ownerDictionary = items
@@ -140,13 +140,13 @@ namespace Xabbo.Core
             }
 
             packet.WriteLegacyShort((short)items.Count());
-            foreach (var item in items)
+            foreach (IFloorItem item in items)
                 item.Compose(packet, false);
         }
 
-        public static void WriteAll(IPacket packet, params FloorItem[] items)
+        public static void ComposeAll(IPacket packet, params FloorItem[] items)
         {
-            WriteAll(packet, (IEnumerable<IFloorItem>)items);
+            ComposeAll(packet, (IEnumerable<IFloorItem>)items);
         }
 
     }
