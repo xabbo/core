@@ -6,7 +6,7 @@ namespace Xabbo.Core.Web
     public class RegistrationRequestData
     {
         [JsonPropertyName("captchaToken")]
-        public string CaptchaToken { get; set; }
+        public string? CaptchaToken { get; set; }
 
         [JsonPropertyName("email")]
         public string Email { get; set; }
@@ -25,6 +25,10 @@ namespace Xabbo.Core.Web
 
         public RegistrationRequestData()
         {
+            Email =
+            Password =
+            PasswordRepeated = string.Empty;
+            Birthdate = new Birthdate();
             TermsOfServiceAccepted = true;
         }
 
