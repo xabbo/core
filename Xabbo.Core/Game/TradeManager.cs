@@ -11,7 +11,6 @@ namespace Xabbo.Core.Game
     {
         private readonly ProfileManager _profileManager;
         private readonly RoomManager _roomManager;
-        private readonly EntityManager _entityManager;
 
         public bool IsTrading { get; private set; }
         public bool IsTrader { get; private set; }
@@ -48,12 +47,11 @@ namespace Xabbo.Core.Game
             => Complete?.Invoke(this, new TradeCompleteEventArgs(wasTrader, self, partner, ownOffer, partnerOffer));
 
         public TradeManager(IInterceptor interceptor, ProfileManager profileManager,
-            RoomManager roomManager, EntityManager entityManager)
+            RoomManager roomManager)
             : base(interceptor)
         {
             _profileManager = profileManager;
             _roomManager = roomManager;
-            _entityManager = entityManager;
         }
 
         private void ResetTrade()
@@ -80,7 +78,7 @@ namespace Xabbo.Core.Game
                 return;
             }
 
-            if (!_roomManager.IsInRoom)
+            if (!_roomManager.IsInRoom || _roomManager.Room is null)
             {
                 DebugUtil.Log("not in room");
                 return;
@@ -91,13 +89,13 @@ namespace Xabbo.Core.Game
             int tradeeId = packet.ReadInt();
             int unknownB = packet.ReadInt(); // ?
 
-            if (!_entityManager.TryGetEntity(traderId, out IRoomUser? trader))
+            if (!_roomManager.Room.TryGetEntityById(traderId, out IRoomUser? trader))
             {
                 DebugUtil.Log($"failed to find user with id {traderId}");
                 return;
             }
 
-            if (!_entityManager.TryGetEntity(tradeeId, out IRoomUser? tradee))
+            if (!_roomManager.Room.TryGetEntityById(tradeeId, out IRoomUser? tradee))
             {
                 DebugUtil.Log($"failed to find user with id {tradeeId}");
                 return;

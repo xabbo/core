@@ -1,27 +1,65 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Xabbo.Core.Game
 {
-    internal class Room : IRoom
+    internal class Room : IRoom, INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        protected bool Set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value))
+                return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
+        }
+
         public long Id { get; }
         public string Model { get; set; } = null!;
 
-        public string? Floor { get; set; }
-        public string? Wallpaper { get; set; }
-        public string? Landscape { get; set; }
+        private string? _floor;
+        public string? Floor
+        {
+            get => _floor;
+            set => Set(ref _floor, value);
+        }
 
-        public RoomData? Data { get; set; }
+        private string? _wallpaper;
+        public string? Wallpaper
+        {
+            get => _wallpaper;
+            set => Set(ref _wallpaper, value);
+        }
+
+        private string? _landscape;
+        public string? Landscape
+        {
+            get => _landscape;
+            set => Set(ref _landscape, value);
+        }
+
+        private RoomData? _roomData;
+        public RoomData? Data
+        {
+            get => _roomData;
+            set => Set(ref _roomData, value);
+        }
         IRoomData? IRoom.Data => Data;
 
         public Tile DoorTile { get; set; }
         public int EntryDirection { get; set; }
+
         public FloorPlan FloorPlan { get; set; } = null!;
         IFloorPlan IRoom.FloorPlan => FloorPlan;
+
         public Heightmap Heightmap { get; set; } = null!;
         IHeightmap IRoom.Heightmap => Heightmap;
 
@@ -32,13 +70,26 @@ namespace Xabbo.Core.Game
         internal ConcurrentDictionary<long, FloorItem> FloorItems { get; } = new();
         internal ConcurrentDictionary<long, WallItem> WallItems { get; } = new();
 
-        internal ConcurrentDictionary<long, Entity> Entities { get; } = new();
-        internal ConcurrentDictionary<int, Entity> EntityIndexMap { get; } = new();
-        internal ConcurrentDictionary<string, Entity> EntityNameMap { get; } = new(StringComparer.OrdinalIgnoreCase);
+        internal ConcurrentDictionary<int, Entity> Entities { get; } = new();
+        // internal ConcurrentDictionary<long, Entity> EntityIdMap { get; } = new();
+        // internal ConcurrentDictionary<string, Entity> EntityNameMap { get; } = new(StringComparer.OrdinalIgnoreCase);
 
         public Room(long id)
         {
             Id = id;
+        }
+
+        internal void AddEntity(Entity entity)
+        {
+            if (Entities.TryAdd(entity.Index, entity))
+            {
+
+            }
+        }
+
+        internal void RemoveEntity(Entity entity)
+        {
+
         }
 
         #region - Furni -
@@ -95,7 +146,36 @@ namespace Xabbo.Core.Game
         #endregion
 
         #region - Entities -
-        
+        public IEntity? GetEntity(int index) => Entities.TryGetValue(index, out Entity? entity) ? entity : null;
+        public IRoomUser? GetUser(int index) => Entities.TryGetValue(index, out Entity? entity) ? (entity as IRoomUser) : null;
+        public IRoomUser? GetUserById(long id) => Entities.Values.OfType<IRoomUser>().FirstOrDefault(x => x.Id == id);
+
+        public bool TryGetEntityByIndex(int index, [NotNullWhen(true)] out IEntity? entity) => (entity = GetEntity(index)) is not null;
+
+        public bool TryGetEntityById<TEntity>(long id, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity
+        {
+            return (entity = Entities.OfType<TEntity>().FirstOrDefault(x => x.Id == id)) is not null;
+        }
+
+        public bool TryGetEntityByName<TEntity>(string name, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity
+        {
+            return (entity = Entities.OfType<TEntity>().FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase))) is not null;
+        }
+
+        public bool TryGetEntityByIndex<TEntity>(int index, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity
+        {
+            if (Entities.TryGetValue(index, out Entity? e))
+            {
+                if (e is TEntity)
+                {
+                    entity = (TEntity)(IEntity)e;
+                    return true;
+                }
+            }
+
+            entity = default;
+            return false;
+        }
         #endregion
     }
 }

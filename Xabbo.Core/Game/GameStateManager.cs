@@ -23,14 +23,14 @@ namespace Xabbo.Core.Game
 
         #region - INotifyPropertyChanged -
         public event PropertyChangedEventHandler? PropertyChanged;
-        protected virtual void OnPropertyChanged(string propertyName)
+        protected virtual void RaisePropertyChanged(string propertyName)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        protected bool _set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        protected bool Set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
             field = value;
-            OnPropertyChanged(propertyName);
+            RaisePropertyChanged(propertyName);
             return true;
         }
         #endregion
@@ -62,11 +62,10 @@ namespace Xabbo.Core.Game
             Interceptor.Dispatcher.Release(this);
         }
 
-        protected Task SendAsync(Header header, params object[] values) => Interceptor.SendToServerAsync(header, values);
-        protected Task SendAsync(IReadOnlyPacket packet) => Interceptor.SendToServerAsync(packet);
-
-        protected Task SendClientAsync(Header header, params object[] values) => Interceptor.SendToClientAsync(header, values);
-        protected Task SendClientAsync(IReadOnlyPacket packet) => Interceptor.SendToClientAsync(packet);
+        protected void Send(Header header, params object[] values) => Interceptor.Send(header, values);
+        protected void Send(IReadOnlyPacket packet) => Interceptor.Send(packet);
+        protected Task SendAsync(Header header, params object[] values) => Interceptor.SendAsync(header, values);
+        protected Task SendAsync(IReadOnlyPacket packet) => Interceptor.SendAsync(packet);
 
         protected virtual void Dispose(bool disposing)
         {

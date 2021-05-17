@@ -10,15 +10,16 @@ using Xabbo.Interceptor;
 
 using Xabbo.Core.Events;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Xabbo.Core.Game
 {
     /// <summary>
-    /// Manages information about the current room, the user's permissions in the room, and its furni and entities.
+    /// Manages information about the current room, the user's permissions in the room, its furni, entities and chat.
     /// </summary>
     public class RoomManager : GameStateManager
     {
-        private readonly ILogger? _logger;
+        private readonly ILogger _logger;
         private readonly Dictionary<long, RoomData> _roomDataCache = new();
 
         private Room? _currentRoom;
@@ -28,21 +29,87 @@ namespace Xabbo.Core.Game
         /// Gets the ID of the current room. The <see cref="Room"/> may not be available
         /// even when the current room ID is set (e.g. when in the queue).
         /// </summary>
-        public long CurrentRoomId { get; private set; }
+        private long _currentRoomId;
+        public long CurrentRoomId
+        {
+            get => _currentRoomId;
+            private set => Set(ref _currentRoomId, value);
+        }
 
-        public bool IsRingingDoorbell { get; private set; }
-        public bool IsInQueue { get; private set; }
-        public int QueuePosition { get; private set; }
-        // TODO public bool IsSpectating { get; private set; }
-        public bool IsLoadingRoom { get; private set; }
-        public bool IsInRoom { get; private set; }
+        private bool _isRingingDoorbell;
+        public bool IsRingingDoorbell
+        {
+            get => _isRingingDoorbell;
+            private set => Set(ref _isRingingDoorbell, value);
+        }
 
-        public IRoom? Room { get; private set; }
-        public IRoomData? Data => _currentRoomData;
+        private bool _isInQueue;
+        public bool IsInQueue
+        {
+            get => _isInQueue;
+            private set => Set(ref _isInQueue, value);
+        }
 
-        public int RightsLevel { get; private set; }
+        private int _queuePosition;
+        public int QueuePosition
+        {
+            get => _queuePosition;
+            private set => Set(ref _queuePosition, value);
+        }
+
+        private bool _isSpectating;
+        public bool IsSpectating
+        {
+            get => _isSpectating;
+            set => Set(ref _isSpectating, value);
+        }
+
+        private bool _isLoadingRoom;
+        public bool IsLoadingRoom
+        {
+            get => _isLoadingRoom;
+            private set => Set(ref _isLoadingRoom, value);
+        }
+
+        private bool _isInRoom;
+        public bool IsInRoom
+        {
+            get => _isInRoom;
+            private set => Set(ref _isInRoom, value);
+        }
+
+        private IRoom? _room;
+        public IRoom? Room
+        {
+            get => _room;
+            set => Set(ref _room, value);
+        }
+
+        private IRoomData? _roomData;
+        public IRoomData? Data
+        {
+            get => _roomData;
+            set => Set(ref _roomData, value);
+        }
+
+        private int _rightsLevel;
+        public int RightsLevel
+        {
+            get => _rightsLevel;
+            private set
+            {
+                if (Set(ref _rightsLevel, value))
+                    RaisePropertyChanged(nameof(HasRights));
+            }
+        }
         public bool HasRights => RightsLevel > 0;
-        public bool IsOwner { get; private set; }
+
+        private bool _isOwner;
+        public bool IsOwner
+        {
+            get => _isOwner;
+            private set => Set(ref _isOwner, value);
+        }
 
         public bool CanMute => CheckPermission(Room?.Data?.Moderation.WhoCanMute);
         public bool CanKick => CheckPermission(Room?.Data?.Moderation.WhoCanKick);
@@ -182,7 +249,7 @@ namespace Xabbo.Core.Game
         {
             _logger.LogTrace(
                 "Floor item slide. (id:{id}, rollerId:{rollerId}, {from} -> {to})",
-                item, rollerId, previousTile, item.Location
+                item.Id, rollerId, previousTile, item.Location
             );
             FloorItemSlide?.Invoke(this, new FloorItemSlideEventArgs(item, previousTile, rollerId));
         }
@@ -422,6 +489,19 @@ namespace Xabbo.Core.Game
             );
             EntityRemoved?.Invoke(this, new EntityEventArgs(entity));
         }
+
+        /// <summary>
+        /// Invoked when an entity in the room talks.
+        /// </summary>
+        public event EventHandler<EntityChatEventArgs>? EntityChat;
+        protected virtual void OnEntityChat(EntityChatEventArgs e)
+        {
+            _logger.LogTrace(
+                "{type}:{bubble} {entity} {message}",
+                e.ChatType, e.BubbleStyle, e.Entity, e.Message
+            );
+            EntityChat?.Invoke(this, e);
+        }
         #endregion
 
         /// <summary>
@@ -430,7 +510,7 @@ namespace Xabbo.Core.Game
         public bool TryGetRoomData(long roomId, [NotNullWhen(true)] out RoomData? data) => _roomDataCache.TryGetValue(roomId, out data);
 
 #pragma warning disable CS8618 // Non-nullable fields are initialized in the ResetRoom() method.
-        public RoomManager(ILogger<RoomManager>? logger, IInterceptor interceptor)
+        public RoomManager(ILogger<RoomManager> logger, IInterceptor interceptor)
             : base(interceptor)
         {
             _logger = logger;
@@ -439,15 +519,17 @@ namespace Xabbo.Core.Game
         }
 
         public RoomManager(IInterceptor interceptor)
-            : this(null, interceptor)
-        { }
+            : base(interceptor)
+        {
+            _logger = NullLogger.Instance;
+
+            ResetState();
+        }
 #pragma warning restore CS8618
 
         protected override void OnInterceptorDisconnected(object? sender, EventArgs e)
         {
             base.OnInterceptorDisconnected(sender, e);
-
-
         }
 
         #region - Room packet handlers -
@@ -461,10 +543,8 @@ namespace Xabbo.Core.Game
             RightsLevel = 0;
             IsOwner = false;
 
-            _currentRoom = null;
-            _currentRoomData = null;
-
-            Room = null;
+            Room = _currentRoom = null;
+            Data = _currentRoomData = null;
         }
 
         private bool CheckPermission(ModerationPermissions? permissions)
@@ -531,16 +611,16 @@ namespace Xabbo.Core.Game
             {
                 if (furni.Type == ItemType.Floor)
                 {
-                    SendClientAsync(In.ActiveObjectRemove, furni.Id, false, -1L, 0);
+                    Send(In.ActiveObjectRemove, furni.Id, false, -1L, 0);
                 }
                 else if (furni.Type == ItemType.Wall)
                 {
-                    SendClientAsync(In.RemoveItem, furni.Id, -1L);
+                    Send(In.RemoveItem, furni.Id, -1L);
                 }
             }
             else
             {
-                SendClientAsync(furni.Type == ItemType.Floor ? In.ActiveObjectAdd : In.AddItem , furni);
+                Send(furni.Type == ItemType.Floor ? In.ActiveObjectAdd : In.AddItem , furni);
             }
 
             OnFurniVisibilityToggled(furni);
@@ -576,9 +656,11 @@ namespace Xabbo.Core.Game
 
             if (IsInRoom && roomData.Id == _currentRoom?.Id)
             {
-                _currentRoomData = roomData;
+                Set(ref _currentRoomData, roomData, nameof(Data));
                 if (_currentRoom is not null)
+                {
                     _currentRoom.Data = roomData;
+                }
 
                 OnRoomDataUpdated(roomData);
             }
@@ -587,7 +669,7 @@ namespace Xabbo.Core.Game
         [Receive(nameof(Incoming.OpenConnectionConfirmation))]
         private void HandleOpenConnectionConfirmation(IReadOnlyPacket packet)
         {
-            if (IsInQueue || IsLoadingRoom || IsInRoom)
+            if (IsInQueue || IsRingingDoorbell || IsLoadingRoom || IsInRoom)
             {
                 ResetState();
                 OnLeftRoom();
@@ -631,6 +713,31 @@ namespace Xabbo.Core.Game
             }
         }
 
+        [Receive(nameof(Incoming.YouAreSpectator))]
+        private void HandleYouAreSpectator(IReadOnlyPacket packet)
+        {
+            if (!IsLoadingRoom)
+            {
+                _logger.LogDebug("Not loading room.");
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            long roomId = packet.ReadLegacyLong();
+            if (roomId != _currentRoom.Id)
+            {
+                _logger.LogError("Room ID mismatch!");
+                return;
+            }
+
+            IsSpectating = true;
+        }
+
         [Receive(nameof(Incoming.RoomReady))]
         private void HandleRoomReady(IReadOnlyPacket packet)
         {
@@ -648,7 +755,8 @@ namespace Xabbo.Core.Game
             string model = packet.ReadString();
             long roomId = packet.ReadLegacyLong();
 
-            if (_currentRoom is null)
+            if (_currentRoom is null ||
+                _currentRoom.Id != roomId)
             {
                 _currentRoom = new Room(roomId);
             }
@@ -656,7 +764,7 @@ namespace Xabbo.Core.Game
             _currentRoom.Model = model;
             IsLoadingRoom = true;
 
-            OnEnteringRoom(_currentRoom.Id);
+            OnEnteringRoom(roomId);
         }
 
         [Receive(nameof(Incoming.FlatProperty))]
@@ -684,7 +792,10 @@ namespace Xabbo.Core.Game
                 default: _logger.LogDebug("Unknown paint type: {type}.", key); break;
             }
 
-            // TODO Add a property updated event if already in room
+            if (IsInRoom)
+            {
+                // TODO PropertyUpdated
+            }
         }
 
         [Receive(nameof(Incoming.YouAreController))]
@@ -790,7 +901,7 @@ namespace Xabbo.Core.Game
                 _currentRoom.Heightmap[x, y] = packet.ReadShort();
             }
 
-            _logger.LogTrace("Received stacking heightmap diff. ({n} changes)", n);
+            _logger.LogTrace("Received stacking heightmap diff. ({n} change(s))", n);
         }
 
         [Receive(nameof(Incoming.FloorHeightmap))]
@@ -867,7 +978,7 @@ namespace Xabbo.Core.Game
         {
             if (_currentRoom is null) 
             {
-                _logger.LogTrace($"[{nameof(HandleCloseConnection)}] Current room is null.");
+                _logger.LogWarning($"[{nameof(HandleCloseConnection)}] Current room is null.");
                 return;
             }
 
@@ -889,14 +1000,19 @@ namespace Xabbo.Core.Game
         }
         #endregion
 
-        /*#region - Floor item packet handlers -
+        #region - Floor item packet handlers -
         [Receive(nameof(Incoming.ActiveObjects))]
         protected void HandleActiveObjects(IReadOnlyPacket packet)
         {
-            Room? room = _roomManager.Room as Room;
-            if (!_roomManager.IsLoadingRoom)
+            if (!IsLoadingRoom)
             {
-                DebugUtil.Log("not entering room");
+                _logger.LogDebug("Not loading room.");
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
                 return;
             }
 
@@ -905,19 +1021,18 @@ namespace Xabbo.Core.Game
             FloorItem[] items = FloorItem.ParseAll(packet);
             foreach (FloorItem item in items)
             {
-                if (_floorItems.TryAdd(item.Id, item))
+                if (_currentRoom.FloorItems.TryAdd(item.Id, item))
                 {
                     newItems.Add(item);
                 }
                 else
                 {
-                    DebugUtil.Log($"failed to add item {item.Id} to the dictionary");
+                    _logger.LogError("Failed to add floor item {itemId}.", item.Id);
                 }
             }
 
             if (newItems.Count > 0)
             {
-                DebugUtil.Log($"loaded {newItems.Count} items");
                 OnFloorItemsLoaded(newItems);
             }
         }
@@ -925,111 +1040,166 @@ namespace Xabbo.Core.Game
         [Receive(nameof(Incoming.ActiveObjectAdd))]
         protected void HandleAddFloorItem(IReadOnlyPacket packet)
         {
-            if (!_roomManager.IsInRoom)
+            if (!IsInRoom)
+            {
+                _logger.LogDebug($"[{nameof(HandleAddFloorItem)}] Not in room.");
                 return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning($"[{nameof(HandleAddFloorItem)}] Current room is null.");
+                return;
+            }
 
             FloorItem item = FloorItem.Parse(packet);
 
-            if (_floorItems.TryAdd(item.Id, item))
+            if (_currentRoom.FloorItems.TryAdd(item.Id, item))
             {
                 OnFloorItemAdded(item);
             }
             else
             {
-                DebugUtil.Log($"failed to add item {item.Id} to the dictionary");
+                _logger.LogError($"[{nameof(HandleAddFloorItem)}] Failed to add floor item {{itemId}}.", item.Id);
             }
         }
 
         [Receive(nameof(Incoming.ActiveObjectRemove))]
         protected void HandleActiveObjectRemove(IReadOnlyPacket packet)
         {
-            *//*
+            /*
                 long id
                 bool isExpired
                 long pickerId
                 int delay
-            *//*
+            */
 
-            if (!_roomManager.IsInRoom)
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("[{method}] Not in room.", nameof(HandleActiveObjectRemove));
                 return;
+            }
 
-            long id = packet.ReadLong();
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("[{method}] Current room is null.", nameof(HandleActiveObjectRemove));
+                return;
+            }
 
-            if (_floorItems.TryRemove(id, out FloorItem? item))
+            long id = packet.Protocol switch
+            {
+                ClientType.Flash => long.Parse(packet.ReadString()),
+                ClientType.Unity => packet.ReadLong(),
+                _ => throw new InvalidOperationException("Unknown protocol type")
+            };
+
+            if (_currentRoom.FloorItems.TryRemove(id, out FloorItem? item))
             {
                 OnFloorItemRemoved(item);
             }
             else
             {
-                DebugUtil.Log($"failed to remove item {id} from the dictionary");
+                _logger.LogError("[{method}] Failed to remove item {id} from the dictionary", nameof(HandleActiveObjectRemove), id);
             }
         }
 
         [Receive(nameof(Incoming.ActiveObjectUpdate))]
         protected void HandleActiveObjectUpdate(IReadOnlyPacket packet)
         {
-            if (!_roomManager.IsInRoom)
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("[{method}] Not in room.", nameof(HandleActiveObjectUpdate));
                 return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("[{method}] Current room is null.", nameof(HandleActiveObjectUpdate));
+                return;
+            }
 
             var updatedItem = FloorItem.Parse(packet);
 
-            if (_floorItems.TryGetValue(updatedItem.Id, out FloorItem? previousItem))
+            if (_currentRoom.FloorItems.TryGetValue(updatedItem.Id, out FloorItem? previousItem))
             {
                 updatedItem.OwnerName = previousItem.OwnerName;
                 updatedItem.IsHidden = previousItem.IsHidden;
 
-                if (_floorItems.TryUpdate(updatedItem.Id, updatedItem, previousItem))
+                if (_currentRoom.FloorItems.TryUpdate(updatedItem.Id, updatedItem, previousItem))
                 {
                     OnFloorItemUpdated(previousItem, updatedItem);
                 }
                 else
                 {
-                    DebugUtil.Log($"failed to update item {updatedItem.Id}");
+                    _logger.LogError("[{method}] Failed to update floor item {itemId}", nameof(HandleActiveObjectUpdate), updatedItem.Id);
                 }
             }
             else
             {
-                DebugUtil.Log($"unable to find item {updatedItem.Id} to update");
+                _logger.LogError("[{method}] Failed to find floor item {itemId} to update", nameof(HandleActiveObjectUpdate), updatedItem.Id);
             }
         }
 
         [Receive(nameof(Incoming.QueueMoveUpdate))]
         protected void HandleObjectOnRoller(IReadOnlyPacket packet)
         {
-            if (!_roomManager.IsInRoom)
-                return;
-
-            var rollerUpdate = RollerUpdate.Parse(packet);
-            foreach (var objectUpdate in rollerUpdate.ObjectUpdates)
+            if (!IsInRoom)
             {
-                if (_floorItems.TryGetValue(objectUpdate.Id, out FloorItem? item))
+                _logger.LogDebug("[{method}] Not in room.", nameof(HandleObjectOnRoller));
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("[{method}] Current room is null.", nameof(HandleObjectOnRoller));
+                return;
+            }
+
+            RollerUpdate rollerUpdate = RollerUpdate.Parse(packet);
+            foreach (RollerObjectUpdate objectUpdate in rollerUpdate.ObjectUpdates)
+            {
+                if (_currentRoom.FloorItems.TryGetValue(objectUpdate.Id, out FloorItem? item))
                 {
-                    var previousTile = item.Location;
+                    Tile previousTile = item.Location;
                     item.Location = new Tile(rollerUpdate.TargetX, rollerUpdate.TargetY, objectUpdate.TargetZ);
                     OnFloorItemSlide(item, previousTile, rollerUpdate.RollerId);
                 }
                 else
                 {
-                    DebugUtil.Log($"unable to find floor item {objectUpdate.Id} to update");
+                    _logger.LogError("[{method}] Failed to find floor item {itemId} to update.", nameof(HandleObjectOnRoller), objectUpdate.Id);
                 }
             }
         }
 
         [Receive(nameof(Incoming.StuffDataUpdate))]
-        protected void HandleItemExtraData(IReadOnlyPacket packet)
+        protected void HandleStuffDataUpdate(IReadOnlyPacket packet)
         {
-            if (!_roomManager.IsInRoom)
-                return;
-
-            long id = packet.ReadLong();
-
-            if (!_floorItems.TryGetValue(id, out FloorItem? item))
+            if (!IsInRoom)
             {
-                DebugUtil.Log($"unable to find floor item {id} to update");
+                _logger.LogDebug("[{method}] Not in room.", nameof(HandleStuffDataUpdate));
                 return;
             }
 
-            var previousData = item.Data;
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("[{method}] Current room is null.", nameof(HandleStuffDataUpdate));
+                return;
+            }
+
+            long id = packet.Protocol switch
+            {
+                ClientType.Flash => long.Parse(packet.ReadString()),
+                ClientType.Unity => packet.ReadLong(),
+                _ => throw new InvalidOperationException("Unknown protocol.")
+            };
+
+            if (!_currentRoom.FloorItems.TryGetValue(id, out FloorItem? item))
+            {
+                _logger.LogError("[{method}] Unable to find floor item {id} to update.", nameof(HandleStuffDataUpdate), id);
+                return;
+            }
+
+            StuffData previousData = item.Data;
             item.Data = StuffData.Parse(packet);
 
             OnFloorItemDataUpdated(item, previousData);
@@ -1038,31 +1208,50 @@ namespace Xabbo.Core.Game
         [Receive(nameof(Incoming.MultipleStuffDataUpdate))]
         protected void HandleItemsDataUpdate(IReadOnlyPacket packet)
         {
-            if (!_roomManager.IsInRoom)
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("[{method}] Not in room.", nameof(HandleItemsDataUpdate));
                 return;
+            }
 
-            int n = packet.ReadShort();
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("[{method}] Current room is null.", nameof(HandleItemsDataUpdate));
+                return;
+            }
+
+            short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
             {
-                long itemId = packet.ReadLong();
+                long itemId = packet.ReadLegacyLong();
                 var data = StuffData.Parse(packet);
-                if (!_floorItems.TryGetValue(itemId, out FloorItem? item)) continue;
+                if (!_currentRoom.FloorItems.TryGetValue(itemId, out FloorItem? item))
+                {
+                    _logger.LogError("[{method}] Failed to find floor item {id} to update.", itemId, nameof(HandleItemsDataUpdate));
+                    continue;
+                }
 
-                var previousData = item.Data;
+                StuffData previousData = item.Data;
                 item.Data = data;
 
                 OnFloorItemDataUpdated(item, previousData);
             }
         }
-        #endregion*/
+        #endregion
 
-        /*#region - Wall item packet handlers -
+        #region - Wall item packet handlers -
         [Receive(nameof(Incoming.Items))]
         protected void HandleItems(IReadOnlyPacket packet)
         {
             if (!IsLoadingRoom)
             {
-                DebugUtil.Log("not entering room");
+                _logger.LogDebug("Not loading room.");
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
                 return;
             }
 
@@ -1071,19 +1260,18 @@ namespace Xabbo.Core.Game
             WallItem[] items = WallItem.ParseAll(packet);
             foreach (var item in items)
             {
-                if (_wallItems.TryAdd(item.Id, item))
+                if (_currentRoom.WallItems.TryAdd(item.Id, item))
                 {
                     newItems.Add(item);
                 }
                 else
                 {
-                    DebugUtil.Log($"failed to add wall item with ID {item.Id}");
+                    _logger.LogError("Failed to add wall item {itemId}.", item.Id);
                 }
             }
 
             if (newItems.Count > 0)
             {
-                DebugUtil.Log($"loaded {newItems.Count} items");
                 OnWallItemsLoaded(newItems);
             }
         }
@@ -1091,30 +1279,53 @@ namespace Xabbo.Core.Game
         [Receive(nameof(Incoming.AddItem))]
         protected void HandleAddItem(IReadOnlyPacket packet)
         {
-            if (!_roomManager.IsInRoom)
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room.");
                 return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
 
             var item = WallItem.Parse(packet);
-            if (_wallItems.TryAdd(item.Id, item))
+            if (_currentRoom.WallItems.TryAdd(item.Id, item))
             {
                 OnWallItemAdded(item);
             }
             else
             {
-                DebugUtil.Log($"failed to add item {item.Id} to the dictionary");
+                _logger.LogError("Failed to add wall item {itemId}.", item.Id);
             }
         }
 
         [Receive(nameof(Incoming.RemoveItem))]
         protected void HandleRemoveItem(IReadOnlyPacket packet)
         {
-            if (!_roomManager.IsInRoom)
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room.");
                 return;
+            }
 
-            long id = packet.ReadLong();
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            long id = packet.Protocol switch
+            {
+                ClientType.Flash => long.Parse(packet.ReadString()),
+                ClientType.Unity => packet.ReadLong(),
+                _ => throw new InvalidOperationException("Unknown protocol")
+            };
             // long pickerId
 
-            if (_wallItems.TryRemove(id, out WallItem? item))
+            if (_currentRoom.WallItems.TryRemove(id, out WallItem? item))
             {
                 OnWallItemRemoved(item);
             }
@@ -1127,13 +1338,22 @@ namespace Xabbo.Core.Game
         [Receive(nameof(Incoming.UpdateItem))]
         protected void HandleUpdateItem(IReadOnlyPacket packet)
         {
-            if (!_roomManager.IsInRoom)
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room.");
                 return;
-            
-            var updatedItem = WallItem.Parse(packet);
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            WallItem updatedItem = WallItem.Parse(packet);
             WallItem? previousItem = null;
 
-            updatedItem = _wallItems.AddOrUpdate(
+            updatedItem = _currentRoom.WallItems.AddOrUpdate(
                 updatedItem.Id,
                 updatedItem,
                 (id, existing) =>
@@ -1145,17 +1365,16 @@ namespace Xabbo.Core.Game
                 }
             );
 
-            if (previousItem == null)
+            if (previousItem is null)
             {
-                DebugUtil.Log($"failed to find previous wall item for update {updatedItem.Id}");
+                _logger.LogError("Failed to find previous wall item {itemId} to update", updatedItem.Id);
             }
             else
             {
                 OnWallItemUpdated(previousItem, updatedItem);
             }
 
-            *//*
-            if (wallItems.TryGetValue(updatedItem.Id, out WallItem previousItem))
+            /*if (wallItems.TryGetValue(updatedItem.Id, out WallItem previousItem))
             {
                 updatedItem.OwnerName = previousItem.OwnerName;
                 updatedItem.IsHidden = previousItem.IsHidden;
@@ -1172,12 +1391,479 @@ namespace Xabbo.Core.Game
             else
             {
                 DebugUtil.Log($"failed to find wall item {updatedItem.Id} to update");
-            }*//*
+            }*/
         }
         #endregion
 
         #region - Entity packet handlers -
+        [InterceptIn(nameof(Incoming.RoomUsers))]
+        private void HandleUsersInRoom(InterceptArgs e)
+        {
+            if (!IsLoadingRoom && !IsInRoom)
+            {
+                _logger.LogDebug("Not loading room / not in room.");
+                return;
+            }
 
-        #endregion*/
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            List<Entity> newEntities = new List<Entity>();
+
+            foreach (Entity entity in Entity.ParseAll(e.Packet))
+            {
+                if (_currentRoom.Entities.TryAdd(entity.Index, entity))
+                {
+                    newEntities.Add(entity);
+                    OnEntityAdded(entity);
+                }
+                else
+                {
+                    _logger.LogError("Failed to add entity {index} {name} (id:{id})", entity.Index, entity.Name, entity.Id);
+                }
+            }
+
+            if (newEntities.Count > 0)
+            {
+                OnEntitiesAdded(newEntities);
+            }
+        }
+
+        [InterceptIn(nameof(Incoming.UserLoggedOut))]
+        private void HandleUserLoggedOut(InterceptArgs e)
+        {
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room.");
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            int index = e.Client switch
+            {
+                ClientType.Flash => int.Parse(e.Packet.ReadString()),
+                ClientType.Unity => e.Packet.ReadInt(),
+                _ => throw new InvalidOperationException("Unknown protocol")
+            };
+
+            if (_currentRoom.Entities.TryRemove(index, out Entity? entity))
+            {
+                OnEntityRemoved(entity);
+            }
+            else
+            {
+                _logger.LogError("Failed to remove entity with index {index}", index);
+            }
+        }
+
+        [InterceptIn(nameof(Incoming.Status))]
+        private void HandleStatus(InterceptArgs e)
+        {
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room.");
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            var updatedEntities = new List<IEntity>();
+
+            short n = e.Packet.ReadLegacyShort();
+            for (int i = 0; i < n; i++)
+            {
+                EntityStatusUpdate update = EntityStatusUpdate.Parse(e.Packet);
+                if (!_currentRoom.Entities.TryGetValue(update.Index, out Entity? entity))
+                {
+                    _logger.LogError("Failed to find entity with index {index} to update", update.Index);
+                    continue;
+                }
+
+                entity.Update(update);
+                updatedEntities.Add(entity);
+
+                OnEntityUpdated(entity);
+            }
+
+            OnEntitiesUpdated(updatedEntities);
+        }
+
+        [InterceptIn(nameof(Incoming.QueueMoveUpdate))]
+        private void HandleQueueMoveUpdate(InterceptArgs e)
+        {
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room.");
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            RollerUpdate rollerUpdate = RollerUpdate.Parse(e.Packet);
+
+            if (rollerUpdate.Type == RollerUpdateType.MovingEntity ||
+                rollerUpdate.Type == RollerUpdateType.StationaryEntity)
+            {
+                if (_currentRoom.Entities.TryGetValue(rollerUpdate.EntityIndex, out Entity? entity))
+                {
+                    var previousTile = entity.Location;
+                    entity.Location = new Tile(rollerUpdate.TargetX, rollerUpdate.TargetY, rollerUpdate.EntityTargetZ);
+
+                    OnEntitySlide(entity, previousTile);
+                }
+                else
+                {
+                    _logger.LogError("Failed to find entity with index {index} to update.", rollerUpdate.EntityIndex);
+                }
+            }
+        }
+
+        [InterceptIn(nameof(Incoming.UpdateAvatar))]
+        private void HandleUpdateAvatar(InterceptArgs e)
+        {
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room."); 
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            int index = e.Packet.ReadInt();
+            if (_currentRoom.Entities.TryGetValue(index, out Entity? entity) &&
+                entity is RoomUser user)
+            {
+                string previousFigure = user.Figure;
+                Gender previousGender = user.Gender;
+                string previousMotto = user.Motto;
+                int previousAchievementScore = user.AchievementScore;
+
+                user.Figure = e.Packet.ReadString();
+                user.Gender = H.ToGender(e.Packet.ReadString());
+                user.Motto = e.Packet.ReadString();
+                user.AchievementScore = e.Packet.ReadInt();
+
+                OnUserDataUpdated(user,
+                    previousFigure, previousGender,
+                    previousMotto, previousAchievementScore
+                );
+            }
+            else
+            {
+                _logger.LogError("Failed to find entity with index {index} to update.", index);
+            }
+        }
+
+        [InterceptIn(nameof(Incoming.UserNameChanged))] // @Check
+        private void HandleUserNameChanged(InterceptArgs e)
+        {
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room.");
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            long id = e.Packet.ReadLegacyLong();
+            int index = e.Packet.ReadInt();
+            string newName = e.Packet.ReadString();
+
+            if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+            {
+                string previousName = entity.Name;
+                entity.Name = newName;
+                OnEntityNameChanged(entity, previousName);
+            }
+            else
+            {
+                _logger.LogError("Failed to find entity with index {index} to update.", index);
+            }
+        }
+
+        [InterceptIn(nameof(Incoming.RoomAvatarSleeping))]
+        private void HandleRoomAvatarSleeping(InterceptArgs e)
+        {
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room.");
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            int index = e.Packet.ReadInt();
+            if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+            {
+                bool wasIdle = entity.IsIdle;
+                entity.IsIdle = e.Packet.ReadBool();
+                OnEntityIdle(entity, wasIdle);
+            }
+            else
+            {
+                _logger.LogError("Failed to find entity with index {index} to update.", index);
+            }
+        }
+
+        [InterceptIn(nameof(Incoming.RoomDance))]
+        private void HandleRoomDance(InterceptArgs e)
+        {
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room.");
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            int index = e.Packet.ReadInt();
+            if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+            {
+                int previousDance = entity.Dance;
+                entity.Dance = e.Packet.ReadInt();
+                OnEntityDance(entity, previousDance);
+            }
+            else
+            {
+                _logger.LogError("Failed to find entity with index {index} to update.", index);
+                return;
+            }
+        }
+
+        [InterceptIn(nameof(Incoming.RoomExpression))]
+        private void HandleRoomExpression(InterceptArgs e)
+        {
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room.");
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            int index = e.Packet.ReadInt();
+            if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+            {
+                OnEntityExpression(entity, (Expressions)e.Packet.ReadInt());
+            }
+            else
+            {
+                _logger.LogError("Failed to find entity with index {index} to update.", index);
+            }
+        }
+
+        [InterceptIn(nameof(Incoming.RoomCarryObject))]
+        private void HandleRoomCarryObject(InterceptArgs e)
+        {
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room.");
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            int index = e.Packet.ReadInt();
+            if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+            {
+                int previousItem = entity.HandItem;
+                entity.HandItem = e.Packet.ReadInt();
+                OnEntityHandItem(entity, previousItem);
+            }
+            else
+            {
+                _logger.LogError("Failed to find entity with index {index} to update.", index);
+            }
+        }
+
+        [InterceptIn(nameof(Incoming.RoomAvatarEffect))]
+        private void HandleRoomAvatarEffect(InterceptArgs e)
+        {
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room.");
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            int index = e.Packet.ReadInt();
+            // + int delay
+            if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+            {
+                int previousEffect = entity.Effect;
+                entity.Effect = e.Packet.ReadInt();
+                OnEntityEffect(entity, previousEffect);
+            }
+            else
+            {
+                _logger.LogError("Failed to find entity with index {index} to update.", index);
+            }
+        }
+
+        [InterceptIn(nameof(Incoming.UserTypingStatusChange))]
+        private void HandleUserTypingStatusChange(InterceptArgs e)
+        {
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room.");
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            int index = e.Packet.ReadInt();
+            if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+            {
+                bool wasTyping = entity.IsTyping;
+                entity.IsTyping = e.Packet.ReadInt() != 0;
+                OnEntityTyping(entity, wasTyping);
+            }
+            else
+            {
+                _logger.LogError("Failed to find entity with index {index} to update.", index);
+            }
+        }
+
+        [InterceptIn(nameof(Incoming.Whisper), nameof(Incoming.Chat), nameof(Incoming.Shout))]
+        private void HandleChat(InterceptArgs e)
+        {
+            if (!IsInRoom)
+            {
+                _logger.LogDebug("Not in room.");
+                return;
+            }
+
+            if (_currentRoom is null)
+            {
+                _logger.LogWarning("Current room is null.");
+                return;
+            }
+
+            ChatType chatType;
+
+            if (e.Packet.Header == In.Whisper) chatType = ChatType.Whisper;
+            else if (e.Packet.Header == In.Chat) chatType = ChatType.Talk;
+            else if (e.Packet.Header == In.Shout) chatType = ChatType.Shout;
+            else
+            {
+                _logger.LogError("Failed to detect chat type from header {header} !", e.Packet.Header);
+                return;
+            }
+
+            int index = e.Packet.ReadInt();
+            if (!_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+            {
+                _logger.LogError("Failed to find entity with index {index}.", index);
+                return;
+            }
+
+            string message = e.Packet.ReadString();
+            int expression = e.Packet.ReadInt();
+            int bubbleStyle = e.Packet.ReadInt();
+
+            // string? int
+
+            EntityChatEventArgs chatEventArgs = new(entity, chatType, message, bubbleStyle);
+            OnEntityChat(chatEventArgs);
+
+            if (chatEventArgs.IsBlocked || entity.IsHidden) e.Block();
+        }
+        #endregion
+
+        #region - Furni interaction -
+        public void Place(long itemId, int x, int y, int direction)
+            => SendAsync(Out.PlaceRoomItem, itemId, x, y, direction);
+        public void Place(long itemId, (int X, int Y) location, int direction)
+            => SendAsync(Out.PlaceRoomItem, itemId, location.X, location.Y, direction);
+        public void Place(IInventoryItem item, int x, int y, int direction)
+            => Place(item.Id, x, y, direction);
+        public void Place(IInventoryItem item, (int X, int Y) location, int direction)
+            => Place(item.Id, location, direction);
+
+        public void Place(long itemId, WallLocation location)
+            => SendAsync(Out.PlaceWallItem, itemId, location.WallX, location.WallY, location.X, location.Y);
+        public void Place(IInventoryItem item, WallLocation location)
+            => Place(item.Id, location);
+
+        public void Move(long floorItemId, int x, int y, int direction)
+            => SendAsync(Out.MoveRoomItem, floorItemId, x, y, direction);
+        public void Move(long floorItemId, (int X, int Y) location, int direction)
+            => SendAsync(Out.MoveRoomItem, floorItemId, location.X, location.Y, direction);
+        public void Move(IFloorItem item, int x, int y, int direction)
+            => Move(item.Id, x, y, direction);
+        public void Move(IFloorItem item, (int X, int Y) location, int direction)
+            => Move(item.Id, location.X, location.Y, direction);
+
+        public void Move(long wallItemId, WallLocation location) => SendAsync(
+            Out.MoveWallItem, wallItemId,
+            location.WallX, location.WallY,
+            location.X, location.Y,
+            location.Orientation.Value.ToString()
+        );
+        public void Move(IWallItem item, WallLocation location)
+            => Move(item.Id, location);
+
+        public void Pickup(IFurni item) => Pickup(item.Type, item.Id);
+        public void Pickup(ItemType type, long id)
+        {
+            if (type == ItemType.Floor)
+                SendAsync(Out.PickItemUpFromRoom, 2, id);
+            else if (type == ItemType.Wall)
+                SendAsync(Out.PickItemUpFromRoom, 1, id);
+        }
+
+        public void UpdateStackTile(IFloorItem stackTile, float height) => UpdateStackTile(stackTile.Id, height);
+        public void UpdateStackTile(long stackTileId, float height)
+            => SendAsync(Out.StackingHelperSetCaretHeight, stackTileId, (int)Math.Round(height * 100.0));
+        #endregion
     }
 }
