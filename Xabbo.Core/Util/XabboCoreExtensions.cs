@@ -147,15 +147,15 @@ namespace Xabbo.Core
         #region - Rooms -
         public static IEnumerable<IRoomInfo> Filter(
             this IEnumerable<IRoomInfo> rooms,
-            string name = null,
-            string description = null,
+            string? name = null,
+            string? description = null,
             int? ownerId = null,
-            string owner = null,
+            string? owner = null,
             RoomAccess? access = null,
             TradePermissions? trading = null,
             RoomCategory? category = null,
             int? groupId = null,
-            string group = null)
+            string? group = null)
         {
             foreach (var roomInfo in rooms)
             {
