@@ -27,7 +27,7 @@ namespace Xabbo.Core
             ActionAllowed = packet.ReadInt();
             BoolA = packet.ReadBool();
             ViewMode = packet.ReadInt();
-            short n = packet.ReadShort();
+            short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
                 Add(RoomInfo.Parse(packet));
         }
