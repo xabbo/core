@@ -146,6 +146,35 @@ namespace Xabbo.Core.Game
         #endregion
 
         #region - Entities -
+        public TEntity? GetEntity<TEntity>(int index) where TEntity : IEntity
+        {
+            if (Entities.TryGetValue(index, out Entity? entity) &&
+                entity is TEntity typedEntity)
+            {
+                return typedEntity;
+            }
+            else
+            {
+                return default;
+            }
+        }
+
+        public TEntity? GetEntity<TEntity>(string name) where TEntity : IEntity
+        {
+            return Entities
+                .Select(x => x.Value)
+                .OfType<TEntity>()
+                .FirstOrDefault(entity => entity.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public TEntity? GetEntityById<TEntity>(long id) where TEntity : IEntity
+        {
+            return Entities
+                .Select(x => x.Value)
+                .OfType<TEntity>()
+                .FirstOrDefault(entity => entity.Id == id);
+        }
+
         public IEntity? GetEntity(int index) => Entities.TryGetValue(index, out Entity? entity) ? entity : null;
         public IRoomUser? GetUser(int index) => Entities.TryGetValue(index, out Entity? entity) ? (entity as IRoomUser) : null;
         public IRoomUser? GetUserById(long id) => Entities.Values.OfType<IRoomUser>().FirstOrDefault(x => x.Id == id);

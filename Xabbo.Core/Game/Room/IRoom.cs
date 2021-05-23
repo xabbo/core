@@ -35,6 +35,19 @@ namespace Xabbo.Core.Game
         IEnumerable<IPet> Pets => Entities.OfType<IPet>();
         IEnumerable<IBot> Bots => Entities.OfType<IBot>();
 
+        /// <summary>
+        /// Gets the entity with the specified index if it exists.
+        /// </summary>
+        TEntity? GetEntity<TEntity>(int index) where TEntity : IEntity;
+        /// <summary>
+        /// Gets the entity with the specified name if it exists.
+        /// </summary>
+        TEntity? GetEntity<TEntity>(string name) where TEntity : IEntity;
+        /// <summary>
+        /// Gets the entity with the specified ID if it exists.
+        /// </summary>
+        TEntity? GetEntityById<TEntity>(long id) where TEntity : IEntity;
+
         bool TryGetEntityByIndex<TEntity>(int index, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity;
         bool TryGetEntityById<TEntity>(long id, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity;
         bool TryGetEntityByName<TEntity>(string name, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity;
