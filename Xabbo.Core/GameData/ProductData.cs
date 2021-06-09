@@ -4,6 +4,8 @@ using System.Text.Json;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json.Serialization;
+using Xabbo.Core.Serialization;
 
 namespace Xabbo.Core.GameData
 {
@@ -12,7 +14,9 @@ namespace Xabbo.Core.GameData
         private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString,
+            Converters = { new StringConverter() }
         };
 
         public static ProductData LoadJsonFile(string path) => LoadJson(File.ReadAllText(path));
@@ -20,6 +24,7 @@ namespace Xabbo.Core.GameData
         {
             return new ProductData(
                 JsonSerializer.Deserialize<Json.ProductData>(json, _jsonSerializerOptions)
+                ?? throw new FormatException("Failed to deserialize product data.")
             );
         }
 

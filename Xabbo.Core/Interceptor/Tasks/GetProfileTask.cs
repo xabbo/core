@@ -17,7 +17,7 @@ namespace Xabbo.Core.Tasks
             _userId = userId;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetExtendedProfile, _userId, false);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetExtendedProfile, (LegacyLong)_userId, false);
 
         [InterceptIn(nameof(Incoming.ExtendedProfile))]
         protected void OnUserProfile(InterceptArgs e)

@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text.Json;
 
 namespace Xabbo.Core.GameData
 {
@@ -14,6 +13,8 @@ namespace Xabbo.Core.GameData
             using (var stream = File.OpenRead(path))
                 return LoadXml(stream);
         }
+
+        
 
         public IReadOnlyList<Palette> Palettes { get; }
         public IReadOnlyList<PartSetCollection> SetCollections { get; }

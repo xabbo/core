@@ -18,7 +18,7 @@ namespace Xabbo.Core.Tasks
             this.groupId = groupId;
         }
 
-        protected override async Task OnExecuteAsync() => await SendAsync(Out.GetHabboGroupDetails, groupId, false);
+        protected override async Task OnExecuteAsync() => await SendAsync(Out.GetHabboGroupDetails, (LegacyLong)groupId, false);
 
         [InterceptIn(nameof(Incoming.HabboGroupDetails))]
         protected void OnHabboGroupDetails(InterceptArgs e)

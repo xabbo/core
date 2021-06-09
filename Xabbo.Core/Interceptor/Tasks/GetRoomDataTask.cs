@@ -17,7 +17,7 @@ namespace Xabbo.Core.Tasks
             _roomId = roomId;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetGuestRoom, _roomId, 0, 0);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetGuestRoom, (LegacyLong)_roomId, 0, 0);
 
         [InterceptIn(nameof(Incoming.GetGuestRoomResult))]
         protected void OnRoomData(InterceptArgs e)
