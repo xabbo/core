@@ -3,6 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
 using Xabbo.Messages;
 using Xabbo.Interceptor;
 
@@ -12,12 +15,14 @@ namespace Xabbo.Core.Game
 {
     public class FriendManager : GameStateManager
     {
-        private int _totalFragments = -1, _currentFragment = 0;
-        private readonly List<Friend> _loadList = new();
-        private bool _isLoading = true, _isForceLoading;
+        private readonly ILogger _logger;
 
         private readonly ConcurrentDictionary<long, Friend> _friends = new();
         private readonly ConcurrentDictionary<string, Friend> _nameMap = new(StringComparer.OrdinalIgnoreCase);
+
+        private int _totalFragments = -1, _currentFragment = 0;
+        private readonly List<Friend> _loadList = new();
+        private bool _isLoading = true, _isForceLoading;
 
         public bool IsInitialized { get; private set; }
         public IEnumerable<IFriend> Friends => _friends.Select(x => x.Value);
@@ -48,10 +53,17 @@ namespace Xabbo.Core.Game
             => MessageReceived?.Invoke(this, new FriendMessageEventArgs(this, friend, message));
         #endregion
 
+        public FriendManager(IInterceptor interceptor,
+            ILogger<FriendManager> logger)
+            : base(interceptor)
+        {
+            _logger = logger;
+        }
+
         public FriendManager(IInterceptor interceptor)
             : base(interceptor)
         {
-
+            _logger = NullLogger.Instance;
         }
 
         public void SendMessage(long id, string message) => SendAsync(Out.SendMessage, id, message);
@@ -62,14 +74,17 @@ namespace Xabbo.Core.Game
             if (_friends.TryAdd(friend.Id, friend))
             {
                 if (!_nameMap.TryAdd(friend.Name, friend))
-                    DebugUtil.Log($"failed to add friend {friend} to name map");
+                    _logger.LogError("Failed to add friend {friend} to name map", friend);
 
                 if (raiseEvent)
+                {
+                    _logger.LogTrace("Added friend {friend}", friend);
                     OnFriendAdded(friend);
+                }
             }
             else
             {
-                DebugUtil.Log($"failed to add friend {friend} to id map");
+                _logger.LogError("Failed to add friend {friend} to id map", friend);
             }
         }
 
@@ -79,7 +94,7 @@ namespace Xabbo.Core.Game
                 AddFriend(friend, raiseEvent);
         }
 
-        private void UpdateFriend(Friend friend, bool raiseEvent = true)
+        private void UpdateFriend(Friend friend)
         {
             if (_friends.TryGetValue(friend.Id, out Friend? previous) &&
                 _friends.TryUpdate(friend.Id, friend, previous))
@@ -89,16 +104,16 @@ namespace Xabbo.Core.Game
                     if (!_nameMap.TryRemove(previous.Name, out _) ||
                         !_nameMap.TryAdd(friend.Name, friend))
                     {
-                        DebugUtil.Log($"failed to update friend {friend} in name map");
+                        _logger.LogError("Failed to update friend {friend} in name map", friend);
                     }
                 }
 
-                if (raiseEvent)
-                    OnFriendUpdated(previous, friend);
+                _logger.LogTrace("Updated friend {friend}", friend);
+                OnFriendUpdated(previous, friend);
             }
             else
             {
-                DebugUtil.Log($"failed to get friend {friend} from id map to update");
+                _logger.LogError("Failed to get friend {friend} from id map to update", friend);
             }
         }
 
@@ -107,20 +122,19 @@ namespace Xabbo.Core.Game
             if (_friends.TryRemove(id, out Friend? friend))
             {
                 if (!_nameMap.TryRemove(friend.Name, out _))
-                    DebugUtil.Log("failed to remove friend from name map");
+                    _logger.LogError("Failed to remove friend {id} from name map", id);
 
+                _logger.LogTrace("Removed friend {friend}", friend);
                 OnFriendRemoved(friend);
             }
             else
             {
-                DebugUtil.Log("failed to remove friend from id mape");
+                _logger.LogError("Failed to remove friend {id} from id map", id);
             }
         }
 
-        private void RemoveFriend(Friend friend) => RemoveFriend(friend.Id);
-
         [InterceptIn(nameof(Incoming.ClientLatencyPingResponse))]
-        private async void HandleLatencyResponse(InterceptArgs e)
+        private async void HandleClientLatencyPingResponse(InterceptArgs e)
         {
             if (!IsInitialized && !_isForceLoading && e.Step > 50)
             {
@@ -129,15 +143,15 @@ namespace Xabbo.Core.Game
             }
         }
 
-        [InterceptIn(nameof(Incoming.FriendBarEventNotification))]
-        protected virtual void HandleInitFriends(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.MessengerInit))]
+        protected virtual void HandleMessengerInit(InterceptArgs e)
         {
             if (_isLoading && _isForceLoading)
                 e.Block();
         }
 
         [InterceptIn(nameof(Incoming.FriendListFragment))]
-        protected virtual void HandleFriends(InterceptArgs e)
+        protected virtual void HandleFriendListFragment(InterceptArgs e)
         {
             if (!_isLoading)
                 return;
@@ -153,7 +167,7 @@ namespace Xabbo.Core.Game
             if (_isForceLoading)
                 e.Block();
 
-            short n = e.Packet.ReadShort();
+            short n = e.Packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
                 _loadList.Add(Friend.Parse(e.Packet));
 
@@ -166,25 +180,30 @@ namespace Xabbo.Core.Game
                 IsInitialized = true;
                 OnLoaded();
             }
+
+            _logger.LogTrace(
+                "Received friend list fragment {fragmentIndex}/{totalFragments} ({fragmentCount})",
+                _currentFragment, total, n
+            );
         }
 
-        [InterceptIn(nameof(Incoming.FriendListUpdate))] // @Legacy UpdateFriend
-        protected virtual void OnUpdateFriend(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.FriendListUpdate))]
+        protected virtual void HandleFriendListUpdate(InterceptArgs e)
         {
-            short n = e.Packet.ReadShort();
+            short n = e.Packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
             {
                 e.Packet.ReadInt(); // -1 = offline, 0 = online
                 e.Packet.ReadString(); // group name
             }
 
-            n = e.Packet.ReadShort();
+            n = e.Packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
             {
                 int updateType = e.Packet.ReadInt();
                 if (updateType == -1) // removed
                 {
-                    long id = e.Packet.ReadLong();
+                    long id = e.Packet.ReadLegacyLong();
                     RemoveFriend(id);
                 }
                 else if (updateType == 0) // updated
