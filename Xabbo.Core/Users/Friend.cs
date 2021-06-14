@@ -27,7 +27,7 @@ namespace Xabbo.Core
 
         protected Friend(IReadOnlyPacket packet)
         {
-            Id = packet.ReadLong();
+            Id = packet.ReadLegacyLong();
             Name = packet.ReadString();
             Gender = H.ToGender(packet.ReadInt());
             IsOnline = packet.ReadBool();
@@ -43,23 +43,22 @@ namespace Xabbo.Core
             Relation = (Relation)packet.ReadShort();
         }
 
-        public void Compose(IPacket packet) => packet.WriteValues(
-            Id,
-            Name,
-            Gender.GetValue(),
-            IsOnline,
-            CanFollow,
-            FigureString,
-            Category,
-            Motto,
-            RealName,
-            String5,
-            IsAcceptingOfflineMessages,
-            Bool4,
-            IsPocketHabboUser,
-            (short)Relation
-        );
+        public void Compose(IPacket packet) => packet
+            .WriteLegacyLong((LegacyLong)Id)
+            .WriteString(Name)
+            .WriteInt(Gender.GetValue())
+            .WriteBool(IsOnline)
+            .WriteBool(CanFollow)
+            .WriteString(FigureString)
+            .WriteInt(Category)
+            .WriteString(Motto)
+            .WriteString(RealName)
+            .WriteString(String5)
+            .WriteBool(IsAcceptingOfflineMessages)
+            .WriteBool(Bool4)
+            .WriteBool(IsPocketHabboUser)
+            .WriteShort((short)Relation);
 
-        public override string ToString() => $"{Name} (id:{Id})";
+        public override string ToString() => $"{Name} [{Id}]";
     }
 }
