@@ -169,22 +169,22 @@ namespace Xabbo.Core
 
         public static WallLocation Parse(string locationString)
         {
-            // TODO ?
-            // if (locationString == null)
-            // return default;
-            if (TryParse(locationString, out WallLocation? wallLocation))
+            if (locationString is null)
+                throw new ArgumentNullException(nameof(locationString));
+
+            if (TryParse(locationString, out WallLocation wallLocation))
             {
-                return wallLocation.Value;
+                return wallLocation;
             }
             else
             {
-                throw new FormatException("Wall location string is of an invalid format");
+                throw new FormatException("Wall location string is of an invalid format.");
             }
         }
 
-        public static bool TryParse(string locationString, [NotNullWhen(true)] out WallLocation? location)
+        public static bool TryParse(string locationString, out WallLocation location)
         {
-            location = null;
+            location = default;
 
             if (locationString.IndexOf(':') != 0)
                 return false;
