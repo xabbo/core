@@ -28,7 +28,7 @@ namespace Xabbo.Core.Game
         /// Gets the ID of the current room. The <see cref="Room"/> may not be available
         /// even when the current room ID is set (e.g. when in the queue).
         /// </summary>
-        private long _currentRoomId;
+        private long _currentRoomId = -1;
         public long CurrentRoomId
         {
             get => _currentRoomId;
@@ -508,23 +508,17 @@ namespace Xabbo.Core.Game
         /// </summary>
         public bool TryGetRoomData(long roomId, [NotNullWhen(true)] out RoomData? data) => _roomDataCache.TryGetValue(roomId, out data);
 
-#pragma warning disable CS8618 // Non-nullable fields are initialized in the ResetRoom() method.
         public RoomManager(ILogger<RoomManager> logger, IInterceptor interceptor)
             : base(interceptor)
         {
             _logger = logger;
-
-            ResetState();
         }
 
         public RoomManager(IInterceptor interceptor)
             : base(interceptor)
         {
             _logger = NullLogger.Instance;
-
-            ResetState();
         }
-#pragma warning restore CS8618
 
         protected override void OnInterceptorDisconnected(object? sender, EventArgs e)
         {
@@ -534,6 +528,8 @@ namespace Xabbo.Core.Game
         #region - Room packet handlers -
         private void ResetState() 
         {
+            _logger.LogTrace("Resetting room state");
+
             IsInQueue =
             IsLoadingRoom =
             IsInRoom = false;
@@ -544,6 +540,8 @@ namespace Xabbo.Core.Game
 
             Room = _currentRoom = null;
             Data = _currentRoomData = null;
+
+            CurrentRoomId = -1;
         }
 
         private bool CheckPermission(ModerationPermissions? permissions)
@@ -610,23 +608,29 @@ namespace Xabbo.Core.Game
             {
                 if (furni.Type == ItemType.Floor)
                 {
-                    Send(In.ActiveObjectRemove, furni.Id, false, -1L, 0);
+                    if (Interceptor.ClientType == ClientType.Unity)
+                        Send(In.ActiveObjectRemove, furni.Id, false, -1L, 0);
+                    else
+                        Send(In.ActiveObjectRemove, furni.Id.ToString(), false, -1, 0);
                 }
                 else if (furni.Type == ItemType.Wall)
                 {
-                    Send(In.RemoveItem, furni.Id, -1L);
+                    if (Interceptor.ClientType == ClientType.Unity)
+                        Send(In.RemoveItem, furni.Id, -1L);
+                    else
+                        Send(In.RemoveItem, furni.Id.ToString(), -1);
                 }
             }
             else
             {
-                Send(furni.Type == ItemType.Floor ? In.ActiveObjectAdd : In.AddItem , furni);
+                Send(furni.Type == ItemType.Floor ? In.ActiveObjectAdd : In.AddItem, furni);
             }
 
             OnFurniVisibilityToggled(furni);
         }
 
-        public void ShowFurni(ItemType type, int id) => SetFurniHidden(type, id, false);
-        public void HideFurni(ItemType type, int id) => SetFurniHidden(type, id, true);
+        public void ShowFurni(ItemType type, long id) => SetFurniHidden(type, id, false);
+        public void HideFurni(ItemType type, long id) => SetFurniHidden(type, id, true);
 
         [Receive(nameof(Incoming.GetGuestRoomResult))]
         private void HandleGetGuestRoomResult(IReadOnlyPacket packet)
@@ -675,6 +679,7 @@ namespace Xabbo.Core.Game
             }
 
             long roomId = packet.ReadLegacyLong();
+            CurrentRoomId = roomId;
             _currentRoom = new Room(roomId);
 
             if (_roomDataCache.TryGetValue(roomId, out RoomData? data))
@@ -730,7 +735,7 @@ namespace Xabbo.Core.Game
             long roomId = packet.ReadLegacyLong();
             if (roomId != _currentRoom.Id)
             {
-                _logger.LogError("Room ID mismatch!");
+                _logger.LogError("Room ID mismatch.");
                 return;
             }
 
@@ -753,6 +758,7 @@ namespace Xabbo.Core.Game
 
             string model = packet.ReadString();
             long roomId = packet.ReadLegacyLong();
+            CurrentRoomId = roomId;
 
             if (_currentRoom is null ||
                 _currentRoom.Id != roomId)
@@ -1855,9 +1861,9 @@ namespace Xabbo.Core.Game
         public void Pickup(ItemType type, long id)
         {
             if (type == ItemType.Floor)
-                SendAsync(Out.PickItemUpFromRoom, 2, id);
+                SendAsync(Out.PickItemUpFromRoom, 2, (LegacyLong)id);
             else if (type == ItemType.Wall)
-                SendAsync(Out.PickItemUpFromRoom, 1, id);
+                SendAsync(Out.PickItemUpFromRoom, 1, (LegacyLong)id);
         }
 
         public void UpdateStackTile(IFloorItem stackTile, float height) => UpdateStackTile(stackTile.Id, height);

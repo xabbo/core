@@ -71,25 +71,10 @@ namespace Xabbo.Core.Game
         internal ConcurrentDictionary<long, WallItem> WallItems { get; } = new();
 
         internal ConcurrentDictionary<int, Entity> Entities { get; } = new();
-        // internal ConcurrentDictionary<long, Entity> EntityIdMap { get; } = new();
-        // internal ConcurrentDictionary<string, Entity> EntityNameMap { get; } = new(StringComparer.OrdinalIgnoreCase);
 
         public Room(long id)
         {
             Id = id;
-        }
-
-        internal void AddEntity(Entity entity)
-        {
-            if (Entities.TryAdd(entity.Index, entity))
-            {
-
-            }
-        }
-
-        internal void RemoveEntity(Entity entity)
-        {
-
         }
 
         #region - Furni -
@@ -183,12 +168,12 @@ namespace Xabbo.Core.Game
 
         public bool TryGetEntityById<TEntity>(long id, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity
         {
-            return (entity = Entities.OfType<TEntity>().FirstOrDefault(x => x.Id == id)) is not null;
+            return (entity = GetEntityById<TEntity>(id)) is not null;
         }
 
         public bool TryGetEntityByName<TEntity>(string name, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity
         {
-            return (entity = Entities.OfType<TEntity>().FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase))) is not null;
+            return (entity = GetEntity<TEntity>(name)) is not null;
         }
 
         public bool TryGetEntityByIndex<TEntity>(int index, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity

@@ -22,12 +22,18 @@ namespace Xabbo.Core.Game
         IFloorPlan FloorPlan { get; }
         IHeightmap Heightmap { get; }
 
+        #region - Furni -
         IEnumerable<IFurni> Furni => FloorItems.Concat<IFurni>(WallItems);
         IEnumerable<IFloorItem> FloorItems { get; }
         IEnumerable<IWallItem> WallItems { get; }
 
         bool FloorItemExists(long id);
         bool WallItemExists(long id);
+
+        IFurni? GetFurni(ItemType type, long id);
+        IFloorItem? GetFloorItem(long id);
+        IWallItem? GetWallItem(long id);
+        #endregion
 
         #region - Entities -
         IEnumerable<IEntity> Entities { get; }
