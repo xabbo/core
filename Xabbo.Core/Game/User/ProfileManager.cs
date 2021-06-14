@@ -13,7 +13,7 @@ namespace Xabbo.Core.Game
         private Task<IUserData> _taskUserData;
         private TaskCompletionSource<IUserData>? _tcsUserData;
 
-        private bool _loadingCredits;
+        private bool _isLoadingCredits;
 
         public UserData? UserData { get; private set; }
         public int? HomeRoom { get; private set; }
@@ -51,8 +51,6 @@ namespace Xabbo.Core.Game
         public event EventHandler<PointsUpdatedEventArgs>? PointsUpdated;
         protected virtual void OnPointsUpdated(ActivityPointType type, int amount, int change)
             => PointsUpdated?.Invoke(this, new PointsUpdatedEventArgs(type, amount, change));
-
-        // LoadedFriends, FriendAdded, FriendRemoved, FriendUpdated
         #endregion
 
         public ProfileManager(IInterceptor interceptor)
@@ -75,9 +73,9 @@ namespace Xabbo.Core.Game
             if (UserData is null) await SendAsync(Out.InfoRetrieve);
             if (Achievements is null) await SendAsync(Out.GetUserAchievements);
 
-            if (Credits is null && !_loadingCredits)
+            if (Credits is null && !_isLoadingCredits)
             {
-                _loadingCredits = true;
+                _isLoadingCredits = true;
                 await SendAsync(Out.GetCredits);
             }
         }
@@ -129,52 +127,52 @@ namespace Xabbo.Core.Game
             HomeRoom = e.Packet.ReadInt();
         }
 
-        // @Update [InterceptIn(nameof(Incoming.?)]
-        private void HandleUserCredits(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.WalletBalance))]
+        private void HandleWalletBalance(InterceptArgs e)
         {
-            if (_loadingCredits)
+            if (_isLoadingCredits)
             {
-                _loadingCredits = false;
+                _isLoadingCredits = false;
                 e.Block();
             }
 
-            Credits = (int)e.Packet.ReadFloat();
+            Credits = (int)e.Packet.ReadFloatAsString();
 
             OnCreditsUpdated();
         }
 
-        // @Update [InterceptIn(nameof(Incoming.?))]
-        private void HandleUserPoints(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.ActivityPoints))]
+        private void HandleActivityPoints(InterceptArgs e)
         {
             Points = ActivityPoints.Parse(e.Packet);
 
             OnLoadedPoints();
         }
 
-        // @Update [Group(Features.Points), InterceptIn("UserPoints")]
-        private void HandleUpdateUserPoints(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.ActivityPointNotification))]
+        private void HandleActivityPointNotification(InterceptArgs e)
         {
             int amount = e.Packet.ReadInt();
             int change = e.Packet.ReadInt();
-            var type = (ActivityPointType)e.Packet.ReadInt();
+            ActivityPointType type = (ActivityPointType)e.Packet.ReadInt();
 
             Points[type] = amount;
 
             OnPointsUpdated(type, amount, change);
         }
 
-        // @Update [Group(Features.Achievements), InterceptIn("AchievementList"), RequiredOut("RequestAchievements")]
-        private void HandleAchievementList(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.PossibleUserAchievements))]
+        private void HandlePossibleUserAchievements(InterceptArgs e)
         {
             Achievements = Achievements.Parse(e.Packet);
 
             OnLoadedAchievements();
         }
 
-        // @Update [Group(Features.Achievements), InterceptIn("AchievementProgress")]
-        private void HandleAchievementProgress(InterceptArgs e)
+        [InterceptIn(nameof(Incoming.PossibleAchievement))]
+        private void HandlePossibleAchievement(InterceptArgs e)
         {
-            var achievement = Achievement.Parse(e.Packet);
+            Achievement achievement = Achievement.Parse(e.Packet);
             Achievements?.Update(achievement);
 
             OnAchievementUpdated(achievement);
