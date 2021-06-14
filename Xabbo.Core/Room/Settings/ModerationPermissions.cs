@@ -1,16 +1,11 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Reflection;
 
 namespace Xabbo.Core
 {
     public enum ModerationPermissions
     {
-        [Description("Owner only")]
         OwnerOnly = 0,
-        [Description("Rights holders")]
         RightsHolders = 1,
-        [Description("All users")]
         AllUsers = 2
     }
 
@@ -18,13 +13,13 @@ namespace Xabbo.Core
     {
         public static string ToFriendlyName(this ModerationPermissions permissions)
         {
-            switch (permissions)
+            return permissions switch
             {
-                case ModerationPermissions.OwnerOnly: return "Owner only";
-                case ModerationPermissions.RightsHolders: return "Rights holders";
-                case ModerationPermissions.AllUsers: return "All users";
-                default: return "Unknown";
-            }
+                ModerationPermissions.OwnerOnly => "Owner only",
+                ModerationPermissions.RightsHolders => "Rights holders",
+                ModerationPermissions.AllUsers => "All users",
+                _ => "Unknown",
+            };
         }
     }
 }
