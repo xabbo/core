@@ -208,7 +208,7 @@ namespace Xabbo.Core
 
         public static IReadOnlyDictionary<char, string> GetAltCharacterMap() => _altCharacterMap.ToDictionary(x => x.Key, x => x.Value);
 
-        public static string ReplaceSpecialCharacters(string text)
+        public static string FormatText(string text)
         {
             var sb = new StringBuilder();
             foreach (char c in text)
@@ -229,7 +229,6 @@ namespace Xabbo.Core
         {
             var req = WebRequest.CreateHttp(url);
             req.UserAgent = USER_AGENT;
-            //req.Host = "www.habbo.com";
             req.Referer = referer;
 
             using (var res = await req.GetResponseAsync().ConfigureAwait(false))
