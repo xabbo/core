@@ -53,7 +53,7 @@ namespace Xabbo.Core.Game
         {
             if (!Interceptor.Dispatcher.IsBound(this))
             {
-                Interceptor.Dispatcher.Bind(this);
+                Interceptor.Dispatcher.Bind(this, Interceptor.ClientType);
             }
         }
 
