@@ -32,32 +32,57 @@ namespace Xabbo.Core
         protected UserProfile(IReadOnlyPacket packet)
             : this()
         {
-            Id = packet.ReadLong();
-            Name = packet.ReadString();
-            Figure = packet.ReadString();
-            Motto = packet.ReadString();
-            Created = packet.ReadString();
-            // ActivityPoints = packet.ReadInt();
-            Friends = packet.ReadInt();
-            IsFriend = packet.ReadBool();
-            // IsFriendRequestSent = packet.ReadBool();
-            // IsOnline = packet.ReadBool();
-            
-            // long secondsSinceLastLogin
-            // bool showInClient ???
-            // bool ?
-            // int ?
-            // int ?
-            // int ?
-            // bool ?
-            // bool ?
+            if (packet.Protocol == ClientType.Flash)
+            {
+                Id = packet.ReadInt();
+                Name = packet.ReadString();
+                Figure = packet.ReadString();
+                Motto = packet.ReadString();
+                Created = packet.ReadString();
+                ActivityPoints = packet.ReadInt();
+                Friends = packet.ReadInt();
+                IsFriend = packet.ReadBool();
+                IsFriendRequestSent = packet.ReadBool();
+                IsOnline = packet.ReadBool();
 
-            int n = packet.ReadInt();
-            for (int i = 0; i < n; i++)
-                Groups.Add(GroupInfo.Parse(packet));
+                int n = packet.ReadInt();
+                for (int i = 0; i < n; i++)
+                {
+                    Groups.Add(GroupInfo.Parse(packet));
+                }
 
-            LastLogin = TimeSpan.FromSeconds(packet.ReadInt());
-            DisplayInClient = packet.ReadBool();
+                LastLogin = TimeSpan.FromSeconds(packet.ReadInt());
+                DisplayInClient = packet.ReadBool();
+            }
+            else
+            {
+                Id = packet.ReadLong();
+                Name = packet.ReadString();
+                Figure = packet.ReadString();
+                Motto = packet.ReadString();
+                Created = packet.ReadString();
+                // ActivityPoints = packet.ReadInt();
+                Friends = packet.ReadInt();
+                IsFriend = packet.ReadBool();
+                // IsFriendRequestSent = packet.ReadBool();
+                // IsOnline = packet.ReadBool();
+
+                // long secondsSinceLastLogin
+                // bool showInClient ???
+                // bool ?
+                // int ?
+                // int ?
+                // int ?
+                // bool ?
+                // bool ?
+
+                short n = packet.ReadShort();
+                for (int i = 0; i < n; i++)
+                    Groups.Add(GroupInfo.Parse(packet));
+
+                LastLogin = TimeSpan.FromSeconds(packet.ReadInt());
+                DisplayInClient = packet.ReadBool();
+            }
         }
 
         public void Compose(IPacket packet) => packet.WriteValues(

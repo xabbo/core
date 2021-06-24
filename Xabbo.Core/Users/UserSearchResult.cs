@@ -13,7 +13,7 @@ namespace Xabbo.Core
         public bool Online { get; set; }
         public bool UnknownBoolA { get; set; }
         public string UnknownStringA { get; set; }
-        public int UnknownIntA { get; set; }
+        public long UnknownLongA { get; set; }
         public string Figure { get; set; }
         public string RealName { get; set; }
 
@@ -21,13 +21,13 @@ namespace Xabbo.Core
 
         protected UserSearchResult(IReadOnlyPacket packet)
         {
-            Id = packet.ReadLong();
+            Id = packet.ReadLegacyLong();
             Name = packet.ReadString();
             Motto = packet.ReadString();
             Online = packet.ReadBool();
             UnknownBoolA = packet.ReadBool();
             UnknownStringA = packet.ReadString();
-            UnknownIntA = packet.ReadInt();
+            UnknownLongA = packet.ReadLegacyLong();
             Figure  = packet.ReadString();
             RealName = packet.ReadString();
         }
