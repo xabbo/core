@@ -14,7 +14,7 @@ namespace Xabbo.Core
         public int LimitedNumber { get; set; }
         public int LimitedTotal { get; set; }
         public int Price { get; set; }
-        public int UnknownInt7 { get; set; }
+        public int TimeRemaining { get; set; }
         public int Average { get; set; }
         public int Offers { get; set; }
 
@@ -50,7 +50,7 @@ namespace Xabbo.Core
             }
 
             Price = packet.ReadInt();
-            UnknownInt7 = packet.ReadInt();
+            TimeRemaining = packet.ReadInt();
             Average = packet.ReadInt();
             Offers = packet.ReadInt();
         }
