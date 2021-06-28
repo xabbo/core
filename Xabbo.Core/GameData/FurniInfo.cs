@@ -53,54 +53,54 @@ namespace Xabbo.Core.GameData
         {
             Type = type;
             Kind = proxy.Id;
-            Identifier = proxy.ClassName;
+            Identifier = proxy.ClassName ?? string.Empty;
             Revision = proxy.Revision;
             DefaultDirection = proxy.DefaultDirection;
             XDimension = proxy.XDimension;
             YDimension = proxy.YDimension;
             PartColors = proxy.PartColors.AsReadOnly();
-            Name = proxy.Name;
-            Description = proxy.Description;
-            AdUrl = proxy.AdUrl;
+            Name = proxy.Name ?? string.Empty;
+            Description = proxy.Description ?? string.Empty;
+            AdUrl = proxy.AdUrl ?? string.Empty;
             OfferId = proxy.OfferId;
             BuyOut = proxy.BuyOut;
             RentOfferId = proxy.RentOfferId;
             RentBuyOut = proxy.RentBuyOut;
             IsBuildersClub = proxy.IsBuildersClub;
             ExcludedDynamic = proxy.ExcludedDynamic;
-            CustomParams = proxy.CustomParams;
+            CustomParams = proxy.CustomParams ?? string.Empty;
             Category = (FurniCategory)proxy.SpecialType;
             CanStandOn = proxy.CanStandOn;
             CanSitOn = proxy.CanSitOn;
             CanLayOn = proxy.CanLayOn;
-            Line = proxy.FurniLine;
+            Line = proxy.FurniLine ?? string.Empty;
         }
 
         internal FurniInfo(ItemType type, Json.FurniInfo proxy)
         {
             Type = type;
             Kind = proxy.Id;
-            Identifier = proxy.ClassName;
+            Identifier = proxy.ClassName ?? string.Empty;
             Revision = proxy.Revision;
             DefaultDirection = proxy.DefaultDir;
             XDimension = proxy.XDim;
             YDimension = proxy.YDim;
             PartColors = proxy.PartColors.Colors.ToList().AsReadOnly();
-            Name = proxy.Name;
-            Description = proxy.Description;
-            AdUrl = proxy.AdUrl;
+            Name = proxy.Name ?? string.Empty;
+            Description = proxy.Description ?? string.Empty;
+            AdUrl = proxy.AdUrl ?? string.Empty;
             OfferId = proxy.OfferId;
             BuyOut = proxy.Buyout;
             RentOfferId = proxy.RentOfferId;
             RentBuyOut = proxy.RentBuyout;
             IsBuildersClub = proxy.BC;
             ExcludedDynamic = proxy.ExcludedDynamic;
-            CustomParams = proxy.CustomParams;
+            CustomParams = proxy.CustomParams ?? string.Empty;
             Category = (FurniCategory)proxy.SpecialType;
             CanStandOn = proxy.CanStandOn;
             CanSitOn = proxy.CanSitOn;
             CanLayOn = proxy.CanLayOn;
-            Line = proxy.FurniLine;
+            Line = proxy.FurniLine ?? string.Empty;
             IsRare = proxy.Rare;
         }
 
