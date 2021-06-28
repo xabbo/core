@@ -1,15 +1,16 @@
 ﻿using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Xabbo.Core.GameData
 {
     public class ExternalTexts : IReadOnlyDictionary<string, string>
     {
-        public static ExternalTexts Load(string path) => new ExternalTexts(path);
+        public static ExternalTexts Load(string path) => new(path);
 
-        private readonly Dictionary<string, string> dict = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> dict = new();
 
         public IEnumerable<string> Keys => dict.Keys;
         public IEnumerable<string> Values => dict.Values;
@@ -29,7 +30,7 @@ namespace Xabbo.Core.GameData
                 }
 
                 string key = line.Substring(0, index);
-                string value = line.Substring(index + 1);
+                string value = line[(index + 1)..];
                 if (!dict.ContainsKey(key))
                     dict.Add(key, value);
                 else
@@ -38,7 +39,7 @@ namespace Xabbo.Core.GameData
         }
 
         public bool ContainsKey(string key) => dict.ContainsKey(key);
-        public bool TryGetValue(string key, out string value) => dict.TryGetValue(key, out value);
+        public bool TryGetValue(string key, [NotNullWhen(true)] out string? value) => dict.TryGetValue(key, out value);
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator() => dict.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

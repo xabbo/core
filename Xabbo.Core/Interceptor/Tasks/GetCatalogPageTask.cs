@@ -19,10 +19,6 @@ namespace Xabbo.Core.Tasks
             this.mode = mode;
         }
 
-        public GetCatalogPageTask(IInterceptor interceptor) : base(interceptor)
-        {
-        }
-
         protected override Task OnExecuteAsync() => SendAsync(Out.GetCatalogPage, pageId, -1, mode);
 
         [InterceptIn(nameof(Incoming.CatalogPage))]

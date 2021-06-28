@@ -11,15 +11,15 @@ namespace Xabbo.Core
 
     public static partial class XabboEnumExtensions
     {
-        public static string GetValue(this BanDuration banType)
+        public static string GetValue(this BanDuration banDuration)
         {
-            switch (banType)
+            return banDuration switch
             {
-                case BanDuration.Hour: return "RWUAM_BAN_USER_HOUR";
-                case BanDuration.Day: return "RWUAM_BAN_USER_DAY";
-                case BanDuration.Permanent: return "RWUAM_BAN_USER_PERM";
-                default: return null;
-            }
+                BanDuration.Hour => "RWUAM_BAN_USER_HOUR",
+                BanDuration.Day => "RWUAM_BAN_USER_DAY",
+                BanDuration.Permanent => "RWUAM_BAN_USER_PERM",
+                _ => throw new Exception($"Unknown ban duration: {banDuration}.")
+            };
         }
     }
 }

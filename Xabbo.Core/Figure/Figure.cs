@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,34 +9,40 @@ namespace Xabbo.Core
 {
     public class Figure
     {
+        private const string FIGUREPART_GENDERS_RESOURCE_PATH = "Xabbo.Core.Resources.figure_part_genders";
+
         private static readonly IReadOnlyDictionary<int, Gender> _genderMap;
 
         static Figure()
         {
             var dictionary = new Dictionary<int, Gender>();
 
-            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Xabbo.Core.Resources.figure_part_genders"))
-            using (var reader = new StreamReader(stream))
+            Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(FIGUREPART_GENDERS_RESOURCE_PATH);
+            if (stream is not null)
             {
-                string line;
-                while ((line = reader.ReadLine()) != null)
+                using (stream)
+                using (StreamReader reader = new(stream))
                 {
-                    int partId; Gender gender;
-
-                    if (string.IsNullOrWhiteSpace(line)) continue;
-                    string[] split = line.Split(new char[] { '/' });
-                    if (split.Length != 2) continue;
-                    if (!int.TryParse(split[0], out partId)) continue;
-
-                    switch (split[1])
+                    string? line;
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        case "M": gender = Gender.Male; break;
-                        case "F": gender = Gender.Female; break;
-                        case "U": gender = Gender.Unisex; break;
-                        default: continue;
-                    }
+                        Gender gender;
 
-                    dictionary[partId] = gender;
+                        if (string.IsNullOrWhiteSpace(line)) continue;
+                        string[] split = line.Split(new char[] { '/' });
+                        if (split.Length != 2) continue;
+                        if (!int.TryParse(split[0], out int partId)) continue;
+
+                        switch (split[1])
+                        {
+                            case "M": gender = Gender.Male; break;
+                            case "F": gender = Gender.Female; break;
+                            case "U": gender = Gender.Unisex; break;
+                            default: continue;
+                        }
+
+                        dictionary[partId] = gender;
+                    }
                 }
             }
 
@@ -70,9 +77,9 @@ namespace Xabbo.Core
 
                 string partIdString;
                 if (end < 0)
-                    partIdString = part.Substring(start + 1);
+                    partIdString = part[(start + 1)..];
                 else
-                    partIdString = part.Substring(start + 1, end - start - 1);
+                    partIdString = part[(start + 1)..end];
 
                 if (!int.TryParse(partIdString, out int partId)) continue;
                 if (TryGetGender(partId, out gender) && gender != Gender.Unisex) return true;
@@ -88,23 +95,19 @@ namespace Xabbo.Core
             get => gender;
             set
             {
-                switch (value)
+                gender = value switch
                 {
-                    case Gender.Male:
-                    case Gender.Female:
-                    case Gender.Unisex:
-                        gender = value;
-                        break;
-                    default: throw new ArgumentException($"Invalid gender: {value}");
-                }
+                    Gender.Male or Gender.Female or Gender.Unisex => value,
+                    _ => throw new ArgumentException($"Invalid gender: {value}."),
+                };
             }
         }
 
-        private readonly List<FigurePart> parts = new List<FigurePart>();
+        private readonly List<FigurePart> parts = new();
 
         public IReadOnlyList<FigurePart> Parts { get; }
 
-        public FigurePart this[FigurePartType type] => parts.FirstOrDefault(part => part.Type == type);
+        public FigurePart? this[FigurePartType type] => parts.FirstOrDefault(part => part.Type == type);
 
         public Figure()
         {
@@ -158,7 +161,7 @@ namespace Xabbo.Core
             return figure;
         }
 
-        public static bool TryParse(string figureString, out Figure figure)
+        public static bool TryParse(string figureString, [NotNullWhen(true)] out Figure? figure)
         {
             figure = null;
             var tempFigure = new Figure();
@@ -195,17 +198,14 @@ namespace Xabbo.Core
             }
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            var other = obj as Figure;
-
-            if (other is null ||
+            if (obj is not Figure other ||
                 other.Gender != Gender ||
                 other.Parts.Count != Parts.Count)
                 return false;
 
             return
-                !ReferenceEquals(other, null) &&
                 other.Gender == Gender &&
                 other.Parts.Count == Parts.Count &&
                 other.Parts.All(part => part.Equals(this[part.Type]));

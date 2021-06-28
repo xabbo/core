@@ -18,18 +18,18 @@ namespace Xabbo.Core.Web
         public DateTime Created => UserInfo.Created;
 
         [JsonPropertyName("user")]
-        public UserInfo UserInfo { get; set; }
+        public UserInfo UserInfo { get; set; } = new();
 
         [JsonPropertyName("groups")]
-        public List<GroupInfo> Groups { get; set; }
+        public List<GroupInfo> Groups { get; set; } = new();
 
         [JsonPropertyName("badges")]
-        public List<BadgeInfo> Badges { get; set; }
+        public List<BadgeInfo> Badges { get; set; } = new();
 
         [JsonPropertyName("friends")]
-        public List<BasicUserInfo> Friends { get; set; }
+        public List<BasicUserInfo> Friends { get; set; } = new();
 
         [JsonPropertyName("rooms")]
-        public List<RoomInfo> Rooms { get; set; }
+        public List<RoomInfo> Rooms { get; set; } = new();
     }
 }

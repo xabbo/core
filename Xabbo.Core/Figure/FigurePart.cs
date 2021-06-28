@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
@@ -62,7 +63,7 @@ namespace Xabbo.Core
             return figurePart;
         }
 
-        public static bool TryParse(string figurePartString, out FigurePart figurePart)
+        public static bool TryParse(string figurePartString, [NotNullWhen(true)] out FigurePart? figurePart)
         {
             figurePart = null;
 
@@ -105,12 +106,10 @@ namespace Xabbo.Core
             }
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            var other = obj as FigurePart;
-
             return (
-                !ReferenceEquals(other, null) &&
+                obj is FigurePart other &&
                 other.Type == Type &&
                 other.Id == Id &&
                 other.Colors.SequenceEqual(Colors)

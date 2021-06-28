@@ -30,12 +30,16 @@ namespace Xabbo.Core.GameData
                 .ToList().AsReadOnly();
         }
 
-        public Palette GetPalette(int id) => Palettes.FirstOrDefault(x => x.Id == id);
+        public Palette? GetPalette(int id) => Palettes.FirstOrDefault(x => x.Id == id);
 
-        public Palette GetPalette(FigurePartType partType) => GetPalette(GetSetCollection(partType).PaletteId);
+        public Palette GetPalette(PartSetCollection setCollection) => GetPalette(setCollection.PaletteId)
+            ?? throw new Exception($"No palette found for part set collection: {setCollection.Type}.");
+
+        public Palette GetPalette(FigurePartType figurePartType) => GetPalette(GetSetCollection(figurePartType));
 
         public PartSetCollection GetSetCollection(FigurePartType figurePartType)
-            => SetCollections.FirstOrDefault(x => x.Type == figurePartType);
+            => SetCollections.FirstOrDefault(x => x.Type == figurePartType)
+            ?? throw new Exception($"No set collection found for figure part type: {figurePartType}.");
 
         public class Palette
         {
@@ -50,7 +54,7 @@ namespace Xabbo.Core.GameData
                     .ToList().AsReadOnly();
             }
 
-            public Color GetColor(int id) => Colors.FirstOrDefault(x => x.Id == id);
+            public Color? GetColor(int id) => Colors.FirstOrDefault(x => x.Id == id);
         }
 
         public class Color
@@ -102,7 +106,7 @@ namespace Xabbo.Core.GameData
                     .ToList().AsReadOnly();
             }
 
-            public PartSet GetSet(int id) => Sets.FirstOrDefault(x => x.Id == id);
+            public PartSet? GetSet(int id) => Sets.FirstOrDefault(x => x.Id == id);
         }
 
         public class PartSet 
@@ -132,7 +136,7 @@ namespace Xabbo.Core.GameData
                     .ToList().AsReadOnly();
             }
 
-            public Part GetPart(int id) => Parts.FirstOrDefault(x => x.Id == id);
+            public Part? GetPart(int id) => Parts.FirstOrDefault(x => x.Id == id);
         }
 
         public class Part
@@ -173,7 +177,7 @@ namespace Xabbo.Core.GameData
         public bool TryGetGender(string figureString, out Gender gender)
         {
             gender = Gender.Unisex;
-            if (!Figure.TryParse(figureString, out Figure figure))
+            if (!Figure.TryParse(figureString, out Figure? figure))
                 return false;
             return TryGetGender(figure, out gender);
         }

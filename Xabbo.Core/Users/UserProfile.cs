@@ -26,6 +26,10 @@ namespace Xabbo.Core
 
         public UserProfile()
         {
+            Name =
+            Figure =
+            Motto =
+            Created = string.Empty;
             Groups = new List<GroupInfo>();
         }
 

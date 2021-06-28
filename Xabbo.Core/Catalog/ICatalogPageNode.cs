@@ -15,7 +15,7 @@ namespace Xabbo.Core
 
         ICatalogPageNode Find(Predicate<ICatalogPageNode> predicate);
         ICatalogPageNode Find(string text);
-        ICatalogPageNode Find(int? id = null, string name = null, string text = null);
+        ICatalogPageNode Find(int? id = null, string? name = null, string? text = null);
 
         IEnumerable<ICatalogPageNode> EnumerateDescendants();
     }

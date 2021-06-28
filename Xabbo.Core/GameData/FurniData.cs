@@ -8,12 +8,12 @@ namespace Xabbo.Core.GameData
 {
     public class FurniData : IReadOnlyCollection<FurniInfo>
     {
-        public static FurniData LoadJson(string json) => new FurniData(Json.FurniData.Load(json));
-        public static FurniData LoadXml(Stream stream) => new FurniData(Xml.FurniData.Load(stream));
+        public static FurniData LoadJson(string json) => new(Json.FurniData.Load(json));
+        public static FurniData LoadXml(Stream stream) => new(Xml.FurniData.Load(stream));
         public static FurniData LoadXml(string path)
         {
-            using (var stream = File.OpenRead(path))
-                return LoadXml(stream);
+            using Stream stream = File.OpenRead(path);
+            return LoadXml(stream);
         }
 
         private readonly IReadOnlyDictionary<string, FurniInfo> _identifierMap;
@@ -40,7 +40,7 @@ namespace Xabbo.Core.GameData
         /// <summary>
         /// Gets the information of the furni with the specified identifier, or <c>null</c> if it does not exist.
         /// </summary>
-        public FurniInfo this[string identifier] => GetInfo(identifier);
+        public FurniInfo? this[string identifier] => GetInfo(identifier);
 
         internal FurniData(Xml.FurniData proxy)
         {
@@ -75,7 +75,7 @@ namespace Xabbo.Core.GameData
         /// <summary>
         /// Gets the information of the furni with the specified type and kind, or <c>null</c> if it does not exist.
         /// </summary>
-        public FurniInfo GetInfo(ItemType type, int kind)
+        public FurniInfo? GetInfo(ItemType type, int kind)
         {
             if (type == ItemType.Floor)
                 return GetFloorItem(kind);
@@ -88,24 +88,24 @@ namespace Xabbo.Core.GameData
         /// <summary>
         /// Gets the information of the specified item, or <c>null</c> if it does not exist.
         /// </summary>
-        public FurniInfo GetInfo(IItem item) => GetInfo(item.Type, item.Kind);
+        public FurniInfo? GetInfo(IItem item) => GetInfo(item.Type, item.Kind);
 
         /// <summary>
         /// Gets the information of the furni with the specified identifier, or <c>null</c> if it does not exist.
         /// </summary>
-        public FurniInfo GetInfo(string identifier) => _identifierMap.TryGetValue(identifier, out FurniInfo info) ? info : null;
+        public FurniInfo? GetInfo(string identifier) => _identifierMap.TryGetValue(identifier, out FurniInfo? info) ? info : null;
 
         /// <summary>
         /// Gets the information for the floor item of the specified kind, or <c>null</c> if it does not exist.
         /// </summary>
-        public FurniInfo GetFloorItem(int kind) => _floorItemMap.TryGetValue(kind, out FurniInfo furniInfo) ? furniInfo : null;
+        public FurniInfo? GetFloorItem(int kind) => _floorItemMap.TryGetValue(kind, out FurniInfo? furniInfo) ? furniInfo : null;
 
         /// <summary>
         /// Gets the information for the wall item of the specified kind, or <c>null</c> if it does not exist.
         /// </summary>
-        public FurniInfo GetWallItem(int kind) => _wallItemMap.TryGetValue(kind, out FurniInfo furniInfo) ? furniInfo : null;
+        public FurniInfo? GetWallItem(int kind) => _wallItemMap.TryGetValue(kind, out FurniInfo? furniInfo) ? furniInfo : null;
 
-        private IEnumerable<FurniInfo> FindItems(IEnumerable<FurniInfo> infos, string searchText)
+        private static IEnumerable<FurniInfo> FindItems(IEnumerable<FurniInfo> infos, string searchText)
         {
             searchText = searchText.ToLower();
             return infos
@@ -131,31 +131,31 @@ namespace Xabbo.Core.GameData
         /// <summary>
         /// Finds the information of a furni containing the specified text in its name.
         /// </summary>
-        public FurniInfo FindItem(string name) => FindItems(this, name).FirstOrDefault();
+        public FurniInfo? FindItem(string searchText) => FindItems(this, searchText).FirstOrDefault();
 
         /// <summary>
         /// Finds the information of a floor furni containing the specified text in its name.
         /// </summary>
-        public FurniInfo FindFloorItem(string name) => FindItems(FloorItems, name).FirstOrDefault();
+        public FurniInfo? FindFloorItem(string searchText) => FindItems(FloorItems, searchText).FirstOrDefault();
 
         /// <summary>
         /// Finds the information of a wall furni containing the specified text in its name.
         /// </summary>
-        public FurniInfo FindWallItem(string name) => FindItems(WallItems, name).FirstOrDefault();
+        public FurniInfo? FindWallItem(string searchText) => FindItems(WallItems, searchText).FirstOrDefault();
 
         public ItemDescriptor GetItemDescriptor(IItem item)
         {
             string variant = string.Empty;
 
             var info = GetInfo(item) ?? throw new ArgumentException(
-                $"Unable to find furni info for {item.Type.ToString().ToLower()} item {item.Kind}"
+                $"Unable to find furni info for {item.Type.ToString().ToLower()} item {item.Kind}."
             );
 
             if (info.Identifier == "poster")
             {
                 if (item is IInventoryItem inventoryItem)
                 {
-                    variant = inventoryItem.Data?.Value;
+                    variant = inventoryItem.Data.Value;
                 }
                 else if (item is IWallItem wallItem)
                 {
@@ -167,7 +167,7 @@ namespace Xabbo.Core.GameData
                 }
                 else
                 {
-                    throw new ArgumentException($"Unable to find variant for poster of item type: {item.GetType().FullName}");
+                    throw new ArgumentException($"Unable to find variant for poster of item type: {item.GetType().FullName}.");
                 }
             }
 
@@ -179,11 +179,13 @@ namespace Xabbo.Core.GameData
             string variant = string.Empty;
 
             var info = GetInfo(item) ?? throw new ArgumentException(
-                $"Unable to find furni info for {item.Type.ToString().ToLower()} item {item.Kind}"
+                $"Unable to find furni info for {item.Type.ToString().ToLower()} item {item.Kind}."
             );
 
             if (info.Identifier == "poster")
-                variant = item.Data?.Value;
+            {
+                variant = item.Data.Value;
+            }
 
             return new StackDescriptor(item.Type, item.Kind, variant, item.IsTradeable, item.IsGroupable);
         }
@@ -194,8 +196,8 @@ namespace Xabbo.Core.GameData
         public IEnumerable<IGrouping<int, IInventoryItem>> GroupItems(IEnumerable<IInventoryItem> items,
             int maxSlots = 9, int maxItems = 1500)
         {
-            if (maxSlots < 1 || maxSlots > 9) throw new ArgumentOutOfRangeException("maxSlots");
-            if (maxItems < 1 || maxItems > 1500) throw new ArgumentOutOfRangeException("maxItems");
+            if (maxSlots < 1 || maxSlots > 9) throw new ArgumentOutOfRangeException(nameof(maxSlots));
+            if (maxItems < 1 || maxItems > 1500) throw new ArgumentOutOfRangeException(nameof(maxItems));
 
             StackDescriptor currentDescriptor = default;
             int currentGroup = 0, currentSlots = 0, currentItems = 0;

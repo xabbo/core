@@ -23,23 +23,23 @@ namespace Xabbo.Core
     {
         public static string ToShortString(this FigurePartType figurePartType)
         {
-            switch (figurePartType)
+            return figurePartType switch
             {
-                case FigurePartType.Hair: return "hr";
-                case FigurePartType.Head: return "hd";
-                case FigurePartType.Chest: return "ch";
-                case FigurePartType.Legs: return "lg";
-                case FigurePartType.Shoes: return "sh";
-                case FigurePartType.Hat: return "ha";
-                case FigurePartType.HeadAccessory: return "he";
-                case FigurePartType.EyeAccessory: return "ea";
-                case FigurePartType.FaceAccessory: return "fa";
-                case FigurePartType.ChestAccessory: return "ca";
-                case FigurePartType.WaistAccessory: return "wa";
-                case FigurePartType.Coat: return "cc";
-                case FigurePartType.ChestPrint: return "cp";
-                default: return null;
-            }
+                FigurePartType.Hair => "hr",
+                FigurePartType.Head => "hd",
+                FigurePartType.Chest => "ch",
+                FigurePartType.Legs => "lg",
+                FigurePartType.Shoes => "sh",
+                FigurePartType.Hat => "ha",
+                FigurePartType.HeadAccessory => "he",
+                FigurePartType.EyeAccessory => "ea",
+                FigurePartType.FaceAccessory => "fa",
+                FigurePartType.ChestAccessory => "ca",
+                FigurePartType.WaistAccessory => "wa",
+                FigurePartType.Coat => "cc",
+                FigurePartType.ChestPrint => "cp",
+                _ => throw new ArgumentException($"Unknown figure part type: {figurePartType}", nameof(figurePartType)),
+            };
         }
     }
 }

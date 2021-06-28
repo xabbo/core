@@ -6,10 +6,10 @@ namespace Xabbo.Core
 {
     public class PetInfo : IComposable
     {
-        public static PetInfo Parse(IReadOnlyPacket packet) => new PetInfo(packet);
+        public static PetInfo Parse(IReadOnlyPacket packet) => new(packet);
 
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public int Level { get; set; }
         public int MaxLevel { get; set; }
         public int Experience { get; set; }
@@ -21,11 +21,11 @@ namespace Xabbo.Core
         public int Scratches { get; set; }
         public int OwnerId { get; set; }
         public int Age { get; set; }
-        public string OwnerName { get; set; }
+        public string OwnerName { get; set; } = string.Empty;
         public int Breed { get; set; }
         public bool UnknownBoolA { get; set; }
         public bool UnknownBoolB { get; set; }
-        public List<int> UnknownIntsA { get; set; } // Something to do with skills (horse)
+        public List<int> UnknownIntsA { get; set; } = new(); // Something to do with skills (horse)
         public int UnknownIntC { get; set; }
         public bool UnknownBoolC { get; set; }
         public bool UnknownBoolD { get; set; }
@@ -36,10 +36,7 @@ namespace Xabbo.Core
         public int TimeUntilGrownUp { get; set; }
         public bool UnknownBoolF { get; set; }
 
-        public PetInfo()
-        {
-            UnknownIntsA = new List<int>();
-        }
+        public PetInfo() { }
 
         protected PetInfo(IReadOnlyPacket packet)
             : this()

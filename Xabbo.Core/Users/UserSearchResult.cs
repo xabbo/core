@@ -8,14 +8,14 @@ namespace Xabbo.Core
         public static UserSearchResult Parse(IReadOnlyPacket packet) => new UserSearchResult(packet);
 
         public long Id { get; set; }
-        public string Name { get; set; }
-        public string Motto { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Motto { get; set; } = string.Empty;
         public bool Online { get; set; }
         public bool UnknownBoolA { get; set; }
-        public string UnknownStringA { get; set; }
+        public string UnknownStringA { get; set; } = string.Empty;
         public long UnknownLongA { get; set; }
-        public string Figure { get; set; }
-        public string RealName { get; set; }
+        public string Figure { get; set; } = string.Empty;
+        public string RealName { get; set; } = string.Empty;
 
         public UserSearchResult() { }
 

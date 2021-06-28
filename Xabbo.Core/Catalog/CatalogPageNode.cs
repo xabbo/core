@@ -65,15 +65,15 @@ namespace Xabbo.Core
             Find(node => string.Equals(node.Text, text, StringComparison.OrdinalIgnoreCase));
         ICatalogPageNode ICatalogPageNode.Find(string text) => Find(text);
 
-        public CatalogPageNode Find(int? id = null, string name = null, string text = null)
+        public CatalogPageNode Find(int? id = null, string? name = null, string? text = null)
         {
             return Find(node =>
-                (id == null || node.Id == id) &&
-                (name == null || string.Equals(node.Name, name, StringComparison.OrdinalIgnoreCase)) &&
-                (text == null || string.Equals(node.Text, text, StringComparison.OrdinalIgnoreCase))
+                (id is null || node.Id == id) &&
+                (name is null || string.Equals(node.Name, name, StringComparison.OrdinalIgnoreCase)) &&
+                (text is null || string.Equals(node.Text, text, StringComparison.OrdinalIgnoreCase))
             );
         }
-        ICatalogPageNode ICatalogPageNode.Find(int? id, string name, string text) => Find(id, name, text);
+        ICatalogPageNode ICatalogPageNode.Find(int? id, string? name, string? text) => Find(id, name, text);
 
         public static CatalogPageNode Parse(IReadOnlyPacket packet, ClientType clientType)
         {

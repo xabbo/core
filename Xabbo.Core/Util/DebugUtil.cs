@@ -9,11 +9,11 @@ namespace Xabbo.Core
     {
         [Conditional("DEBUG")]
         public static void Log(string message,
-            [CallerMemberName] string memberName = null,
-            [CallerFilePath] string sourceFilePath = null,
+            [CallerMemberName] string? memberName = null,
+            [CallerFilePath] string? sourceFilePath = null,
             [CallerLineNumber] int sourceLineNumber = 0)
         {
-            string fileName = Path.GetFileNameWithoutExtension(sourceFilePath);
+            string? fileName = Path.GetFileNameWithoutExtension(sourceFilePath);
             Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] {fileName}.{memberName}: {message}");
         }
     }

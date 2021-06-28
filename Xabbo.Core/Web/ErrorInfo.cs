@@ -9,12 +9,12 @@ namespace Xabbo.Core.Web
     public class ErrorInfo
     {
         [JsonPropertyName("param")]
-        public string Parameter { get; set; }
+        public string Parameter { get; set; } = string.Empty;
 
         [JsonPropertyName("msg")]
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         [JsonPropertyName("value")]
-        public string Value { get; set; }
+        public string Value { get; set; } = string.Empty;
     }
 }

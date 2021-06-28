@@ -28,7 +28,7 @@ namespace Xabbo.Core
         ICatalogPageNode ICatalog.Find(Predicate<ICatalogPageNode> predicate) => Find(predicate);
         public CatalogPageNode Find(string name) => Root.Find(name);
         ICatalogPageNode ICatalog.Find(string name) => Find(name);
-        public CatalogPageNode Find(int? id = null, string name = null, string text = null) => Root.Find(id, name, text);
+        public CatalogPageNode Find(int? id = null, string? name = null, string? text = null) => Root.Find(id, name, text);
         ICatalogPageNode ICatalog.Find(int? id, string name, string text) => Find(id, name, text);
 
         public static Catalog Parse(IReadOnlyPacket packet, ClientType clientType = ClientType.Unknown)

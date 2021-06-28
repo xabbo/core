@@ -8,12 +8,15 @@ namespace Xabbo.Core.GameData.Xml
     [XmlRoot("furnidata")]
     public class FurniData
     {
-        private static readonly XmlSerializer _serializer = new XmlSerializer(typeof(FurniData));
-        public static FurniData Load(Stream stream) => (FurniData)_serializer.Deserialize(stream);
+        private static readonly XmlSerializer _serializer = new(typeof(FurniData));
+
+        public static FurniData Load(Stream stream) => (FurniData?)_serializer.Deserialize(stream)
+            ?? throw new Exception("Failed to deserialize furni data.");
+
         public static FurniData Load(string path)
         {
-            using (Stream stream = File.OpenRead(path))
-                return Load(stream);
+            using Stream stream = File.OpenRead(path);
+            return Load(stream);
         }
 
         [XmlArray("roomitemtypes")]

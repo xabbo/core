@@ -38,15 +38,15 @@ namespace Xabbo.Core
         }
 
         public IEnumerable<RoomInfo> FindRooms(
-            string name = null,
-            string description = null,
+            string? name = null,
+            string? description = null,
             int? ownerId = null,
-            string owner = null,
+            string? owner = null,
             RoomAccess? access = null,
             TradePermissions? trading = null,
             RoomCategory? category = null,
             int? groupId = null,
-            string group = null)
+            string? group = null)
         {
             foreach (var roomInfo in GetRooms())
             {
@@ -63,6 +63,8 @@ namespace Xabbo.Core
             }
         }
 
-        public RoomInfo FindRoom(string name) => GetRooms().FirstOrDefault(roomInfo => roomInfo.Name.ToLower().Contains(name.ToLower()));
+        public RoomInfo? FindRoom(string name) => GetRooms().FirstOrDefault(
+            roomInfo => roomInfo.Name.Contains(name, StringComparison.OrdinalIgnoreCase)
+        );
     }
 }

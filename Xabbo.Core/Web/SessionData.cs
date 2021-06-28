@@ -7,16 +7,16 @@ namespace Xabbo.Core.Web
     public class SessionData
     {
         [JsonPropertyName("uniqueId")]
-        public string UniqueId { get; set; }
+        public string UniqueId { get; set; } = string.Empty;
 
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [JsonPropertyName("figureString")]
-        public string FigureString { get; set; }
+        public string FigureString { get; set; } = string.Empty;
 
         [JsonPropertyName("motto")]
-        public string Motto { get; set; }
+        public string Motto { get; set; } = string.Empty;
 
         [JsonPropertyName("buildersClubMember")]
         public bool BuildersClubMember { get; set; }
@@ -37,7 +37,7 @@ namespace Xabbo.Core.Web
         public long LoginLogId { get; set; }
 
         [JsonPropertyName("email")]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [JsonPropertyName("identityId")]
         public int IdentityId { get; set; }
@@ -49,25 +49,25 @@ namespace Xabbo.Core.Web
         public bool IdentityVerified { get; set; }
 
         [JsonPropertyName("identityType")]
-        public string IdentityType { get; set; }
+        public string IdentityType { get; set; } = string.Empty;
 
         [JsonPropertyName("trusted")]
         public bool Trusted { get; set; }
 
         [JsonPropertyName("force")]
-        public List<string> Force { get; set; }
+        public List<string> Force { get; set; } = new();
 
         [JsonPropertyName("accountId")]
         public int AccountId { get; set; }
 
         [JsonPropertyName("country")]
-        public string Country { get; set; }
+        public string Country { get; set; } = string.Empty;
 
         [JsonPropertyName("traits")]
-        public List<string> Traits { get; set; }
+        public List<string> Traits { get; set; } = new();
 
         [JsonPropertyName("partner")]
-        public string Partner { get; set; }
+        public string Partner { get; set; } = string.Empty;
 
         [JsonPropertyName("banned")]
         public bool Banned { get; set; }

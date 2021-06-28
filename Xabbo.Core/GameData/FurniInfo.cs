@@ -85,7 +85,7 @@ namespace Xabbo.Core.GameData
             DefaultDirection = proxy.DefaultDir;
             XDimension = proxy.XDim;
             YDimension = proxy.YDim;
-            PartColors = proxy.PartColors?.Colors.ToList().AsReadOnly();
+            PartColors = proxy.PartColors.Colors.ToList().AsReadOnly();
             Name = proxy.Name;
             Description = proxy.Description;
             AdUrl = proxy.AdUrl;

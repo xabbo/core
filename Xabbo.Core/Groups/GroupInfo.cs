@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core
@@ -8,10 +9,10 @@ namespace Xabbo.Core
         public static GroupInfo Parse(IReadOnlyPacket packet) => new GroupInfo(packet);
 
         public long Id { get; set; }
-        public string Name { get; set; }
-        public string BadgeCode { get; set; }
-        public string PrimaryColor { get; set; }
-        public string SecondaryColor { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string BadgeCode { get; set; } = string.Empty;
+        public string PrimaryColor { get; set; } = string.Empty;
+        public string SecondaryColor { get; set; } = string.Empty;
         public bool IsFavorite { get; set; }
         public long OwnerId { get; set; }
         public bool HasForum { get; set; }
@@ -32,14 +33,15 @@ namespace Xabbo.Core
 
         public void Compose(IPacket packet)
         {
-            packet.WriteLegacyLong(Id);
-            packet.WriteString(Name);
-            packet.WriteString(BadgeCode);
-            packet.WriteString(PrimaryColor);
-            packet.WriteString(SecondaryColor);
-            packet.WriteBool(IsFavorite);
-            packet.WriteLegacyLong(OwnerId);
-            packet.WriteBool(HasForum);
+            packet
+                .WriteLegacyLong(Id)
+                .WriteString(Name)
+                .WriteString(BadgeCode)
+                .WriteString(PrimaryColor)
+                .WriteString(SecondaryColor)
+                .WriteBool(IsFavorite)
+                .WriteLegacyLong(OwnerId)
+                .WriteBool(HasForum);
         }
     }
 }

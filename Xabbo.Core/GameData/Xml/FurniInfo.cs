@@ -10,7 +10,7 @@ namespace Xabbo.Core.GameData.Xml
         public int Id { get; set; }
 
         [XmlAttribute("classname")]
-        public string ClassName { get; set; }
+        public string ClassName { get; set; } = string.Empty;
 
         [XmlElement("revision")]
         public int Revision { get; set; }
@@ -26,16 +26,16 @@ namespace Xabbo.Core.GameData.Xml
 
         [XmlArray("partcolors")]
         [XmlArrayItem("color")]
-        public List<string> PartColors { get; set; }
+        public List<string> PartColors { get; set; } = new();
 
         [XmlElement("name")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [XmlElement("description")]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [XmlElement("adurl")]
-        public string AdUrl { get; set; }
+        public string AdUrl { get; set; } = string.Empty;
 
         [XmlElement("offerid")]
         public int OfferId { get; set; }
@@ -56,7 +56,7 @@ namespace Xabbo.Core.GameData.Xml
         public bool ExcludedDynamic { get; set; }
 
         [XmlElement("customparams")]
-        public string CustomParams { get; set; }
+        public string CustomParams { get; set; } = string.Empty;
 
         [XmlElement("specialtype")]
         public int SpecialType { get; set; }
@@ -71,11 +71,6 @@ namespace Xabbo.Core.GameData.Xml
         public bool CanLayOn { get; set; }
 
         [XmlElement("furniline")]
-        public string FurniLine { get; set; }
-
-        public FurniInfo()
-        {
-            PartColors = new List<string>();
-        }
+        public string FurniLine { get; set; } = string.Empty;
     }
 }

@@ -136,7 +136,7 @@ namespace Xabbo.Core
         }
 
         public override int GetHashCode() => (X1, Y1, X2, Y2).GetHashCode();
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is Area other && Equals(other);
         }

@@ -6,7 +6,7 @@ namespace Xabbo.Core
     public class Badge
     {
         public int Id { get; set; }
-        public string Code { get; set; }
+        public string Code { get; set; } = string.Empty;
 
         public Badge() { }
 
@@ -22,6 +22,6 @@ namespace Xabbo.Core
             Code = packet.ReadString();
         }
 
-        public static Badge Parse(IReadOnlyPacket packet) => new Badge(packet);
+        public static Badge Parse(IReadOnlyPacket packet) => new(packet);
     }
 }

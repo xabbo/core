@@ -5,6 +5,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
+using System.Diagnostics.CodeAnalysis;
+
 using Xabbo.Core.Serialization;
 
 namespace Xabbo.Core.GameData
@@ -24,11 +26,11 @@ namespace Xabbo.Core.GameData
         {
             return new ProductData(
                 JsonSerializer.Deserialize<Json.ProductData>(json, _jsonSerializerOptions)
-                ?? throw new FormatException("Failed to deserialize product data.")
+                ?? throw new Exception("Failed to deserialize product data.")
             );
         }
 
-        private readonly Dictionary<string, ProductInfo> _map = new Dictionary<string, ProductInfo>();
+        private readonly Dictionary<string, ProductInfo> _map = new();
 
         public ProductInfo this[string key] => _map[key];
         public IEnumerable<string> Keys => _map.Keys;
@@ -39,11 +41,11 @@ namespace Xabbo.Core.GameData
         {
             foreach (var productInfoProxy in productDataProxy.Container.Product)
             {
-                ProductInfo productInfo = new ProductInfo(productInfoProxy);
+                ProductInfo productInfo = new(productInfoProxy);
                 
                 if (_map.ContainsKey(productInfo.Code))
                 {
-                    Debug.WriteLine($"[!] Duplicate product code '{productInfo.Code}' in JSON product data");
+                    Debug.WriteLine($"[!] Duplicate product code '{productInfo.Code}' in JSON product data.");
                 }
                 else
                 {
@@ -54,7 +56,7 @@ namespace Xabbo.Core.GameData
 
         public bool ContainsKey(string key) => _map.ContainsKey(key);
         public IEnumerator<KeyValuePair<string, ProductInfo>> GetEnumerator() => _map.GetEnumerator();
-        public bool TryGetValue(string key, out ProductInfo value) => _map.TryGetValue(key, out value);
+        public bool TryGetValue(string key, [NotNullWhen(true)] out ProductInfo? value) => _map.TryGetValue(key, out value);
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 

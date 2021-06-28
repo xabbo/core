@@ -7,32 +7,27 @@ namespace Xabbo.Core.GameData.Json
 {
     public class ProductData
     {
-        private static readonly JsonSerializerOptions _options = new JsonSerializerOptions()
+        private static readonly JsonSerializerOptions _serializerOptions = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             PropertyNameCaseInsensitive = true
         };
 
-        public static ProductData Load(string json) => JsonSerializer.Deserialize<ProductData>(json, _options);
+        public static ProductData? Load(string json) => JsonSerializer.Deserialize<ProductData>(json, _serializerOptions);
 
         [JsonPropertyName("productdata")]
-        public ProductInfoContainer Container { get; set; }
+        public ProductInfoContainer Container { get; set; } = new();
 
         public class ProductInfoContainer
         {
-            public List<ProductInfo> Product { get; set; }
-
-            public ProductInfoContainer()
-            {
-                Product = new List<ProductInfo>();
-            }
+            public List<ProductInfo> Product { get; set; } = new();
         }
     }
 
     public class ProductInfo
     {
-        public string Code { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
     }
 }

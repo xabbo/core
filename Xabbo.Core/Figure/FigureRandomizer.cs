@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Xabbo.Core.GameData;
+using static Xabbo.Core.GameData.FigureData;
 
 namespace Xabbo.Core
 {
     public class FigureRandomizer
     {
-        private readonly Random random = new Random();
+        private readonly Random random = new();
 
         public FigureData FigureData { get; }
 
@@ -36,16 +37,17 @@ namespace Xabbo.Core
             };
         }
 
-        private int GetColorCount(FigureData.PartSet partSet) => partSet.Parts.Select(x => x.ColorIndex).Where(x => x > 0).Distinct().Count();
+        private static int GetColorCount(PartSet partSet)
+            => partSet.Parts.Select(x => x.ColorIndex).Where(x => x > 0).Distinct().Count();
 
-        private FigureData.Color[] GetColors(int paletteId) =>
-            FigureData.GetPalette(paletteId).Colors
+        private Color[] GetColors(PartSetCollection setCollection) =>
+            FigureData.GetPalette(setCollection).Colors
             .Where(x =>
                 x.IsSelectable &&
                 (AllowHC || !x.IsClubRequired)
             ).ToArray();
 
-        private FigureData.PartSet[] GetPartSets(FigurePartType partType, Gender gender)
+        private PartSet[] GetPartSets(FigurePartType partType, Gender gender)
             => FigureData.GetSetCollection(partType).Sets
             .Where(set =>
                 set.IsSelectable && !set.IsSellable &&
@@ -53,7 +55,7 @@ namespace Xabbo.Core
                 ((set.Gender & gender) > 0)
             ).ToArray();
 
-        private FigureData.PartSet GetRandomPartSet(FigurePartType partType, Gender gender)
+        private PartSet? GetRandomPartSet(FigurePartType partType, Gender gender)
         {
             var selection = GetPartSets(partType, gender);
             if (selection.Length == 0) return null;
@@ -71,7 +73,7 @@ namespace Xabbo.Core
             if (partSet.IsColorable)
             {
                 int colorCount = GetColorCount(partSet);
-                var colorSelection = FigureData.GetPalette(partSetCollection.PaletteId).Colors.Where(x =>
+                var colorSelection = FigureData.GetPalette(partSetCollection).Colors.Where(x =>
                     (AllowHC || !x.IsClubRequired) &&
                     x.IsSelectable
                 ).ToArray();
@@ -90,8 +92,8 @@ namespace Xabbo.Core
         public FigureData.Color GetRandomColor(FigurePartType figurePartType)
         {
             var set = FigureData.GetSetCollection(figurePartType);
-            if (set == null) throw new Exception($"Unknown part type: {figurePartType}");
-            var selection = FigureData.GetPalette(set.PaletteId).Colors.Where(x => x.IsSelectable && (AllowHC || !x.IsClubRequired)).ToArray();
+            if (set is null) throw new Exception($"Unknown part type: {figurePartType}.");
+            var selection = FigureData.GetPalette(set).Colors.Where(x => x.IsSelectable && (AllowHC || !x.IsClubRequired)).ToArray();
             return selection[random.Next(selection.Length)];
         }
 
@@ -119,7 +121,7 @@ namespace Xabbo.Core
                     if (partSet.IsColorable)
                     {
                         int colorCount = GetColorCount(partSet);
-                        var colors = GetColors(setCollection.PaletteId);
+                        var colors = GetColors(setCollection);
 
                         for (int i = 0; i < colorCount; i++)
                         {

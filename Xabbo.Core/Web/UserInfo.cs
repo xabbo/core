@@ -13,6 +13,6 @@ namespace Xabbo.Core.Web
         public bool IsProfileVisible { get; set; }
 
         [JsonPropertyName("selectedBadges")]
-        public List<SelectedBadgeInfo> SelectedBadges { get; set; }
+        public List<SelectedBadgeInfo> SelectedBadges { get; set; } = new();
     }
 }

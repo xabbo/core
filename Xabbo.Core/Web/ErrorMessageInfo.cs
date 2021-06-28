@@ -6,6 +6,6 @@ namespace Xabbo.Core.Web
     public class ErrorMessageInfo
     {
         [JsonPropertyName("errorMsg")]
-        public string ErrorMsg { get; set; }
+        public string ErrorMsg { get; set; } = string.Empty;
     }
 }

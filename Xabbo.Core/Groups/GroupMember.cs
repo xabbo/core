@@ -9,8 +9,8 @@ namespace Xabbo.Core
 
         public GroupMemberType Type { get; set; }
         public long Id { get; set; }
-        public string Name { get; set; }
-        public string Figure { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Figure { get; set; } = string.Empty;
         public DateTime Joined { get; set; }
 
         public GroupMember() { }
@@ -18,7 +18,7 @@ namespace Xabbo.Core
         protected GroupMember(IReadOnlyPacket packet)
         {
             Type = (GroupMemberType)packet.ReadInt();
-            Id = packet.ReadLong();
+            Id = packet.ReadLegacyLong();
             Name = packet.ReadString();
             Figure = packet.ReadString();
             Joined = DateTime.Parse(packet.ReadString());

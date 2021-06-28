@@ -268,22 +268,22 @@ namespace Xabbo.Core
         public static Task<string> LoadExternalVariablesAsync(string domain)
             => DownloadStringAsync(URL_EXTERNAL_VARIABLES.Replace("$domain", domain));
 
-        public static async Task<UserInfo> FindUserAsync(string name)
+        public static async Task<UserInfo?> FindUserAsync(string name)
         {
             string json = await DownloadStringAsync(API_USER_LOOKUP.Replace("$name", WebUtility.UrlEncode(name))).ConfigureAwait(false);
 
-            var userInfo = JsonSerializer.Deserialize<UserInfo>(json);
-            if (userInfo.UniqueId == null) return null;
+            UserInfo? userInfo = JsonSerializer.Deserialize<UserInfo>(json);
+            if (userInfo?.UniqueId is null) return null;
 
             return userInfo;
         }
 
-        public static async Task<Web.UserProfile> GetProfileAsync(string uniqueId)
+        public static async Task<Web.UserProfile?> GetProfileAsync(string uniqueId)
         {
             string json = await DownloadStringAsync(API_USER_PROFILE.Replace("$uniqueId", uniqueId)).ConfigureAwait(false);
 
             var userProfile = JsonSerializer.Deserialize<Web.UserProfile>(json);
-            if (userProfile.UniqueId == null) return null;
+            if (userProfile?.UniqueId is null) return null;
 
             return userProfile;
         }
@@ -299,11 +299,10 @@ namespace Xabbo.Core
             );
         }
 
-        // https://habbo-stories-content.s3.amazonaws.com/servercamera/purchased/hhus/106070019-58678495-1562585848630_small.png
         public static async Task<PhotoData> GetPhotoDataAsync(string id)
         {
             string json = await DownloadStringAsync(API_FURNI_EXTRADATA.Replace("$id", id)).ConfigureAwait(false);
-            return JsonSerializer.Deserialize<PhotoData>(json);
+            return JsonSerializer.Deserialize<PhotoData>(json) ?? throw new FormatException("Failed to deserialize photo data.");
         }
 
         public static async Task<byte[]> DownloadPhotoAsync(string id)
@@ -314,7 +313,7 @@ namespace Xabbo.Core
 
         public static Task<byte[]> DownloadPhotoAsync(PhotoData photoData)
         {
-            return DownloadDataAsync(photoData.Url, null);
+            return DownloadDataAsync(photoData.Url);
         }
         #endregion
     }

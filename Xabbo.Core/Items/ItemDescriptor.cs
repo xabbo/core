@@ -12,7 +12,7 @@ namespace Xabbo.Core
             : this(type, kind, null)
         { }
 
-        public ItemDescriptor(ItemType type, int kind, string variant)
+        public ItemDescriptor(ItemType type, int kind, string? variant)
         {
             Type = type;
             Kind = kind;
@@ -21,7 +21,7 @@ namespace Xabbo.Core
 
         public override int GetHashCode() => (Type, Kind, Variant).GetHashCode();
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is ItemDescriptor other
                 && Equals(other);

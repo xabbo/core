@@ -11,16 +11,16 @@ namespace Xabbo.Core.Web
         public int Id { get; set; }
 
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [JsonPropertyName("description")]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [JsonPropertyName("creationTime")]
         public DateTime Created { get; set; }
 
         [JsonPropertyName("tags")]
-        public List<string> Tags { get; set; }
+        public List<string> Tags { get; set; } = new();
 
         [JsonPropertyName("maximumVisitors")]
         public int MaximumVisitors { get; set; }
@@ -29,25 +29,25 @@ namespace Xabbo.Core.Web
         public bool ShowOwnerName { get; set; }
 
         [JsonPropertyName("ownerName")]
-        public string OwnerName { get; set; }
+        public string OwnerName { get; set; } = string.Empty;
 
         [JsonPropertyName("ownerUniqueId")]
-        public string OwnerUniqueId { get; set; }
+        public string OwnerUniqueId { get; set; } = string.Empty;
 
         [JsonPropertyName("categories")]
-        public List<string> Categories { get; set; }
+        public List<string> Categories { get; set; } = new();
 
         [JsonPropertyName("thumbnailUrl")]
-        public string ThumbnailUrl { get; set; }
+        public string ThumbnailUrl { get; set; } = string.Empty;
 
         [JsonPropertyName("imageUrl")]
-        public string ImageUrl { get; set; }
+        public string ImageUrl { get; set; } = string.Empty;
 
         [JsonPropertyName("rating")]
         public int Rating { get; set; }
 
         [JsonPropertyName("uniqueId")]
-        public string UniqueId { get; set; }
+        public string UniqueId { get; set; } = string.Empty;
 
         // The following are not included in user profile,
         // only returned by the room info api
@@ -56,6 +56,6 @@ namespace Xabbo.Core.Web
         public bool IsPublicRoom { get; set; }
 
         [JsonPropertyName("doorMode")]
-        public string DoorMode { get; set; }
+        public string DoorMode { get; set; } = string.Empty;
     }
 }

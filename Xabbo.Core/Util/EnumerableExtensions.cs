@@ -14,6 +14,6 @@ namespace Xabbo.Core
                 .Select(x => x.Key);
         }
 
-        public static T FindDuplicate<T>(this IEnumerable<T> enumerable) => FindDuplicates(enumerable).FirstOrDefault();
+        public static T? FindDuplicate<T>(this IEnumerable<T> enumerable) => FindDuplicates(enumerable).FirstOrDefault();
     }
 }

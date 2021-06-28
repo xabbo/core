@@ -22,7 +22,7 @@ namespace Xabbo.Core
 
         public override int GetHashCode() => (Type, Kind, Variant, IsTradeable, IsGroupable).GetHashCode();
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is StackDescriptor other
                 && Equals(other);

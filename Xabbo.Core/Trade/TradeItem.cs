@@ -13,7 +13,7 @@ namespace Xabbo.Core
         public int Kind { get; set; }
         public FurniCategory Category { get; set; }
         public bool IsGroupable { get; set; }
-        public StuffData Data { get; set; }
+        public StuffData Data { get; set; } = new LegacyData();
         IItemData IInventoryItem.Data => Data;
         public int CreationDay { get; set; }
         public int CreationMonth { get; set; }

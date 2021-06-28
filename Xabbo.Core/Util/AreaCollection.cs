@@ -7,18 +7,14 @@ namespace Xabbo.Core
 {
     public class AreaCollection : ICollection<Area>
     {
-        private readonly HashSet<Area> _areas = new HashSet<Area>();
+        private readonly HashSet<Area> _areas = new();
 
         public int Count => _areas.Count;
         public bool IsReadOnly => false;
 
-        public IReadOnlyList<(int X, int Y)> Tiles { get; private set; }
+        public IReadOnlyList<(int X, int Y)> Tiles { get; private set; } = Array.Empty<(int, int)>();
 
-        public AreaCollection()
-        {
-            _areas = new HashSet<Area>();
-            UpdateTiles();
-        }
+        public AreaCollection() { }
 
         public AreaCollection(params Area[] areas)
             : this((IEnumerable<Area>)areas)

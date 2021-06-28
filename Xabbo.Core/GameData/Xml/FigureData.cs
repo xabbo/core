@@ -8,17 +8,18 @@ namespace Xabbo.Core.GameData.Xml
     [XmlRoot("figuredata")]
     public class FigureData
     {
-        private static readonly XmlSerializer serializer;
-        static FigureData() { serializer = new XmlSerializer(typeof(FigureData)); }
-        public static FigureData Load(Stream stream) => (FigureData)serializer.Deserialize(stream);
+        private static readonly XmlSerializer _serializer = new(typeof(FigureData));
+
+        public static FigureData Load(Stream stream) => (FigureData?)_serializer.Deserialize(stream)
+            ?? throw new Exception("Failed to deserialize figure data.");
 
         [XmlArray("colors")]
         [XmlArrayItem("palette")]
-        public List<Palette> Palettes { get; set; }
+        public List<Palette> Palettes { get; set; } = new();
 
         [XmlArray("sets")]
         [XmlArrayItem("settype")]
-        public List<PartSetCollection> SetCollections { get; set; }
+        public List<PartSetCollection> SetCollections { get; set; } = new();
 
         public class Palette
         {
@@ -26,7 +27,7 @@ namespace Xabbo.Core.GameData.Xml
             public int Id { get; set; }
 
             [XmlElement("color")]
-            public List<Color> Colors { get; set; }
+            public List<Color> Colors { get; set; } = new();
         }
 
         public class Color
@@ -44,13 +45,13 @@ namespace Xabbo.Core.GameData.Xml
             public bool IsSelectable { get; set; }
 
             [XmlText]
-            public string Value { get; set; }
+            public string Value { get; set; } = string.Empty;
         }
 
         public class PartSetCollection
         {
             [XmlAttribute("type")]
-            public string Type { get; set; }
+            public string Type { get; set; } = string.Empty;
 
             [XmlAttribute("paletteid")]
             public int PaletteId { get; set; }
@@ -68,7 +69,7 @@ namespace Xabbo.Core.GameData.Xml
             public int mand_f_1 { get; set; }
 
             [XmlElement("set")]
-            public List<PartSet> Sets { get; set; }
+            public List<PartSet> Sets { get; set; } = new();
         }
 
         public class PartSet
@@ -77,7 +78,7 @@ namespace Xabbo.Core.GameData.Xml
             public int Id { get; set; }
 
             [XmlAttribute("gender")]
-            public string Gender { get; set; }
+            public string Gender { get; set; } = string.Empty;
 
             [XmlAttribute("club")]
             public int RequiredClubLevel { get; set; }
@@ -95,7 +96,7 @@ namespace Xabbo.Core.GameData.Xml
             public bool IsSellable { get; set; }
 
             [XmlElement("part")]
-            public List<Part> Parts { get; set; }
+            public List<Part> Parts { get; set; } = new();
         }
 
         public class Part
@@ -104,7 +105,7 @@ namespace Xabbo.Core.GameData.Xml
             public int Id { get; set; }
 
             [XmlAttribute("type")]
-            public string Type { get; set; }
+            public string Type { get; set; } = string.Empty;
 
             [XmlAttribute("colorable")]
             public bool IsColorable { get; set; }

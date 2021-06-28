@@ -7,14 +7,14 @@ namespace Xabbo.Core
     public class RoomSettings : IComposable
     {
         public long Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public RoomAccess Access { get; set; }
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
         public int MaxVisitors { get; set; }
         public int UnknownIntA { get; set; }
         public RoomCategory Category { get; set; }
-        public List<string> Tags { get; set; }
+        public List<string> Tags { get; set; } = new();
         public TradePermissions Trading { get; set; }
 
         public bool AllowPets { get; set; }
@@ -24,19 +24,12 @@ namespace Xabbo.Core
         public Thickness WallThickness { get; set; }
         public Thickness FloorThickness { get; set; }
 
-        public ModerationSettings Moderation { get; set; }
-        public ChatSettings Chat { get; set; }
+        public ModerationSettings Moderation { get; set; } = new();
+        public ChatSettings Chat { get; set; } = new();
 
         public bool EnlistByFurniContent { get; set; }
 
-        public RoomSettings()
-        {
-            Name = string.Empty;
-            Description = string.Empty;
-            Password = string.Empty;
-
-            Tags = new List<string>();
-        }
+        public RoomSettings() { }
 
         protected RoomSettings(IReadOnlyPacket packet)
             : this()
@@ -150,6 +143,6 @@ namespace Xabbo.Core
             );
         }
 
-        public static RoomSettings Parse(IReadOnlyPacket packet) => new RoomSettings(packet);
+        public static RoomSettings Parse(IReadOnlyPacket packet) => new(packet);
     }
 }
