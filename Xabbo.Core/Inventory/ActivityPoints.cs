@@ -38,7 +38,7 @@ namespace Xabbo.Core
 
         protected ActivityPoints(IReadOnlyPacket packet)
         {
-            int n = packet.ReadInt();
+            short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
             {
                 var type = (ActivityPointType)packet.ReadInt();
