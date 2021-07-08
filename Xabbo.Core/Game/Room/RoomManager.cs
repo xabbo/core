@@ -1401,7 +1401,7 @@ namespace Xabbo.Core.Game
         #endregion
 
         #region - Entity packet handlers -
-        [InterceptIn(nameof(Incoming.RoomUsers))]
+        [InterceptIn(nameof(Incoming.UsersInRoom))]
         private void HandleUsersInRoom(InterceptArgs e)
         {
             if (!IsLoadingRoom && !IsInRoom)
