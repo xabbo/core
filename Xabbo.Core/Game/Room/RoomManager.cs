@@ -520,13 +520,14 @@ namespace Xabbo.Core.Game
             _logger = NullLogger.Instance;
         }
 
-        protected override void OnInterceptorDisconnected(object? sender, EventArgs e)
+        protected override void OnDisconnected(object? sender, EventArgs e)
         {
-            base.OnInterceptorDisconnected(sender, e);
+            base.OnDisconnected(sender, e);
+
+            ResetState();
         }
 
-        #region - Room packet handlers -
-        private void ResetState() 
+        private void ResetState()
         {
             _logger.LogTrace("Resetting room state");
 
@@ -632,6 +633,7 @@ namespace Xabbo.Core.Game
         public void ShowFurni(ItemType type, long id) => SetFurniHidden(type, id, false);
         public void HideFurni(ItemType type, long id) => SetFurniHidden(type, id, true);
 
+        #region - Room packet handlers -
         [Receive(nameof(Incoming.GetGuestRoomResult))]
         private void HandleGetGuestRoomResult(IReadOnlyPacket packet)
         {

@@ -45,11 +45,11 @@ namespace Xabbo.Core.Game
         public GameStateManager(IInterceptor interceptor)
         {
             Interceptor = interceptor;
-            Interceptor.Connected += OnInterceptorConnected;
-            Interceptor.Disconnected += OnInterceptorDisconnected;
+            Interceptor.Connected += OnConnected;
+            Interceptor.Disconnected += OnDisconnected;
         }
 
-        protected virtual void OnInterceptorConnected(object? sender, EventArgs e)
+        protected virtual void OnConnected(object? sender, EventArgs e)
         {
             if (!Interceptor.Dispatcher.IsBound(this))
             {
@@ -57,7 +57,7 @@ namespace Xabbo.Core.Game
             }
         }
 
-        protected virtual void OnInterceptorDisconnected(object? sender, EventArgs e)
+        protected virtual void OnDisconnected(object? sender, EventArgs e)
         {
             Interceptor.Dispatcher.Release(this);
         }

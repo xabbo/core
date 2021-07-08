@@ -53,13 +53,32 @@ namespace Xabbo.Core.Game
             => PointsUpdated?.Invoke(this, new PointsUpdatedEventArgs(type, amount, change));
         #endregion
 
+#pragma warning disable CS8618
         public ProfileManager(IInterceptor interceptor)
             : base(interceptor)
+        {
+            Reset();
+        }
+#pragma warning restore CS8618
+
+        private void Reset()
         {
             _tcsUserData = new TaskCompletionSource<IUserData>();
             _taskUserData = _tcsUserData.Task;
 
+            UserData = null;
             Points = new ActivityPoints();
+            Achievements = null;
+
+            _tcsUserData = null;
+            _isLoadingCredits = false;
+        }
+
+        protected override void OnDisconnected(object? sender, EventArgs e)
+        {
+            base.OnDisconnected(sender, e);
+
+            Reset();
         }
 
         /// <summary>

@@ -66,6 +66,20 @@ namespace Xabbo.Core.Game
             _logger = NullLogger.Instance;
         }
 
+        protected override void OnDisconnected(object? sender, EventArgs e)
+        {
+            base.OnDisconnected(sender, e);
+
+            _friends.Clear();
+            _nameMap.Clear();
+
+            _totalFragments = -1;
+            _currentFragment = 0;
+            _loadList.Clear();
+            _isLoading = true;
+            _isForceLoading = false;
+        }
+
         public void SendMessage(long id, string message) => SendAsync(Out.SendMessage, id, message);
         public void SendMessage(Friend friend, string message) => SendMessage(friend.Id, message);
 

@@ -54,6 +54,13 @@ namespace Xabbo.Core.Game
             _roomManager = roomManager;
         }
 
+        protected override void OnDisconnected(object? sender, EventArgs e)
+        {
+            base.OnDisconnected(sender, e);
+
+            ResetTrade();
+        }
+
         private void ResetTrade()
         {
             IsTrading =
