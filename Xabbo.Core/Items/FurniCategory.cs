@@ -13,7 +13,7 @@ namespace Xabbo.Core
         Poster = 6,
         Trax = 7,
         Disk = 8,
-        Present = 9,
+        Gift = 9,
         MysteryBox = 10,
         Trophy = 11,
         // 12 = 2016 bubble juice (a credit furni?)
