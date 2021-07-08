@@ -36,7 +36,7 @@ namespace Xabbo.Core
         protected Achievements(IReadOnlyPacket packet)
             : this()
         {
-            short n = packet.ReadShort();
+            short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
                 Update(Achievement.Parse(packet));
 

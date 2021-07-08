@@ -65,11 +65,7 @@ namespace Xabbo.Core
             String3 = packet.ReadString();
             MaxLevel = packet.ReadInt();
             Int9 = packet.ReadInt();
-
-            if (packet.Protocol == ClientType.Unity)
-            {
-                _Short1 = packet.ReadShort();
-            }
+            _Short1 = packet.ReadShort();
         }
 
         public void Compose(IPacket packet)
@@ -87,13 +83,9 @@ namespace Xabbo.Core
                 Category,
                 String3,
                 MaxLevel,
-                Int9
+                Int9,
+                _Short1
             );
-
-            if (packet.Protocol == ClientType.Unity)
-            {
-                packet.WriteShort(_Short1);
-            }
         }
 
         public static Achievement Parse(IReadOnlyPacket packet) => new Achievement(packet);
