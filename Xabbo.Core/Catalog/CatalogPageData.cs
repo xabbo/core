@@ -23,7 +23,7 @@ namespace Xabbo.Core
             String4 = string.Empty;
         }
 
-        protected CatalogPageData(IReadOnlyPacket packet, ClientType clientType)
+        protected CatalogPageData(IReadOnlyPacket packet)
             : this()
         {
             Position = packet.ReadInt();
@@ -49,9 +49,9 @@ namespace Xabbo.Core
             SecondsToExpiration = packet.ReadInt();
         }
 
-        public static CatalogPageData Parse(IReadOnlyPacket packet, ClientType clientType = ClientType.Unknown)
+        public static CatalogPageData Parse(IReadOnlyPacket packet)
         {
-            return new CatalogPageData(packet, clientType);
+            return new CatalogPageData(packet);
         }
     }
 }

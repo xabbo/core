@@ -32,37 +32,37 @@ namespace Xabbo.Core
             Data = new List<CatalogPageData>();
         }
 
-        protected CatalogPage(IReadOnlyPacket packet, ClientType clientType)
+        protected CatalogPage(IReadOnlyPacket packet)
         {
             Id = packet.ReadInt();
             Mode = packet.ReadString();
             LayoutCode = packet.ReadString();
 
-            int n = packet.ReadShort();
+            short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
                 Images.Add(packet.ReadString());
 
-            n = packet.ReadShort();
+            n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
                 Texts.Add(packet.ReadString());
 
-            n = packet.ReadShort();
+            n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
-                Offers.Add(CatalogOffer.Parse(packet, clientType));
+                Offers.Add(CatalogOffer.Parse(packet));
 
             UnknownIntA = packet.ReadInt();
             AcceptSeasonCurrencyAsCredits = packet.ReadBool();
             if (packet.Available > 0)
             {
-                n = packet.ReadInt();
+                n = packet.ReadLegacyShort();
                 for (int i = 0; i < n; i++)
-                    Data.Add(CatalogPageData.Parse(packet, clientType));
+                    Data.Add(CatalogPageData.Parse(packet));
             }
         }
 
-        public static CatalogPage Parse(IReadOnlyPacket packet, ClientType clientType = ClientType.Unknown)
+        public static CatalogPage Parse(IReadOnlyPacket packet)
         {
-            return new CatalogPage(packet, clientType);
+            return new CatalogPage(packet);
         }
     }
 }

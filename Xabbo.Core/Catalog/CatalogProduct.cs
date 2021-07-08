@@ -6,8 +6,7 @@ namespace Xabbo.Core
 {
     public class CatalogProduct : ICatalogProduct
     {
-        public static CatalogProduct Parse(IReadOnlyPacket packet, ClientType clientType)
-            => new CatalogProduct(packet, clientType);
+        public static CatalogProduct Parse(IReadOnlyPacket packet) => new CatalogProduct(packet);
 
         public ItemType Type { get; set; }
         public int Kind { get; set; }
@@ -26,9 +25,14 @@ namespace Xabbo.Core
             Variant = string.Empty;
         }
 
-        protected CatalogProduct(IReadOnlyPacket packet, ClientType clientType)
+        protected CatalogProduct(IReadOnlyPacket packet)
         {
-            Type = H.ToItemType(packet.ReadShort());
+            Type = packet.Protocol switch
+            {
+                ClientType.Flash => H.ToItemType(packet.ReadString()),
+                ClientType.Unity => H.ToItemType(packet.ReadShort()),
+                _ => throw new Exception($"Unknown client protocol: {packet.Protocol}.")
+            };
 
             if (Type == ItemType.Badge)
             {

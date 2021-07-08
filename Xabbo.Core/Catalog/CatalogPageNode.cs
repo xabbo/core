@@ -27,7 +27,7 @@ namespace Xabbo.Core
             Children = new List<CatalogPageNode>();
         }
 
-        protected CatalogPageNode(IReadOnlyPacket packet, ClientType clientType)
+        protected CatalogPageNode(IReadOnlyPacket packet)
         {
             IsVisible = packet.ReadBool();
             Icon = packet.ReadInt();
@@ -35,13 +35,13 @@ namespace Xabbo.Core
             Name = packet.ReadString();
             Text = packet.ReadString();
 
-            short n = packet.ReadShort();
+            short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
                 OfferIds.Add(packet.ReadInt());
 
-            n = packet.ReadShort();
+            n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
-                Children.Add(Parse(packet, clientType));
+                Children.Add(Parse(packet));
         }
 
         public IEnumerable<CatalogPageNode> EnumerateDescendants()
@@ -75,9 +75,9 @@ namespace Xabbo.Core
         }
         ICatalogPageNode ICatalogPageNode.Find(int? id, string? name, string? text) => Find(id, name, text);
 
-        public static CatalogPageNode Parse(IReadOnlyPacket packet, ClientType clientType)
+        public static CatalogPageNode Parse(IReadOnlyPacket packet)
         {
-            return new CatalogPageNode(packet, clientType);
+            return new CatalogPageNode(packet);
         }
     }
 }

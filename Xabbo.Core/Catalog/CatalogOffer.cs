@@ -28,7 +28,7 @@ namespace Xabbo.Core
             PreviewImage = string.Empty;
         }
 
-        protected CatalogOffer(IReadOnlyPacket packet, ClientType clientType)
+        protected CatalogOffer(IReadOnlyPacket packet)
         {
             Id = packet.ReadInt();
             FurniLine = packet.ReadString();
@@ -38,9 +38,9 @@ namespace Xabbo.Core
             ActivityPointType = (ActivityPointType)packet.ReadInt();
             CanPurchaseAsGift = packet.ReadBool();
 
-            int n = packet.ReadInt();
+            short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
-                Products.Add(CatalogProduct.Parse(packet, clientType));
+                Products.Add(CatalogProduct.Parse(packet));
 
             ClubLevel = packet.ReadInt();
             CanPurchaseMultiple = packet.ReadBool();
@@ -48,9 +48,9 @@ namespace Xabbo.Core
             PreviewImage = packet.ReadString();
         }
 
-        public static CatalogOffer Parse(IReadOnlyPacket packet, ClientType clientType = ClientType.Unknown)
+        public static CatalogOffer Parse(IReadOnlyPacket packet)
         {
-            return new CatalogOffer(packet, clientType);
+            return new CatalogOffer(packet);
         }
     }
 }

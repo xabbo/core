@@ -17,9 +17,9 @@ namespace Xabbo.Core
             Mode = string.Empty;
         }
         
-        protected Catalog(IReadOnlyPacket packet, ClientType clientType)
+        protected Catalog(IReadOnlyPacket packet)
         {
-            Root = CatalogPageNode.Parse(packet, clientType);
+            Root = CatalogPageNode.Parse(packet);
             UnknownBoolA = packet.ReadBool();
             Mode = packet.ReadString();
         }
@@ -31,9 +31,9 @@ namespace Xabbo.Core
         public CatalogPageNode Find(int? id = null, string? name = null, string? text = null) => Root.Find(id, name, text);
         ICatalogPageNode ICatalog.Find(int? id, string name, string text) => Find(id, name, text);
 
-        public static Catalog Parse(IReadOnlyPacket packet, ClientType clientType = ClientType.Unknown)
+        public static Catalog Parse(IReadOnlyPacket packet)
         {
-            return new Catalog(packet, clientType);
+            return new Catalog(packet);
         }
     }
 }
