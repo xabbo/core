@@ -17,36 +17,41 @@ namespace Xabbo.Core.GameData
         /// <summary>
         /// Gets the unique identifier string of the furni.
         /// </summary>
-        public string Identifier { get; }
+        public string Identifier { get; } = string.Empty;
         public int Revision { get; }
         public int DefaultDirection { get; }
         public int XDimension { get; }
         public int YDimension { get; }
-        public IReadOnlyList<string> PartColors { get; }
+        public IReadOnlyList<string> PartColors { get; } = new List<string>();
         /// <summary>
         /// Gets the name of the furni.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; } = string.Empty;
         /// <summary>
         /// Gets the description of the furni.
         /// </summary>
-        public string Description { get; }
-        public string AdUrl { get; }
+        public string Description { get; } = string.Empty;
+        public string AdUrl { get; } = string.Empty;
         public int OfferId { get; }
         public bool BuyOut { get; }
         public int RentOfferId { get; }
         public bool RentBuyOut { get; }
         public bool IsBuildersClub { get; }
         public bool ExcludedDynamic { get; }
-        public string CustomParams { get; }
+        public string CustomParams { get; } = string.Empty;
         /// <summary>
         /// Gets the category of the furni.
         /// </summary>
         public FurniCategory Category { get; }
+        /// <summary>
+        /// Gets the category name of the furni.
+        /// </summary>
+        public string CategoryName { get; } = string.Empty;
         public bool CanStandOn { get; }
         public bool CanSitOn { get; }
         public bool CanLayOn { get; }
-        public string Line { get; }
+        public string Line { get; } = string.Empty;
+        public string Environment { get; } = string.Empty;
         public bool IsRare { get; }
 
         internal FurniInfo(ItemType type, Xml.FurniInfo proxy)
@@ -97,10 +102,12 @@ namespace Xabbo.Core.GameData
             ExcludedDynamic = proxy.ExcludedDynamic;
             CustomParams = proxy.CustomParams ?? string.Empty;
             Category = (FurniCategory)proxy.SpecialType;
+            CategoryName = proxy.Category ?? string.Empty;
             CanStandOn = proxy.CanStandOn;
             CanSitOn = proxy.CanSitOn;
             CanLayOn = proxy.CanLayOn;
             Line = proxy.FurniLine ?? string.Empty;
+            Environment = proxy.Environment ?? string.Empty;
             IsRare = proxy.Rare;
         }
 
