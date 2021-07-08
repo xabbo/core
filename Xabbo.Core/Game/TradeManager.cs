@@ -70,7 +70,7 @@ namespace Xabbo.Core.Game
         }
 
         [Receive(nameof(Incoming.TradeOpen))]
-        private void HandleTradeStart(IReadOnlyPacket packet)
+        private void HandleTradeOpen(IReadOnlyPacket packet)
         {
             if (_profileManager.UserData == null)
             {
@@ -112,8 +112,8 @@ namespace Xabbo.Core.Game
             OnStart(IsTrader, Partner);
         }
 
-        [Receive("TradeStartFail")]
-        private void HandleTradeStartFail(IReadOnlyPacket packet)
+        [Receive(nameof(Incoming.TradeOpenFail))]
+        private void HandleTradeOpenFail(IReadOnlyPacket packet)
         {
             if (!_roomManager.IsInRoom)
             {
@@ -128,8 +128,8 @@ namespace Xabbo.Core.Game
             OnStartFail(reason, name);
         }
 
-        [Receive("TradeUpdate")]
-        private void HandleTradeUpdate(IReadOnlyPacket packet)
+        [Receive(nameof(Incoming.TradeItems))]
+        private void HandleTradeItems(IReadOnlyPacket packet)
         {
             if (!_roomManager.IsInRoom)
             {
@@ -160,8 +160,8 @@ namespace Xabbo.Core.Game
             OnUpdate(OwnOffer, PartnerOffer);
         }
 
-        [Receive("TradeAccepted")]
-        private void HandleTradeAccepted(IReadOnlyPacket packet)
+        [Receive(nameof(Incoming.TradeAccept))]
+        private void HandleTradeAccept(IReadOnlyPacket packet)
         {
             if (!_roomManager.IsInRoom)
             {
@@ -199,8 +199,8 @@ namespace Xabbo.Core.Game
             OnAccept(user, accepted);
         }
 
-        [Receive("TradingWaitingConfirm")]
-        private void HandleTradingWaitingConfirm(IReadOnlyPacket packet)
+        [Receive(nameof(Incoming.TradeConfirmation))]
+        private void HandleTradeConfirmation(IReadOnlyPacket packet)
         {
             if (!_roomManager.IsInRoom)
             {
@@ -218,8 +218,8 @@ namespace Xabbo.Core.Game
             OnWaitingConfirm();
         }
 
-        [Receive("TradeStopped")]
-        private void HandleTradeStopped(IReadOnlyPacket packet)
+        [Receive(nameof(Incoming.TradeCompleted))]
+        private void HandleTradeCompleted(IReadOnlyPacket packet)
         {
             if (!_roomManager.IsInRoom || !IsTrading)
                 return;
