@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core
@@ -54,7 +56,7 @@ namespace Xabbo.Core
         public bool ContainsKey(string key) => dict.ContainsKey(key);
         public void Add(string key, string value) => dict.Add(key, value);
         public bool Remove(string key) => dict.Remove(key);
-        public bool TryGetValue(string key, out string value) => TryGetValue(key, out value!);
+        public bool TryGetValue(string key, [NotNullWhen(true)] out string? value) => dict.TryGetValue(key, out value);
         public void Add(KeyValuePair<string, string> item) => ((IDictionary<string, string>)dict).Add(item);
         public void Clear() => dict.Clear();
         public bool Contains(KeyValuePair<string, string> item) => ((IDictionary<string, string>)dict).Contains(item);
