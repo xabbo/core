@@ -7,7 +7,6 @@ using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks
 {
-    // @Update [RequiredOut(nameof(Outgoing.RequestCatalogMode))]
     public class GetCatalogTask : InterceptorTask<ICatalog>
     {
         private readonly string mode;
@@ -21,7 +20,7 @@ namespace Xabbo.Core.Tasks
         protected override Task OnExecuteAsync() => SendAsync(Out.GetCatalogIndex, mode);
 
         [InterceptIn(nameof(Incoming.CatalogIndex))]
-        protected void OnCatalogPagesList(InterceptArgs e)
+        protected void HandleCatalogIndex(InterceptArgs e)
         {
             try
             {
