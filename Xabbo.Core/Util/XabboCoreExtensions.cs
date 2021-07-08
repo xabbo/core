@@ -9,27 +9,113 @@ namespace Xabbo.Core
 {
     public static class XabboCoreExtensions
     {
-        #region - Items -
-        public static IEnumerable<T> GetFloorItems<T>(this IEnumerable<T> items) where T : IItem
-            => items.Where(x => x.Type == ItemType.Floor);
-        public static IEnumerable<T> GetWallItems<T>(this IEnumerable<T> items) where T : IItem
-            => items.Where(x => x.Type == ItemType.Wall);
+        private static FurniData? _furniData;
+        private static ExternalTexts? _texts;
+        private static FurniData FurniData => _furniData ?? throw new InvalidOperationException("Xabbo Core extensions have not been initialized.");
+        private static ExternalTexts Texts => _texts ?? throw new InvalidOperationException("Xabbo Core extensions have not been initialized.");
+        public static void Initialize(FurniData furniData, ExternalTexts texts)
+        {
+            _furniData = furniData;
+            _texts = texts;
+        }
 
-        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, ItemType type, int kind) where T : IItem
-            => items.Where(item => item.Type == type && item.Kind == kind);
-        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, FurniInfo furniInfo) where T : IItem
-            => OfKind(items, furniInfo.Type, furniInfo.Kind);
+        #region - Items -
+        public static IEnumerable<T> GetFloorItems<T>(this IEnumerable<T> items)
+            where T : IItem => items.Where(x => x.Type == ItemType.Floor);
+        public static IEnumerable<T> GetWallItems<T>(this IEnumerable<T> items)
+            where T : IItem => items.Where(x => x.Type == ItemType.Wall);
+
+        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, ItemType type, int kind)
+            where T : IItem => items.Where(item => item.Type == type && item.Kind == kind);
+        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, FurniInfo furniInfo)
+            where T : IItem => OfKind(items, furniInfo.Type, furniInfo.Kind);
 
         public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, IEnumerable<FurniInfo> furniInfo) where T : IItem
         {
             var set = new HashSet<(ItemType, int)>(furniInfo.Select(info => (info.Type, info.Kind)));
             return items.Where(item => set.Contains((item.Type, item.Kind)));
         }
-        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, params FurniInfo[] furniInfo) where T : IItem
-            => OfKinds(items, (IEnumerable<FurniInfo>)furniInfo);
+        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, params FurniInfo[] furniInfo)
+            where T : IItem => OfKinds(items, (IEnumerable<FurniInfo>)furniInfo);
+
+        public static IEnumerable<T> OfCategory<T>(this IEnumerable<T> items, FurniCategory category)
+            where T : IItem => items.Where(x => FurniData.GetInfo(x)?.Category == category);
         #endregion
 
         #region - Furni -
+        private static string GetVariant(IItem item)
+        {
+            if (item is IFloorItem floorItem)
+            {
+                return floorItem.Data.Value;
+            }
+            else if (item is IWallItem wallItem)
+            {
+                return wallItem.Data;
+            }
+            else if (item is IInventoryItem inventoryItem)
+            {
+                return inventoryItem.Data.Value;
+            }
+            else if (item is IMarketplaceItem marketplaceItem)
+            {
+                return marketplaceItem.Data.Value;
+            }
+            else if (item is ICatalogProduct catalogProduct)
+            {
+                return catalogProduct.Variant;
+            }
+            else
+            {
+                throw new Exception($"Failed to find variant for item type: {item.GetType().FullName}.");
+            }
+        }
+
+        public static FurniInfo? GetInfo(this IItem item) => FurniData.GetInfo(item);
+        public static string? GetIdentifier(this IItem item) => FurniData.GetInfo(item)?.Identifier;
+        public static ItemDescriptor GetDescriptor(this IItem item)
+        {
+            FurniInfo info = FurniData.GetInfo(item)
+                ?? throw new Exception($"Failed to find furni info for {item.Type.ToString().ToLower()} item {item.Kind}.");
+
+            string? variant = null;
+
+            if (info.Identifier == "poster")
+            {
+                variant = GetVariant(item);
+            }
+
+            return new ItemDescriptor(item.Type, item.Kind, variant);
+        }
+        public static string? GetName(this ItemDescriptor descriptor)
+        {
+            FurniInfo info = FurniData.GetInfo(descriptor.Type, descriptor.Kind)
+                ?? throw new Exception($"Failed to find furni info for {descriptor.Type.ToString().ToLower()} item {descriptor.Kind}.");
+
+            string name = info.Name;
+
+            if (info.Identifier == "poster")
+            {
+                string key = $"poster_{descriptor.Variant}_name";
+                if (Texts.ContainsKey(key))
+                {
+                    name = Texts[key];
+                }
+            }
+
+            return string.IsNullOrWhiteSpace(name) ? info.Identifier : name;
+        }
+        public static string? GetName(this IItem item) => GetName(GetDescriptor(item));
+
+        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, string identifier)
+            where T : IItem => items.Where(x => FurniData.GetInfo(x)?.Identifier.Equals(identifier, StringComparison.OrdinalIgnoreCase) ?? false);
+        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, IEnumerable<string> identifiers)
+            where T : IItem
+        {
+            HashSet<string> set = new(identifiers, StringComparer.OrdinalIgnoreCase);
+            return items.Where(x => set.Contains(FurniData.GetInfo(x)?.Identifier ?? string.Empty));
+        }
+
         public static IEnumerable<IFloorItem> OfKind(this IEnumerable<IFloorItem> items, int kind)
             => items.Where(item => item.Kind == kind);
         public static IEnumerable<IWallItem> OfKind(this IEnumerable<IWallItem> items, int kind)
@@ -37,7 +123,7 @@ namespace Xabbo.Core
 
         public static IEnumerable<IFloorItem> OfKinds(this IEnumerable<IFloorItem> items, IEnumerable<int> kinds)
         {
-            var set = new HashSet<int>(kinds);
+            HashSet<int> set = new(kinds);
             return items.Where(item => set.Contains(item.Kind));
         }
         public static IEnumerable<IFloorItem> OfKinds(this IEnumerable<IFloorItem> items, params int[] kinds)
@@ -45,7 +131,7 @@ namespace Xabbo.Core
 
         public static IEnumerable<IWallItem> OfKinds(this IEnumerable<IWallItem> items, IEnumerable<int> kinds)
         {
-            var set = new HashSet<int>(kinds);
+            HashSet<int> set = new(kinds);
             return items.Where(item => set.Contains(item.Kind));
         }
         public static IEnumerable<IWallItem> OfKinds(this IEnumerable<IWallItem> items, params int[] kinds)
@@ -115,8 +201,8 @@ namespace Xabbo.Core
 
         public static IEnumerable<IGrouping<int, IInventoryItem>> Group(this IEnumerable<IInventoryItem> items, int maxSlots = 9, int maxItems = 1500)
         {
-            if (maxSlots < 1 || maxSlots > 9) throw new ArgumentOutOfRangeException("maxSlots");
-            if (maxItems < 1 || maxItems > 1500) throw new ArgumentOutOfRangeException("maxItems");
+            if (maxSlots < 1 || maxSlots > 9) throw new ArgumentOutOfRangeException(nameof(maxSlots));
+            if (maxItems < 1 || maxItems > 1500) throw new ArgumentOutOfRangeException(nameof(maxItems));
 
             int groupIndex = 0, currentSlots = 0, currentCount = 0;
             var lastKind = ((ItemType)(-1), -1);
