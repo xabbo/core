@@ -35,7 +35,7 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the category in the friend list that the friend belongs to.
         /// </summary>
-        int Category { get; }
+        long Category { get; }
         /// <summary>
         /// Gets the motto of the friend.
         /// </summary>

@@ -14,7 +14,7 @@ namespace Xabbo.Core
         public bool IsOnline { get; set; }
         public bool CanFollow { get; set; }
         public string FigureString { get; set; } = string.Empty;
-        public int Category { get; set; }
+        public long Category { get; set; }
         public string Motto { get; set; } = string.Empty;
         public string RealName { get; set; } = string.Empty;
         public string String5 { get; set; } = string.Empty;
@@ -33,13 +33,25 @@ namespace Xabbo.Core
             IsOnline = packet.ReadBool();
             CanFollow = packet.ReadBool();
             FigureString = packet.ReadString();
-            Category = packet.ReadInt();
+            Category = packet.ReadLegacyLong();
             Motto = packet.ReadString();
-            RealName = packet.ReadString();
-            String5 = packet.ReadString();
+
+            if (packet.Protocol == ClientType.Flash)
+            {
+                RealName = packet.ReadString();
+                String5 = packet.ReadString();
+            }
+
             IsAcceptingOfflineMessages = packet.ReadBool();
             Bool4 = packet.ReadBool();
             IsPocketHabboUser = packet.ReadBool();
+
+            if (packet.Protocol == ClientType.Unity)
+            {
+                RealName = packet.ReadString();
+                String5 = packet.ReadString();
+            }
+
             Relation = (Relation)packet.ReadShort();
         }
 
@@ -50,7 +62,7 @@ namespace Xabbo.Core
             .WriteBool(IsOnline)
             .WriteBool(CanFollow)
             .WriteString(FigureString)
-            .WriteInt(Category)
+            .WriteLegacyLong(Category)
             .WriteString(Motto)
             .WriteString(RealName)
             .WriteString(String5)
@@ -59,6 +71,6 @@ namespace Xabbo.Core
             .WriteBool(IsPocketHabboUser)
             .WriteShort((short)Relation);
 
-        public override string ToString() => $"{Name} [{Id}]";
+        public override string ToString() => Name;
     }
 }
