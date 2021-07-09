@@ -453,14 +453,14 @@ namespace Xabbo.Core.Game
         /// <summary>
         /// Invoked when an entity performs an action.
         /// </summary>
-        public event EventHandler<EntityExpressionEventArgs>? EntityExpression;
-        protected virtual void OnEntityExpression(IEntity entity, Expressions expression)
+        public event EventHandler<EntityActionEventArgs>? EntityAction;
+        protected virtual void OnEntityAction(IEntity entity, Actions action)
         {
             _logger.LogTrace(
-                "Entity expression. ({entityName} [{entityId}:{entityIndex}], action:{action})",
-                entity.Name, entity.Id, entity.Index, expression
+                "Entity action. ({entityName} [{entityId}:{entityIndex}], action:{action})",
+                entity.Name, entity.Id, entity.Index, action
             );
-            EntityExpression?.Invoke(this, new EntityExpressionEventArgs(entity, expression));
+            EntityAction?.Invoke(this, new EntityActionEventArgs(entity, action));
         }
 
         /// <summary>
@@ -1687,7 +1687,7 @@ namespace Xabbo.Core.Game
             int index = e.Packet.ReadInt();
             if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
             {
-                OnEntityExpression(entity, (Expressions)e.Packet.ReadInt());
+                OnEntityAction(entity, (Actions)e.Packet.ReadInt());
             }
             else
             {
