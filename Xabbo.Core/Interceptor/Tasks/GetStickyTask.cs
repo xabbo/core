@@ -17,7 +17,7 @@ namespace Xabbo.Core.Tasks
             _stickyId = stickyId;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetItemData, _stickyId);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetItemData, (LegacyLong)_stickyId);
 
         [InterceptIn(nameof(Incoming.ItemData))]
         protected void OnPostItData(InterceptArgs e)

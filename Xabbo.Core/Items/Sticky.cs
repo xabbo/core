@@ -19,13 +19,23 @@ namespace Xabbo.Core
 
         protected Sticky(IReadOnlyPacket packet)
         {
-            Id = packet.ReadLong();
+            Id = packet.Protocol switch
+            {
+                ClientType.Flash => long.Parse(packet.ReadString()),
+                ClientType.Unity => packet.ReadLong(),
+                _ => throw new Exception("Unknown client protocol.")
+            };
             string text = packet.ReadString();
             int spaceIndex = text.IndexOf(' ');
-            if (spaceIndex != 6 && text.Length != 6)
-               throw new FormatException($"Sticky data is of an invalid format: '{text}'");
             Color = text[0..6];
-            Text = text[7..];
+            if (spaceIndex == 6)
+            {
+                Text = text[7..];
+            }
+            else
+            {
+                Text = string.Empty;
+            }
         }
 
         public static Sticky Parse(IReadOnlyPacket packet) => new Sticky(packet);
