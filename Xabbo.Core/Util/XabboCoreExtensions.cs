@@ -57,7 +57,7 @@ namespace Xabbo.Core
             {
                 return inventoryItem.Data.Value;
             }
-            else if (item is IMarketplaceItem marketplaceItem)
+            else if (item is IMarketplaceOffer marketplaceItem)
             {
                 return marketplaceItem.Data.Value;
             }

@@ -1,13 +1,14 @@
 ﻿using System;
-
+using System.Collections;
+using System.Collections.Generic;
 using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class MarketplaceItem : IMarketplaceItem
+    public class MarketplaceOffer : IMarketplaceOffer
     {
         public long Id { get; set; }
-        public int UnknownInt2 { get; set; }
+        public MarketplaceOfferStatus Status { get; set; }
         public ItemType Type { get; set; }
         public int Kind { get; set; }
         public IItemData Data { get; set; }
@@ -18,10 +19,15 @@ namespace Xabbo.Core
         public int Average { get; set; }
         public int Offers { get; set; }
 
-        protected MarketplaceItem(IReadOnlyPacket packet)
+        public MarketplaceOffer()
+        {
+            Data = new LegacyData();
+        }
+
+        protected MarketplaceOffer(IReadOnlyPacket packet, bool hasOfferCount)
         {
             Id = packet.ReadLegacyLong();
-            UnknownInt2 = packet.ReadInt();
+            Status = (MarketplaceOfferStatus)packet.ReadInt();
 
             int itemType = packet.ReadInt();
             switch (itemType)
@@ -52,7 +58,8 @@ namespace Xabbo.Core
             Price = packet.ReadInt();
             TimeRemaining = packet.ReadInt();
             Average = packet.ReadInt();
-            Offers = packet.ReadInt();
+            if (hasOfferCount)
+                Offers = packet.ReadInt();
         }
 
         public void Compose(IPacket packet)
@@ -62,7 +69,7 @@ namespace Xabbo.Core
 
             packet
                 .WriteLegacyLong(Id)
-                .WriteInt(UnknownInt2);
+                .WriteInt((int)Status);
 
             if (Type == ItemType.Floor)
             {
@@ -93,13 +100,28 @@ namespace Xabbo.Core
             {
                 throw new Exception($"Invalid MarketplaceItem type: {Type}");
             }
+
+            packet
+                .WriteInt(Price)
+                .WriteInt(TimeRemaining)
+                .WriteInt(Average);
+
+            if (Offers > 0)
+                packet.WriteInt(Offers);
         }
 
-        public static MarketplaceItem Parse(IReadOnlyPacket packet)
+        public static MarketplaceOffer Parse(IReadOnlyPacket packet, bool hasOfferCount = true)
         { 
-            return new MarketplaceItem(packet);
+            return new MarketplaceOffer(packet, hasOfferCount);
         }
 
-        public override string ToString() => $"[{Id}:{Type.ToShortString()}{Kind}]";
+        public static IEnumerable<MarketplaceOffer> ParseMany(IReadOnlyPacket packet, bool hasOfferCount = true)
+        {
+            short n = packet.ReadLegacyShort();
+            for (int i = 0; i < n; i++)
+                yield return Parse(packet, hasOfferCount);
+        }
+
+        public override string ToString() => $"{Id}/{Type.ToShortString()}:{Kind}";
     }
 }
