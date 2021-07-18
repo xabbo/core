@@ -158,11 +158,23 @@ namespace Xabbo.Core
 
         public void Compose(IPacket packet)
         {
-            packet.WriteInt(WallX);
-            packet.WriteInt(WallY);
-            packet.WriteInt(X);
-            packet.WriteInt(Y);
-            packet.WriteString(Orientation.Value.ToString());
+            if (packet.Protocol == ClientType.Flash)
+            {
+                packet.WriteString(ToString());
+            }
+            else if (packet.Protocol == ClientType.Unity)
+            {
+                packet
+                    .WriteInt(WallX)
+                    .WriteInt(WallY)
+                    .WriteInt(X)
+                    .WriteInt(Y)
+                    .WriteString(Orientation.Value.ToString());
+            }
+            else
+            {
+                throw new Exception("Unknown client protocol.");
+            }
         }
 
         public static WallLocation Parse(IReadOnlyPacket packet) => Parse(packet.ReadString());
