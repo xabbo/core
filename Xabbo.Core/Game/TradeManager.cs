@@ -225,14 +225,14 @@ namespace Xabbo.Core.Game
             OnWaitingConfirm();
         }
 
-        [Receive(nameof(Incoming.TradeCompleted))]
-        private void HandleTradeCompleted(IReadOnlyPacket packet)
+        [Receive(nameof(Incoming.TradeClose))]
+        private void HandleTradeClose(IReadOnlyPacket packet)
         {
             if (!_roomManager.IsInRoom || !IsTrading)
                 return;
 
             int userId = packet.ReadInt();
-            int reason = packet.ReadInt();
+            int status = packet.ReadInt();
 
             bool wasTrader = IsTrader;
             IRoomUser? self = Self;
@@ -257,15 +257,15 @@ namespace Xabbo.Core.Game
 
             ResetTrade();
 
-            if (reason == 0)
+            if (status == 0)
             {
                 DebugUtil.Log($"complete {userId}, partner = {partner}");
                 OnComplete(wasTrader, self, partner, ownOffer, partnerOffer);
             }
             else
             {
-                DebugUtil.Log($"stopped, reason = {reason} ({userId})");
-                OnStop(user, reason);
+                DebugUtil.Log($"stopped, reason = {status} ({userId})");
+                OnStop(user, status);
             }
         }
     }
