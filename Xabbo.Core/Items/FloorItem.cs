@@ -21,8 +21,7 @@ namespace Xabbo.Core
         public float Height { get; set; }
         public long Extra { get; set; }
 
-        public StuffData Data { get; set; }
-        IItemData IFloorItem.Data => Data;
+        public IItemData Data { get; set; }
 
         public override int State => double.TryParse(Data.Value, out double state) ? (int)state : -1;
 

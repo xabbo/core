@@ -894,7 +894,7 @@ namespace Xabbo.Core.Game
         [Receive(nameof(Incoming.StackingHeightmapDiff))]
         private void HandleStackingHeightmapDiff(IReadOnlyPacket packet)
         {
-            if (_currentRoom is null) 
+            if (_currentRoom is null)
             {
                 _logger.LogTrace($"[{nameof(HandleStackingHeightmapDiff)}] Current room is null.");
                 return;
@@ -1206,7 +1206,7 @@ namespace Xabbo.Core.Game
                 return;
             }
 
-            StuffData previousData = item.Data;
+            IItemData previousData = item.Data;
             item.Data = StuffData.Parse(packet);
 
             OnFloorItemDataUpdated(item, previousData);
@@ -1231,14 +1231,14 @@ namespace Xabbo.Core.Game
             for (int i = 0; i < n; i++)
             {
                 long itemId = packet.ReadLegacyLong();
-                var data = StuffData.Parse(packet);
+                IItemData data = StuffData.Parse(packet);
                 if (!_currentRoom.FloorItems.TryGetValue(itemId, out FloorItem? item))
                 {
                     _logger.LogError("[{method}] Failed to find floor item {id} to update.", itemId, nameof(HandleItemsDataUpdate));
                     continue;
                 }
 
-                StuffData previousData = item.Data;
+                IItemData previousData = item.Data;
                 item.Data = data;
 
                 OnFloorItemDataUpdated(item, previousData);
