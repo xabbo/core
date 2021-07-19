@@ -22,14 +22,16 @@ namespace Xabbo.Core
         /// </summary>
         int LimitedNumber { get; }
         /// <summary>
-        /// Gets the total limited rares of this item.
+        /// Gets the total number of limited rares of this item.
         /// </summary>
         int LimitedTotal { get; }
         /// <summary>
         /// Gets the price of the marketplace offer.
         /// </summary>
         int Price { get; }
-
+        /// <summary>
+        /// Gets the remaining time of this offer in minutes.
+        /// </summary>
         int TimeRemaining { get; }
         /// <summary>
         /// Gets the average price for this item.
