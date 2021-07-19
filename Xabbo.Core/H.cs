@@ -191,7 +191,6 @@ namespace Xabbo.Core
             { '|', "❤️" },
             { '¥', "⭐" },
             { 'ƒ', "🖤" },
-            { 'í', "-" },
             { '—', "🎵" },
             { 'ª', "💀" },
             { 'º', "⚡" },
@@ -208,7 +207,7 @@ namespace Xabbo.Core
 
         public static IReadOnlyDictionary<char, string> GetAltCharacterMap() => _altCharacterMap.ToDictionary(x => x.Key, x => x.Value);
 
-        public static string FormatText(string text)
+        public static string RenderText(string text)
         {
             var sb = new StringBuilder();
             foreach (char c in text)
