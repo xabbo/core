@@ -57,8 +57,8 @@ namespace Xabbo.Core
                 if (access.HasValue && roomInfo.Access != access) continue;
                 if (trading.HasValue && roomInfo.Trading != trading) continue;
                 if (category.HasValue && roomInfo.Category != category) continue;
-                if (groupId.HasValue && (!roomInfo.IsGroupHomeRoom || roomInfo.GroupId != groupId)) continue;
-                if (group != null && (!roomInfo.IsGroupHomeRoom || !roomInfo.GroupName.ToLower().Contains(group.ToLower()))) continue;
+                if (groupId.HasValue && (!roomInfo.IsGroupRoom || roomInfo.GroupId != groupId)) continue;
+                if (group != null && (!roomInfo.IsGroupRoom || !roomInfo.GroupName.ToLower().Contains(group.ToLower()))) continue;
                 yield return roomInfo;
             }
         }

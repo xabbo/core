@@ -25,6 +25,14 @@ namespace Xabbo.Core.Game
         public long Id { get; }
         public string Model { get; set; } = null!;
 
+        private RoomData _roomData = null!;
+        public RoomData Data
+        {
+            get => _roomData;
+            set => Set(ref _roomData, value);
+        }
+        IRoomData IRoom.Data => Data;
+
         private string? _floor;
         public string? Floor
         {
@@ -46,14 +54,6 @@ namespace Xabbo.Core.Game
             set => Set(ref _landscape, value);
         }
 
-        private RoomData? _roomData;
-        public RoomData? Data
-        {
-            get => _roomData;
-            set => Set(ref _roomData, value);
-        }
-        IRoomData? IRoom.Data => Data;
-
         public Tile DoorTile { get; set; }
         public int EntryDirection { get; set; }
 
@@ -72,9 +72,10 @@ namespace Xabbo.Core.Game
 
         internal ConcurrentDictionary<int, Entity> Entities { get; } = new();
 
-        public Room(long id)
+        public Room(long id, RoomData roomData)
         {
             Id = id;
+            _roomData = roomData;
         }
 
         #region - Furni -

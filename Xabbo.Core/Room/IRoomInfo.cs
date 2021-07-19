@@ -27,7 +27,7 @@ namespace Xabbo.Core
 
         RoomFlags Flags { get; }
         bool HasOfficialRoomPic { get; }
-        bool IsGroupHomeRoom { get; }
+        bool IsGroupRoom { get; }
         bool HasEvent { get; }
         bool ShowOwnerName { get; }
         bool AllowPets { get; }
@@ -38,6 +38,6 @@ namespace Xabbo.Core
         string GroupBadge { get; }
         string EventName { get; }
         string EventDescription { get; }
-        int EventMinutesLeft { get; }
+        int EventMinutesRemaining { get; }
     }
 }

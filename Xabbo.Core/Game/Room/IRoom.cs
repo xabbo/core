@@ -9,7 +9,43 @@ namespace Xabbo.Core.Game
     {
         long Id { get; }
 
-        IRoomData? Data { get; }
+        IRoomData Data { get; }
+
+        #region - Room data -
+        string Name => Data.Name;
+        string Description => Data.Description;
+        long OwnerId => Data.OwnerId;
+        string OwnerName => Data.OwnerName;
+
+        RoomAccess Access => Data.Access;
+        bool IsOpen => Access == RoomAccess.Open;
+        bool IsDoorbell => Access == RoomAccess.Doorbell;
+        bool IsLocked => Access == RoomAccess.Password;
+        bool IsInvisible => Access == RoomAccess.Invisible;
+
+        int MaxUsers => Data.MaxUsers;
+        TradePermissions Trading => Data.Trading;
+        int Score => Data.Score;
+        int Ranking => Data.Ranking;
+        RoomCategory Category => Data.Category;
+        IReadOnlyList<string> Tags => Data.Tags;
+
+        RoomFlags Flags => Data.Flags;
+        bool HasEvent => Data.HasEvent;
+        bool IsGroupRoom => Data.IsGroupRoom;
+        bool AllowPets => Data.AllowPets;
+
+        long GroupId => Data.GroupId;
+        string GroupName => Data.GroupName;
+        string GroupBadge => Data.GroupBadge;
+
+        string EventName => Data.EventName;
+        string EventDescription => Data.EventDescription;
+        int EventMinutesRemaining => Data.EventMinutesRemaining;
+
+        IModerationSettings Moderation => Data.Moderation;
+        IChatSettings ChatSettings => Data.ChatSettings;
+        #endregion
 
         string Model { get; }
         string? Floor { get; }

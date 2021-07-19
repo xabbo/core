@@ -682,13 +682,18 @@ namespace Xabbo.Core.Game
 
             long roomId = packet.ReadLegacyLong();
             CurrentRoomId = roomId;
-            _currentRoom = new Room(roomId);
 
             if (_roomDataCache.TryGetValue(roomId, out RoomData? data))
             {
                 _currentRoomData = data;
                 _logger.LogTrace("Loaded room data from cache.");
             }
+            else
+            {
+                _logger.LogTrace("Failed to load room data from cache.");
+            }
+
+            _currentRoom = new Room(roomId, data!);
         }
 
         [Receive(nameof(Incoming.RoomQueueStatus))]
@@ -765,7 +770,17 @@ namespace Xabbo.Core.Game
             if (_currentRoom is null ||
                 _currentRoom.Id != roomId)
             {
-                _currentRoom = new Room(roomId);
+                if (_roomDataCache.TryGetValue(roomId, out RoomData? data))
+                {
+                    _currentRoomData = data;
+                    _logger.LogTrace("Loaded room data from cache.");
+                }
+                else
+                {
+                    _logger.LogTrace("Failed to load room data from cache.");
+                }
+
+                _currentRoom = new Room(roomId, data!);
             }
 
             _currentRoom.Model = model;

@@ -28,7 +28,7 @@ namespace Xabbo.Core
         
         public RoomFlags Flags { get; set; }
         public bool HasOfficialRoomPic => Flags.HasFlag(RoomFlags.HasOfficialRoomPic);
-        public bool IsGroupHomeRoom => Flags.HasFlag(RoomFlags.IsGroupHomeRoom);
+        public bool IsGroupRoom => Flags.HasFlag(RoomFlags.IsGroupHomeRoom);
         public bool HasEvent => Flags.HasFlag(RoomFlags.HasEvent);
         public bool ShowOwnerName => Flags.HasFlag(RoomFlags.ShowOwnerName);
         public bool AllowPets => Flags.HasFlag(RoomFlags.AllowPets);
@@ -39,7 +39,7 @@ namespace Xabbo.Core
         public string GroupBadge { get; set; }
         public string EventName { get; set; }
         public string EventDescription { get; set; }
-        public int EventMinutesLeft { get; set; }
+        public int EventMinutesRemaining { get; set; }
 
         public RoomInfo()
         {
@@ -94,7 +94,7 @@ namespace Xabbo.Core
             {
                 EventName = packet.ReadString();
                 EventDescription = packet.ReadString();
-                EventMinutesLeft = packet.ReadInt();
+                EventMinutesRemaining = packet.ReadInt();
             }
         }
 
@@ -138,7 +138,7 @@ namespace Xabbo.Core
             {
                 packet.WriteString(EventName);
                 packet.WriteString(EventDescription);
-                packet.WriteInt(EventMinutesLeft);
+                packet.WriteInt(EventMinutesRemaining);
             }
         }
 
