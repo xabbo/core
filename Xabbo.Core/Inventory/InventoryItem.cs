@@ -153,63 +153,55 @@ namespace Xabbo.Core
 
         public void Compose(IPacket packet)
         {
+            packet.WriteLegacyLong(ItemId);
+
             if (packet.Protocol == ClientType.Flash)
             {
-                packet
-                    .WriteInt((int)ItemId)
-                    .WriteString(Type.ToShortString())
-                    .WriteInt((int)Id)
-                    .WriteInt(Kind)
-                    .WriteInt((int)Category)
-                    .Write(Data)
-                    .WriteBool(_Bool1)
-                    .WriteBool(IsTradeable)
-                    .WriteBool(IsGroupable)
-                    .WriteBool(IsSellable)
-                    .WriteInt(SecondsToExpiration)
-                    .WriteBool(HasRentPeriodStarted)
-                    .WriteInt((int)RoomId);
-
-                if (Type == ItemType.Floor)
-                {
-                    packet
-                        .WriteString(_String2)
-                        .WriteInt((int)Extra);
-                }
+                packet.WriteString(Type.ToShortString());
             }
-            else if (packet.Protocol == ClientType.Unity)
+            else
             {
-                packet
-                    .WriteLong(ItemId)
-                    .WriteShort(Type.GetValue())
-                    .WriteLong(Id)
-                    .WriteInt(Kind)
-                    .WriteInt((int)Category)
-                    .Write(Data)
-                    .WriteBool(_Bool1)
-                    .WriteBool(IsTradeable)
-                    .WriteBool(IsGroupable)
-                    .WriteBool(IsSellable)
-                    .WriteInt(SecondsToExpiration)
-                    .WriteBool(HasRentPeriodStarted)
-                    .WriteLong(RoomId);
-                
+                packet.WriteShort(Type.GetValue());
+            }
+
+            packet
+                .WriteLegacyLong(Id)
+                .WriteInt(Kind)
+                .WriteInt((int)Category)
+                .Write(Data)
+                .WriteBool(_Bool1)
+                .WriteBool(IsTradeable)
+                .WriteBool(IsGroupable)
+                .WriteBool(IsSellable)
+                .WriteInt(SecondsToExpiration)
+                .WriteBool(HasRentPeriodStarted)
+                .WriteLegacyLong(RoomId);
+
+            if (packet.Protocol == ClientType.Unity)
+            {
+                // - Seems to be consistent
                 packet
                     .WriteString(_String1)
                     .WriteString(_String2)
                     .WriteInt(_Int3);
+            }
 
-                if (Type == ItemType.Floor)
+            if (Type == ItemType.Floor)
+            {
+                if (packet.Protocol == ClientType.Flash)
                 {
                     packet
+                        .WriteString(_String2)
+                        .WriteLegacyLong(Extra);
+                }
+                else
+                {
+                    // 10 bytes ?
+                    packet
                         .WriteString(_String3)
-                        .WriteLong(Extra)
+                        .WriteLegacyLong(Extra)
                         .WriteInt(_Int5);
                 }
-            }
-            else
-            {
-                throw new InvalidOperationException("Unknown protocol.");
             }
         }
 
