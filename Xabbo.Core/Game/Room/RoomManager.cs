@@ -915,6 +915,8 @@ namespace Xabbo.Core.Game
                 return;
             }
 
+            if (_currentRoom.Heightmap is null) return;
+
             int n = packet.ReadByte();
             for (int i = 0; i < n; i++)
             {
@@ -972,20 +974,6 @@ namespace Xabbo.Core.Game
                 _currentRoomData = roomData;
                 _currentRoom.Data = roomData;
             }
-
-            // if (_floorPlan is null ||
-            //     _heightmap is null ||
-            //     _floorItems is null ||
-            //     _wallItems is null ||
-            //     _entities is null ||
-            //     _entityIndexMap is null ||
-            //     _entityNameMap is null)
-            // {
-            //     _logger.LogError("");
-            //     return;
-            // }
-
-            // _currentRoom = new Room(_currentRoomId);
 
             IsOwner = packet.ReadBool();
             IsLoadingRoom = false;
