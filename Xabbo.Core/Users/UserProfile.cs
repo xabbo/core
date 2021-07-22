@@ -23,6 +23,8 @@ namespace Xabbo.Core
         IReadOnlyList<IGroupInfo> IUserProfile.Groups => Groups;
         public TimeSpan LastLogin { get; set; }
         public bool DisplayInClient { get; set; }
+        public int Level { get; set; }
+        public int StarGems { get; set; }
 
         public UserProfile()
         {
@@ -57,6 +59,16 @@ namespace Xabbo.Core
 
                 LastLogin = TimeSpan.FromSeconds(packet.ReadInt());
                 DisplayInClient = packet.ReadBool();
+
+                if (packet.Available > 0)
+                {
+                    packet.ReadBool();
+                    Level = packet.ReadInt();
+                    packet.ReadInt();
+                    StarGems = packet.ReadInt();
+                    packet.ReadBool();
+                    packet.ReadBool();
+                }
             }
             else
             {

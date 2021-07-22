@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core
@@ -18,5 +19,7 @@ namespace Xabbo.Core
         bool IsOnline { get; }
         IReadOnlyList<IGroupInfo> Groups { get; }
         TimeSpan LastLogin { get; }
+        int Level { get; }
+        int StarGems { get; }
     }
 }
