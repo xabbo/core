@@ -922,7 +922,7 @@ namespace Xabbo.Core.Game
             {
                 int x = packet.ReadByte();
                 int y = packet.ReadByte();
-                _currentRoom.Heightmap[x, y] = packet.ReadShort();
+                _currentRoom.Heightmap[x, y].Update(packet.ReadShort());
             }
 
             _logger.LogTrace("Received stacking heightmap diff. ({n} change(s))", n);

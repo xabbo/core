@@ -82,12 +82,12 @@ namespace Xabbo.Core.Game
         /// <summary>
         /// Gets whether the floor item with the specified ID exists in the room or not.
         /// </summary>
-        public bool FloorItemExists(long itemId) => FloorItems.ContainsKey(itemId);
+        public bool HasFloorItem(long itemId) => FloorItems.ContainsKey(itemId);
 
         /// <summary>
         /// Gets whether the wall item with the specified ID exists in the room or not.
         /// </summary>
-        public bool WallItemExists(long itemId) => WallItems.ContainsKey(itemId);
+        public bool HasWallItem(long itemId) => WallItems.ContainsKey(itemId);
 
         /// <summary>
         /// Attempts to get the furni of the specified type with the specified ID and returns <c>true</c> if successful.

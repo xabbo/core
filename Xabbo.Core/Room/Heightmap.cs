@@ -1,39 +1,39 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class Heightmap : IHeightmap
+    public class Heightmap : IHeightmap, IEnumerable<HeightmapTile>
     {
+        private readonly List<HeightmapTile> _tiles;
+
         public int Width { get; }
         public int Length { get; }
-        public short[] Values { get; }
-        IReadOnlyList<short> IHeightmap.Values => Values;
 
-        public short this[int x, int y]
+        public HeightmapTile this[int x, int y]
         {
             get
             {
-                if (x < 0 || x >= Width) throw new ArgumentOutOfRangeException("x");
-                if (y < 0 || y >= Length) throw new ArgumentOutOfRangeException("y");
-                return Values[y * Width + x];
-            }
-
-            set
-            {
-                if (x < 0 || x >= Width) throw new ArgumentOutOfRangeException("x");
-                if (y < 0 || y >= Length) throw new ArgumentOutOfRangeException("y");
-                Values[y * Width + x] = value;
+                if (x < 0 || x >= Width) throw new ArgumentOutOfRangeException(nameof(x));
+                if (y < 0 || y >= Length) throw new ArgumentOutOfRangeException(nameof(y));
+                return _tiles[y * Width + x];
             }
         }
+        public HeightmapTile this[(int X, int Y) location] => this[location.X, location.Y];
+        IHeightmapTile IHeightmap.this[int x, int y] => this[x, y];
+        IHeightmapTile IHeightmap.this[(int X, int Y) location] => this[location];
 
         public Heightmap(int width, int length)
         {
             Width = width;
             Length = length;
-            Values = new short[width * length];
+            _tiles = new List<HeightmapTile>();
+            for (int i = 0; i < width * length; i++)
+                _tiles.Add(new HeightmapTile(i % width, i / width));
         }
 
         private Heightmap(IReadOnlyPacket packet)
@@ -42,21 +42,23 @@ namespace Xabbo.Core
             short n = packet.ReadLegacyShort();
             Length = n / Width;
 
-            Values = new short[n];
+            _tiles = new List<HeightmapTile>();
             for (int i = 0; i < n; i++)
-                Values[i] = packet.ReadShort();
+            {
+                short value = packet.ReadShort();
+                _tiles.Add(new HeightmapTile(i % Width, i / Width, value));
+            }
         }
 
-        public double GetHeight(int x, int y)
+        private static bool IsTile(short value) => value >= 0;
+        private static bool IsBlocked(short value) => (value & 0x4000) > 0;
+        private static double GetHeight(short value)
         {
-            short value = Values[y * Width + x];
             if (value < 0) return -1;
-
-            return (value & 0x3FFF) / 256.0;
+            else return (value & 0x3FFF) / 256.0;
         }
-        public double GetHeight((int X, int Y) location) => GetHeight(location.X, location.Y);
 
-        public void SetHeight(int x, int y, double height)
+        /*public void SetHeight(int x, int y, double height)
         {
             if (height < 0 || height > 63)
                 throw new ArgumentOutOfRangeException("height", "Height must be from 0 - 63.");
@@ -64,29 +66,17 @@ namespace Xabbo.Core
             this[x ,y] &= ~0x3FFF;
             this[x, y] |= (short)(height * 256.0);
         }
-        public void SetHeight((int X, int Y) location, double height) => SetHeight(location.X, location.Y, height);
+        public void SetHeight((int X, int Y) location, double height) => SetHeight(location.X, location.Y, height);*/
 
-        public bool IsBlocked(int x, int y) => (this[x, y] & 0x4000) > 0;
-        public bool IsBlocked((int X, int Y) location) => IsBlocked(location.X, location.Y);
-
-        public void SetBlocked(int x, int y, bool isBlocked)
+        /*public void SetBlocked(int x, int y, bool isBlocked)
         {
             if (isBlocked)
                 this[x, y] |= 0x4000;
             else
                 this[x, y] &= ~0x4000;
-        }
+        }*/
 
-        public bool IsTile(int x, int y)
-        {
-            if (x < 0 || x >= Width || y < 0 || y >= Length)
-                return false;
-
-            return Values[y * Width + x] >= 0;
-        }
-        public bool IsTile((int X, int Y) location) => IsTile(location.X, location.Y);
-
-        public void SetIsTile(int x, int y, bool isTile)
+        /*public void SetIsTile(int x, int y, bool isTile)
         {
             unchecked
             {
@@ -96,14 +86,13 @@ namespace Xabbo.Core
                     this[x, y] |= (short)0x8000;
             }
         }
-        public void SetIsTile((int X, int Y) location, bool isTile) => SetIsTile(location.X, location.Y, isTile);
-
-        public bool IsFree(int x, int y) => IsTile(x, y) && !IsBlocked(x, y);
-        public bool IsFree((int X, int Y) location) => IsFree(location.X, location.Y);
+        public void SetIsTile((int X, int Y) location, bool isTile) => SetIsTile(location.X, location.Y, isTile);*/
 
         public void Compose(IPacket packet)
         {
-            if (Values == null)
+            throw new NotImplementedException();
+
+            /*if (Values == null)
                 throw new NullReferenceException("Values cannot be null.");
             if (Values.Length != Width * Length)
                 throw new FormatException($"The length of Values must be equal to Width * Height");
@@ -111,9 +100,15 @@ namespace Xabbo.Core
             packet.WriteInt(Width);
             packet.WriteLegacyShort((short)(Width * Length));
             for (int i = 0; i < Values.Length; i++)
-                packet.WriteShort(Values[i]);
+                packet.WriteShort(Values[i]);*/
         }
 
         public static Heightmap Parse(IReadOnlyPacket packet) => new Heightmap(packet);
+
+
+        public IEnumerator<HeightmapTile> GetEnumerator() => _tiles.GetEnumerator();
+
+        IEnumerator<IHeightmapTile> IEnumerable<IHeightmapTile>.GetEnumerator() => _tiles.Cast<IHeightmapTile>().GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
