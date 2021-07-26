@@ -36,6 +36,27 @@ namespace Xabbo.Core
             UnknownStringA = string.Empty;
         }
 
+        public FloorItem(IFloorItem item)
+        {
+            Id = item.Id;
+            Kind = item.Kind;
+            Location = item.Location;
+            Direction = item.Direction;
+            Height = item.Height;
+            Extra = item.Extra;
+            // TODO Deep copy of item data
+            Data = item.Data;
+            SecondsToExpiration = item.SecondsToExpiration;
+            Usage = item.Usage;
+            OwnerId = item.OwnerId;
+            OwnerName = item.OwnerName;
+
+            if (item is FloorItem floorItem)
+                UnknownStringA = floorItem.UnknownStringA;
+            else
+                UnknownStringA = string.Empty;
+        }
+
         protected FloorItem(IReadOnlyPacket packet, bool readName)
         {
             Id = packet.ReadLegacyLong();

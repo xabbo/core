@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core
@@ -10,17 +11,7 @@ namespace Xabbo.Core
     {
         public override ItemType Type => ItemType.Wall;
 
-        private string _data;
-        public string Data
-        {
-            get => _data;
-            set
-            {
-                if (value is null)
-                    throw new ArgumentNullException("Data");
-                _data = value;
-            }
-        }
+        public string Data { get; set; }
 
         public override int State => int.TryParse(Data, out int state) ? state : -1;
 
@@ -46,10 +37,28 @@ namespace Xabbo.Core
             OwnerId = -1;
             OwnerName = "(unknown)";
 
-            _data = string.Empty;
+            Data = string.Empty;
             SecondsToExpiration = -1;
             Usage = FurniUsage.None;
             Location = WallLocation.Zero;
+        }
+
+        /// <summary>
+        /// Creates a copy of the specified wall item.
+        /// </summary>
+        public WallItem(IWallItem item)
+        {
+            Id = item.Id;
+            Kind = item.Kind;
+            Location = item.Location;
+            Data = item.Data;
+            SecondsToExpiration = item.SecondsToExpiration;
+            Usage = item.Usage;
+
+            OwnerId = item.OwnerId;
+            OwnerName = item.OwnerName;
+
+            IsHidden = item.IsHidden;
         }
 
         protected WallItem(IReadOnlyPacket packet, bool readName)
