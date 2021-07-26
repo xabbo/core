@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace Xabbo.Core
-{
+{ 
     public interface IMarketplaceTradeInfo
     {
         int DayOffset { get; }
