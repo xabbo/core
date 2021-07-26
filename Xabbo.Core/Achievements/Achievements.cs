@@ -48,7 +48,7 @@ namespace Xabbo.Core
             _dict.AddOrUpdate(
                 achievement.Id,
                 achievement,
-                (id, ach) => ach
+                (id, ach) => achievement
             );
         }
 
