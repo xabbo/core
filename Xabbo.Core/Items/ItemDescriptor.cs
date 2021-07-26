@@ -2,10 +2,24 @@
 
 namespace Xabbo.Core
 {
-    public struct ItemDescriptor
+    /// <summary>
+    /// Represents an item type, kind, and variant (used for posters).
+    /// </summary>
+    public struct ItemDescriptor : IItem
     {
+        long IItem.Id => -1;
+
+        /// <summary>
+        /// Gets the item type.
+        /// </summary>
         public ItemType Type { get; }
+        /// <summary>
+        /// Gets the item kind.
+        /// </summary>
         public int Kind { get; }
+        /// <summary>
+        /// Gets the item variant.
+        /// </summary>
         public string Variant { get; }
 
         public ItemDescriptor(ItemType type, int kind)
