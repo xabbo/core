@@ -38,9 +38,9 @@ namespace Xabbo.Core.GameData
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
-        /// Gets the information of the furni with the specified identifier, or <c>null</c> if it does not exist.
+        /// Gets the information of the furni with the specified identifier.
         /// </summary>
-        public FurniInfo? this[string identifier] => GetInfo(identifier);
+        public FurniInfo this[string identifier] => GetInfo(identifier);
 
         internal FurniData(Xml.FurniData proxy)
         {
@@ -73,37 +73,90 @@ namespace Xabbo.Core.GameData
         }
 
         /// <summary>
-        /// Gets the information of the furni with the specified type and kind, or <c>null</c> if it does not exist.
+        /// Returns whether furni info with the specified type and kind exists or not.
         /// </summary>
-        public FurniInfo? GetInfo(ItemType type, int kind)
+        public bool Exists(ItemType type, int kind)
+        {
+            return type switch
+            {
+                ItemType.Floor => _floorItemMap.ContainsKey(kind),
+                ItemType.Wall => _wallItemMap.ContainsKey(kind),
+                _ => false
+            };
+        }
+        /// <summary>
+        /// Returns whether furni info for the specified item exists or not.
+        /// </summary>
+        public bool Exists(IItem item) => Exists(item.Type, item.Kind);
+        /// <summary>
+        /// Returns whether floor furni info with the specified kind exists or not.
+        /// </summary>
+        public bool FloorItemExists(int kind) => Exists(ItemType.Floor, kind);
+        /// <summary>
+        /// Returns whether wall furni info with the specified kind exists or not.
+        /// </summary>
+        public bool WallItemExists(int kind) => Exists(ItemType.Wall, kind);
+
+        /// <summary>
+        /// Gets the information of the furni with the specified type and kind.
+        /// </summary>
+        public FurniInfo GetInfo(ItemType type, int kind)
         {
             if (type == ItemType.Floor)
+            {
                 return GetFloorItem(kind);
+            }
             else if (type == ItemType.Wall)
+            {
                 return GetWallItem(kind);
+            }
             else
-                return null;
+            {
+                throw new Exception($"Failed to find furni info for item: {type}/{kind}.");
+            }
         }
 
         /// <summary>
-        /// Gets the information of the specified item, or <c>null</c> if it does not exist.
+        /// Gets the furni info of the specified item.
         /// </summary>
-        public FurniInfo? GetInfo(IItem item) => GetInfo(item.Type, item.Kind);
+        public FurniInfo GetInfo(IItem item) => GetInfo(item.Type, item.Kind);
 
         /// <summary>
-        /// Gets the information of the furni with the specified identifier, or <c>null</c> if it does not exist.
+        /// Gets the furni info of the furni with the specified identifier.
         /// </summary>
-        public FurniInfo? GetInfo(string identifier) => _identifierMap.TryGetValue(identifier, out FurniInfo? info) ? info : null;
+        public FurniInfo GetInfo(string identifier)
+        {
+            if (_identifierMap.TryGetValue(identifier, out FurniInfo? info))
+            {
+                return info;
+            }
+            else
+            {
+                throw new Exception($"Failed to find furni info with identifier: \"{identifier}\".");
+            }
+        }
 
         /// <summary>
-        /// Gets the information for the floor item of the specified kind, or <c>null</c> if it does not exist.
+        /// Gets the furni info for the floor item of the specified kind.
         /// </summary>
-        public FurniInfo? GetFloorItem(int kind) => _floorItemMap.TryGetValue(kind, out FurniInfo? furniInfo) ? furniInfo : null;
+        public FurniInfo GetFloorItem(int kind)
+        {
+            if (!_floorItemMap.TryGetValue(kind, out FurniInfo? furniInfo))
+                throw new Exception($"Failed to find furni info for item: Floor/{kind}.");
+
+            return furniInfo;
+        }
 
         /// <summary>
-        /// Gets the information for the wall item of the specified kind, or <c>null</c> if it does not exist.
+        /// Gets the furni info for the wall item of the specified kind.
         /// </summary>
-        public FurniInfo? GetWallItem(int kind) => _wallItemMap.TryGetValue(kind, out FurniInfo? furniInfo) ? furniInfo : null;
+        public FurniInfo GetWallItem(int kind)
+        {
+            if (!_wallItemMap.TryGetValue(kind, out FurniInfo? furniInfo))
+                throw new Exception($"Failed to find furni info for item: Wall/{kind}.");
+
+            return furniInfo;
+        }
 
         private static IEnumerable<FurniInfo> FindItems(IEnumerable<FurniInfo> infos, string searchText)
         {
@@ -114,35 +167,41 @@ namespace Xabbo.Core.GameData
         }
 
         /// <summary>
-        /// Finds information of furni containing the specified text in its name.
+        /// Finds information of all furni containing the specified text in its name.
         /// </summary>
         public IEnumerable<FurniInfo> FindItems(string searchText) => FindItems(this, searchText);
 
         /// <summary>
-        /// Finds information of floor furni containing the specified text in its name.
+        /// Finds information of all floor furni containing the specified text in its name.
         /// </summary>
         public IEnumerable<FurniInfo> FindFloorItems(string searchText) => FindItems(FloorItems, searchText);
 
         /// <summary>
-        /// Finds information of wall furni containing the specified text in its name.
+        /// Finds information of all wall furni containing the specified text in its name.
         /// </summary>
         public IEnumerable<FurniInfo> FindWallItems(string searchText) => FindItems(WallItems, searchText);
 
         /// <summary>
-        /// Finds the information of a furni containing the specified text in its name.
+        /// Finds the first information of a furni containing the specified text in its name,
+        /// or <c>null</c> if no matches were found.
         /// </summary>
         public FurniInfo? FindItem(string searchText) => FindItems(this, searchText).FirstOrDefault();
 
         /// <summary>
-        /// Finds the information of a floor furni containing the specified text in its name.
+        /// Finds the first information of a floor furni containing the specified text in its name,
+        /// or <c>null</c> if no matches were found.
         /// </summary>
         public FurniInfo? FindFloorItem(string searchText) => FindItems(FloorItems, searchText).FirstOrDefault();
 
         /// <summary>
-        /// Finds the information of a wall furni containing the specified text in its name.
+        /// Finds the first information of a wall furni containing the specified text in its name,
+        /// or <c>null</c> if no matches were found.
         /// </summary>
         public FurniInfo? FindWallItem(string searchText) => FindItems(WallItems, searchText).FirstOrDefault();
 
+        /// <summary>
+        /// Gets the <see cref="ItemDescriptor"/> of the specified item.
+        /// </summary>
         public ItemDescriptor GetItemDescriptor(IItem item)
         {
             string variant = string.Empty;
