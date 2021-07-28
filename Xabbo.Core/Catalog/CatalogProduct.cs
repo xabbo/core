@@ -37,14 +37,13 @@ namespace Xabbo.Core
             if (Type == ItemType.Badge)
             {
                 Variant = packet.ReadString();
-                Count = 0;
+                Count = 1;
             }
             else
             {
                 Kind = packet.ReadInt();
                 Variant = packet.ReadString();
                 Count = packet.ReadInt();
-                // int ?
                 IsLimited = packet.ReadBool();
                 if (IsLimited)
                 {
