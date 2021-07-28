@@ -6,14 +6,14 @@ namespace Xabbo.Core
 {
     public class RoomData : RoomInfo, IRoomData
     {
-        public bool IsUpdating { get; set; }
-        public bool ForceLoad { get; set; }
-        public bool Bool3 { get; set; }
-        public bool BypassAccess { get; set; }
+        public bool IsEntering { get; set; }
+        public bool Forward { get; set; }
+        public bool IsStaffPick { get; set; }
+        public bool IsGroupMember { get; set; }
         public bool IsRoomMuted { get; set; }
         public ModerationSettings Moderation { get; set; }
         IModerationSettings IRoomData.Moderation => Moderation;
-        public bool ShowMuteButton { get; set; }
+        public bool CanMute { get; set; }
         public ChatSettings ChatSettings { get; set; }
         IChatSettings IRoomData.ChatSettings => ChatSettings;
 
@@ -26,19 +26,19 @@ namespace Xabbo.Core
             ChatSettings = new ChatSettings();
         }
 
-        protected RoomData(bool isUpdating, IReadOnlyPacket packet)
+        protected RoomData(bool isEntering, IReadOnlyPacket packet)
             : base(packet)
         {
-            IsUpdating = isUpdating;
+            IsEntering = isEntering;
 
-            ForceLoad = packet.ReadBool(); // if IsUpdating == false
-            Bool3 = packet.ReadBool();
-            BypassAccess = packet.ReadBool();
+            Forward = packet.ReadBool();
+            IsStaffPick = packet.ReadBool();
+            IsGroupMember = packet.ReadBool();
             IsRoomMuted = packet.ReadBool();
 
             Moderation = ModerationSettings.Parse(packet);
 
-            ShowMuteButton = packet.ReadBool();
+            CanMute = packet.ReadBool();
             ChatSettings = ChatSettings.Parse(packet);
 
             if (packet.Protocol == ClientType.Unity)
@@ -50,18 +50,18 @@ namespace Xabbo.Core
 
         public override void Compose(IPacket packet)
         {
-            packet.WriteBool(IsUpdating);
+            packet.WriteBool(IsEntering);
 
             base.Compose(packet);
 
-            packet.WriteBool(ForceLoad);
-            packet.WriteBool(Bool3);
-            packet.WriteBool(BypassAccess);
+            packet.WriteBool(Forward);
+            packet.WriteBool(IsStaffPick);
+            packet.WriteBool(IsGroupMember);
             packet.WriteBool(IsRoomMuted);
 
             Moderation.Compose(packet);
 
-            packet.WriteBool(ShowMuteButton);
+            packet.WriteBool(CanMute);
 
             ChatSettings.Compose(packet);
         }

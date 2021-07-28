@@ -4,12 +4,12 @@ namespace Xabbo.Core
 {
     public interface IRoomData : IRoomInfo
     {
-        bool IsUpdating { get; }
-        bool ForceLoad { get; }
-        bool BypassAccess { get; }
+        bool IsEntering { get; }
+        bool Forward { get; }
+        bool IsGroupMember { get; }
         bool IsRoomMuted { get; }
         IModerationSettings Moderation { get; }
-        bool ShowMuteButton { get; }
+        bool CanMute { get; }
         IChatSettings ChatSettings { get; }
     }
 }
