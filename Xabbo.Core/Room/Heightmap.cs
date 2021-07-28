@@ -33,7 +33,7 @@ namespace Xabbo.Core
             Length = length;
             _tiles = new List<HeightmapTile>();
             for (int i = 0; i < width * length; i++)
-                _tiles.Add(new HeightmapTile(i % width, i / width));
+                _tiles.Add(new HeightmapTile(i % width, i / width, 0));
         }
 
         private Heightmap(IReadOnlyPacket packet)
@@ -50,57 +50,16 @@ namespace Xabbo.Core
             }
         }
 
-        private static bool IsTile(short value) => value >= 0;
-        private static bool IsBlocked(short value) => (value & 0x4000) > 0;
-        private static double GetHeight(short value)
-        {
-            if (value < 0) return -1;
-            else return (value & 0x3FFF) / 256.0;
-        }
-
-        /*public void SetHeight(int x, int y, double height)
-        {
-            if (height < 0 || height > 63)
-                throw new ArgumentOutOfRangeException("height", "Height must be from 0 - 63.");
-
-            this[x ,y] &= ~0x3FFF;
-            this[x, y] |= (short)(height * 256.0);
-        }
-        public void SetHeight((int X, int Y) location, double height) => SetHeight(location.X, location.Y, height);*/
-
-        /*public void SetBlocked(int x, int y, bool isBlocked)
-        {
-            if (isBlocked)
-                this[x, y] |= 0x4000;
-            else
-                this[x, y] &= ~0x4000;
-        }*/
-
-        /*public void SetIsTile(int x, int y, bool isTile)
-        {
-            unchecked
-            {
-                if (isTile)
-                    this[x, y] &= (short)~0x8000;
-                else
-                    this[x, y] |= (short)0x8000;
-            }
-        }
-        public void SetIsTile((int X, int Y) location, bool isTile) => SetIsTile(location.X, location.Y, isTile);*/
-
         public void Compose(IPacket packet)
         {
-            throw new NotImplementedException();
+            packet
+                .WriteInt(Width)
+                .WriteLegacyShort((short)(Width * Length));
 
-            /*if (Values == null)
-                throw new NullReferenceException("Values cannot be null.");
-            if (Values.Length != Width * Length)
-                throw new FormatException($"The length of Values must be equal to Width * Height");
-
-            packet.WriteInt(Width);
-            packet.WriteLegacyShort((short)(Width * Length));
-            for (int i = 0; i < Values.Length; i++)
-                packet.WriteShort(Values[i]);*/
+            foreach (HeightmapTile tile in _tiles)
+            {
+                tile.Compose(packet);
+            }
         }
 
         public static Heightmap Parse(IReadOnlyPacket packet) => new Heightmap(packet);

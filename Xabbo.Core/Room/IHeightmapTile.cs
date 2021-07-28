@@ -1,11 +1,13 @@
 ﻿using System;
 
+using Xabbo.Messages;
+
 namespace Xabbo.Core
 {
     /// <summary>
     /// Represents a tile in the heightmap.
     /// </summary>
-    public interface IHeightmapTile
+    public interface IHeightmapTile : IComposable
     {
         /// <summary>
         /// Gets the X coordinate of this tile.
@@ -22,7 +24,7 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets if this is a floor tile.
         /// </summary>
-        bool IsTile { get; }
+        bool IsFloor { get; }
         /// <summary>
         /// Gets if this tile is blocked by an existing furni.
         /// </summary>

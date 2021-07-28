@@ -1,5 +1,7 @@
 ﻿using System;
 
+using Xabbo.Messages;
+
 namespace Xabbo.Core
 {
     public class HeightmapTile : IHeightmapTile
@@ -8,9 +10,9 @@ namespace Xabbo.Core
         public int Y { get; }
         public (int X, int Y) Location => (X, Y);
 
-        public bool IsTile { get; set; }
+        public bool IsFloor { get; set; }
         public bool IsBlocked { get; set; }
-        public bool IsFree => IsTile && !IsBlocked;
+        public bool IsFree => IsFloor && !IsBlocked;
         public double Height { get; set; }
 
         public HeightmapTile(int x, int y, short value)
@@ -23,9 +25,18 @@ namespace Xabbo.Core
 
         public void Update(short value)
         {
-            IsTile = value >= 0;
-            IsBlocked = (value & 0x4000) > 0;
-            Height = (value < 0) ? -1 : ((value & 0x3FFF) / 256.0);
+            IsFloor = value >= 0;
+            IsBlocked = (value & 0x4000) != 0;
+            Height = value >= 0 ? ((value & 0x3FFF) / 256.0) : -1;
+        }
+
+        public void Compose(IPacket packet)
+        {
+            packet.WriteShort((short)(
+                (IsFloor ? 0x0000 : 0x8000) |
+                (IsBlocked ? 0x4000 : 0x0000) |
+                ((int)(Height * 256.0) & 0x3FFF)
+            ));
         }
     }
 }

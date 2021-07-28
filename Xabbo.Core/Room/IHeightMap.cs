@@ -7,9 +7,9 @@ namespace Xabbo.Core
 {
     /// <summary>
     /// Represents the stacking heightmap of a room.
-    /// Stores whether a certain location contains a tile,
+    /// Stores whether a certain location contains a floor tile,
     /// whether a furni may be placed on that tile,
-    /// and the height at which a furni may be placed.
+    /// and the stack height at which a furni may be placed.
     /// </summary>
     public interface IHeightmap : IEnumerable<IHeightmapTile>, IComposable
     {
@@ -22,11 +22,11 @@ namespace Xabbo.Core
         /// </summary>
         int Length { get; }
         /// <summary>
-        /// Gest the tile in this heightmap at the specified location.
+        /// Gets the tile in this heightmap at the specified location.
         /// </summary>
         IHeightmapTile this[int x, int y] { get; }
         /// <summary>
-        /// Gest the tile in this heightmap at the specified location.
+        /// Gets the tile in this heightmap at the specified location.
         /// </summary>
         IHeightmapTile this[(int X, int Y) location] { get; }
     }
