@@ -6,8 +6,6 @@ namespace Xabbo.Core
 {
     public class PetInfo : IComposable
     {
-        public static PetInfo Parse(IReadOnlyPacket packet) => new(packet);
-
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public int Level { get; set; }
@@ -23,18 +21,18 @@ namespace Xabbo.Core
         public int Age { get; set; }
         public string OwnerName { get; set; } = string.Empty;
         public int Breed { get; set; }
-        public bool UnknownBoolA { get; set; }
-        public bool UnknownBoolB { get; set; }
-        public List<int> UnknownIntsA { get; set; } = new(); // Something to do with skills (horse)
-        public int UnknownIntC { get; set; }
-        public bool UnknownBoolC { get; set; }
-        public bool UnknownBoolD { get; set; }
-        public bool UnknownBoolE { get; set; }
+        public bool HasFreeSaddle { get; set; }
+        public bool IsRiding { get; set; }
+        public List<int> SkillThresholds { get; set; } = new(); // Something to do with skills (horse)
+        public int AccessRights { get; set; }
+        public bool CanBreed { get; set; }
+        public bool CanHarvest { get; set; }
+        public bool CanRevive { get; set; }
         public int RarityLevel { get; set; }
-        public int MaxRemainingWellbeing { get; set; }
-        public int RemainingWellbeing { get; set; }
-        public int TimeUntilGrownUp { get; set; }
-        public bool UnknownBoolF { get; set; }
+        public int MaxWellbeingSeconds { get; set; }
+        public int RemainingWellbeingSeconds { get; set; }
+        public int RemainingGrowingSeconds { get; set; }
+        public bool HasBreedingPermission { get; set; }
 
         public PetInfo() { }
 
@@ -56,22 +54,22 @@ namespace Xabbo.Core
             Age = packet.ReadInt();
             OwnerName = packet.ReadString();
             Breed = packet.ReadInt();
-            UnknownBoolA = packet.ReadBool();
-            UnknownBoolB = packet.ReadBool();
+            HasFreeSaddle = packet.ReadBool();
+            IsRiding = packet.ReadBool();
 
             int n = packet.ReadInt();
             for (int i = 0; i < n; i++)
-                UnknownIntsA.Add(packet.ReadInt());
+                SkillThresholds.Add(packet.ReadInt());
 
-            UnknownIntC = packet.ReadInt();
-            UnknownBoolC = packet.ReadBool();
-            UnknownBoolD = packet.ReadBool();
-            UnknownBoolE = packet.ReadBool();
+            AccessRights = packet.ReadInt();
+            CanBreed = packet.ReadBool();
+            CanHarvest = packet.ReadBool();
+            CanRevive = packet.ReadBool();
             RarityLevel = packet.ReadInt();
-            MaxRemainingWellbeing = packet.ReadInt();
-            RemainingWellbeing = packet.ReadInt();
-            TimeUntilGrownUp = packet.ReadInt();
-            UnknownBoolF = packet.ReadBool();
+            MaxWellbeingSeconds = packet.ReadInt();
+            RemainingWellbeingSeconds = packet.ReadInt();
+            RemainingGrowingSeconds = packet.ReadInt();
+            HasBreedingPermission = packet.ReadBool();
         }
 
         public void Compose(IPacket packet)
@@ -91,22 +89,24 @@ namespace Xabbo.Core
             packet.WriteInt(Age);
             packet.WriteString(OwnerName);
             packet.WriteInt(Breed);
-            packet.WriteBool(UnknownBoolA);
-            packet.WriteBool(UnknownBoolB);
+            packet.WriteBool(HasFreeSaddle);
+            packet.WriteBool(IsRiding);
 
-            packet.WriteInt(UnknownIntsA.Count);
-            foreach (int value in UnknownIntsA)
+            packet.WriteInt(SkillThresholds.Count);
+            foreach (int value in SkillThresholds)
                 packet.WriteInt(value);
 
-            packet.WriteInt(UnknownIntC);
-            packet.WriteBool(UnknownBoolC);
-            packet.WriteBool(UnknownBoolD);
-            packet.WriteBool(UnknownBoolE);
+            packet.WriteInt(AccessRights);
+            packet.WriteBool(CanBreed);
+            packet.WriteBool(CanHarvest);
+            packet.WriteBool(CanRevive);
             packet.WriteInt(RarityLevel);
-            packet.WriteInt(MaxRemainingWellbeing);
-            packet.WriteInt(RemainingWellbeing);
-            packet.WriteInt(TimeUntilGrownUp);
-            packet.WriteBool(UnknownBoolF);
+            packet.WriteInt(MaxWellbeingSeconds);
+            packet.WriteInt(RemainingWellbeingSeconds);
+            packet.WriteInt(RemainingGrowingSeconds);
+            packet.WriteBool(HasBreedingPermission);
         }
+
+        public static PetInfo Parse(IReadOnlyPacket packet) => new(packet);
     }
 }
