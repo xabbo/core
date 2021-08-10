@@ -3,14 +3,21 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class CrackableFurniData : StuffData, ICrackableFurniData
+    public class CrackableFurniData : ItemData, ICrackableFurniData
     {
         public int Hits { get; set; }
         public int Target { get; set; }
 
         public CrackableFurniData()
-            : base(StuffDataType.CrackableFurni)
+            : base(ItemDataType.CrackableFurni)
         { }
+
+        public CrackableFurniData(ICrackableFurniData data)
+            : base(data)
+        {
+            Hits = data.Hits;
+            Target = data.Target;
+        }
 
         protected override void Initialize(IReadOnlyPacket packet)
         {

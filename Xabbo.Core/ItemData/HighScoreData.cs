@@ -1,38 +1,48 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class HighScoreData : StuffData, IHighScoreData, IList<HighScoreData.HighScore>
+    public class HighScoreData : ItemData, IHighScoreData, IList<HighScoreData.HighScore>
     {
-        private readonly List<HighScore> list;
+        private readonly List<HighScore> _list;
 
-        public int Int1 { get; set; }
-        public int Int2 { get; set; }
+        public int ScoreType { get; set; }
+        public int ClearType { get; set; }
 
-        public int Count => list.Count;
+        public int Count => _list.Count;
         public bool IsReadOnly => false;
         public HighScore this[int index]
         {
-            get => list[index];
-            set => list[index] = value;
+            get => _list[index];
+            set => _list[index] = value;
         }
         IHighScore IReadOnlyList<IHighScore>.this[int index] => this[index];
         IEnumerator<IHighScore> IEnumerable<IHighScore>.GetEnumerator() => GetEnumerator();
 
         public HighScoreData()
-            : base(StuffDataType.HighScore)
+            : base(ItemDataType.HighScore)
         {
-            list = new List<HighScore>();
+            _list = new List<HighScore>();
+        }
+
+        public HighScoreData(IHighScoreData data)
+            : base(data)
+        {
+            _list = data.Select(score => new HighScore(score)).ToList();
+
+            ScoreType = data.ScoreType;
+            ClearType = data.ClearType;
         }
 
         protected override void Initialize(IReadOnlyPacket packet)
         {
             Value = packet.ReadString();
-            Int1 = packet.ReadInt();
-            Int2 = packet.ReadInt();
+            ScoreType = packet.ReadInt();
+            ClearType = packet.ReadInt();
 
             short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
@@ -45,7 +55,7 @@ namespace Xabbo.Core
                 short k = packet.ReadLegacyShort();
                 for (int j = 0; j < k; j++)
                 {
-                    highScore.Names.Add(packet.ReadString());
+                    highScore.Users.Add(packet.ReadString());
                 }
 
                 Add(highScore);
@@ -57,23 +67,29 @@ namespace Xabbo.Core
         public class HighScore : IHighScore
         {
             public int Value { get; set; }
-            public List<string> Names { get; set; }
-            IReadOnlyList<string> IHighScore.Names => Names;
+            public List<string> Users { get; set; }
+            IReadOnlyList<string> IHighScore.Users => Users;
 
             public HighScore()
             {
-                Names = new List<string>();
+                Users = new List<string>();
+            }
+
+            public HighScore(IHighScore highScore)
+            {
+                Value = highScore.Value;
+                Users = new List<string>(highScore.Users);
             }
 
             public void Compose(IPacket packet)
             {
                 packet.WriteInt(Value);
 
-                packet.WriteLegacyShort((short)(Names?.Count ?? 0));
+                packet.WriteLegacyShort((short)(Users?.Count ?? 0));
 
-                if (Names != null)
+                if (Users != null)
                 {
-                    foreach (string name in Names)
+                    foreach (string name in Users)
                     {
                         packet.WriteString(name);
                     }
@@ -84,8 +100,8 @@ namespace Xabbo.Core
         protected override void WriteData(IPacket packet)
         {
             packet.WriteString(Value);
-            packet.WriteInt(Int1);
-            packet.WriteInt(Int2);
+            packet.WriteInt(ScoreType);
+            packet.WriteInt(ClearType);
 
             packet.WriteLegacyShort((short)Count);
 
@@ -93,15 +109,15 @@ namespace Xabbo.Core
                 highScore.Compose(packet);
         }
 
-        public int IndexOf(HighScore item) => list.IndexOf(item);
-        public void Insert(int index, HighScore item) => list.Insert(index, item);
-        public void RemoveAt(int index) => list.RemoveAt(index);
-        public void Add(HighScore item) => list.Add(item);
-        public void Clear() => list.Clear();
-        public bool Contains(HighScore item) => list.Contains(item);
-        public void CopyTo(HighScore[] array, int arrayIndex) => list.CopyTo(array, arrayIndex);
-        public bool Remove(HighScore item) => list.Remove(item);
-        public IEnumerator<HighScore> GetEnumerator() => list.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => list.GetEnumerator();
+        public int IndexOf(HighScore item) => _list.IndexOf(item);
+        public void Insert(int index, HighScore item) => _list.Insert(index, item);
+        public void RemoveAt(int index) => _list.RemoveAt(index);
+        public void Add(HighScore item) => _list.Add(item);
+        public void Clear() => _list.Clear();
+        public bool Contains(HighScore item) => _list.Contains(item);
+        public void CopyTo(HighScore[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
+        public bool Remove(HighScore item) => _list.Remove(item);
+        public IEnumerator<HighScore> GetEnumerator() => _list.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => _list.GetEnumerator();
     }
 }

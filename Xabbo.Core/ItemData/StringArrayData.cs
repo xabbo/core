@@ -6,22 +6,29 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class StringArrayData : StuffData, IStringArrayData, IList<string>
+    public class StringArrayData : ItemData, IStringArrayData, IList<string>
     {
-        private readonly List<string> list;
+        private readonly List<string> _list;
 
-        public int Count => list.Count;
-        public bool IsReadOnly => false;
+        public int Count => _list.Count;
+        bool ICollection<string>.IsReadOnly => false;
+
         public string this[int index]
         {
-            get => list[index];
-            set => list[index] = value;
+            get => _list[index];
+            set => _list[index] = value;
         }
 
         public StringArrayData()
-            : base(StuffDataType.StringArray)
+            : base(ItemDataType.StringArray)
         {
-            list = new List<string>();
+            _list = new List<string>();
+        }
+
+        public StringArrayData(IStringArrayData data)
+            : base(data)
+        {
+            _list = new List<string>(data);
         }
 
         protected override void Initialize(IReadOnlyPacket packet)
@@ -29,7 +36,7 @@ namespace Xabbo.Core
             short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
             {
-                list.Add(packet.ReadString());
+                _list.Add(packet.ReadString());
             }
 
             base.Initialize(packet);
@@ -37,8 +44,8 @@ namespace Xabbo.Core
 
         protected override void WriteData(IPacket packet)
         {
-            packet.WriteLegacyShort((short)list.Count);
-            foreach (string value in list)
+            packet.WriteLegacyShort((short)_list.Count);
+            foreach (string value in _list)
             {
                 packet.WriteString(value);
             }
@@ -46,15 +53,15 @@ namespace Xabbo.Core
             WriteBase(packet);
         }
 
-        public int IndexOf(string item) => list.IndexOf(item);
-        public void Insert(int index, string item) => list.Insert(index, item);
-        public void RemoveAt(int index) => list.RemoveAt(index);
-        public void Add(string item) => list.Add(item);
-        public void Clear() => list.Clear();
-        public bool Contains(string item) => list.Contains(item);
-        public void CopyTo(string[] array, int arrayIndex) => list.CopyTo(array, arrayIndex);
-        public bool Remove(string item) => list.Remove(item);
-        public IEnumerator<string> GetEnumerator() => list.GetEnumerator();
+        public int IndexOf(string item) => _list.IndexOf(item);
+        public void Insert(int index, string item) => _list.Insert(index, item);
+        public void RemoveAt(int index) => _list.RemoveAt(index);
+        public void Add(string item) => _list.Add(item);
+        public void Clear() => _list.Clear();
+        public bool Contains(string item) => _list.Contains(item);
+        public void CopyTo(string[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
+        public bool Remove(string item) => _list.Remove(item);
+        public IEnumerator<string> GetEnumerator() => _list.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

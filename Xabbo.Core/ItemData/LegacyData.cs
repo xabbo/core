@@ -1,13 +1,21 @@
 ﻿using System;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class LegacyData : StuffData, ILegacyData
+    public class LegacyData : ItemData, ILegacyData
     {
         public LegacyData()
-            : base(StuffDataType.Legacy)
+            : base(ItemDataType.Legacy)
         { }
+
+        public LegacyData(ILegacyData data)
+            : base(data)
+        {
+            Flags = data.Flags;
+            Value = data.Value;
+        }
 
         protected override void Initialize(IReadOnlyPacket packet)
         {

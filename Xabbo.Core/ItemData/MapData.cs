@@ -7,27 +7,34 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class MapData : StuffData, IMapData, IDictionary<string, string>
+    public class MapData : ItemData, IMapData, IDictionary<string, string>
     {
-        private readonly Dictionary<string, string> dict;
+        private readonly Dictionary<string, string> _map;
 
-        public ICollection<string> Keys => dict.Keys;
+        public ICollection<string> Keys => _map.Keys;
         IEnumerable<string> IReadOnlyDictionary<string, string>.Keys => Keys;
-        public ICollection<string> Values => dict.Values;
+        public ICollection<string> Values => _map.Values;
         IEnumerable<string> IReadOnlyDictionary<string, string>.Values => Values;
-        public int Count => dict.Count;
-        public bool IsReadOnly => false;
+        public int Count => _map.Count;
+
+        bool ICollection<KeyValuePair<string, string>>.IsReadOnly => false;
 
         public string this[string key]
         {
-            get => dict[key];
-            set => dict[key] = value;
+            get => _map[key];
+            set => _map[key] = value;
         }
 
         public MapData()
-            : base(StuffDataType.Map)
+            : base(ItemDataType.Map)
         {
-            dict = new Dictionary<string, string>();
+            _map = new Dictionary<string, string>();
+        }
+
+        public MapData(IMapData data)
+            : base(data)
+        {
+            _map = new Dictionary<string, string>(data);
         }
 
         protected override void Initialize(IReadOnlyPacket packet)
@@ -35,7 +42,7 @@ namespace Xabbo.Core
             short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
             {
-                dict.Add(packet.ReadString(), packet.ReadString());
+                _map.Add(packet.ReadString(), packet.ReadString());
             }
 
             base.Initialize(packet);
@@ -43,8 +50,8 @@ namespace Xabbo.Core
 
         protected override void WriteData(IPacket packet)
         {
-            packet.WriteLegacyShort((short)dict.Count);
-            foreach (var item in dict)
+            packet.WriteLegacyShort((short)_map.Count);
+            foreach (var item in _map)
             {
                 packet.WriteString(item.Key);
                 packet.WriteString(item.Value);
@@ -53,16 +60,16 @@ namespace Xabbo.Core
             WriteBase(packet);
         }
 
-        public bool ContainsKey(string key) => dict.ContainsKey(key);
-        public void Add(string key, string value) => dict.Add(key, value);
-        public bool Remove(string key) => dict.Remove(key);
-        public bool TryGetValue(string key, [NotNullWhen(true)] out string? value) => dict.TryGetValue(key, out value);
-        public void Add(KeyValuePair<string, string> item) => ((IDictionary<string, string>)dict).Add(item);
-        public void Clear() => dict.Clear();
-        public bool Contains(KeyValuePair<string, string> item) => ((IDictionary<string, string>)dict).Contains(item);
-        public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex) => ((IDictionary<string, string>)dict).CopyTo(array, arrayIndex);
-        public bool Remove(KeyValuePair<string, string> item) => ((IDictionary<string, string>)dict).Remove(item);
-        public IEnumerator<KeyValuePair<string, string>> GetEnumerator() => dict.GetEnumerator();
+        public bool ContainsKey(string key) => _map.ContainsKey(key);
+        public void Add(string key, string value) => _map.Add(key, value);
+        public bool Remove(string key) => _map.Remove(key);
+        public bool TryGetValue(string key, [NotNullWhen(true)] out string? value) => _map.TryGetValue(key, out value);
+        public void Add(KeyValuePair<string, string> item) => ((IDictionary<string, string>)_map).Add(item);
+        public void Clear() => _map.Clear();
+        public bool Contains(KeyValuePair<string, string> item) => ((IDictionary<string, string>)_map).Contains(item);
+        public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex) => ((IDictionary<string, string>)_map).CopyTo(array, arrayIndex);
+        public bool Remove(KeyValuePair<string, string> item) => ((IDictionary<string, string>)_map).Remove(item);
+        public IEnumerator<KeyValuePair<string, string>> GetEnumerator() => _map.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

@@ -13,15 +13,17 @@ namespace Xabbo.Core
         public int Kind { get; set; }
         public FurniCategory Category { get; set; }
         public bool IsGroupable { get; set; }
-        public StuffData Data { get; set; } = new LegacyData();
+        public ItemData Data { get; set; } = new LegacyData();
         IItemData IInventoryItem.Data => Data;
         public int CreationDay { get; set; }
         public int CreationMonth { get; set; }
         public int CreationYear { get; set; }
         public long Extra { get; set; }
 
+        bool IInventoryItem.IsRecyclable => true;
         bool IInventoryItem.IsTradeable => true;
         bool IInventoryItem.IsSellable => true;
+        string IInventoryItem.SlotId => string.Empty;
         int IInventoryItem.SecondsToExpiration => -1;
         bool IInventoryItem.HasRentPeriodStarted => false;
         long IInventoryItem.RoomId => -1;
@@ -36,7 +38,7 @@ namespace Xabbo.Core
             Kind = packet.ReadInt();
             Category = (FurniCategory)packet.ReadInt();
             IsGroupable = packet.ReadBool();
-            Data = StuffData.Parse(packet);
+            Data = ItemData.Parse(packet);
             CreationDay = packet.ReadInt();
             CreationMonth = packet.ReadInt();
             CreationYear = packet.ReadInt();
@@ -76,6 +78,6 @@ namespace Xabbo.Core
             return new TradeItem(packet);
         }
 
-        public override string ToString() => $"[{ItemId}:{Type.ToShortString()}{Kind}]";
+        public override string ToString() => $"{ItemId}:{Type.ToShortString()}{Kind}";
     }
 }

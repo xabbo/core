@@ -4,13 +4,19 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class VoteResultData : StuffData, IVoteResultData
+    public class VoteResultData : ItemData, IVoteResultData
     {
         public int Result { get; set; }
 
         public VoteResultData()
-            : base(StuffDataType.VoteResult)
+            : base(ItemDataType.VoteResult)
         { }
+
+        public VoteResultData(IVoteResultData data)
+            : base(data)
+        {
+            Result = data.Result;
+        }
 
         protected override void Initialize(IReadOnlyPacket packet)
         {

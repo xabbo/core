@@ -3,5 +3,12 @@ using System.Collections.Generic;
 
 namespace Xabbo.Core
 {
-    public interface IHighScoreData : IItemData, IReadOnlyList<IHighScore> { }
+    /// <summary>
+    /// Defines high score information as extra data in an item.
+    /// </summary>
+    public interface IHighScoreData : IItemData, IReadOnlyList<IHighScore>
+    {
+        int ScoreType { get; }
+        int ClearType { get; }
+    }
 }

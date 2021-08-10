@@ -35,7 +35,7 @@ namespace Xabbo.Core
                 case 1:
                     Type = ItemType.Floor;
                     Kind = packet.ReadInt();
-                    Data = StuffData.Parse(packet);
+                    Data = ItemData.Parse(packet);
                     break;
                 case 2:
                     Type = ItemType.Wall;
@@ -48,8 +48,8 @@ namespace Xabbo.Core
                     Data = new LegacyData()
                     {
                         Flags = ItemDataFlags.IsLimitedRare,
-                        LimitedNumber = packet.ReadInt(),
-                        LimitedTotal = packet.ReadInt()
+                        UniqueSerialNumber = packet.ReadInt(),
+                        UniqueSeriesSize = packet.ReadInt()
                     };
                     break;
                 default: throw new Exception($"Unknown MarketplaceItem type: {itemType}");
@@ -78,8 +78,8 @@ namespace Xabbo.Core
                     packet
                         .WriteInt(3)
                         .WriteInt(Kind)
-                        .WriteInt(Data.LimitedNumber)
-                        .WriteInt(Data.LimitedTotal);
+                        .WriteInt(Data.UniqueSerialNumber)
+                        .WriteInt(Data.UniqueSeriesSize);
                 }
                 else
                 {

@@ -5,6 +5,7 @@ namespace Xabbo.Core
 {
     internal static class XabboConst
     {
+        public const int DEFAULT_TIMEOUT = 10000;
         public const float DEFAULT_EPSILON = 0.01f;
 
         public const string DEFAULT_USER_AGENT =

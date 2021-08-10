@@ -273,6 +273,31 @@ namespace Xabbo.Core
                     return groupIndex;
                 });
         }
+
+        /// <summary>
+        /// Groups the specified inventory items into fragments.
+        /// </summary>
+        /// <param name="items">The items to group into fragments.</param>
+        /// <param name="size">The maximum number of items per fragment.</param>
+        public static IEnumerable<InventoryFragment> Fragmentize(this IEnumerable<IInventoryItem> items, int size = 600)
+        {
+            if (items is not IInventoryItem[] array)
+            {
+                array = items.ToArray();
+            }
+
+            int currentIndex = 0;
+            int totalFragments = (int)Math.Ceiling(array.Length / (double)size);
+
+            foreach (var group in array.GroupBy(x => currentIndex++ / size))
+            {
+                yield return new InventoryFragment(group)
+                {
+                    Index = group.Key,
+                    Total = totalFragments
+                };
+            }
+        }
         #endregion
 
         #region - Rooms -

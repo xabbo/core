@@ -1,15 +1,15 @@
 ﻿ using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Messages;
 using Xabbo.Interceptor;
 
 using Xabbo.Core.Events;
-using System.Diagnostics.CodeAnalysis;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Xabbo.Core.Game
 {
@@ -405,8 +405,8 @@ namespace Xabbo.Core.Game
         protected virtual void OnEntityIdle(IEntity entity, bool wasIdle)
         {
             _logger.LogTrace(
-                "Entity idle. ({entityName} [{entityId}:{entityIndex}], {isIdle} -> {wasIdle})",
-                entity.Name, entity.Id, entity.Index, entity.IsIdle, wasIdle
+                "Entity idle. ({entityName} [{entityId}:{entityIndex}], {wasIdle} -> {isIdle})",
+                entity.Name, entity.Id, entity.Index, wasIdle, entity.IsIdle
             );
             EntityIdle?.Invoke(this, new EntityIdleEventArgs(entity, wasIdle));
         }
@@ -418,8 +418,8 @@ namespace Xabbo.Core.Game
         protected virtual void OnEntityDance(IEntity entity, int previousDance)
         {
             _logger.LogTrace(
-                "Entity dance. ({entityName} [{entityId}:{entityIndex}], {dance} -> {previousDance})",
-                entity.Name, entity.Id, entity.Index, entity.Dance, previousDance
+                "Entity dance. ({entityName} [{entityId}:{entityIndex}], {previousDance} -> {dance})",
+                entity.Name, entity.Id, entity.Index, previousDance, entity.Dance
             );
             EntityDance?.Invoke(this, new EntityDanceEventArgs(entity, previousDance));
         }
@@ -431,8 +431,8 @@ namespace Xabbo.Core.Game
         protected virtual void OnEntityHandItem(IEntity entity, int previousItem)
         {
             _logger.LogTrace(
-                "Entity hand item. ({entityName} [{entityId}:{entityIndex}], {itemId} -> {previousItemId})",
-                entity.Name, entity.Id, entity.Index, entity.HandItem, previousItem
+                "Entity hand item. ({entityName} [{entityId}:{entityIndex}], {previousItemId} -> {itemId})",
+                entity.Name, entity.Id, entity.Index, previousItem, entity.HandItem
             );
             EntityHandItem?.Invoke(this, new EntityHandItemEventArgs(entity, previousItem));
         }
@@ -444,8 +444,8 @@ namespace Xabbo.Core.Game
         protected virtual void OnEntityEffect(IEntity entity, int previousEffect)
         {
             _logger.LogTrace(
-                "Entity effect. ({entityName} [{entityId}:{entityIndex}], {effect} -> {previousEffect})",
-                entity.Name, entity.Id, entity.Index, entity.Effect, previousEffect
+                "Entity effect. ({entityName} [{entityId}:{entityIndex}], {previousEffect} -> {effect})",
+                entity.Name, entity.Id, entity.Index, previousEffect, entity.Effect
             );
             EntityEffect?.Invoke(this, new EntityEffectEventArgs(entity, previousEffect));
         }
@@ -470,8 +470,8 @@ namespace Xabbo.Core.Game
         protected virtual void OnEntityTyping(IEntity entity, bool wasTyping)
         {
             _logger.LogTrace(
-                "Entity typing. ({entityName} [{entityId}:{entityIndex}], {isTyping} -> {wasTyping})",
-                entity.Name, entity.Id, entity.Index, entity.IsTyping, wasTyping
+                "Entity typing. ({entityName} [{entityId}:{entityIndex}], {wasTyping} -> {isTyping})",
+                entity.Name, entity.Id, entity.Index, wasTyping, entity.IsTyping
             );
             EntityTyping?.Invoke(this, new EntityTypingEventArgs(entity, wasTyping));
         }
@@ -1210,7 +1210,7 @@ namespace Xabbo.Core.Game
             }
 
             IItemData previousData = item.Data;
-            item.Data = StuffData.Parse(packet);
+            item.Data = ItemData.Parse(packet);
 
             OnFloorItemDataUpdated(item, previousData);
         }
@@ -1234,7 +1234,7 @@ namespace Xabbo.Core.Game
             for (int i = 0; i < n; i++)
             {
                 long itemId = packet.ReadLegacyLong();
-                IItemData data = StuffData.Parse(packet);
+                IItemData data = ItemData.Parse(packet);
                 if (!_currentRoom.FloorItems.TryGetValue(itemId, out FloorItem? item))
                 {
                     _logger.LogError("[{method}] Failed to find floor item {id} to update.", itemId, nameof(HandleItemsDataUpdate));
