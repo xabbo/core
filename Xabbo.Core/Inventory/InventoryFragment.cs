@@ -7,12 +7,12 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
-    public class Inventory : IInventory, ICollection<InventoryItem>
+    public class InventoryFragment : IInventoryFragment, ICollection<InventoryItem>
     {
         private readonly List<InventoryItem> _list = new List<InventoryItem>();
 
-        public int TotalPackets { get; set; }
-        public int PacketIndex { get; set; }
+        public int Total { get; set; }
+        public int Index { get; set; }
 
         bool ICollection<InventoryItem>.IsReadOnly => false;
 
@@ -25,21 +25,25 @@ namespace Xabbo.Core
         }
 
         public IEnumerable<InventoryItem> FloorItems => this.Where<InventoryItem>(item => item.IsFloorItem);
-        IEnumerable<IInventoryItem> IInventory.FloorItems => FloorItems;
+        IEnumerable<IInventoryItem> IInventoryFragment.FloorItems => FloorItems;
         public IEnumerable<InventoryItem> WallItems => this.Where<InventoryItem>(item => item.IsWallItem);
-        IEnumerable<IInventoryItem> IInventory.WallItems => WallItems;
+        IEnumerable<IInventoryItem> IInventoryFragment.WallItems => WallItems;
 
-        public Inventory() { }
+        public InventoryFragment() { }
 
-        protected Inventory(IReadOnlyPacket packet)
+        public InventoryFragment(IEnumerable<IInventoryItem> items)
         {
-            TotalPackets = packet.ReadInt();
-            PacketIndex = packet.ReadInt();
+            _list.AddRange(items.Select(
+                item => item is InventoryItem inventoryItem ? inventoryItem : new InventoryItem(item)
+            ));
+        }
 
-            foreach (InventoryItem item in ParseItems(packet))
-            {
-                Add(item);
-            }
+        protected InventoryFragment(IReadOnlyPacket packet)
+        {
+            Total = packet.ReadInt();
+            Index = packet.ReadInt();
+
+            _list.AddRange(InventoryItem.ParseMany(packet));
         }
 
         public void Add(InventoryItem item) => _list.Add(item);
@@ -52,18 +56,19 @@ namespace Xabbo.Core
         IEnumerator<IInventoryItem> IEnumerable<IInventoryItem>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public static Inventory Parse(IReadOnlyPacket packet)
+        public void Compose(IPacket packet)
         {
-            return new Inventory(packet);
-        }
+            packet
+                .WriteInt(Total)
+                .WriteInt(Index);
 
-        public static IEnumerable<InventoryItem> ParseItems(IReadOnlyPacket packet)
-        {
-            int n = packet.ReadLegacyShort();
-            for (int i = 0; i < n; i++)
+            packet.WriteLegacyShort((short)_list.Count);
+            foreach (InventoryItem item in _list)
             {
-                yield return InventoryItem.Parse(packet);
+                packet.Write(item);
             }
         }
+
+        public static InventoryFragment Parse(IReadOnlyPacket packet) => new InventoryFragment(packet);
     }
 }

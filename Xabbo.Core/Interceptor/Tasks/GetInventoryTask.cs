@@ -5,19 +5,21 @@ using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
+using Xabbo.Core.Game;
+
 namespace Xabbo.Core.Tasks
 {
     public class GetInventoryTask : InterceptorTask<IInventory>
     {
-        private int totalExpected = -1, currentIndex = 0;
+        private int _total = -1, _index = 0;
         private readonly Inventory inventory = new Inventory();
 
-        private readonly bool _block;
+        private readonly bool _blockPackets;
 
-        public GetInventoryTask(IInterceptor interceptor, bool blockPackets)
+        public GetInventoryTask(IInterceptor interceptor, bool blockPackets = true)
             : base(interceptor)
         {
-            _block = blockPackets;
+            _blockPackets = blockPackets;
         }
 
         public GetInventoryTask(IInterceptor interceptor) : this(interceptor, true) { }
@@ -29,21 +31,37 @@ namespace Xabbo.Core.Tasks
         {
             try
             {
-                var packet = e.Packet;
-                int total = packet.ReadInt();
-                int current = packet.ReadInt();
+                InventoryFragment fragment = InventoryFragment.Parse(e.Packet);
 
-                if (current != currentIndex) return;
-                if (totalExpected == -1) totalExpected = total;
-                else if (total != totalExpected) return;
-                currentIndex++;
+                if (fragment.Index != _index)
+                {
+                    throw new Exception(
+                        $"Fragment index mismatch."
+                        + $" Expected: {_index}; received: {fragment.Index}."
+                    );
+                }
 
-                if (_block)
+                if (_total == -1)
+                {
+                    _total = fragment.Total;
+                }
+                else if (fragment.Total != _total)
+                {
+                    throw new Exception(
+                        "Fragment count mismatch."
+                        + $" Expected: {_total}; received: {fragment.Total}."
+                    );
+                }
+
+                _index++;
+
+                if (_blockPackets)
                     e.Block();
 
-                foreach (var item in Inventory.ParseItems(packet))
-                    inventory.Add(item);
-                if (currentIndex == totalExpected)
+                foreach (var item in fragment)
+                    inventory.TryAdd(item);
+
+                if (_index == _total)
                     SetResult(inventory);
             }
             catch (Exception ex) { SetException(ex); }
