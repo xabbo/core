@@ -8,7 +8,7 @@ namespace Xabbo.Core
     public class CatalogPage : ICatalogPage
     {
         public int Id { get; set; }
-        public string Mode { get; set; }
+        public string CatalogType { get; set; }
         public string LayoutCode { get; set; }
         public List<string> Images { get; set; } = new List<string>();
         IReadOnlyList<string> ICatalogPage.Images => Images;
@@ -16,26 +16,26 @@ namespace Xabbo.Core
         IReadOnlyList<string> ICatalogPage.Texts => Texts;
         public List<CatalogOffer> Offers { get; set; } = new List<CatalogOffer>();
         IReadOnlyList<ICatalogOffer> ICatalogPage.Offers => Offers;
-        public int UnknownIntA { get; set; }
+        public int OfferId { get; set; }
         public bool AcceptSeasonCurrencyAsCredits { get; set; }
-        public List<CatalogPageData> Data { get; set; } = new List<CatalogPageData>();
-        IReadOnlyList<ICatalogPageData> ICatalogPage.Data => Data;
+        public List<CatalogPageItem> FrontPageItems { get; set; } = new List<CatalogPageItem>();
+        IReadOnlyList<ICatalogPageItem> ICatalogPage.Data => FrontPageItems;
 
         public CatalogPage()
         {
-            Mode =
+            CatalogType =
             LayoutCode = string.Empty;
 
             Images = new List<string>();
             Texts = new List<string>();
             Offers = new List<CatalogOffer>();
-            Data = new List<CatalogPageData>();
+            FrontPageItems = new List<CatalogPageItem>();
         }
 
         protected CatalogPage(IReadOnlyPacket packet)
         {
             Id = packet.ReadInt();
-            Mode = packet.ReadString();
+            CatalogType = packet.ReadString();
             LayoutCode = packet.ReadString();
 
             short n = packet.ReadLegacyShort();
@@ -48,21 +48,34 @@ namespace Xabbo.Core
 
             n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
-                Offers.Add(CatalogOffer.Parse(packet));
+            {
+                CatalogOffer offer = CatalogOffer.Parse(packet);
+                offer.Page = this;
+                Offers.Add(offer);
+            }
 
-            UnknownIntA = packet.ReadInt();
+            OfferId = packet.ReadInt();
             AcceptSeasonCurrencyAsCredits = packet.ReadBool();
             if (packet.Available > 0)
             {
                 n = packet.ReadLegacyShort();
                 for (int i = 0; i < n; i++)
-                    Data.Add(CatalogPageData.Parse(packet));
+                    FrontPageItems.Add(CatalogPageItem.Parse(packet));
             }
         }
 
-        public static CatalogPage Parse(IReadOnlyPacket packet)
+        public void Compose(IPacket packet)
         {
-            return new CatalogPage(packet);
+            packet
+                .WriteInt(Id)
+                .WriteString(CatalogType)
+                .WriteString(LayoutCode)
+                .WriteValues(Images, Texts, Offers)
+                .WriteInt(OfferId)
+                .WriteBool(AcceptSeasonCurrencyAsCredits)
+                .WriteValues(FrontPageItems);
         }
+
+        public static CatalogPage Parse(IReadOnlyPacket packet) => new CatalogPage(packet);
     }
 }

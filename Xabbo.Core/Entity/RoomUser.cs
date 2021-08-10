@@ -8,11 +8,11 @@ namespace Xabbo.Core
     {
         public Gender Gender { get; set; }
         public long GroupId { get; set; }
-        public int Int8 { get; set; }
+        public int GroupStatus { get; set; }
         public string GroupName { get; set; } 
         public string FigureExtra { get; set; }
         public int AchievementScore { get; set; }
-        public bool Bool1 { get; set; }
+        public bool IsModerator { get; set; }
 
         public int RightsLevel => CurrentUpdate?.ControlLevel ?? 0;
         public bool HasRights => RightsLevel > 0;
@@ -31,11 +31,11 @@ namespace Xabbo.Core
         {
             Gender = H.ToGender(packet.ReadString());
             GroupId = packet.ReadLegacyLong();
-            Int8 = packet.ReadInt();
+            GroupStatus = packet.ReadInt();
             GroupName = packet.ReadString();
             FigureExtra = packet.ReadString();
             AchievementScore = packet.ReadInt();
-            Bool1 = packet.ReadBool();
+            IsModerator = packet.ReadBool();
         }
 
         protected override void OnUpdate(EntityStatusUpdate update) { }
@@ -47,11 +47,11 @@ namespace Xabbo.Core
             packet
                 .WriteString(Gender.ToShortString())
                 .WriteLegacyLong(GroupId)
-                .WriteInt(Int8)
+                .WriteInt(GroupStatus)
                 .WriteString(GroupName)
                 .WriteString(FigureExtra)
                 .WriteInt(AchievementScore)
-                .WriteBool(Bool1);
+                .WriteBool(IsModerator);
         }
     }
 }

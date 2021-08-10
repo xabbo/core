@@ -6,11 +6,8 @@ namespace Xabbo.Core
 {
     public class GroupData : IGroupData
     {
-        public static GroupData Parse(IReadOnlyPacket packet, ClientType clientType = ClientType.Unknown)
-            => new GroupData(packet, clientType);
-
         public long Id { get; set; }
-        public bool CanLeave { get; set; }
+        public bool IsGuild { get; set; }
         public GroupType Type { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
@@ -24,15 +21,15 @@ namespace Xabbo.Core
         public bool IsOwner { get; set; }
         public bool IsAdmin { get; set; }
         public string OwnerName { get; set; }
-        public bool DisplayInClient { get; set; }
+        public bool ShowInClient { get; set; }
         public bool CanDecorateHomeRoom { get; set; }
         public int PendingRequests { get; set; }
-        public bool CanViewForum { get; set; }
+        public bool HasForum { get; set; }
 
-        protected GroupData(IReadOnlyPacket packet, ClientType clientType)
+        protected GroupData(IReadOnlyPacket packet)
         {
             Id = packet.ReadLong();
-            CanLeave = packet.ReadBool();
+            IsGuild = packet.ReadBool();
             Type = (GroupType)packet.ReadInt();
             Name = packet.ReadString();
             Description = packet.ReadString();
@@ -46,12 +43,14 @@ namespace Xabbo.Core
             IsOwner = packet.ReadBool();
             IsAdmin = packet.ReadBool();
             OwnerName = packet.ReadString();
-            DisplayInClient = packet.ReadBool();
+            ShowInClient = packet.ReadBool();
             CanDecorateHomeRoom = packet.ReadBool();
             PendingRequests = packet.ReadInt();
-            CanViewForum = packet.ReadBool();
+            HasForum = packet.ReadBool();
 
-            // TODO extra 8 bytes
+            // TODO extra 8 bytes in Unity client
         }
+
+        public static GroupData Parse(IReadOnlyPacket packet) => new GroupData(packet);
     }
 }

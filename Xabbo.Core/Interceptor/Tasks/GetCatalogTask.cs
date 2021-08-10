@@ -9,15 +9,15 @@ namespace Xabbo.Core.Tasks
 {
     public class GetCatalogTask : InterceptorTask<ICatalog>
     {
-        private readonly string mode;
+        private readonly string _type;
 
-        public GetCatalogTask(IInterceptor interceptor, string mode)
+        public GetCatalogTask(IInterceptor interceptor, string type)
             : base(interceptor)
         {
-            this.mode = mode;
+            _type = type;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetCatalogIndex, mode);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetCatalogIndex, _type);
 
         [InterceptIn(nameof(Incoming.CatalogIndex))]
         protected void HandleCatalogIndex(InterceptArgs e)
@@ -25,7 +25,7 @@ namespace Xabbo.Core.Tasks
             try
             {
                 var catalog = Catalog.Parse(e.Packet);
-                if (catalog.Mode == mode)
+                if (catalog.Type == _type)
                 {
                     if (SetResult(catalog))
                         e.Block();

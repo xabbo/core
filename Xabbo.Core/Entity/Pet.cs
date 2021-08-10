@@ -10,21 +10,21 @@ namespace Xabbo.Core
         public long OwnerId { get; set; }
         public string OwnerName { get; set; }
         public int RarityLevel { get; set; }
-        public bool Bool1 { get; set; }
-        public bool Bool2 { get; set; }
-        public bool Bool3 { get; set; }
-        public bool Bool4 { get; set; }
-        public bool Bool5 { get; set; }
-        public bool Bool6 { get; set; }
+        public bool HasSaddle { get; set; }
+        public bool IsRiding { get; set; }
+        public bool CanBreed { get; set; }
+        public bool CanHarvest { get; set; }
+        public bool CanRevive { get; set; }
+        public bool HasBreedingPermission { get; set; }
         public int Level { get; set; }
-        public string Stance { get; set; }
+        public string Posture { get; set; }
 
         public Pet(long id, int index)
             : base(EntityType.Pet, id, index)
         {
             OwnerId = -1;
             OwnerName = "(unknown)";
-            Stance = "";
+            Posture = "";
         }
 
         internal Pet(long id, int index, IReadOnlyPacket packet)
@@ -34,14 +34,14 @@ namespace Xabbo.Core
             OwnerId = packet.ReadLegacyLong();
             OwnerName = packet.ReadString();
             RarityLevel = packet.ReadInt();
-            Bool1 = packet.ReadBool();
-            Bool2 = packet.ReadBool();
-            Bool3 = packet.ReadBool();
-            Bool4 = packet.ReadBool();
-            Bool5 = packet.ReadBool();
-            Bool6 = packet.ReadBool();
+            HasSaddle = packet.ReadBool();
+            IsRiding = packet.ReadBool();
+            CanBreed = packet.ReadBool();
+            CanHarvest = packet.ReadBool();
+            CanRevive = packet.ReadBool();
+            HasBreedingPermission = packet.ReadBool();
             Level = packet.ReadInt();
-            Stance = packet.ReadString();
+            Posture = packet.ReadString();
         }
 
         public override void Compose(IPacket packet)
@@ -52,14 +52,14 @@ namespace Xabbo.Core
                 .WriteInt(Breed)
                 .WriteLegacyLong(OwnerId)
                 .WriteInt(RarityLevel)
-                .WriteBool(Bool1)
-                .WriteBool(Bool2)
-                .WriteBool(Bool3)
-                .WriteBool(Bool4)
-                .WriteBool(Bool5)
-                .WriteBool(Bool6)
+                .WriteBool(HasSaddle)
+                .WriteBool(IsRiding)
+                .WriteBool(CanBreed)
+                .WriteBool(CanHarvest)
+                .WriteBool(CanRevive)
+                .WriteBool(HasBreedingPermission)
                 .WriteInt(Level)
-                .WriteString(Stance);
+                .WriteString(Posture);
         }
     }
 }

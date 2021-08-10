@@ -5,7 +5,7 @@ namespace Xabbo.Core
     public interface IGroupData
     {
         long Id { get; }
-        bool CanLeave { get; }
+        bool IsGuild { get; }
         GroupType Type { get; }
         string Name { get; }
         string Description { get; }
@@ -21,6 +21,6 @@ namespace Xabbo.Core
         string OwnerName { get; }
         bool CanDecorateHomeRoom { get; }
         int PendingRequests { get; }
-        bool CanViewForum { get; }
+        bool HasForum { get; }
     }
 }

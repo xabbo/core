@@ -25,7 +25,7 @@ namespace Xabbo.Core
 
         public override int State => double.TryParse(Data.Value, out double state) ? (int)state : -1;
 
-        public string UnknownStringA { get; set; }
+        public string StaticClass { get; set; }
 
         public FloorItem()
         {
@@ -33,7 +33,7 @@ namespace Xabbo.Core
             Data = new LegacyData();
             SecondsToExpiration = -1;
             Usage = FurniUsage.None;
-            UnknownStringA = string.Empty;
+            StaticClass = string.Empty;
         }
 
         public FloorItem(IFloorItem item)
@@ -44,17 +44,12 @@ namespace Xabbo.Core
             Direction = item.Direction;
             Height = item.Height;
             Extra = item.Extra;
-            // TODO Deep copy of item data
-            Data = item.Data;
+            Data = ItemData.Clone(item.Data);
             SecondsToExpiration = item.SecondsToExpiration;
             Usage = item.Usage;
             OwnerId = item.OwnerId;
             OwnerName = item.OwnerName;
-
-            if (item is FloorItem floorItem)
-                UnknownStringA = floorItem.UnknownStringA;
-            else
-                UnknownStringA = string.Empty;
+            StaticClass = item.StaticClass;
         }
 
         protected FloorItem(IReadOnlyPacket packet, bool readName)
@@ -71,16 +66,20 @@ namespace Xabbo.Core
             // - consumable state e.g. cabbage 0: full, 1: partly eaten, 2: mostly eaten
             // - linked teleport id
 
-            Data = StuffData.Parse(packet);
+            Data = ItemData.Parse(packet);
 
             SecondsToExpiration = packet.ReadInt();
             Usage = (FurniUsage)packet.ReadInt();
             OwnerId = packet.ReadLegacyLong();
 
-            if (Kind < 0) // ? idk
-                UnknownStringA = packet.ReadString();
+            if (Kind < 0)
+            {
+                StaticClass = packet.ReadString();
+            }
             else
-                UnknownStringA = string.Empty;
+            {
+                StaticClass = string.Empty;
+            }
 
             if (readName && packet.CanReadString())
                 OwnerName = packet.ReadString();
@@ -107,7 +106,7 @@ namespace Xabbo.Core
                 .WriteInt((int)Usage)
                 .WriteLegacyLong(OwnerId);
 
-            if (Kind < 0) packet.WriteString(UnknownStringA);
+            if (Kind < 0) packet.WriteString(StaticClass);
             if (writeOwnerName) packet.WriteString(OwnerName);
         }
 

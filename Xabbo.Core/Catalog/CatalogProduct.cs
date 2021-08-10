@@ -52,5 +52,35 @@ namespace Xabbo.Core
                 }
             }
         }
+
+        public void Compose(IPacket packet)
+        {
+            switch (packet.Protocol)
+            {
+                case ClientType.Flash: packet.WriteString(Type.ToShortString()); break;
+                case ClientType.Unity: packet.WriteShort(Type.GetValue()); break;
+                default: throw new Exception($"Unknown client protocol: {packet.Protocol}.");
+            }
+
+            if (Type == ItemType.Badge)
+            {
+                packet.WriteString(Variant);
+            }
+            else
+            {
+                packet
+                    .WriteInt(Kind)
+                    .WriteString(Variant)
+                    .WriteInt(Count)
+                    .WriteBool(IsLimited);
+
+                if (IsLimited)
+                {
+                    packet
+                        .WriteInt(LimitedTotal)
+                        .WriteInt(LimitedRemaining);
+                }
+            }
+        }
     }
 }

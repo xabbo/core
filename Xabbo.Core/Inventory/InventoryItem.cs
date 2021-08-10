@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Collections.Generic;
 using Xabbo.Messages;
 
 namespace Xabbo.Core
@@ -11,17 +11,17 @@ namespace Xabbo.Core
         public long Id { get; set; }
         public int Kind { get; set; }
         public FurniCategory Category { get; set; }
-        public StuffData Data { get; set; }
+        public ItemData Data { get; set; }
         IItemData IInventoryItem.Data => Data;
-        public bool _Bool1 { get; set; }
+        public bool IsRecyclable { get; set; }
         public bool IsTradeable { get; set; }
         public bool IsGroupable { get; set; }
-        public bool IsSellable { get; set; } // ?
+        public bool IsSellable { get; set; }
         public int SecondsToExpiration { get; set; }
         public bool HasRentPeriodStarted { get; set; }
         public long RoomId { get; set; }
-        public string _String1 { get; set; }
-        public string _String2 { get; set; }
+        public short _Short1 { get; set; }
+        public string SlotId { get; set; }
         public int _Int3 { get; set; }
 
         public string _String3 { get; set; }
@@ -35,9 +35,20 @@ namespace Xabbo.Core
         {
             Data = new LegacyData();
 
-            _String1 =
-            _String2 =
+            SlotId =
             _String3 = string.Empty;
+        }
+
+        public InventoryItem(IInventoryItem item)
+        {
+            Type = item.Type;
+            Kind = item.Kind;
+
+            Id = item.Id;
+            ItemId = item.ItemId;
+            Category = item.Category;
+            Data = (ItemData)item.Data; // TODO Deep copy data
+
         }
 
         protected InventoryItem(IReadOnlyPacket packet)
@@ -57,8 +68,8 @@ namespace Xabbo.Core
             Id = packet.ReadLegacyLong();
             Kind = packet.ReadInt();
             Category = (FurniCategory)packet.ReadInt();
-            Data = StuffData.Parse(packet);
-            _Bool1 = packet.ReadBool();
+            Data = ItemData.Parse(packet);
+            IsRecyclable = packet.ReadBool();
             IsTradeable = packet.ReadBool();
             IsGroupable = packet.ReadBool();
             IsSellable = packet.ReadBool();
@@ -69,8 +80,8 @@ namespace Xabbo.Core
             if (packet.Protocol == ClientType.Unity)
             {
                 // - Seems to be consistent
-                _String1 = packet.ReadString(); // string ""
-                _String2 = packet.ReadString(); // string "r" / "s"
+                _Short1 = packet.ReadShort(); // ?
+                SlotId = packet.ReadString(); // string "r" / "s"
                 _Int3 = packet.ReadInt(); // int 1187551480
             }
 
@@ -78,7 +89,7 @@ namespace Xabbo.Core
             {
                 if (packet.Protocol == ClientType.Flash)
                 {
-                    _String2 = packet.ReadString();
+                    SlotId = packet.ReadString();
                     Extra = packet.ReadInt();
                 }
                 else
@@ -157,7 +168,7 @@ namespace Xabbo.Core
 
             if (packet.Protocol == ClientType.Flash)
             {
-                packet.WriteString(Type.ToShortString());
+                packet.WriteString(Type.ToShortString().ToUpper());
             }
             else
             {
@@ -169,7 +180,7 @@ namespace Xabbo.Core
                 .WriteInt(Kind)
                 .WriteInt((int)Category)
                 .Write(Data)
-                .WriteBool(_Bool1)
+                .WriteBool(IsRecyclable)
                 .WriteBool(IsTradeable)
                 .WriteBool(IsGroupable)
                 .WriteBool(IsSellable)
@@ -179,10 +190,9 @@ namespace Xabbo.Core
 
             if (packet.Protocol == ClientType.Unity)
             {
-                // - Seems to be consistent
                 packet
-                    .WriteString(_String1)
-                    .WriteString(_String2)
+                    .WriteShort(_Short1)
+                    .WriteString(SlotId)
                     .WriteInt(_Int3);
             }
 
@@ -191,7 +201,7 @@ namespace Xabbo.Core
                 if (packet.Protocol == ClientType.Flash)
                 {
                     packet
-                        .WriteString(_String2)
+                        .WriteString(SlotId)
                         .WriteLegacyLong(Extra);
                 }
                 else
@@ -205,9 +215,15 @@ namespace Xabbo.Core
             }
         }
 
-        public static InventoryItem Parse(IReadOnlyPacket packet)
+        public static InventoryItem Parse(IReadOnlyPacket packet) => new InventoryItem(packet);
+
+        public static IEnumerable<InventoryItem> ParseMany(IReadOnlyPacket packet)
         {
-            return new InventoryItem(packet);
+            short n = packet.ReadLegacyShort();
+            for (int i = 0; i < n; i++)
+            {
+                yield return Parse(packet);
+            }
         }
 
         public override string ToString() => $"[{Id}:{Type.ToShortString()}{Kind}]";

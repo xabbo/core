@@ -18,6 +18,10 @@ namespace Xabbo.Core
         /// </summary>
         IItemData Data { get; }
         /// <summary>
+        /// Gets if the inventory item is recyclable.
+        /// </summary>
+        bool IsRecyclable { get; }
+        /// <summary>
         /// Gets if the inventory item is groupable.
         /// </summary>
         bool IsGroupable { get; }
@@ -41,6 +45,7 @@ namespace Xabbo.Core
         /// Gets the room ID that the inventory item is in.
         /// </summary>
         long RoomId { get; }
+        string SlotId { get; }
         /// <summary>
         /// Gets the extra state of the inventory item which is used for
         /// consumable state, linked teleporter ID, etc.

@@ -13,8 +13,8 @@ namespace Xabbo.Core
         public Gender Gender { get; set; }
         public long OwnerId { get; set; }
         public string OwnerName { get; set; }
-        public List<short> Data { get; set; }
-        IReadOnlyList<short> IBot.Data => Data;
+        public List<short> Skills { get; set; }
+        IReadOnlyList<short> IBot.Data => Skills;
 
         public Bot(EntityType type, long id, int index)
             : base(type, id, index)
@@ -28,7 +28,7 @@ namespace Xabbo.Core
             Gender = Gender.Unisex;
             OwnerId = -1;
             OwnerName = string.Empty;
-            Data = new List<short>();
+            Skills = new List<short>();
         }
 
         public Bot(EntityType type, long id, int index, IReadOnlyPacket packet)
@@ -43,7 +43,7 @@ namespace Xabbo.Core
                 short n = packet.ReadLegacyShort();
                 for (int i = 0; i < n; i++)
                 {
-                    Data.Add(packet.ReadShort());
+                    Skills.Add(packet.ReadShort());
                 }
             }
         }
@@ -59,8 +59,8 @@ namespace Xabbo.Core
                     .WriteLegacyLong(OwnerId)
                     .WriteString(OwnerName);
 
-                packet.WriteLegacyShort((short)Data.Count);
-                foreach (short value in Data)
+                packet.WriteLegacyShort((short)Skills.Count);
+                foreach (short value in Skills)
                 {
                     packet.WriteShort(value);
                 }

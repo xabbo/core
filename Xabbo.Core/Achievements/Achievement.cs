@@ -2,90 +2,88 @@
 
 using Xabbo.Messages;
 
-/*
-	Achievement {
-		int achievementId
-		int level // level 0 must start at 1
-		string string1
-		int baseProgress
-		int maxProgress = max(1, readInt())
-			get() => maxProgress - baseProgress;
-		int int3
-		int int4
-		int currentProgress
-			get() => currentProgress - baseProgress;
-		bool bool1 // Maxed?
-		string category
-		string string2
-		int maxLevel
-		int int7
-		
-		local bool ? => level > 1 || bool1;
-	}
-*/
-
 namespace Xabbo.Core
 {
+    /*
+        int achievementId
+        int level
+        string badgeId
+        int scoreAtStartOfLevel
+        int scoreLimit
+          -> max(1, value) - scoreAtStartOfLevel
+        int levelRewardPoints
+        int levelRewardPointType
+        int currentPoints
+          -> value - scoreAtStartOfLevel
+        bool finalLevel
+        string category
+        string subCategory
+        int levelCount
+        int displayMethod
+        short state
+
+        firstLevelAchieved = level > 1 || finalLevel
+     */
+
     public class Achievement : IAchievement, IComposable
     {
         public int Id { get; set; }
         public int Level { get; set; }
-        public string BadgeName { get; set; }
+        public string BadgeId { get; set; }
         public int BaseProgress { get; set; }
         public int MaxProgress { get; set; }
-        public int Int5 { get; set; }
-        public int Int6 { get; set; }
+        public int LevelRewardPoints { get; set; }
+        public int LevelRewardPointType { get; set; }
         public int CurrentProgress { get; set; }
-        public bool IsCompleted { get; set; }
+        public bool IsComplete { get; set; }
         public string Category { get; set; }
-        public string String3 { get; set; }
+        public string Subcategory { get; set; }
         public int MaxLevel { get; set; }
-        public int Int9 { get; set; }
-        public short _Short1 { get; set; }
+        public int DisplayMethod { get; set; }
+        public short State { get; set; }
 
         public Achievement()
         {
-            BadgeName = string.Empty;
+            BadgeId = string.Empty;
             Category = string.Empty;
-            String3 = string.Empty;
+            Subcategory = string.Empty;
         }
 
         protected Achievement(IReadOnlyPacket packet)
         {
             Id = packet.ReadInt();
             Level = packet.ReadInt();
-            BadgeName = packet.ReadString();
+            BadgeId = packet.ReadString();
             BaseProgress = packet.ReadInt();
             MaxProgress = packet.ReadInt();
-            Int5 = packet.ReadInt();
-            Int6 = packet.ReadInt();
+            LevelRewardPoints = packet.ReadInt();
+            LevelRewardPointType = packet.ReadInt();
             CurrentProgress = packet.ReadInt();
-            IsCompleted = packet.ReadBool();
+            IsComplete = packet.ReadBool();
             Category = packet.ReadString();
-            String3 = packet.ReadString();
+            Subcategory = packet.ReadString();
             MaxLevel = packet.ReadInt();
-            Int9 = packet.ReadInt();
-            _Short1 = packet.ReadShort();
+            DisplayMethod = packet.ReadInt();
+            State = packet.ReadShort();
         }
 
         public void Compose(IPacket packet)
         {
-            packet.WriteValues(
-                Id,
-                Level,
-                BadgeName,
-                BaseProgress,
-                MaxProgress,
-                Int5,
-                Int6,
-                CurrentProgress,
-                IsCompleted,
-                Category,
-                String3,
-                MaxLevel,
-                Int9,
-                _Short1
-            );
+            packet
+                .WriteInt(Id)
+                .WriteInt(Level)
+                .WriteString(BadgeId)
+                .WriteInt(BaseProgress)
+                .WriteInt(MaxProgress)
+                .WriteInt(LevelRewardPoints)
+                .WriteInt(LevelRewardPointType)
+                .WriteInt(CurrentProgress)
+                .WriteBool(IsComplete)
+                .WriteString(Category)
+                .WriteString(Subcategory)
+                .WriteInt(MaxLevel)
+                .WriteInt(DisplayMethod)
+                .WriteShort(State);
         }
 
         public static Achievement Parse(IReadOnlyPacket packet) => new Achievement(packet);

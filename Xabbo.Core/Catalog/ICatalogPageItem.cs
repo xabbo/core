@@ -1,8 +1,10 @@
 ﻿using System;
 
+using Xabbo.Messages;
+
 namespace Xabbo.Core
 {
-    public interface ICatalogPageData
+    public interface ICatalogPageItem : IComposable
     {
         int Position { get; }
         int Type { get; }

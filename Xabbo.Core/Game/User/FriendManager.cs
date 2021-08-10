@@ -207,8 +207,8 @@ namespace Xabbo.Core.Game
             short n = e.Packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
             {
-                e.Packet.ReadInt(); // -1 = offline, 0 = online
-                e.Packet.ReadString(); // group name
+                e.Packet.ReadInt(); // category id : -1 = offline, 0 = online
+                e.Packet.ReadString(); // category name
             }
 
             n = e.Packet.ReadLegacyShort();
@@ -233,7 +233,7 @@ namespace Xabbo.Core.Game
             }
         }
 
-        [InterceptIn(nameof(Incoming.MessengerNewConsoleMessage))] // @Legacy ReceivePrivateMessage
+        [InterceptIn(nameof(Incoming.MessengerNewConsoleMessage))]
         protected virtual void OnReceivePrivateMessage(InterceptArgs e)
         {
             long id = e.Packet.ReadLong();
@@ -244,7 +244,8 @@ namespace Xabbo.Core.Game
             }
 
             string message = e.Packet.ReadString();
-            // int:? [string:?]
+            // int secondsSinceSent
+            // string extraData
 
             OnMessageReceived(friend, message);
         }

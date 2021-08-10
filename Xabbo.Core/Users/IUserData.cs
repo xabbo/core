@@ -1,10 +1,11 @@
 ﻿using System;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core
 {
     /// <summary>
-    /// The user's own data that is sent upon requesting user data.
+    /// The current user's information that is sent upon requesting user data.
     /// </summary>
     public interface IUserData : IComposable
     {
@@ -13,10 +14,13 @@ namespace Xabbo.Core
         string Figure { get; }
         Gender Gender { get; }
         string Motto { get; }
+        string RealName { get; set; }
+        bool DirectMail { get; set; }
         int TotalRespects { get; }
         int RespectsLeft { get; }
         int ScratchesLeft { get; }
-        string LastLogin { get; } // @Cleanup LastAccess ?
+        bool StreamPublishingAllowed { get; }
+        string LastAccessDate { get; }
         bool IsNameChangeable { get; }
         bool IsSafetyLocked { get; }
     }

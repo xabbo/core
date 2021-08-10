@@ -9,9 +9,10 @@ namespace Xabbo.Core
         string GroupName { get; }
         long HomeRoomId { get; }
         string BadgeCode { get; }
-        int TotalMatches { get; }
-        int ResultsPerPage { get; }
-        int CurrentPage { get; }
+        int TotalEntries { get; }
+        bool IsAllowedToManage { get; }
+        int PageSize { get; }
+        int PageIndex { get; }
         GroupMemberSearchType SearchType { get; }
         string Filter { get; }
     }

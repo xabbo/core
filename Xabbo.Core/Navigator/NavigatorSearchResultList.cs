@@ -11,7 +11,7 @@ namespace Xabbo.Core
         public string Category { get; set; }
         public string Text { get; set; }
         public int ActionAllowed { get; set; }
-        public bool BoolA { get; set; }
+        public bool ForceClosed { get; set; }
         public int ViewMode { get; set; }
 
         public NavigatorSearchResultList()
@@ -25,7 +25,7 @@ namespace Xabbo.Core
             Category = packet.ReadString();
             Text = packet.ReadString();
             ActionAllowed = packet.ReadInt();
-            BoolA = packet.ReadBool();
+            ForceClosed = packet.ReadBool();
             ViewMode = packet.ReadInt();
             short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)

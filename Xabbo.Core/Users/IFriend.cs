@@ -35,15 +35,18 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the category in the friend list that the friend belongs to.
         /// </summary>
-        long Category { get; }
+        long CategoryId { get; }
         /// <summary>
         /// Gets the motto of the friend.
         /// </summary>
         string Motto { get; }
+        string RealName { get; }
+        string FacebookId { get; }
         /// <summary>
         /// Gets whether the friend is accepting offline messages or not.
         /// </summary>
         bool IsAcceptingOfflineMessages { get; }
+        bool IsVipMember { get; }
         bool IsPocketHabboUser { get; }
         /// <summary>
         /// Gets the relation of the friend.

@@ -8,11 +8,16 @@ namespace Xabbo.Core
 {
     public class CatalogPageNode : ICatalogPageNode
     {
+        public Catalog Catalog { get; set; }
+        ICatalog ICatalogPageNode.Catalog => Catalog;
+        public CatalogPageNode Parent { get; set; }
+        ICatalogPageNode ICatalogPageNode.Parent => Parent;
+
         public bool IsVisible { get; set; }
         public int Icon { get; set; }
         public int Id { get; set; }
         public string Name { get; set; }
-        public string Text { get; set; }
+        public string Title { get; set; }
         public List<int> OfferIds { get; set; } = new List<int>();
         IReadOnlyList<int> ICatalogPageNode.OfferIds => OfferIds;
         public List<CatalogPageNode> Children { get; set; } = new List<CatalogPageNode>();
@@ -21,19 +26,20 @@ namespace Xabbo.Core
         public CatalogPageNode()
         {
             Name =
-            Text = string.Empty;
+            Title = string.Empty;
 
             OfferIds = new List<int>();
             Children = new List<CatalogPageNode>();
         }
 
-        protected CatalogPageNode(IReadOnlyPacket packet)
+        protected internal CatalogPageNode(IReadOnlyPacket packet,
+            Catalog? catalog = null, CatalogPageNode? parent = null)
         {
             IsVisible = packet.ReadBool();
             Icon = packet.ReadInt();
             Id = packet.ReadInt();
             Name = packet.ReadString();
-            Text = packet.ReadString();
+            Title = packet.ReadString();
 
             short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
@@ -41,10 +47,21 @@ namespace Xabbo.Core
 
             n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
-                Children.Add(Parse(packet));
+                Children.Add(new CatalogPageNode(packet, catalog, this));
         }
 
-        public IEnumerable<CatalogPageNode> EnumerateDescendants()
+        public void Compose(IPacket packet)
+        {
+            packet
+                .WriteBool(IsVisible)
+                .WriteInt(Icon)
+                .WriteInt(Id)
+                .WriteString(Name)
+                .WriteString(Title)
+                .WriteValues(OfferIds, Children);
+        }
+
+        public IEnumerable<CatalogPageNode> EnumerateDescendantsAndSelf()
         {
             var queue = new Queue<CatalogPageNode>(new[] { this });
 
@@ -56,28 +73,21 @@ namespace Xabbo.Core
                     queue.Enqueue(child);
             }
         }
-        IEnumerable<ICatalogPageNode> ICatalogPageNode.EnumerateDescendants() => EnumerateDescendants();
+        IEnumerable<ICatalogPageNode> ICatalogPageNode.EnumerateDescendantsAndSelf() => EnumerateDescendantsAndSelf();
 
-        public CatalogPageNode Find(Predicate<CatalogPageNode> predicate) => EnumerateDescendants().First(x => predicate(x));
-        ICatalogPageNode ICatalogPageNode.Find(Predicate<ICatalogPageNode> predicate) => Find(predicate);
+        public CatalogPageNode FindNode(Func<CatalogPageNode, bool> predicate) => EnumerateDescendantsAndSelf().First(x => predicate(x));
+        ICatalogPageNode ICatalogPageNode.FindNode(Func<ICatalogPageNode, bool> predicate) => FindNode(predicate);
 
-        public CatalogPageNode Find(string text) =>
-            Find(node => string.Equals(node.Text, text, StringComparison.OrdinalIgnoreCase));
-        ICatalogPageNode ICatalogPageNode.Find(string text) => Find(text);
-
-        public CatalogPageNode Find(int? id = null, string? name = null, string? text = null)
+        public CatalogPageNode FindNode(string? title = null, string? name = null, int? id = null)
         {
-            return Find(node =>
+            return FindNode(node =>
                 (id is null || node.Id == id) &&
                 (name is null || string.Equals(node.Name, name, StringComparison.OrdinalIgnoreCase)) &&
-                (text is null || string.Equals(node.Text, text, StringComparison.OrdinalIgnoreCase))
+                (title is null || string.Equals(node.Title, title, StringComparison.OrdinalIgnoreCase))
             );
         }
-        ICatalogPageNode ICatalogPageNode.Find(int? id, string? name, string? text) => Find(id, name, text);
+        ICatalogPageNode ICatalogPageNode.FindNode(string? title, string? name, int? id) => FindNode(title, name, id);
 
-        public static CatalogPageNode Parse(IReadOnlyPacket packet)
-        {
-            return new CatalogPageNode(packet);
-        }
+        public static CatalogPageNode Parse(IReadOnlyPacket packet) => new CatalogPageNode(packet);
     }
 }

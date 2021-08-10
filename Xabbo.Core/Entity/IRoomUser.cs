@@ -6,9 +6,11 @@ namespace Xabbo.Core
     {
         Gender Gender { get; }
         long GroupId { get; }
+        int GroupStatus { get; }
         string GroupName { get; }
         string FigureExtra { get; }
         int AchievementScore { get; }
+        bool IsModerator { get; }
 
         int RightsLevel { get; }
         bool HasRights { get; }

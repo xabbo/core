@@ -13,10 +13,10 @@ namespace Xabbo.Core
         public string GroupName { get; set; } = string.Empty;
         public long HomeRoomId { get; set; }
         public string BadgeCode { get; set; } = string.Empty;
-        public int TotalMatches { get; set; }
-        public bool Bool1 { get; set; }
-        public int ResultsPerPage { get; set; }
-        public int CurrentPage { get; set; }
+        public int TotalEntries { get; set; }
+        public bool IsAllowedToManage { get; set; }
+        public int PageSize { get; set; }
+        public int PageIndex { get; set; }
         public GroupMemberSearchType SearchType { get; set; }
         public string Filter { get; set; } = string.Empty;
 
@@ -31,13 +31,13 @@ namespace Xabbo.Core
             GroupName = packet.ReadString();
             HomeRoomId = packet.ReadLegacyLong();
             BadgeCode = packet.ReadString();
-            TotalMatches = packet.ReadInt();
+            TotalEntries = packet.ReadInt();
             short n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
                 Add(GroupMember.Parse(packet));
-            Bool1 = packet.ReadBool();
-            ResultsPerPage = packet.ReadInt();
-            CurrentPage = packet.ReadInt();
+            IsAllowedToManage = packet.ReadBool();
+            PageSize = packet.ReadInt();
+            PageIndex = packet.ReadInt();
             SearchType = (GroupMemberSearchType)packet.ReadInt();
             Filter = packet.ReadString();
         }

@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Xabbo.Messages;
+
 namespace Xabbo.Core
 {
-    public interface ICatalogOffer
+    public interface ICatalogOffer : IComposable
     {
+        ICatalogPage? Page { get; }
+
         int Id { get; }
         string FurniLine { get; }
         bool IsRentable { get; }

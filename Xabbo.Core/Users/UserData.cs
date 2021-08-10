@@ -13,24 +13,24 @@ namespace Xabbo.Core
         public string Figure { get; set; }
         public Gender Gender { get; set; }
         public string Motto { get; set; }
-        public string String4 { get; set; } // RealName @Sulakore
-        public bool Bool1 { get; set; } // DirectMail @Sulakore
+        public string RealName { get; set; }
+        public bool DirectMail { get; set; }
         public int TotalRespects { get; set; }
         public int RespectsLeft { get; set; }
         public int ScratchesLeft { get; set; }
-        public bool Bool2 { get; set; } // StreamPublishingAllowed @Sulakore
-        public string LastLogin { get; set; }
+        public bool StreamPublishingAllowed { get; set; }
+        public string LastAccessDate { get; set; }
         public bool IsNameChangeable { get; set; }
         public bool IsSafetyLocked { get; set; }
-        public bool Bool3 { get; set; }
+        public bool _Bool5 { get; set; }
 
         public UserData()
         {
             Name =
             Figure =
             Motto =
-            String4 =
-            LastLogin = string.Empty;
+            RealName =
+            LastAccessDate = string.Empty;
 
             Gender = Gender.Unisex;
         }
@@ -42,16 +42,16 @@ namespace Xabbo.Core
             Figure = packet.ReadString();
             Gender = H.ToGender(packet.ReadString());
             Motto = packet.ReadString();
-            String4 = packet.ReadString();
-            Bool1 = packet.ReadBool();
+            RealName = packet.ReadString();
+            DirectMail = packet.ReadBool();
             TotalRespects = packet.ReadInt();
             RespectsLeft = packet.ReadInt();
             ScratchesLeft = packet.ReadInt();
-            Bool2 = packet.ReadBool();
-            LastLogin = packet.ReadString();
+            StreamPublishingAllowed = packet.ReadBool();
+            LastAccessDate = packet.ReadString();
             IsNameChangeable = packet.ReadBool();
             IsSafetyLocked = packet.ReadBool();
-            Bool3 = packet.ReadBool();
+            _Bool5 = packet.ReadBool();
         }
 
         public void Compose(IPacket packet) => packet.WriteValues(
@@ -60,15 +60,16 @@ namespace Xabbo.Core
             Figure,
             Gender.ToShortString(),
             Motto,
-            String4,
-            Bool1,
+            RealName,
+            DirectMail,
             TotalRespects,
             RespectsLeft,
             ScratchesLeft,
-            Bool2,
-            LastLogin,
+            StreamPublishingAllowed,
+            LastAccessDate,
             IsNameChangeable,
-            IsSafetyLocked
+            IsSafetyLocked,
+            _Bool5
         );
 
         public static UserData Parse(IReadOnlyPacket packet) => new UserData(packet);

@@ -14,12 +14,12 @@ namespace Xabbo.Core
         public bool IsOnline { get; set; }
         public bool CanFollow { get; set; }
         public string FigureString { get; set; } = string.Empty;
-        public long Category { get; set; }
+        public long CategoryId { get; set; }
         public string Motto { get; set; } = string.Empty;
         public string RealName { get; set; } = string.Empty;
-        public string String5 { get; set; } = string.Empty;
+        public string FacebookId { get; set; } = string.Empty;
         public bool IsAcceptingOfflineMessages { get; set; }
-        public bool Bool4 { get; set; }
+        public bool IsVipMember { get; set; }
         public bool IsPocketHabboUser { get; set; }
         public Relation Relation { get; set; }
 
@@ -33,23 +33,23 @@ namespace Xabbo.Core
             IsOnline = packet.ReadBool();
             CanFollow = packet.ReadBool();
             FigureString = packet.ReadString();
-            Category = packet.ReadLegacyLong();
+            CategoryId = packet.ReadLegacyLong();
             Motto = packet.ReadString();
 
             if (packet.Protocol == ClientType.Flash)
             {
                 RealName = packet.ReadString();
-                String5 = packet.ReadString();
+                FacebookId = packet.ReadString();
             }
 
             IsAcceptingOfflineMessages = packet.ReadBool();
-            Bool4 = packet.ReadBool();
+            IsVipMember = packet.ReadBool();
             IsPocketHabboUser = packet.ReadBool();
 
             if (packet.Protocol == ClientType.Unity)
             {
                 RealName = packet.ReadString();
-                String5 = packet.ReadString();
+                FacebookId = packet.ReadString();
             }
 
             Relation = (Relation)packet.ReadShort();
@@ -62,12 +62,12 @@ namespace Xabbo.Core
             .WriteBool(IsOnline)
             .WriteBool(CanFollow)
             .WriteString(FigureString)
-            .WriteLegacyLong(Category)
+            .WriteLegacyLong(CategoryId)
             .WriteString(Motto)
             .WriteString(RealName)
-            .WriteString(String5)
+            .WriteString(FacebookId)
             .WriteBool(IsAcceptingOfflineMessages)
-            .WriteBool(Bool4)
+            .WriteBool(IsVipMember)
             .WriteBool(IsPocketHabboUser)
             .WriteShort((short)Relation);
 

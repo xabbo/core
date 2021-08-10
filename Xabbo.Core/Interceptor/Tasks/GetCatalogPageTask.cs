@@ -10,16 +10,16 @@ namespace Xabbo.Core.Tasks
     public class GetCatalogPageTask : InterceptorTask<ICatalogPage>
     {
         private readonly int _pageId;
-        private readonly string _mode;
+        private readonly string _catalogType;
 
-        public GetCatalogPageTask(IInterceptor interceptor, int pageId, string mode)
+        public GetCatalogPageTask(IInterceptor interceptor, int pageId, string catalogType)
             : base(interceptor)
         {
             _pageId = pageId;
-            _mode = mode;
+            _catalogType = catalogType;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetCatalogPage, _pageId, -1, _mode);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetCatalogPage, _pageId, -1, _catalogType);
 
         [InterceptIn(nameof(Incoming.CatalogPage))]
         protected void HandleCatalogPage(InterceptArgs e)
@@ -28,7 +28,7 @@ namespace Xabbo.Core.Tasks
             {
                 var catalogPage = CatalogPage.Parse(e.Packet);
                 if (catalogPage.Id == _pageId &&
-                    catalogPage.Mode == _mode)
+                    catalogPage.CatalogType == _catalogType)
                 {
                     if (SetResult(catalogPage))
                         e.Block();

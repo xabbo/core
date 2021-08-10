@@ -32,7 +32,7 @@ namespace Xabbo.Core.Tasks
             {
                 var groupMembers = GroupMembers.Parse(e.Packet);
                 if (groupMembers.GroupId == _groupId &&
-                    groupMembers.CurrentPage == _page &&
+                    groupMembers.PageIndex == _page &&
                     groupMembers.Filter == _filter &&
                     groupMembers.SearchType == _searchType)
                 {

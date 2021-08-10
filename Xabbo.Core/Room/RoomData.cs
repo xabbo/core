@@ -17,8 +17,8 @@ namespace Xabbo.Core
         public ChatSettings ChatSettings { get; set; }
         IChatSettings IRoomData.ChatSettings => ChatSettings;
 
-        public int UnknownInt1 { get; set; }
-        public int UnknownInt2 { get; set; }
+        public int _Int6 { get; set; }
+        public int _Int7 { get; set; }
 
         public RoomData()
         {
@@ -43,8 +43,8 @@ namespace Xabbo.Core
 
             if (packet.Protocol == ClientType.Unity)
             {
-                UnknownInt1 = packet.ReadInt();
-                UnknownInt2 = packet.ReadInt();
+                _Int6 = packet.ReadInt();
+                _Int7 = packet.ReadInt();
             }
         }
 

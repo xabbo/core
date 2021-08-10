@@ -12,7 +12,7 @@ namespace Xabbo.Core
     {
         private readonly ConcurrentDictionary<int, Achievement> _dict;
 
-        public string String1 { get; set; }
+        public string DefaultCategory { get; set; }
 
         public int Count => _dict.Count;
         public IEnumerator<Achievement> GetEnumerator() => _dict.Select(x => x.Value).GetEnumerator();
@@ -30,7 +30,7 @@ namespace Xabbo.Core
         {
             _dict = new ConcurrentDictionary<int, Achievement>();
 
-            String1 = string.Empty;
+            DefaultCategory = string.Empty;
         }
 
         protected Achievements(IReadOnlyPacket packet)
@@ -40,7 +40,7 @@ namespace Xabbo.Core
             for (int i = 0; i < n; i++)
                 Update(Achievement.Parse(packet));
 
-            String1 = packet.ReadString();
+            DefaultCategory = packet.ReadString();
         }
 
         public void Update(Achievement achievement)

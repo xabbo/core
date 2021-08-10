@@ -46,5 +46,6 @@ namespace Xabbo.Core
         /// Gets the data of the floor item.
         /// </summary>
         IItemData Data { get; }
+        string StaticClass { get; }
     }
 }

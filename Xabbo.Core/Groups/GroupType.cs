@@ -6,6 +6,7 @@ namespace Xabbo.Core
     {
         Open = 0,
         Exclusive = 1,
-        Closed = 2
+        Closed = 2,
+        Large = 3
     }
 }

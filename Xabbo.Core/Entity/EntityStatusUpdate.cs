@@ -203,6 +203,15 @@ namespace Xabbo.Core
             Direction = 0;
         }
 
+        public EntityStatusUpdate(IEntityStatusUpdate original)
+        {
+            Index = original.Index;
+            Location = original.Location;
+            HeadDirection = original.HeadDirection;
+            Direction = original.Direction;
+            Status = original.Status;
+        }
+
         private EntityStatusUpdate(IReadOnlyPacket packet)
         {
             Index = packet.ReadInt();
@@ -256,7 +265,7 @@ namespace Xabbo.Core
             var sb = new StringBuilder();
             foreach (var pair in fragments)
             {
-                if (sb.Length > 0) sb.Append('/');
+                sb.Append('/');
                 sb.Append(pair.Key);
                 for (int i = 0; i < pair.Value.Length; i++)
                 {
@@ -264,6 +273,7 @@ namespace Xabbo.Core
                     sb.Append(pair.Value[i]);
                 }
             }
+            sb.Append('/');
             return sb.ToString();
         }
 
@@ -297,17 +307,14 @@ namespace Xabbo.Core
         }
 
         public static EntityStatusUpdate Parse(IReadOnlyPacket packet) => new EntityStatusUpdate(packet);
-        public static EntityStatusUpdate[] ParseAll(IReadOnlyPacket packet)
+        public static IEnumerable<EntityStatusUpdate> ParseMany(IReadOnlyPacket packet)
         {
             short n = packet.ReadLegacyShort();
 
-            EntityStatusUpdate[] entityUpdates = new EntityStatusUpdate[n];
             for (int i = 0; i < n; i++)
             {
-                entityUpdates[i] = Parse(packet);
+                yield return Parse(packet);
             }
-
-            return entityUpdates;
         }
 
         public static void ComposeAll(IPacket packet, IEnumerable<IEntityStatusUpdate> updates)
