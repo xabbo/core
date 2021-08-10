@@ -13,7 +13,7 @@ namespace Xabbo.Core.Game
         private Task<IUserData> _taskUserData;
         private TaskCompletionSource<IUserData>? _tcsUserData;
 
-        private bool _isLoadingCredits;
+        private bool _isLoadingProfile, _isLoadingCredits;
 
         public UserData? UserData { get; private set; }
         public int? HomeRoom { get; private set; }
@@ -70,7 +70,6 @@ namespace Xabbo.Core.Game
             Points = new ActivityPoints();
             Achievements = null;
 
-            _tcsUserData = null;
             _isLoadingCredits = false;
         }
 
@@ -82,14 +81,19 @@ namespace Xabbo.Core.Game
         }
 
         /// <summary>
-        /// Waits for the user data load, or returns the user's data instantly if it has already loaded.
+        /// Waits for the user data load, or returns the user's data immediately if it has already loaded.
         /// </summary>
         public Task<IUserData> GetUserDataAsync() => _taskUserData;
 
         [InterceptIn(nameof(Incoming.ClientLatencyPingResponse))]
         private async void HandleLatencyResponse(InterceptArgs e)
         {
-            if (UserData is null) await SendAsync(Out.InfoRetrieve);
+            if (UserData is null && !_isLoadingProfile)
+            {
+                _isLoadingProfile = true;
+                await SendAsync(Out.InfoRetrieve);
+            }
+
             if (Achievements is null) await SendAsync(Out.GetUserAchievements);
 
             if (Credits is null && !_isLoadingCredits)
@@ -100,14 +104,20 @@ namespace Xabbo.Core.Game
         }
 
         [InterceptIn(nameof(Incoming.UserObject))]
-        private void HandleUserData(InterceptArgs e)
+        private void HandleUserObject(InterceptArgs e)
         {
+            if (_isLoadingProfile)
+            {
+                e.Block();
+                _isLoadingProfile = false;
+            }
+
             UserData = UserData.Parse(e.Packet);
+
+            _taskUserData = Task.FromResult<IUserData>(UserData);
 
             _tcsUserData?.TrySetResult(UserData);
             _tcsUserData = null;
-
-            _taskUserData = Task.FromResult<IUserData>(UserData);
 
             OnLoadedUserData();
         }
