@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Core.Events;
-using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Xabbo.Core.Game
 {
+    /// <summary>
+    /// Manages the user's inventory.
+    /// </summary>
     public class InventoryManager : GameStateManager
     {
         private readonly ILogger _logger;
@@ -63,7 +66,7 @@ namespace Xabbo.Core.Game
         /// <summary>
         /// Returns the inventory immediately if it is available
         /// and has not been invalidated, otherwise attempts to retrieve it from the server.
-        /// Note that the user must be in a room in order to retrieve the inventory from the server.
+        /// Note that the user must be in a room to retrieve the inventory from the server.
         /// If the user is not in a room and a request to load the inventory is made, this method will time out.
         /// </summary>
         public async Task<IInventory> GetInventoryAsync(int timeout = XabboConst.DEFAULT_TIMEOUT,
@@ -121,8 +124,6 @@ namespace Xabbo.Core.Game
 
             InventoryFragment fragment = InventoryFragment.Parse(e.Packet);
 
-            _logger.LogTrace("Received inventory fragment {n} of {total}.", fragment.Index + 1, fragment.Total);
-
             if (fragment.Index == 0)
             {
                 _logger.LogTrace("Resetting inventory load state.");
@@ -144,6 +145,8 @@ namespace Xabbo.Core.Game
                 return;
             }
 
+            _logger.LogTrace("Received inventory fragment {n} of {total}.", fragment.Index + 1, fragment.Total);
+
             _currentPacketIndex++;
             _fragments.Add(fragment);
 
@@ -153,6 +156,7 @@ namespace Xabbo.Core.Game
 
                 _inventory ??= new Inventory();
                 _inventory.Clear();
+                _inventory.IsInvalidated = false;
 
                 foreach (InventoryItem item in _fragments.SelectMany(fragment => (ICollection<InventoryItem>)fragment))
                 {
