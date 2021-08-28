@@ -24,7 +24,8 @@ namespace Xabbo.Core
         /// <param name="name">The name of the catalog page.</param>
         /// <param name="id">The ID of the catalog page.</param>
         /// <returns>The first matching catalog page, or <c>null</c> if it was not found.</returns>
-        ICatalogPageNode? FindNode(string? title, string? name, int? id = null);
+        ICatalogPageNode? FindNode(string? title = null, string? name = null, int? id = null);
+
         /// <summary>
         /// Searches the catalog for a matching <see cref="ICatalogPageNode"/>.
         /// </summary>
