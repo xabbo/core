@@ -17,6 +17,8 @@ namespace Xabbo.Core
         bool IsController { get; }
         int ControlLevel { get; }
 
+        bool IsTrading { get; }
+
         Tile? MovingTo { get; }
 
         bool SittingOnFloor { get; }
