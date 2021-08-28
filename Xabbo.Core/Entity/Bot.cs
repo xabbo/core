@@ -55,7 +55,7 @@ namespace Xabbo.Core
             if (Type == EntityType.PrivateBot)
             {
                 packet
-                    .WriteString(Gender.ToShortString())
+                    .WriteString(Gender.ToShortString().ToLower())
                     .WriteLegacyLong(OwnerId)
                     .WriteString(OwnerName);
 

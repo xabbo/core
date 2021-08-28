@@ -45,7 +45,7 @@ namespace Xabbo.Core
             base.Compose(packet);
 
             packet
-                .WriteString(Gender.ToShortString())
+                .WriteString(Gender.ToShortString().ToLower())
                 .WriteLegacyLong(GroupId)
                 .WriteInt(GroupStatus)
                 .WriteString(GroupName)
