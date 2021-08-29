@@ -4,8 +4,8 @@
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>Xabbo.Core</RootNamespace>
     <AssemblyName>Xabbo.Core</AssemblyName>
-    <AssemblyVersion>0.9.0.0</AssemblyVersion>
-    <FileVersion>0.9.0.0</FileVersion>
+    <AssemblyVersion>0.9.1</AssemblyVersion>
+    <FileVersion>0.9.1</FileVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   
@@ -17,12 +17,6 @@
   <PropertyGroup>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName).xml</DocumentationFile>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Properties\**" />
-    <EmbeddedResource Remove="Properties\**" />
-    <None Remove="Properties\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Remove="Resources\figure_part_genders" />

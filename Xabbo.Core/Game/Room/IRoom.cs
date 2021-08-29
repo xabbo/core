@@ -166,6 +166,19 @@ namespace Xabbo.Core.Game
         /// </summary>
         IHeightmap Heightmap { get; }
 
+        /// <summary>
+        /// Gets if the walls are hidden.
+        /// </summary>
+        bool HideWalls { get; }
+        /// <summary>
+        /// Gets the wall thickness.
+        /// </summary>
+        Thickness WallThickness { get; }
+        /// <summary>
+        /// Gets the floor thickness.
+        /// </summary>
+        Thickness FloorThickness { get; }
+
         #region - Furni -
         /// <summary>
         /// Gets the furni in this room.

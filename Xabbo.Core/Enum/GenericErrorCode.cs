@@ -2,7 +2,7 @@
 
 namespace Xabbo.Core
 {
-    public enum ErrorCode
+    public enum GenericErrorCode
     {
         InvalidRoomPassword = -100002,
         Kicked = 4008

@@ -65,7 +65,7 @@ namespace Xabbo.Core
             packet.WriteLegacyShort((short)_list.Count);
             foreach (InventoryItem item in _list)
             {
-                packet.Write(item);
+                item.Compose(packet);
             }
         }
 

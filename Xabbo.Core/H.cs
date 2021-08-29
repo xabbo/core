@@ -5,9 +5,10 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
+using Xabbo.Core.Serialization;
 using Xabbo.Core.Web;
 
 using static Xabbo.Core.XabboConst;
@@ -16,6 +17,16 @@ namespace Xabbo.Core
 {
     public static class H
     {
+        private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            Converters =
+            {
+                new DateTimeConverter()
+            }
+        };
+
         private static readonly Regex regexAvatarValidator
                = new Regex(@"^[a-zA-Z0-9_\-=?!@:.,]{3,15}$", RegexOptions.Compiled);
 
@@ -70,8 +81,8 @@ namespace Xabbo.Core
             {
                 's' => ItemType.Floor,
                 'i' => ItemType.Wall,
-                'e' => ItemType.Effect,
                 'b' => ItemType.Badge,
+                'e' => ItemType.Effect,
                 'r' => ItemType.Bot,
                 _ => throw new Exception($"Unknown item type '{value}'")
             };
@@ -222,12 +233,12 @@ namespace Xabbo.Core
         #endregion
 
         #region - Web API -
-        public static string USER_AGENT = DEFAULT_USER_AGENT;
+        public static string UserAgent { get; set; } = DEFAULT_USER_AGENT;
 
         private static async Task<string> DownloadStringAsync(string url, string referer = "https://www.habbo.com/")
         {
             var req = WebRequest.CreateHttp(url);
-            req.UserAgent = USER_AGENT;
+            req.UserAgent = UserAgent;
             req.Referer = referer;
 
             using (var res = await req.GetResponseAsync().ConfigureAwait(false))
@@ -240,7 +251,7 @@ namespace Xabbo.Core
         private static async Task<byte[]> DownloadDataAsync(string url, string referer = "https://www.habbo.com/")
         {
             var req = WebRequest.CreateHttp(url);
-            req.UserAgent = USER_AGENT;
+            req.UserAgent = UserAgent;
 
             if (referer != null) req.Referer = referer;
 
@@ -271,7 +282,7 @@ namespace Xabbo.Core
         {
             string json = await DownloadStringAsync(API_USER_LOOKUP.Replace("$name", WebUtility.UrlEncode(name))).ConfigureAwait(false);
 
-            UserInfo? userInfo = JsonSerializer.Deserialize<UserInfo>(json);
+            UserInfo? userInfo = JsonSerializer.Deserialize<UserInfo>(json, _jsonSerializerOptions);
             if (userInfo?.UniqueId is null) return null;
 
             return userInfo;
@@ -281,7 +292,7 @@ namespace Xabbo.Core
         {
             string json = await DownloadStringAsync(API_USER_PROFILE.Replace("$uniqueId", uniqueId)).ConfigureAwait(false);
 
-            var userProfile = JsonSerializer.Deserialize<Web.UserProfile>(json);
+            var userProfile = JsonSerializer.Deserialize<Web.UserProfile>(json, _jsonSerializerOptions);
             if (userProfile?.UniqueId is null) return null;
 
             return userProfile;
@@ -301,7 +312,8 @@ namespace Xabbo.Core
         public static async Task<PhotoData> GetPhotoDataAsync(string id)
         {
             string json = await DownloadStringAsync(API_FURNI_EXTRADATA.Replace("$id", id)).ConfigureAwait(false);
-            return JsonSerializer.Deserialize<PhotoData>(json) ?? throw new FormatException("Failed to deserialize photo data.");
+            return JsonSerializer.Deserialize<PhotoData>(json, _jsonSerializerOptions)
+                ?? throw new FormatException("Failed to deserialize photo data.");
         }
 
         public static async Task<byte[]> DownloadPhotoAsync(string id)

@@ -63,6 +63,10 @@ namespace Xabbo.Core.Game
         public Heightmap Heightmap { get; set; } = null!;
         IHeightmap IRoom.Heightmap => Heightmap;
 
+        public bool HideWalls { get; set; }
+        public Thickness WallThickness { get; set; } = Thickness.Normal;
+        public Thickness FloorThickness { get; set; } = Thickness.Normal;
+
         IEnumerable<IFloorItem> IRoom.FloorItems => FloorItems.Select(x => x.Value);
         IEnumerable<IWallItem> IRoom.WallItems => WallItems.Select(x => x.Value);
         IEnumerable<IEntity> IRoom.Entities => Entities.Select(x => x.Value);

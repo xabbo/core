@@ -368,19 +368,19 @@ namespace Xabbo.Core.Game
         }
 
         /// <summary>
-        /// Invoked when a user's figure, motto or achievement score is updated.
+        /// Invoked when an entity's figure, gender, motto or achievement score is updated.
         /// </summary>
-        public event EventHandler<UserDataUpdatedEventArgs>? UserDataUpdated;
-        protected virtual void OnUserDataUpdated(IRoomUser user,
+        public event EventHandler<EntityDataUpdatedEventArgs>? EntityDataUpdated;
+        protected virtual void OnEntityDataUpdated(IEntity entity,
             string previousFigure, Gender previousGender,
             string previousMotto, int previousAchievementScore)
         {
             _logger.LogTrace(
-                "User data updated. ({userName} [{userId}:{userIndex}])",
-                user.Name, user.Id, user.Index
+                "Entity data updated. ({name} [{id}:{index}])",
+                entity.Name, entity.Id, entity.Index
             );
-            UserDataUpdated?.Invoke(this, new UserDataUpdatedEventArgs(
-                user, previousFigure, previousGender,
+            EntityDataUpdated?.Invoke(this, new EntityDataUpdatedEventArgs(
+                entity, previousFigure, previousGender,
                 previousMotto, previousAchievementScore
             ));
         }
@@ -609,14 +609,14 @@ namespace Xabbo.Core.Game
             {
                 if (furni.Type == ItemType.Floor)
                 {
-                    if (Interceptor.ClientType == ClientType.Unity)
+                    if (Interceptor.Client == ClientType.Unity)
                         Send(In.ActiveObjectRemove, furni.Id, false, -1L, 0);
                     else
                         Send(In.ActiveObjectRemove, furni.Id.ToString(), false, -1, 0);
                 }
                 else if (furni.Type == ItemType.Wall)
                 {
-                    if (Interceptor.ClientType == ClientType.Unity)
+                    if (Interceptor.Client == ClientType.Unity)
                         Send(In.RemoveItem, furni.Id, -1L);
                     else
                         Send(In.RemoveItem, furni.Id.ToString(), -1);
@@ -949,6 +949,34 @@ namespace Xabbo.Core.Game
             _logger.LogTrace("Received floor heightmap. (size:{width}x{length})", floorPlan.Width, floorPlan.Length);
         }
 
+        [Receive(nameof(Incoming.RoomVisualizationSettings))]
+        private void HandleRoomVisualizationSettings(IReadOnlyPacket packet)
+        {
+            if (_currentRoom is null)
+            {
+                return;
+            }
+
+            _currentRoom.HideWalls = packet.ReadBool();
+            _currentRoom.WallThickness = (Thickness)packet.ReadInt();
+            _currentRoom.FloorThickness = (Thickness)packet.ReadInt();
+
+            // TODO event
+        }
+
+        [Receive(nameof(Incoming.RoomChatSettings))]
+        private void HandleRoomChatSettings(IReadOnlyPacket packet)
+        {
+            if (_currentRoom is null)
+            {
+                return;
+            }
+
+            _currentRoom.Data.ChatSettings = ChatSettings.Parse(packet);
+
+            OnRoomDataUpdated(_currentRoom.Data);
+        }
+
         [Receive(nameof(Incoming.RoomEntryInfo))]
         private void HandleRoomEntryInfo(IReadOnlyPacket packet)
         {
@@ -1004,8 +1032,8 @@ namespace Xabbo.Core.Game
         {
             if (!IsInRoom) return;
 
-            ErrorCode errorCode = (ErrorCode)packet.ReadInt();
-            if (errorCode == ErrorCode.Kicked)
+            GenericErrorCode errorCode = (GenericErrorCode)packet.ReadInt();
+            if (errorCode == GenericErrorCode.Kicked)
                 OnKicked();
         }
         #endregion
@@ -1560,20 +1588,41 @@ namespace Xabbo.Core.Game
             }
 
             int index = e.Packet.ReadInt();
-            if (_currentRoom.Entities.TryGetValue(index, out Entity? entity) &&
-                entity is RoomUser user)
+            if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
             {
-                string previousFigure = user.Figure;
-                Gender previousGender = user.Gender;
-                string previousMotto = user.Motto;
-                int previousAchievementScore = user.AchievementScore;
+                string previousFigure = entity.Figure;
+                Gender previousGender;
+                string previousMotto = entity.Motto;
+                int previousAchievementScore = 0;
 
-                user.Figure = e.Packet.ReadString();
-                user.Gender = H.ToGender(e.Packet.ReadString());
-                user.Motto = e.Packet.ReadString();
-                user.AchievementScore = e.Packet.ReadInt();
+                string updatedFigure = e.Packet.ReadString();
+                Gender updatedGender = H.ToGender(e.Packet.ReadString());
+                string updatedMotto = e.Packet.ReadString();
+                int updatedAchievementScore = e.Packet.ReadInt();
 
-                OnUserDataUpdated(user,
+                entity.Figure = updatedFigure;
+                entity.Motto = updatedMotto;
+
+                if (entity is RoomUser user)
+                {
+                    previousGender = user.Gender;
+                    user.Gender = updatedGender;
+                    previousAchievementScore = user.AchievementScore;
+                    user.AchievementScore = updatedAchievementScore;
+                }
+                else if (entity is Bot bot)
+                {
+                    previousGender = bot.Gender;
+                    bot.Gender = updatedGender;
+                    previousAchievementScore = updatedAchievementScore;
+                }
+                else
+                {
+                    previousGender = updatedGender;
+                    previousAchievementScore = updatedAchievementScore;
+                }
+
+                OnEntityDataUpdated(entity,
                     previousFigure, previousGender,
                     previousMotto, previousAchievementScore
                 );
@@ -1584,7 +1633,7 @@ namespace Xabbo.Core.Game
             }
         }
 
-        [InterceptIn(nameof(Incoming.UserNameChanged))] // @Check
+        [InterceptIn(nameof(Incoming.UserNameChanged))]
         private void HandleUserNameChanged(InterceptArgs e)
         {
             if (!IsInRoom)
