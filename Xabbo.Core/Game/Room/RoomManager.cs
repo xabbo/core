@@ -547,12 +547,15 @@ namespace Xabbo.Core.Game
 
         private bool CheckPermission(ModerationPermissions? permissions)
         {
-            if (!IsInRoom) return false;
+            if (!permissions.HasValue || !IsInRoom) return false;
 
             return permissions switch
             {
                 ModerationPermissions.OwnerOnly => IsOwner,
-                ModerationPermissions.RightsHolders => RightsLevel > 0,
+                ModerationPermissions.GroupAdmins => RightsLevel >= 3,
+                ModerationPermissions.RightsHolders or
+                (ModerationPermissions.GroupAdmins | ModerationPermissions.RightsHolders) 
+                    => RightsLevel > 0,
                 ModerationPermissions.AllUsers => true,
                 _ => false,
             };
