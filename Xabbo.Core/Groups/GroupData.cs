@@ -28,13 +28,13 @@ namespace Xabbo.Core
 
         protected GroupData(IReadOnlyPacket packet)
         {
-            Id = packet.ReadLong();
+            Id = packet.ReadLegacyLong();
             IsGuild = packet.ReadBool();
             Type = (GroupType)packet.ReadInt();
             Name = packet.ReadString();
             Description = packet.ReadString();
             Badge = packet.ReadString();
-            HomeRoomId = packet.ReadLong();
+            HomeRoomId = packet.ReadLegacyLong();
             HomeRoomName = packet.ReadString();
             MemberStatus = (GroupMemberStatus)packet.ReadInt();
             MemberCount = packet.ReadInt();
