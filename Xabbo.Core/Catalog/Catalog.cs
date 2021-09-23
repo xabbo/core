@@ -34,9 +34,9 @@ namespace Xabbo.Core
                 .WriteString(Type);
         }
 
-        public CatalogPageNode FindNode(Func<CatalogPageNode, bool> predicate) => RootNode.FindNode(predicate);
+        public CatalogPageNode? FindNode(Func<CatalogPageNode, bool> predicate) => RootNode.FindNode(predicate);
         ICatalogPageNode? ICatalog.FindNode(Func<ICatalogPageNode, bool> predicate) => FindNode(predicate);
-        public CatalogPageNode FindNode(string? title, string? name, int? id) => RootNode.FindNode(title, name, id);
+        public CatalogPageNode? FindNode(string? title = null, string? name = null, int? id = null) => RootNode.FindNode(title, name, id);
         ICatalogPageNode? ICatalog.FindNode(string? title, string? name, int? id) => FindNode(title, name, id);
 
         public IEnumerator<CatalogPageNode> GetEnumerator() => RootNode.EnumerateDescendantsAndSelf().GetEnumerator();

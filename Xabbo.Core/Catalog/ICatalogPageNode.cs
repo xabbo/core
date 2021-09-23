@@ -18,8 +18,8 @@ namespace Xabbo.Core
         IReadOnlyList<int> OfferIds { get; }
         IReadOnlyList<ICatalogPageNode> Children { get; }
 
-        ICatalogPageNode FindNode(Func<ICatalogPageNode, bool> predicate);
-        ICatalogPageNode FindNode(string? title = null, string? name = null, int? id = null);
+        ICatalogPageNode? FindNode(Func<ICatalogPageNode, bool> predicate);
+        ICatalogPageNode? FindNode(string? title = null, string? name = null, int? id = null);
 
         IEnumerable<ICatalogPageNode> EnumerateDescendantsAndSelf();
     }
