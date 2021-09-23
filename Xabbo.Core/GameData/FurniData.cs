@@ -40,7 +40,7 @@ namespace Xabbo.Core.GameData
         /// <summary>
         /// Gets the information of the furni with the specified identifier.
         /// </summary>
-        public FurniInfo this[string identifier] => GetInfo(identifier);
+        public FurniInfo? this[string identifier] => GetInfo(identifier);
 
         internal FurniData(Xml.FurniData proxy)
         {
@@ -100,21 +100,12 @@ namespace Xabbo.Core.GameData
         /// <summary>
         /// Gets the information of the furni with the specified type and kind.
         /// </summary>
-        public FurniInfo GetInfo(ItemType type, int kind)
+        public FurniInfo GetInfo(ItemType type, int kind) => type switch
         {
-            if (type == ItemType.Floor)
-            {
-                return GetFloorItem(kind);
-            }
-            else if (type == ItemType.Wall)
-            {
-                return GetWallItem(kind);
-            }
-            else
-            {
-                throw new Exception($"Failed to find furni info for item: {type}/{kind}.");
-            }
-        }
+            ItemType.Floor => GetFloorItem(kind),
+            ItemType.Wall => GetWallItem(kind),
+            _ => throw new Exception($"Invalid item type specified: {type}.")
+        };
 
         /// <summary>
         /// Gets the furni info of the specified item.
@@ -124,17 +115,7 @@ namespace Xabbo.Core.GameData
         /// <summary>
         /// Gets the furni info of the furni with the specified identifier.
         /// </summary>
-        public FurniInfo GetInfo(string identifier)
-        {
-            if (_identifierMap.TryGetValue(identifier, out FurniInfo? info))
-            {
-                return info;
-            }
-            else
-            {
-                throw new Exception($"Failed to find furni info with identifier: \"{identifier}\".");
-            }
-        }
+        public FurniInfo? GetInfo(string identifier) => _identifierMap.TryGetValue(identifier, out FurniInfo? info) ? info : null;
 
         /// <summary>
         /// Gets the furni info for the floor item of the specified kind.
