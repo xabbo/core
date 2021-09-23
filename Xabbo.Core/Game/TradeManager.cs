@@ -68,7 +68,8 @@ namespace Xabbo.Core.Game
             IsTrader =
             HasAccepted = 
             HasPartnerAccepted =
-            IsWaitingConfirmation = false;
+            IsWaitingConfirmation =
+            IsCompleted = false;
 
             Self =
             Partner = null;
@@ -99,9 +100,9 @@ namespace Xabbo.Core.Game
             }
 
             int traderId = packet.ReadInt();
-            int unknownA = packet.ReadInt(); // ?
+            int traderCanTrade = packet.ReadInt();
             int tradeeId = packet.ReadInt();
-            int unknownB = packet.ReadInt(); // ?
+            int tradeeCanTrade = packet.ReadInt();
 
             if (!_roomManager.Room.TryGetEntityById(traderId, out IRoomUser? trader))
             {
