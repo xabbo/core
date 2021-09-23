@@ -30,7 +30,7 @@ namespace Xabbo.Core
             PreviewImage = string.Empty;
         }
 
-        protected CatalogOffer(IReadOnlyPacket packet)
+        protected CatalogOffer(IReadOnlyPacket packet, bool fromCatalog)
         {
             Id = packet.ReadInt();
             FurniLine = packet.ReadString();
@@ -46,11 +46,15 @@ namespace Xabbo.Core
 
             ClubLevel = packet.ReadInt();
             CanPurchaseMultiple = packet.ReadBool();
-            IsPet = packet.ReadBool();
-            PreviewImage = packet.ReadString();
+
+            if (fromCatalog)
+            {
+                IsPet = packet.ReadBool();
+                PreviewImage = packet.ReadString();
+            }
         }
 
-        public void Compose(IPacket packet)
+        public void Compose(IPacket packet, bool fromCatalog = true)
         {
             packet
                 .WriteInt(Id)
@@ -62,11 +66,19 @@ namespace Xabbo.Core
                 .WriteBool(CanPurchaseAsGift)
                 .WriteValues(Products)
                 .WriteInt(ClubLevel)
-                .WriteBool(CanPurchaseMultiple)
-                .WriteBool(IsPet)
-                .WriteString(PreviewImage);
+                .WriteBool(CanPurchaseMultiple);
+
+            if (fromCatalog)
+            {
+                packet
+                    .WriteBool(IsPet)
+                    .WriteString(PreviewImage);
+            }
         }
 
-        public static CatalogOffer Parse(IReadOnlyPacket packet) => new CatalogOffer(packet);
+        void IComposable.Compose(IPacket packet) => Compose(packet, true);
+
+        public static CatalogOffer Parse(IReadOnlyPacket packet, bool fromCatalog = true)
+            => new CatalogOffer(packet, fromCatalog);
     }
 }
