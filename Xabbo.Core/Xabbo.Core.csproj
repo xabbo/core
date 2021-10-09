@@ -22,11 +22,14 @@
 
   <!-- Package -->
   <PropertyGroup>
-    <LocalPackageSource>%USERPROFILE%\.nuget\local</LocalPackageSource>
     <PackageId>Xabbo.Core</PackageId>
-    <Version Condition="'$(Configuration)'=='Develop'">1.0.0-dev</Version>
-    <Version Condition="'$(Configuration)'=='Release'">1.0.0-alpha</Version>
+    <Description>Provides data structure parsing, game state management, and interactions for Habbo packet interceptors.</Description>
+    <Version Condition="'$(Configuration)'=='Develop'">0.0.0-dev</Version>
+    <Version Condition="'$(Configuration)'=='Release'">1.0.0-beta</Version>
+    <InformationalVersion>$(Version)</InformationalVersion>
     <Authors>b7</Authors>
+    <LocalPackageCache>%USERPROFILE%\.nuget\packages</LocalPackageCache>
+    <LocalPackageSource>%USERPROFILE%\.nuget\local</LocalPackageSource>
   </PropertyGroup>
   
   <!-- Rename paths -->
@@ -56,15 +59,16 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)'=='Develop'">
-    <PackageReference Include="Xabbo.Common" Version="1.0.0-dev" />
+    <PackageReference Include="Xabbo.Common" Version="0.0.0-dev*" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)'=='Release'">
-    <PackageReference Include="Xabbo.Common" Version="1.0.0-alpha*" />
+    <PackageReference Include="Xabbo.Common" Version="1.0.0-beta*" />
   </ItemGroup>
 
   <!-- Update package in local source after pack -->
   <Target Name="NugetDeletePackage" AfterTargets="Pack" Condition="'$(Configuration)'=='Develop'">
+    <Exec Command="nuget delete $(PackageId) $(Version) -Source $(LocalPackageCache) -NonInteractive" ContinueOnError="true" />
     <Exec Command="nuget delete $(PackageId) $(Version) -Source $(LocalPackageSource) -NonInteractive" ContinueOnError="true" />
   </Target>
   <Target Name="NugetAddPackage" AfterTargets="Pack" Condition="'$(Configuration)'!='Debug'">
