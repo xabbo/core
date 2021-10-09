@@ -7,26 +7,25 @@ using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks
 {
-    // @Update [RequiredOut(nameof(Outgoing.RequestPetInfo))]
     public class GetPetInfoTask : InterceptorTask<PetInfo>
     {
-        private readonly int petId;
+        private readonly long _petId;
 
-        public GetPetInfoTask(IInterceptor interceptor, int petId)
+        public GetPetInfoTask(IInterceptor interceptor, long petId)
             : base(interceptor)
         {
-            this.petId = petId;
+            _petId = petId;
         }
 
-        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.RequestPetInfo);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetNewPetInfo, (LegacyLong)_petId);
 
-        // @Update [InterceptIn(nameof(Incoming.PetInfo))]
+        [InterceptIn(nameof(Incoming.PetInfo))]
         protected void OnPetInfo(InterceptArgs e)
         {
             try
             {
                 var petInfo = PetInfo.Parse(e.Packet);
-                if (petInfo.Id == petId)
+                if (petInfo.Id == _petId)
                 {
                     if (SetResult(petInfo))
                         e.Block();

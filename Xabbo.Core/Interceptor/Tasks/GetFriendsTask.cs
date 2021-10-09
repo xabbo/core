@@ -8,22 +8,21 @@ using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks
 {
-    // @Update [RequiredOut("RequestInitFriends")]
     public class GetFriendsTask : InterceptorTask<List<Friend>>
     {
-        private int totalExpected = -1, currentIndex = 0;
-        private readonly List<Friend> friends = new List<Friend>();
+        private int _totalExpected = -1, _currentIndex = 0;
+        private readonly List<Friend> _friends = new List<Friend>();
 
         public GetFriendsTask(IInterceptor interceptor)
             : base(interceptor)
         { }
 
-        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update SendAsync(Out.RequestInitFriends);
+        protected override Task OnExecuteAsync() => SendAsync(Out.MessengerInit);
 
-        // @Update [InterceptIn(nameof(Incoming.InitFriends))]
+        [InterceptIn(nameof(Incoming.MessengerInit))]
         protected void OnInitFriends(InterceptArgs e) => e.Block();
 
-        // @Update [InterceptIn(nameof(Incoming.Friends))]
+        [InterceptIn(nameof(Incoming.FriendListFragment))]
         protected void OnFriends(InterceptArgs e)
         {
             try
@@ -31,19 +30,19 @@ namespace Xabbo.Core.Tasks
                 int total = e.Packet.ReadInt();
                 int current = e.Packet.ReadInt();
 
-                if (current != currentIndex) return;
-                if (totalExpected == -1) totalExpected = total;
-                else if (totalExpected != total) return;
-                currentIndex++;
+                if (current != _currentIndex) return;
+                if (_totalExpected == -1) _totalExpected = total;
+                else if (_totalExpected != total) return;
+                _currentIndex++;
 
                 e.Block();
 
-                int n = e.Packet.ReadInt();
+                int n = e.Packet.ReadLegacyShort();
                 for (int i = 0; i < n; i++)
-                    friends.Add(Friend.Parse(e.Packet));
+                    _friends.Add(Friend.Parse(e.Packet));
 
-                if (currentIndex == total)
-                    SetResult(friends);
+                if (_currentIndex == total)
+                    SetResult(_friends);
             }
             catch (Exception ex) { SetException(ex); }
         }

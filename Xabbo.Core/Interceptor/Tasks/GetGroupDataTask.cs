@@ -7,18 +7,17 @@ using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks
 {
-    // @Update [RequiredOut(nameof(Outgoing.RequestGuildInfo))]
     public class GetGroupDataTask : InterceptorTask<IGroupData>
     {
-        private readonly long groupId;
+        private readonly long _groupId;
 
         public GetGroupDataTask(IInterceptor interceptor, long groupId)
             : base(interceptor)
         {
-            this.groupId = groupId;
+            _groupId = groupId;
         }
 
-        protected override async Task OnExecuteAsync() => await SendAsync(Out.GetHabboGroupDetails, (LegacyLong)groupId, false);
+        protected override async Task OnExecuteAsync() => await SendAsync(Out.GetHabboGroupDetails, (LegacyLong)_groupId, false);
 
         [InterceptIn(nameof(Incoming.HabboGroupDetails))]
         protected void OnHabboGroupDetails(InterceptArgs e)
@@ -26,7 +25,7 @@ namespace Xabbo.Core.Tasks
             try
             {
                 var groupData = GroupData.Parse(e.Packet);
-                if (groupData.Id == groupId)
+                if (groupData.Id == _groupId)
                 {
                     if (SetResult(groupData))
                         e.Block();

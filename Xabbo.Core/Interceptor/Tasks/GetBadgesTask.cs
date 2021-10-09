@@ -8,19 +8,18 @@ using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks
 {
-    // @Update [RequiredOut(nameof(Outgoing.RequestInventoryBadges))]
     public class GetBadgesTask : InterceptorTask<List<Badge>>
     {
-        private int totalExpected = -1, currentIndex = 0;
-        private readonly List<Badge> badges = new List<Badge>();
+        private int _totalExpected = -1, _currentIndex = 0;
+        private readonly List<Badge> _badges = new List<Badge>();
 
         public GetBadgesTask(IInterceptor interceptor)
             : base(interceptor)
         { }
 
-        protected override Task OnExecuteAsync() => throw new NotImplementedException(); // @Update  SendAsync(Out.RequestInventoryBadges);
+        protected override Task OnExecuteAsync() => SendAsync(Out.GetAvailableBadges);
 
-        // @Update [InterceptIn(nameof(Incoming.InventoryBadges))]
+        [InterceptIn(nameof(Incoming.AvailableBadges))]
         protected void OnInventoryBadges(InterceptArgs e)
         {
             try
@@ -29,19 +28,19 @@ namespace Xabbo.Core.Tasks
                 int total = packet.ReadInt();
                 int index = packet.ReadInt();
 
-                if (index != currentIndex) return;
-                if (totalExpected == -1) totalExpected = total;
-                else if (total != totalExpected) return;
-                currentIndex++;
+                if (index != _currentIndex) return;
+                if (_totalExpected == -1) _totalExpected = total;
+                else if (total != _totalExpected) return;
+                _currentIndex++;
 
                 e.Block();
 
                 int n = packet.ReadInt();
                 for (int i = 0; i < n; i++)
-                    badges.Add(Badge.Parse(packet));
+                    _badges.Add(Badge.Parse(packet));
 
-                if (currentIndex == totalExpected)
-                    SetResult(badges);
+                if (_currentIndex == _totalExpected)
+                    SetResult(_badges);
             }
             catch (Exception ex) { SetException(ex); }
         }

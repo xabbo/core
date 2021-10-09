@@ -150,7 +150,7 @@ namespace Xabbo.Core.Game
         [InterceptIn(nameof(Incoming.ClientLatencyPingResponse))]
         private async void HandleClientLatencyPingResponse(InterceptArgs e)
         {
-            if (!IsInitialized && !_isForceLoading && e.Step > 50)
+            if (!IsInitialized && !_isForceLoading && e.Step > 10)
             {
                 _isForceLoading = true;
                 await SendAsync(Out.MessengerInit);

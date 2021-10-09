@@ -9,15 +9,15 @@ namespace Xabbo.Core.Tasks
 {
     public class SearchUserTask : InterceptorTask<UserSearchResults>
     {
-        private readonly string searchName;
+        private readonly string _searchName;
 
         public SearchUserTask(IInterceptor interceptor, string searchName)
             : base(interceptor)
         {
-            this.searchName = searchName;
+            this._searchName = searchName;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.HabboSearch, searchName);
+        protected override Task OnExecuteAsync() => SendAsync(Out.HabboSearch, _searchName);
 
         [InterceptIn(nameof(Incoming.HabboSearchResult))]
         protected void OnUserSearchResult(InterceptArgs e)

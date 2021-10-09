@@ -9,17 +9,17 @@ namespace Xabbo.Core.Tasks
 {
     public class SearchNavigatorTask : InterceptorTask<NavigatorSearchResults>
     {
-        private readonly string category;
-        private readonly string filter;
+        private readonly string _category;
+        private readonly string _filter;
 
         public SearchNavigatorTask(IInterceptor interceptor, string category, string filter)
             : base(interceptor)
         {
-            this.category = category;
-            this.filter = filter;
+            _category = category;
+            _filter = filter;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.Navigator2Search, category, filter);
+        protected override Task OnExecuteAsync() => SendAsync(Out.Navigator2Search, _category, _filter);
 
         [InterceptIn(nameof(Incoming.Navigator2SearchResultBlocks))]
         protected void OnNavigatorSearchResults(InterceptArgs e)
@@ -27,8 +27,8 @@ namespace Xabbo.Core.Tasks
             try
             {
                 var results = NavigatorSearchResults.Parse(e.Packet);
-                if (results.Category == category &&
-                    results.Filter == filter)
+                if (results.Category == _category &&
+                    results.Filter == _filter)
                 {
                     if (SetResult(results))
                         e.Block();

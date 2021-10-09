@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core
@@ -34,112 +35,51 @@ namespace Xabbo.Core
         protected RoomSettings(IReadOnlyPacket packet)
             : this()
         {
-            /*
-            << RoomSettings
-            long roomId
-            string name
-            string desc
-            int access
-            int category
-            int allowPets
-
-            UNKNOWN DATA
-
-            ---- LEGACY ----
-            int roomId
-            string name
-            string desc
-            int access
-            int category
-            int maxUsers
-            int 50 ???
-            int tags[] { string }
-            int trading
-            int allowPets
-            int allowOtherPetsToEat
-            int disableRoomBlocking
-            int hideWalls
-            int wallThickness
-            int floorThickness
-            chatSettings
-            bool enlistByFurniContent
-            moderationSettings
-            */
-
-            Id = packet.ReadLong();
+            Id = packet.ReadLegacyLong();
             Name = packet.ReadString();
             Description = packet.ReadString();
             Access = (RoomAccess)packet.ReadInt();
             Category = (RoomCategory)packet.ReadInt();
-            AllowPets = packet.ReadInt() > 0;
+            MaxVisitors = packet.ReadInt(); // maximumVisitors
+            packet.ReadInt(); // maximumVisitorsLimit
 
-            // 18 unknown (null) bytes
+            short n = packet.ReadLegacyShort();
+            for (int i = 0; i < n; i++)
+                Tags.Add(packet.ReadString());
 
-            //MaxVisitors = packet.ReadInt();
-            //UnknownIntA = packet.ReadInt();
-            //short n = packet.ReadShort();
-            //for (int i = 0; i < n; i++)
-            //    Tags.Add(packet.ReadString());
-            //Trading = (TradePermissions)packet.ReadInt();
-            //AllowPets = packet.ReadInt() > 0;
-            //AllowOthersPetsToEat = packet.ReadInt() > 0;
-            //DisableRoomBlocking = packet.ReadInt() > 0;
-            //HideWalls = packet.ReadInt() > 0;
-            //WallThickness = (Thickness)packet.ReadInt();
-            //FloorThickness = (Thickness)packet.ReadInt();
-            //Chat = ChatSettings.Parse(packet);
-            //EnlistByFurniContent = packet.ReadBool();
-            //Moderation = ModerationSettings.Parse(packet);
+            Trading = (TradePermissions)packet.ReadInt(); // tradeMode
+            AllowPets = packet.ReadInt() == 1;
+            AllowOthersPetsToEat = packet.ReadInt() == 1; // allowFoodConsume
+            DisableRoomBlocking = packet.ReadInt() == 1; // allowWalkThrough
+            HideWalls = packet.ReadInt() == 1;
+            WallThickness = (Thickness)packet.ReadInt();
+            FloorThickness = (Thickness)packet.ReadInt();
+            Chat = ChatSettings.Parse(packet);
+
+            EnlistByFurniContent = packet.ReadBool(); // allowNavigatorDynamicCats
+            Moderation = ModerationSettings.Parse(packet);
         }
-
-        /*
-        ----- LEGACY -----
-        >> RoomSettingsSave
-        int id
-        string name
-        string description
-        int access
-        string password
-        int maxUsers
-        int category
-        int tags { string }
-        int tradePermissions
-        bool allowPets
-        bool allowOthersPetsToEat
-        bool disableRoomBlocking
-        bool hideWalls
-        int wallThickness
-        int floorThickness
-        moderationSettings
-          int 
-          int 
-          int 
-        chatSettings
-          int 
-          int 
-          int 
-          int chatHearingDistance
-          int 
-        bool enlistByTopFurniContent
-        */
 
         /// <summary>
         /// Writes the values of this <see cref="RoomSettings"/> to the specified packet
-        /// to be sent to the server with <c>RoomSettingsSave</c>.
+        /// to be sent to the server with <see cref="Outgoing.SaveRoomSettings"/>.
         /// </summary>
         public void Compose(IPacket packet)
         {
             packet.WriteValues(
-                Id,
+                (LegacyLong)Id,
                 Name ?? string.Empty,
                 Description ?? string.Empty,
                 (int)Access,
                 Password ?? string.Empty,
                 MaxVisitors,
                 (int)Category,
-                AllowPets ? 1 : 0,
-                // TODO Structure
-                0, 0, 0, 0, ""
+                Tags,
+                (int)Trading,
+                AllowPets, AllowOthersPetsToEat, DisableRoomBlocking, HideWalls,
+                (int)WallThickness, (int)FloorThickness,
+                Moderation, Chat,
+                EnlistByFurniContent
             );
         }
 
