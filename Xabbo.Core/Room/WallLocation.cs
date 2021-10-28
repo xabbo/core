@@ -14,54 +14,54 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the wall X coordinate.
         /// </summary>
-        public int WallX { get; }
+        public int WX { get; }
         /// <summary>
         /// Gets the wall Y coordinate.
         /// </summary>
-        public int WallY { get; }
+        public int WY { get; }
         /// <summary>
-        /// Gets the X coordinate.
+        /// Gets the location X coordinate.
         /// </summary>
-        public int X { get; }
+        public int LX { get; }
         /// <summary>
-        /// Gets the Y coordinate.
+        /// Gets the location Y coordinate.
         /// </summary>
-        public int Y { get; }
+        public int LY { get; }
         /// <summary>
         /// Gets the wall orientation.
         /// </summary>
         public WallOrientation Orientation { get; }
 
-        public WallLocation(int wallX, int wallY, int offsetX, int offsetY, WallOrientation orientation)
+        public WallLocation(int wx, int wy, int lx, int ly, WallOrientation orientation)
         {
-            WallX = wallX;
-            WallY = wallY;
-            X = offsetX;
-            Y = offsetY;
+            WX = wx;
+            WY = wy;
+            LX = lx;
+            LY = ly;
             Orientation = orientation;
         }
 
-        public WallLocation(int wallX, int wallY, int offsetX, int offsetY)
-            : this(wallX, wallY, offsetX, offsetY, 'l')
+        public WallLocation(int wx, int wy, int lx, int ly)
+            : this(wx, wy, lx, ly, 'l')
         { }
 
         /// <summary>
-        /// Offsets the wall location by the specified values
-        /// and attempts to keep the offset X and Y locations in place,
+        /// Offsets the wall coordinates by the specified values
+        /// attempting to keep the location fixed in place,
         /// relative to the original wall location.
         /// </summary>
-        /// <param name="wallOffsetX">The amount to offset the wall X by.</param>
-        /// <param name="wallOffsetY">The amount to offset the wall Y by.</param>
+        /// <param name="wxOffset">The amount to offset wall X by.</param>
+        /// <param name="wyOffset">The amount to offset wall Y by.</param>
         /// <param name="scale">The scale value of the room as specified in the floor plan.</param>
-        public WallLocation Offset(int wallOffsetX, int wallOffsetY, int scale)
+        public WallLocation Offset(int wxOffset, int wyOffset, int scale)
         {
             int halfTileWidth = scale / 2;
 
             return Add(
-                wallOffsetX,
-                wallOffsetY,
-                -(wallOffsetX - wallOffsetY) * halfTileWidth,
-                -(wallOffsetX + wallOffsetY) * halfTileWidth / 2
+                wxOffset,
+                wyOffset,
+                -(wxOffset - wyOffset) * halfTileWidth,
+                -(wxOffset + wyOffset) * halfTileWidth / 2
             );
         }
 
@@ -74,87 +74,87 @@ namespace Xabbo.Core
         public WallLocation Adjust(int scale)
         {
             int
-                x = X,
-                y = Y,
-                wallX = WallX,
-                wallY = WallY;
+                lx = LX,
+                ly = LY,
+                wx = WX,
+                wy = WY;
 
-            while (x > (scale / 2))
+            while (lx > (scale / 2))
             {
-                x -= scale / 2;
+                lx -= scale / 2;
                 if (Orientation == WallOrientation.Left)
                 {
-                    wallY--;
-                    y += scale / 4;
+                    wy--;
+                    ly += scale / 4;
                 }
                 else
                 {
-                    wallX++;
-                    y -= scale / 4;
+                    wx++;
+                    ly -= scale / 4;
                 }
             }
 
-            while (x < (-scale / 2))
+            while (lx < (-scale / 2))
             {
-                x += scale / 2;
+                lx += scale / 2;
                 if (Orientation == WallOrientation.Left)
                 {
-                    wallY++;
-                    y -= scale / 4;
+                    wy++;
+                    ly -= scale / 4;
                 }
                 else
                 {
-                    wallX--;
-                    y += scale / 4;
+                    wx--;
+                    ly += scale / 4;
                 }
             }
 
-            return new WallLocation(wallX, wallY, x, y, Orientation);
+            return new WallLocation(wx, wy, lx, ly, Orientation);
         }
 
         /// <summary>
         /// Flips the wall orientation between left and right, and returns the new wall location.
         /// </summary>
-        public WallLocation Flip() => new WallLocation(WallX, WallY, X, Y, Orientation.IsLeft ? WallOrientation.Right : WallOrientation.Left);
+        public WallLocation Flip() => new WallLocation(WX, WY, LX, LY, Orientation.IsLeft ? WallOrientation.Right : WallOrientation.Left);
 
         /// <summary>
         /// Returns a new wall location with the specified orientation.
         /// </summary>
-        public WallLocation Orient(WallOrientation orientation) => new WallLocation(WallX, WallY, X, Y, orientation);
+        public WallLocation Orient(WallOrientation orientation) => new WallLocation(WX, WY, LX, LY, orientation);
 
         /// <summary>
         /// Adds the specified offset values and returns the new wall location.
         /// </summary>
-        public WallLocation Add(int wallX, int wallY, int locationX, int locationY) => new WallLocation(
-            WallX + wallX, WallY + wallY,
-            X + locationX, Y + locationY,
+        public WallLocation Add(int wx, int wy, int lx, int ly) => new WallLocation(
+            WX + wx, WY + wy,
+            LX + lx, LY + ly,
             Orientation
         );
 
         /// <summary>
-        /// Adds the specified offset values and returns the new wall location.
+        /// Adds the specified location offset values and returns the new wall location.
         /// </summary>
-        public WallLocation Add(int offsetX, int offsetY) => new WallLocation(
-            WallX, WallY, X + offsetX, Y + offsetY, Orientation
+        public WallLocation Add(int lxOffset, int lyOffset) => new WallLocation(
+            WX, WY, LX + lxOffset, LY + lyOffset, Orientation
         );
 
-        public override int GetHashCode() => (WallX, WallY, X, Y, Orientation.Value).GetHashCode();
+        public override int GetHashCode() => (WX, WY, LX, LY, Orientation.Value).GetHashCode();
 
         public bool Equals(WallLocation other)
         {
             return
-                WallX == other.WallX &&
-                WallY == other.WallY &&
-                X == other.X &&
-                Y == other.Y &&
+                WX == other.WX &&
+                WY == other.WY &&
+                LX == other.LX &&
+                LY == other.LY &&
                 Orientation == other.Orientation;
         }
 
         public override bool Equals(object? obj)
             => obj is WallLocation loc && Equals(loc);
 
-        public override string ToString() => ToString(WallX, WallY, X, Y, Orientation);
-        public static string ToString(int wallX, int wallY, int x, int y, WallOrientation orientation) => $":w={wallX},{wallY} l={x},{y} {orientation.Value}";
+        public override string ToString() => ToString(WX, WY, LX, LY, Orientation);
+        public static string ToString(int wx, int wy, int lx, int ly, WallOrientation orientation) => $":w={wx},{wy} l={lx},{ly} {orientation.Value}";
 
         public void Compose(IPacket packet)
         {
@@ -165,10 +165,10 @@ namespace Xabbo.Core
             else if (packet.Protocol == ClientType.Unity)
             {
                 packet
-                    .WriteInt(WallX)
-                    .WriteInt(WallY)
-                    .WriteInt(X)
-                    .WriteInt(Y)
+                    .WriteInt(WX)
+                    .WriteInt(WY)
+                    .WriteInt(LX)
+                    .WriteInt(LY)
                     .WriteString(Orientation.Value.ToString());
             }
             else
@@ -212,12 +212,12 @@ namespace Xabbo.Core
                 return false;
             }
 
-            string[] positions = parts[0].Substring(3).Split(',');
+            string[] positions = parts[0][3..].Split(',');
             if (positions.Length != 2) return false;
             if (!int.TryParse(positions[0], out int wallX)) return false;
             if (!int.TryParse(positions[1], out int wallY)) return false;
 
-            positions = parts[1].Substring(2).Split(',');
+            positions = parts[1][2..].Split(',');
             if (positions.Length != 2) return false;
             if (!int.TryParse(positions[0], out int x)) return false;
             if (!int.TryParse(positions[1], out int y)) return false;

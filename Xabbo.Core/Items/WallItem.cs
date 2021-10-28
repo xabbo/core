@@ -18,16 +18,16 @@ namespace Xabbo.Core
         public WallLocation Location { get; set; }
 
         [JsonIgnore]
-        public int WallX => Location.WallX;
+        public int WX => Location.WX;
 
         [JsonIgnore]
-        public int WallY => Location.WallY;
+        public int WY => Location.WY;
 
         [JsonIgnore]
-        public int X => Location.X;
+        public int LX => Location.LX;
 
         [JsonIgnore]
-        public int Y => Location.Y;
+        public int LY => Location.LY;
 
         [JsonIgnore]
         public WallOrientation Orientation => Location.Orientation;

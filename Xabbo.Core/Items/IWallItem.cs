@@ -11,19 +11,19 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the wall X coordinate of the wall item.
         /// </summary>
-        int WallX { get; }
+        int WX { get; }
         /// <summary>
         /// Gets the wall Y coordinate of the wall item.
         /// </summary>
-        int WallY { get; }
+        int WY { get; }
         /// <summary>
         /// Gets the X location of the wall item.
         /// </summary>
-        int X { get; }
+        int LX { get; }
         /// <summary>
         /// Gets the Y location of the wall item.
         /// </summary>
-        int Y { get; }
+        int LY { get; }
         /// <summary>
         /// Gets the orientation of the wall item.
         /// </summary>

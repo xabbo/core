@@ -1892,7 +1892,7 @@ namespace Xabbo.Core.Game
             => Place(item.Id, location, direction);
 
         public void Place(long itemId, WallLocation location)
-            => SendAsync(Out.PlaceWallItem, itemId, location.WallX, location.WallY, location.X, location.Y);
+            => SendAsync(Out.PlaceWallItem, itemId, location.WX, location.WY, location.LX, location.LY);
         public void Place(IInventoryItem item, WallLocation location)
             => Place(item.Id, location);
 
@@ -1907,8 +1907,8 @@ namespace Xabbo.Core.Game
 
         public void Move(long wallItemId, WallLocation location) => SendAsync(
             Out.MoveWallItem, wallItemId,
-            location.WallX, location.WallY,
-            location.X, location.Y,
+            location.WX, location.WY,
+            location.LX, location.LY,
             location.Orientation.Value.ToString()
         );
         public void Move(IWallItem item, WallLocation location)

@@ -280,17 +280,17 @@ namespace Xabbo.Core
         {
             foreach (var item in items)
             {
-                if (wallX.HasValue && item.WallX != wallX) continue;
-                if (wallY.HasValue && item.WallY != wallY) continue;
-                if (x.HasValue && item.X != x) continue;
-                if (y.HasValue && item.Y != y) continue;
+                if (wallX.HasValue && item.WX != wallX) continue;
+                if (wallY.HasValue && item.WY != wallY) continue;
+                if (x.HasValue && item.LX != x) continue;
+                if (y.HasValue && item.LY != y) continue;
                 if (orientation.HasValue && item.Orientation != orientation) continue;
                 yield return item;
             }
         }
 
         public static IEnumerable<IWallItem> At(this IEnumerable<IWallItem> items, WallLocation location)
-            => At(items, location.WallX, location.WallY, location.X, location.Y, location.Orientation);
+            => At(items, location.WX, location.WY, location.LX, location.LY, location.Orientation);
         #endregion
 
         #region - Inventory -
