@@ -17,6 +17,6 @@ namespace Xabbo.Core
         /// <summary>
         /// The users with this high score.
         /// </summary>
-        IReadOnlyList<string> Users { get; }
+        IReadOnlyList<string> Names { get; }
     }
 }

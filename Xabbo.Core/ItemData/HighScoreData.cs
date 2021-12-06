@@ -55,7 +55,7 @@ namespace Xabbo.Core
                 short k = packet.ReadLegacyShort();
                 for (int j = 0; j < k; j++)
                 {
-                    highScore.Users.Add(packet.ReadString());
+                    highScore.Names.Add(packet.ReadString());
                 }
 
                 Add(highScore);
@@ -67,29 +67,29 @@ namespace Xabbo.Core
         public class HighScore : IHighScore
         {
             public int Value { get; set; }
-            public List<string> Users { get; set; }
-            IReadOnlyList<string> IHighScore.Users => Users;
+            public List<string> Names { get; set; }
+            IReadOnlyList<string> IHighScore.Names => Names;
 
             public HighScore()
             {
-                Users = new List<string>();
+                Names = new List<string>();
             }
 
             public HighScore(IHighScore highScore)
             {
                 Value = highScore.Value;
-                Users = new List<string>(highScore.Users);
+                Names = new List<string>(highScore.Names);
             }
 
             public void Compose(IPacket packet)
             {
                 packet.WriteInt(Value);
 
-                packet.WriteLegacyShort((short)(Users?.Count ?? 0));
+                packet.WriteLegacyShort((short)(Names?.Count ?? 0));
 
-                if (Users != null)
+                if (Names != null)
                 {
-                    foreach (string name in Users)
+                    foreach (string name in Names)
                     {
                         packet.WriteString(name);
                     }
