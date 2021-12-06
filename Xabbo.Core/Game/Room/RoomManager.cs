@@ -636,6 +636,9 @@ namespace Xabbo.Core.Game
         public void ShowFurni(ItemType type, long id) => SetFurniHidden(type, id, false);
         public void HideFurni(ItemType type, long id) => SetFurniHidden(type, id, true);
 
+        public void ShowFurni(IFurni furni) => SetFurniHidden(furni.Type, furni.Id, false);
+        public void HideFurni(IFurni furni) => SetFurniHidden(furni.Type, furni.Id, true);
+
         #region - Room packet handlers -
         [Receive(nameof(Incoming.GetGuestRoomResult))]
         private void HandleGetGuestRoomResult(IReadOnlyPacket packet)
