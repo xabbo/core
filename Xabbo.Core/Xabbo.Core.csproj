@@ -9,7 +9,7 @@
     <FileVersion>1.0.0</FileVersion>
     <Nullable>enable</Nullable>
     <DebugType>embedded</DebugType>
-    <Configurations>Debug;Release;Develop</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <!-- Configurations -->
@@ -24,8 +24,7 @@
   <PropertyGroup>
     <PackageId>Xabbo.Core</PackageId>
     <Description>Provides data structure parsing, game state management, and interactions for Habbo packet interceptors.</Description>
-    <Version Condition="'$(Configuration)'=='Develop'">0.0.0-dev</Version>
-    <Version Condition="'$(Configuration)'=='Release'">1.0.0-beta</Version>
+    <Version>1.0.0-beta.1</Version>
     <InformationalVersion>$(Version)</InformationalVersion>
     <Authors>b7</Authors>
     <LocalPackageCache>%USERPROFILE%\.nuget\packages</LocalPackageCache>
@@ -54,24 +53,16 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
   </ItemGroup>
   
-  <ItemGroup Condition="'$(Configuration)'=='Debug'">
+  <ItemGroup Condition="'$(Configuration)'!='Release'">
     <ProjectReference Include="$(SolutionDir)\Xabbo.Common\Xabbo.Common\Xabbo.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(Configuration)'=='Develop'">
-    <PackageReference Include="Xabbo.Common" Version="0.0.0-dev*" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)'=='Release'">
     <PackageReference Include="Xabbo.Common" Version="1.0.0-beta*" />
   </ItemGroup>
 
-  <!-- Update package in local source after pack -->
-  <Target Name="NugetDeletePackage" AfterTargets="Pack" Condition="'$(Configuration)'=='Develop'">
-    <Exec Command="nuget delete $(PackageId) $(Version) -Source $(LocalPackageCache) -NonInteractive" ContinueOnError="true" />
-    <Exec Command="nuget delete $(PackageId) $(Version) -Source $(LocalPackageSource) -NonInteractive" ContinueOnError="true" />
-  </Target>
-  <Target Name="NugetAddPackage" AfterTargets="Pack" Condition="'$(Configuration)'!='Debug'">
+  <!-- Add package to local source after pack -->
+  <Target Name="NugetAddPackage" AfterTargets="Pack" Condition="'$(Configuration)'=='Release'">
     <Exec Command="nuget add bin\$(ConfigurationName)\$(PackageId).$(Version).nupkg -Source $(LocalPackageSource)" />
   </Target>
 
