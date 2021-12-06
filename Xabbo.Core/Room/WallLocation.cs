@@ -67,8 +67,8 @@ namespace Xabbo.Core
 
         /// <summary>
         /// Attempts to adjust all coordinates to a valid location using the room scale,
-        /// and returns the updated wall location. Does not take into account the wall
-        /// boundaries defined in the floor plan which affects the starting position of the Y coordinate.
+        /// and returns the updated wall location. Does not take into account
+        /// the floor plan which affects the offset of the LY coordinate.
         /// </summary>
         /// <param name="scale">The scale value of the room as specified in the floor plan.</param>
         public WallLocation Adjust(int scale)
@@ -79,35 +79,23 @@ namespace Xabbo.Core
                 wx = WX,
                 wy = WY;
 
-            while (lx > (scale / 2))
+            int halfTileWidth = scale / 2;
+            int wallOffset = (lx / halfTileWidth);
+            if (lx < 0) wallOffset -= 1;
+
+            if (Orientation == WallOrientation.Left)
             {
-                lx -= scale / 2;
-                if (Orientation == WallOrientation.Left)
-                {
-                    wy--;
-                    ly += scale / 4;
-                }
-                else
-                {
-                    wx++;
-                    ly -= scale / 4;
-                }
+                wy -= wallOffset;
+                ly += wallOffset * halfTileWidth / 2;
+            }
+            else
+            {
+                wx += wallOffset;
+                ly -= wallOffset * halfTileWidth / 2;
             }
 
-            while (lx < (-scale / 2))
-            {
-                lx += scale / 2;
-                if (Orientation == WallOrientation.Left)
-                {
-                    wy++;
-                    ly -= scale / 4;
-                }
-                else
-                {
-                    wx--;
-                    ly += scale / 4;
-                }
-            }
+            lx -= wallOffset * halfTileWidth;
+
 
             return new WallLocation(wx, wy, lx, ly, Orientation);
         }
