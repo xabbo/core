@@ -22,14 +22,21 @@
 
   <!-- Package -->
   <PropertyGroup>
+    <LocalPackageSource>%USERPROFILE%\.nuget\local</LocalPackageSource>
     <PackageId>Xabbo.Core</PackageId>
-    <Description>Provides data structure parsing, game state management, and interactions for Habbo packet interceptors.</Description>
+    <Description>Provides parsers, composers, interactions &amp; game state management for Xabbo.Common.</Description>
     <Version>1.0.0-beta.1</Version>
     <InformationalVersion>$(Version)</InformationalVersion>
+    <PackageProjectUrl>https://github.com/b7c/Xabbo.Common</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>img\package-icon.png</PackageIcon>
     <Authors>b7</Authors>
-    <LocalPackageCache>%USERPROFILE%\.nuget\packages</LocalPackageCache>
-    <LocalPackageSource>%USERPROFILE%\.nuget\local</LocalPackageSource>
   </PropertyGroup>
+
+  <!-- Include package icon -->
+  <ItemGroup>
+    <None Include="res\img\xabbo-skull-128.png" Pack="true" PackagePath="img\package-icon.png" />
+  </ItemGroup>
   
   <!-- Rename paths -->
   <PropertyGroup>
@@ -50,15 +57,12 @@
 
   <!-- References -->
   <ItemGroup>
+	<PackageReference Include="Xabbo.Common" Version="1.0.0-beta.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
   </ItemGroup>
-  
-  <ItemGroup Condition="'$(Configuration)'!='Release'">
-    <ProjectReference Include="$(SolutionDir)\Xabbo.Common\Xabbo.Common\Xabbo.Common.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup Condition="'$(Configuration)'=='Release'">
-    <PackageReference Include="Xabbo.Common" Version="1.0.0-beta*" />
+
+  <ItemGroup>
+    <Folder Include="res\img\" />
   </ItemGroup>
 
   <!-- Add package to local source after pack -->

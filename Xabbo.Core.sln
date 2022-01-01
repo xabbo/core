@@ -1,13 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29306.81
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Core", "Xabbo.Core\Xabbo.Core.csproj", "{2D314D9C-89AF-43A6-A638-23C959EE4DE9}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Submodules", "Submodules", "{A197589C-010A-4AB2-AA96-2121524758A0}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Common", "Xabbo.Common\Xabbo.Common\Xabbo.Common.csproj", "{5DE83E34-0316-4A43-AB90-1F97EE5A6D9D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,16 +15,9 @@ Global
 		{2D314D9C-89AF-43A6-A638-23C959EE4DE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D314D9C-89AF-43A6-A638-23C959EE4DE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D314D9C-89AF-43A6-A638-23C959EE4DE9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5DE83E34-0316-4A43-AB90-1F97EE5A6D9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5DE83E34-0316-4A43-AB90-1F97EE5A6D9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5DE83E34-0316-4A43-AB90-1F97EE5A6D9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5DE83E34-0316-4A43-AB90-1F97EE5A6D9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{5DE83E34-0316-4A43-AB90-1F97EE5A6D9D} = {A197589C-010A-4AB2-AA96-2121524758A0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FCB533B3-E5E4-4101-90E9-B076D854E73E}
