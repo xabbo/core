@@ -1,58 +1,57 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Immutable;
 
 namespace Xabbo.Core.GameData
 {
-    public class FurniInfo
+    public record FurniInfo
     {
         /// <summary>
         /// Gets the type of the furni.
         /// </summary>
-        public ItemType Type { get; }
+        public ItemType Type { get; init; }
         /// <summary>
         /// Gets the kind of the furni.
         /// </summary>
-        public int Kind { get; }
+        public int Kind { get; init; }
         /// <summary>
         /// Gets the unique identifier string of the furni.
         /// </summary>
-        public string Identifier { get; } = string.Empty;
-        public int Revision { get; }
-        public int DefaultDirection { get; }
-        public int XDimension { get; }
-        public int YDimension { get; }
-        public IReadOnlyList<string> PartColors { get; } = new List<string>();
+        public string Identifier { get; init; } = string.Empty;
+        public int Revision { get; init; }
+        public int DefaultDirection { get; init; }
+        public int XDimension { get; init; }
+        public int YDimension { get; init; }
+        public ImmutableArray<string> PartColors { get; init; }
         /// <summary>
         /// Gets the name of the furni.
         /// </summary>
-        public string Name { get; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
         /// <summary>
         /// Gets the description of the furni.
         /// </summary>
-        public string Description { get; } = string.Empty;
-        public string AdUrl { get; } = string.Empty;
-        public int OfferId { get; }
-        public bool BuyOut { get; }
-        public int RentOfferId { get; }
-        public bool RentBuyOut { get; }
-        public bool IsBuildersClub { get; }
-        public bool ExcludedDynamic { get; }
-        public string CustomParams { get; } = string.Empty;
+        public string Description { get; init; } = string.Empty;
+        public string AdUrl { get; init; } = string.Empty;
+        public int OfferId { get; init; }
+        public bool BuyOut { get; init; }
+        public int RentOfferId { get; init; }
+        public bool RentBuyOut { get; init; }
+        public bool IsBuildersClub { get; init; }
+        public bool ExcludedDynamic { get; init; }
+        public string CustomParams { get; init; }
         /// <summary>
         /// Gets the category of the furni.
         /// </summary>
-        public FurniCategory Category { get; }
+        public FurniCategory Category { get; init; }
         /// <summary>
         /// Gets the category name of the furni.
         /// </summary>
-        public string CategoryName { get; } = string.Empty;
-        public bool CanStandOn { get; }
-        public bool CanSitOn { get; }
-        public bool CanLayOn { get; }
-        public string Line { get; } = string.Empty;
-        public string Environment { get; } = string.Empty;
-        public bool IsRare { get; }
+        public string CategoryName { get; init; }
+        public bool CanStandOn { get; init; }
+        public bool CanSitOn { get; init; }
+        public bool CanLayOn { get; init; }
+        public string Line { get; init; }
+        public string Environment { get; init; }
+        public bool IsRare { get; init; }
 
         internal FurniInfo(ItemType type, Xml.FurniInfo proxy)
         {
@@ -63,7 +62,7 @@ namespace Xabbo.Core.GameData
             DefaultDirection = proxy.DefaultDirection;
             XDimension = proxy.XDimension;
             YDimension = proxy.YDimension;
-            PartColors = proxy.PartColors.AsReadOnly();
+            PartColors = proxy.PartColors.ToImmutableArray();
             Name = proxy.Name ?? string.Empty;
             Description = proxy.Description ?? string.Empty;
             AdUrl = proxy.AdUrl ?? string.Empty;
@@ -90,7 +89,7 @@ namespace Xabbo.Core.GameData
             DefaultDirection = proxy.DefaultDir;
             XDimension = proxy.XDim;
             YDimension = proxy.YDim;
-            PartColors = proxy.PartColors.Colors.ToList().AsReadOnly();
+            PartColors = proxy.PartColors.Colors.ToImmutableArray();
             Name = proxy.Name ?? string.Empty;
             Description = proxy.Description ?? string.Empty;
             AdUrl = proxy.AdUrl ?? string.Empty;

@@ -14,8 +14,6 @@ namespace Xabbo.Core.GameData
                 return LoadXml(stream);
         }
 
-        
-
         public IReadOnlyList<Palette> Palettes { get; }
         public IReadOnlyList<PartSetCollection> SetCollections { get; }
 
