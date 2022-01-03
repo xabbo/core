@@ -70,6 +70,7 @@ namespace Xabbo.Core.Game
             Points = new ActivityPoints();
             Achievements = null;
 
+            _isLoadingProfile = false;
             _isLoadingCredits = false;
         }
 
@@ -81,13 +82,15 @@ namespace Xabbo.Core.Game
         }
 
         /// <summary>
-        /// Waits for the user data load, or returns the user's data immediately if it has already loaded.
+        /// Waits for the user data to load, or returns the user's data immediately if it has already loaded.
         /// </summary>
         public Task<IUserData> GetUserDataAsync() => _taskUserData;
 
         [InterceptIn(nameof(Incoming.ClientLatencyPingResponse))]
         private async void HandleLatencyResponse(InterceptArgs e)
         {
+            if (e.Packet.ReadInt() == 0) return;
+
             if (UserData is null && !_isLoadingProfile)
             {
                 _isLoadingProfile = true;
