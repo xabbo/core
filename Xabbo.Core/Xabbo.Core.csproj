@@ -1,73 +1,75 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Project -->
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>Xabbo.Core</RootNamespace>
-    <AssemblyName>Xabbo.Core</AssemblyName>
-    <AssemblyVersion>1.0.0</AssemblyVersion>
-    <FileVersion>1.0.0</FileVersion>
-    <Nullable>enable</Nullable>
-    <DebugType>embedded</DebugType>
-    <Configurations>Debug;Release</Configurations>
-  </PropertyGroup>
+	<!-- Project -->
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<RootNamespace>Xabbo.Core</RootNamespace>
+		<AssemblyName>Xabbo.Core</AssemblyName>
+		<AssemblyVersion>1.0.0</AssemblyVersion>
+		<FileVersion>1.0.0</FileVersion>
+		<Nullable>enable</Nullable>
+		<DebugType>embedded</DebugType>
+		<Configurations>Debug;Release</Configurations>
+	</PropertyGroup>
 
-  <!-- Configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Develop|AnyCPU'">
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
+	<!-- Configurations -->
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Develop|AnyCPU'">
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+	</PropertyGroup>
 
-  <!-- Package -->
-  <PropertyGroup>
-    <LocalPackageSource>%USERPROFILE%\.nuget\local</LocalPackageSource>
-    <PackageId>Xabbo.Core</PackageId>
-    <Description>Provides parsers, composers, interactions &amp; game state management for Xabbo.Common.</Description>
-    <Version>1.0.0-beta.1</Version>
-    <InformationalVersion>$(Version)</InformationalVersion>
-    <PackageProjectUrl>https://github.com/b7c/Xabbo.Common</PackageProjectUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageIcon>img\package-icon.png</PackageIcon>
-    <Authors>b7</Authors>
-  </PropertyGroup>
+	<!-- Package -->
+	<PropertyGroup>
+		<LocalPackageSource>%USERPROFILE%\.nuget\local</LocalPackageSource>
+		<PackageId>Xabbo.Core</PackageId>
+		<Description>Provides parsers, composers, interactions &amp; game state management.</Description>
+		<Version>1.0.0-beta.1</Version>
+		<InformationalVersion>$(Version)</InformationalVersion>
+		<RepositoryUrl>https://github.com/b7c/Xabbo.Core.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageIcon>img\package-icon.png</PackageIcon>
+		<Authors>b7</Authors>
+		<PackageTags>xabbo;habbo</PackageTags>
+	</PropertyGroup>
 
-  <!-- Include package icon -->
-  <ItemGroup>
-    <None Include="res\img\xabbo-skull-128.png" Pack="true" PackagePath="img\package-icon.png" />
-  </ItemGroup>
-  
-  <!-- Rename paths -->
-  <PropertyGroup>
-    <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
-    <PathMap>$(AppOutputBase)=Xabbo.Core\</PathMap>
-  </PropertyGroup>
+	<!-- Include package icon -->
+	<ItemGroup>
+		<None Include="res\img\xabbo-skull-128.png" Pack="true" PackagePath="img\package-icon.png" />
+	</ItemGroup>
 
-  <!-- Documentation -->
-  <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName).xml</DocumentationFile>
-  </PropertyGroup>
+	<!-- Rename paths -->
+	<PropertyGroup>
+		<AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
+		<PathMap>$(AppOutputBase)=Xabbo.Core\</PathMap>
+	</PropertyGroup>
 
-  <!-- Resources -->
-  <ItemGroup>
-    <None Remove="Resources\figure_part_genders" />
-    <EmbeddedResource Include="Resources\figure_part_genders" />
-  </ItemGroup>
+	<!-- Documentation -->
+	<PropertyGroup>
+		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName).xml</DocumentationFile>
+	</PropertyGroup>
 
-  <!-- References -->
-  <ItemGroup>
-	<PackageReference Include="Xabbo.Common" Version="1.0.0-beta.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
-  </ItemGroup>
+	<!-- Resources -->
+	<ItemGroup>
+		<None Remove="Resources\figure_part_genders" />
+		<EmbeddedResource Include="Resources\figure_part_genders" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="res\img\" />
-  </ItemGroup>
+	<!-- References -->
+	<ItemGroup>
+		<PackageReference Include="Xabbo.Common" Version="1.0.0-beta.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+	</ItemGroup>
 
-  <!-- Add package to local source after pack -->
-  <Target Name="NugetAddPackage" AfterTargets="Pack" Condition="'$(Configuration)'=='Release'">
-    <Exec Command="nuget add bin\$(ConfigurationName)\$(PackageId).$(Version).nupkg -Source $(LocalPackageSource)" />
-  </Target>
+	<ItemGroup>
+		<Folder Include="res\img\" />
+	</ItemGroup>
+
+	<!-- Add package to local source after pack -->
+	<Target Name="NugetAddPackage" AfterTargets="Pack" Condition="'$(Configuration)'=='Release'">
+		<Exec Command="nuget add bin\$(ConfigurationName)\$(PackageId).$(Version).nupkg -Source $(LocalPackageSource)" />
+	</Target>
 
 </Project>
