@@ -9,6 +9,7 @@ namespace Xabbo.Core.GameData
     public class FurniData : IReadOnlyCollection<FurniInfo>
     {
         public static FurniData LoadJson(string json) => new(Json.FurniData.Load(json));
+        public static FurniData LoadJsonFile(string path) => LoadJson(File.ReadAllText(path));
         public static FurniData LoadXml(Stream stream) => new(Xml.FurniData.Load(stream));
         public static FurniData LoadXml(string path)
         {
