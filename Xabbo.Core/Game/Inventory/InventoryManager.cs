@@ -63,6 +63,16 @@ namespace Xabbo.Core.Game
             _logger = NullLogger.Instance;
         }
 
+        protected override void OnDisconnected(object? sender, EventArgs e)
+        {
+            base.OnDisconnected(sender, e);
+
+            _inventory = null;
+            _forceLoadingInventory = false;
+            _currentPacketIndex = 0;
+            _totalPackets = 0;
+        }
+
         /// <summary>
         /// Returns the inventory immediately if it is available
         /// and has not been invalidated, otherwise attempts to retrieve it from the server.
