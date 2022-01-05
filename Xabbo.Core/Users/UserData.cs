@@ -51,7 +51,11 @@ namespace Xabbo.Core
             LastAccessDate = packet.ReadString();
             IsNameChangeable = packet.ReadBool();
             IsSafetyLocked = packet.ReadBool();
-            _Bool5 = packet.ReadBool();
+
+            if (packet.Available > 0)
+            {
+                _Bool5 = packet.ReadBool();
+            }
         }
 
         public void Compose(IPacket packet) => packet.WriteValues(
