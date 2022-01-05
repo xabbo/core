@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,18 @@ namespace Xabbo.Core.GameData
 {
     public class GameDataManager : IGameDataManager
     {
+        private static string GetDefaultCachePath()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return @"%APPDATA%\xabbo\cache\gamedata";
+            }
+            else
+            {
+                return "%HOME%/.xabbo/cache/gamedata";
+            }
+        }
+
         private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
 
         private TaskCompletionSource? _tcsLoad;
@@ -29,7 +42,7 @@ namespace Xabbo.Core.GameData
         public event Action<Exception>? LoadFailed;
 
         public GameDataManager()
-            : this(@"%APPDATA%\xabbo\cache\gamedata")
+            : this(GetDefaultCachePath())
         { }
 
         public GameDataManager(string cachePath)
@@ -57,6 +70,7 @@ namespace Xabbo.Core.GameData
             CancellationToken cancellationToken)
         {
             string cacheFolderPath = Path.Combine(CachePath, domain, type.ToString().ToLower());
+            Directory.CreateDirectory(cacheFolderPath);
 
             string filePath = Path.Combine(cacheFolderPath, hash);
 
