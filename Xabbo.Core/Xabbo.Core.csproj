@@ -24,7 +24,7 @@
 	<PropertyGroup>
 		<LocalPackageSource>%USERPROFILE%\.nuget\local</LocalPackageSource>
 		<PackageId>Xabbo.Core</PackageId>
-		<Description>Provides parsers, composers, interactions &amp; game state management.</Description>
+		<Description>Provides parsers, composers, interactions &amp; game state management for Xabbo.Common.</Description>
 		<Version>1.0.0-beta.1</Version>
 		<InformationalVersion>$(Version)</InformationalVersion>
 		<RepositoryUrl>https://github.com/b7c/Xabbo.Core.git</RepositoryUrl>
@@ -59,7 +59,7 @@
 
 	<!-- References -->
 	<ItemGroup>
-		<PackageReference Include="Xabbo.Common" Version="1.0.0-beta.1" />
+		<PackageReference Include="Xabbo.Common" Version="1.0.0-beta.2" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
 	</ItemGroup>
 
