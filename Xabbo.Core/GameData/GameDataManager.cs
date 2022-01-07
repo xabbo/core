@@ -114,7 +114,10 @@ namespace Xabbo.Core.GameData
 
                 GameDataHashesContainer? hashesContainer = null;
 
-                FileInfo hashesFile = new(Path.Combine(CachePath, domain, "hashes.json"));
+                string hotelCachePath = Path.Combine(CachePath, domain);
+                Directory.CreateDirectory(hotelCachePath);
+
+                FileInfo hashesFile = new(Path.Combine(hotelCachePath, "hashes.json"));
                 if (hashesFile.Exists &&
                     (DateTime.Now - hashesFile.LastWriteTime) < TimeSpan.FromMinutes(15))
                 {
