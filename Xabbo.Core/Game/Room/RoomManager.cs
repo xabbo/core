@@ -240,6 +240,13 @@ namespace Xabbo.Core.Game
             FloorItemDataUpdated?.Invoke(this, new FloorItemDataUpdatedEventArgs(item, previousData));
         }
 
+        public event EventHandler<DiceUpdatedEventArgs>? DiceUpdated;
+        protected virtual void OnDiceUpdated(IFloorItem item, int previousValue)
+        {
+            _logger.LogTrace("Dice value updated. (id:{id})", item.Id);
+            DiceUpdated?.Invoke(this, new DiceUpdatedEventArgs(item, previousValue));
+        }
+
         /// <summary>
         /// Invoked when a floor item slides due to a roller or wired update.
         /// </summary>
@@ -1268,18 +1275,40 @@ namespace Xabbo.Core.Game
             for (int i = 0; i < n; i++)
             {
                 long itemId = packet.ReadLegacyLong();
-                IItemData data = ItemData.Parse(packet);
+                ItemData data = ItemData.Parse(packet);
                 if (!_currentRoom.FloorItems.TryGetValue(itemId, out FloorItem? item))
                 {
                     _logger.LogError("[{method}] Failed to find floor item {id} to update.", itemId, nameof(HandleItemsDataUpdate));
                     continue;
                 }
 
-                IItemData previousData = item.Data;
+                ItemData previousData = item.Data;
                 item.Data = data;
 
                 OnFloorItemDataUpdated(item, previousData);
             }
+        }
+
+        [Receive(nameof(Incoming.DiceValue))]
+        protected void HandleDiceValue(IReadOnlyPacket packet)
+        {
+            if (!IsInRoom) return;
+
+            if (_currentRoom is null) return;
+
+            long itemId = packet.ReadLegacyLong();
+            int diceValue = packet.ReadInt();
+
+            if (!_currentRoom.FloorItems.TryGetValue(itemId, out FloorItem? item))
+            {
+                _logger.LogError("[{method}] Failed to find floor item {id} to update.", nameof(HandleDiceValue), itemId);
+                return;
+            }
+
+            int previousValue = item.Data.State;
+            item.Data.Value = $"{diceValue}";
+
+            OnDiceUpdated(item, previousValue);
         }
         #endregion
 
