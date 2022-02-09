@@ -216,63 +216,61 @@ namespace Xabbo.Core
         #endregion
 
         #region - Furni -
-        public static IEnumerable<IFloorItem> OfKind(this IEnumerable<IFloorItem> items, int kind)
-            => items.Where(item => item.Kind == kind);
-        public static IEnumerable<IWallItem> OfKind(this IEnumerable<IWallItem> items, int kind)
-            => items.Where(item => item.Kind == kind);
+        /// <summary>
+        /// Gets the area occupied by a floor item.
+        /// </summary>
+        public static Area GetArea<TFloorItem>(this TFloorItem item)
+            where TFloorItem : IFloorItem
+        {
+            FurniInfo info = FurniData.GetInfo(item);
+            Area area = new(item.XY, info.XDimension, info.YDimension);
+            if (item.Direction % 4 == 2)
+                area = area.Flip();
+            return area;
+        }
 
-        public static IEnumerable<IFloorItem> OfKinds(this IEnumerable<IFloorItem> items, IEnumerable<int> kinds)
+        /// <summary>
+        /// Gets floor items intersecting the specified area.
+        /// </summary>
+        public static IEnumerable<T> Intersecting<T>(this IEnumerable<T> items, Area area)
+            where T : IFloorItem
+        {
+            return items.Where(item => GetArea(item).Intersects(area));
+        }
+
+        /// <summary>
+        /// Gets items of the specified kind.
+        /// </summary>
+        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, int kind)
+            where T : IFloorItem, IWallItem => items.Where(item => item.Kind == kind);
+
+        /// <summary>
+        /// Gets items of the specified kinds.
+        /// </summary>
+        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, IEnumerable<int> kinds)
+            where T : IFloorItem, IWallItem   
         {
             HashSet<int> set = new(kinds);
             return items.Where(item => set.Contains(item.Kind));
         }
-        public static IEnumerable<IFloorItem> OfKinds(this IEnumerable<IFloorItem> items, params int[] kinds)
-            => OfKinds(items, (IEnumerable<int>)kinds);
 
-        public static IEnumerable<IWallItem> OfKinds(this IEnumerable<IWallItem> items, IEnumerable<int> kinds)
-        {
-            HashSet<int> set = new(kinds);
-            return items.Where(item => set.Contains(item.Kind));
-        }
-        public static IEnumerable<IWallItem> OfKinds(this IEnumerable<IWallItem> items, params int[] kinds)
-            => OfKinds(items, (IEnumerable<int>)kinds);
+        /// <summary>
+        /// Gets items of the specified kinds.
+        /// </summary>
+        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, params int[] kinds)
+            where T : IFloorItem, IWallItem => OfKinds<T>(items, (IEnumerable<int>)kinds);
 
-        public static IEnumerable<T> OwnedBy<T>(this IEnumerable<T> items, int ownerId) where T : IFurni
-            => items.Where(item => item.OwnerId == ownerId);
+        /// <summary>
+        /// Gets items owned by the specified user ID.
+        /// </summary>
+        public static IEnumerable<T> OwnedBy<T>(this IEnumerable<T> items, long ownerId)
+            where T : IFurni => items.Where(item => item.OwnerId == ownerId);
+
+        /// <summary>
+        /// Gets items owned by the specified user.
+        /// </summary>
         public static IEnumerable<T> OwnedBy<T>(this IEnumerable<T> items, string ownerName) where T : IFurni
             => items.Where(item => string.Equals(item.OwnerName, ownerName, StringComparison.OrdinalIgnoreCase));
-
-        public static IEnumerable<IFloorItem> At(this IEnumerable<IFloorItem> items,
-            int? x = null, int? y = null, double? z = null, int? dir = null,
-            double epsilon = XabboConst.DEFAULT_EPSILON)
-        {
-            foreach (var item in items)
-            {
-                if (x.HasValue && item.X != x.Value) continue;
-                if (y.HasValue && item.Y != y.Value) continue;
-                if (z.HasValue && Math.Abs(item.Z - z.Value) >= epsilon) continue;
-                if (dir.HasValue && item.Direction != dir.Value) continue;
-                yield return item;
-            }
-        }
-
-        public static IEnumerable<IFloorItem> At(this IEnumerable<IFloorItem> items,
-            (int X, int Y) location, int? dir = null)
-        {
-            return At(items, location.X, location.Y, dir: dir);
-        }
-
-        public static IEnumerable<IFloorItem> At(this IEnumerable<IFloorItem> items,
-            (int X, int Y, double Z) location, int? dir = null, double epsilon = XabboConst.DEFAULT_EPSILON)
-        {
-            return At(items, location.X, location.Y, location.Z, dir, epsilon);
-        }
-
-        public static IEnumerable<IFloorItem> At(this IEnumerable<IFloorItem> items,
-            Tile tile, int? dir = null, double epsilon = XabboConst.DEFAULT_EPSILON)
-        { 
-            return At(items, tile.X, tile.Y, tile.Z, dir, epsilon: epsilon);
-        }
 
         public static IEnumerable<IWallItem> At(this IEnumerable<IWallItem> items,
             int? wallX = null, int? wallY = null, int? x = null, int? y = null,
@@ -289,6 +287,9 @@ namespace Xabbo.Core
             }
         }
 
+        /// <summary>
+        /// Gets wall items placed at the specified location.
+        /// </summary>
         public static IEnumerable<IWallItem> At(this IEnumerable<IWallItem> items, WallLocation location)
             => At(items, location.WX, location.WY, location.LX, location.LY, location.Orientation);
         #endregion
@@ -385,9 +386,12 @@ namespace Xabbo.Core
         #endregion
 
         #region - Entities -
+        /// <summary>
+        /// Gets room entities at the specified X, Y, Z location and/or direction.
+        /// </summary>
         public static IEnumerable<T> At<T>(this IEnumerable<T> entities,
             int? x = null, int? y = null, double? z = null, int? dir = null,
-            double epsilon = XabboConst.DEFAULT_EPSILON) where T : IEntity
+            double epsilon = XabboConst.DEFAULT_EPSILON) where T : IRoomEntity
         {
             foreach (var e in entities)
             {
@@ -399,21 +403,33 @@ namespace Xabbo.Core
             }
         }
 
+        /// <summary>
+        /// Gets entities at the specified X/Y location and optionally direction.
+        /// </summary>
         public static IEnumerable<T> At<T>(this IEnumerable<T> entities,
-            (int X, int Y) location, int? dir = null) where T : IEntity
+            (int X, int Y) location, int? dir = null) where T : IRoomEntity
         {
             return At(entities, location.X, location.Y, null, dir);
         }
 
+        /// <summary>
+        /// Gets entities at the specified X/Y/Z location and optionally direction.
+        /// </summary>
         public static IEnumerable<T> At<T>(this IEnumerable<T> entities,
             (int X, int Y, double Z) location, int? dir = null,
-            double epsilon = XabboConst.DEFAULT_EPSILON) where T : IEntity
-        { 
+            double epsilon = XabboConst.DEFAULT_EPSILON) where T : IRoomEntity
+        {
             return At(entities, location.X, location.Y, location.Z, dir, epsilon);
         }
 
+        static void Test()
+        {
+            IEnumerable<IRoomUser> ents = Enumerable.Empty<IRoomUser>();
+            ents.At(dir: 4);
+        }
+
         public static IEnumerable<T> Inside<T>(this IEnumerable<T> entities, Area area)
-            where T : IEntity
+            where T : IRoomEntity
         {
             return entities.Where(x => area.Contains(x.Location));
         }

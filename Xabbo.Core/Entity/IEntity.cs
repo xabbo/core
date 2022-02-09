@@ -6,7 +6,7 @@ using Xabbo.Core.Game;
 
 namespace Xabbo.Core
 {
-    public interface IEntity : IComposable
+    public interface IEntity : IRoomEntity, IComposable
     {
         /// <summary>
         /// Gets if the entity has been removed from the room.
@@ -14,7 +14,7 @@ namespace Xabbo.Core
         bool IsRemoved { get; }
 
         /// <summary>
-        /// Gets if the entity is hidden client-side by the <see cref="EntityManager" />.
+        /// Gets if the entity is hidden client-side by the <see cref="RoomManager" />.
         /// </summary>
         bool IsHidden { get; }
 
@@ -49,39 +49,29 @@ namespace Xabbo.Core
         string Figure { get; }
 
         /// <summary>
-        /// Gets the location of the entity.
-        /// </summary>
-        Tile Location { get; }
-
-        /// <summary>
         /// Gets the X coordinate of the entity.
         /// </summary>
-        int X { get; }
+        public int X => Location.X;
 
         /// <summary>
         /// Gets the Y coordinate of the entity.
         /// </summary>
-        int Y { get; }
+        public int Y => Location.Y;
 
         /// <summary>
         /// Gets the XY coordinates of the entity.
         /// </summary>
-        (int X, int Y) XY { get; }
+        public (int X, int Y) XY => Location.XY;
 
         /// <summary>
         /// Gets the Z coordinate of the entity.
         /// </summary>
-        float Z { get; }
+        public float Z => Location.Z;
 
         /// <summary>
         /// Gets the XYZ coordinates of the entity.
         /// </summary>
-        (int X, int Y, float Z) XYZ { get; }
-
-        /// <summary>
-        /// Gets the direction of the entity.
-        /// </summary>
-        int Direction { get; }
+        public (int X, int Y, float Z) XYZ => Location.XYZ;
 
         /// <summary>
         /// Gets the current dance of the entity.
