@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Interceptor.Attributes;
 
 namespace Xabbo.Core.Tasks
 {
@@ -17,7 +18,7 @@ namespace Xabbo.Core.Tasks
             _userId = userId;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetExtendedProfile, (LegacyLong)_userId, false);
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetExtendedProfile, (LegacyLong)_userId, false);
 
         [InterceptIn(nameof(Incoming.ExtendedProfile))]
         protected void OnUserProfile(InterceptArgs e)

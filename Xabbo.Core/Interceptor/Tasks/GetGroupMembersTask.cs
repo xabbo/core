@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Messages.Attributes;
 
 namespace Xabbo.Core.Tasks
 {
@@ -23,7 +24,8 @@ namespace Xabbo.Core.Tasks
             _searchType = searchType;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetGuildMembers, _groupId, _page, _filter, (int)_searchType);
+        /// <inheritdoc/>
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetGuildMembers, (LegacyLong)_groupId, _page, _filter, (int)_searchType);
 
         [InterceptIn(nameof(Incoming.GuildMembers))] 
         protected void OnGuildMembers(InterceptArgs e)

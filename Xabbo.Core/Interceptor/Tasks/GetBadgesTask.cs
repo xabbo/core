@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Xabbo.Messages;
+using Xabbo.Messages.Attributes;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
@@ -17,7 +18,7 @@ namespace Xabbo.Core.Tasks
             : base(interceptor)
         { }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetAvailableBadges);
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetAvailableBadges);
 
         [InterceptIn(nameof(Incoming.AvailableBadges))]
         protected void OnInventoryBadges(InterceptArgs e)

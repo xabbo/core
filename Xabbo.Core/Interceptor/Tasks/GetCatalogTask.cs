@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 using Xabbo.Messages;
 using Xabbo.Interceptor;
+using Xabbo.Interceptor.Attributes;
 using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks
@@ -17,7 +18,7 @@ namespace Xabbo.Core.Tasks
             _type = type;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetCatalogIndex, _type);
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetCatalogIndex, _type);
 
         [InterceptIn(nameof(Incoming.CatalogIndex))]
         protected void HandleCatalogIndex(InterceptArgs e)

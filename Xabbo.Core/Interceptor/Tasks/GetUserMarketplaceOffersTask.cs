@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
-using Xabbo.Messages;
+using Xabbo.Interceptor.Attributes;
 
 namespace Xabbo.Core.Tasks
 {
@@ -13,7 +14,7 @@ namespace Xabbo.Core.Tasks
             : base(interceptor)
         { }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.MarketplaceListOwnOffers);
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.MarketplaceListOwnOffers);
 
         [InterceptIn(nameof(Incoming.MarketplaceOwnOfferList))]
         protected void HandleMarketplaceOwnOfferList(InterceptArgs e)

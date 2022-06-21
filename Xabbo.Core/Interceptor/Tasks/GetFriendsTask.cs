@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Interceptor.Attributes;
 
 namespace Xabbo.Core.Tasks
 {
@@ -17,7 +18,7 @@ namespace Xabbo.Core.Tasks
             : base(interceptor)
         { }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.MessengerInit);
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.MessengerInit);
 
         [InterceptIn(nameof(Incoming.MessengerInit))]
         protected void OnInitFriends(InterceptArgs e) => e.Block();

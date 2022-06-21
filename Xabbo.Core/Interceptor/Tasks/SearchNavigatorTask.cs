@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Interceptor.Attributes;
 
 namespace Xabbo.Core.Tasks
 {
@@ -19,7 +20,7 @@ namespace Xabbo.Core.Tasks
             _filter = filter;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.Navigator2Search, _category, _filter);
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.Navigator2Search, _category, _filter);
 
         [InterceptIn(nameof(Incoming.Navigator2SearchResultBlocks))]
         protected void OnNavigatorSearchResults(InterceptArgs e)

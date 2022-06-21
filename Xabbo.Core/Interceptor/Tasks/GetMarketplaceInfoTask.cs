@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
-using Xabbo.Messages;
+using Xabbo.Interceptor.Attributes;
 
 namespace Xabbo.Core.Tasks
 {
@@ -19,7 +20,7 @@ namespace Xabbo.Core.Tasks
             _kind = kind;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(
             Out.MarketplaceGetItemStats,
             _type switch
             {

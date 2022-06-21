@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Interceptor.Attributes;
 
 using Xabbo.Core.Game;
 
@@ -24,7 +25,7 @@ namespace Xabbo.Core.Tasks
 
         public GetInventoryTask(IInterceptor interceptor) : this(interceptor, true) { }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetInventory);
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetInventory);
 
         [InterceptIn(nameof(Incoming.InventoryPush))]
         protected void OnInventoryItems(InterceptArgs e)

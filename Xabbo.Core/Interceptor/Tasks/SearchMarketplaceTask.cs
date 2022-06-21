@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
-using Xabbo.Messages;
+using Xabbo.Interceptor.Attributes;
 
 namespace Xabbo.Core.Tasks
 {
@@ -26,7 +27,7 @@ namespace Xabbo.Core.Tasks
             _sort = sort;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(
             Out.MarketplaceSearchOffers,
             _from ?? -1, _to ?? -1,
             _searchText ?? string.Empty,

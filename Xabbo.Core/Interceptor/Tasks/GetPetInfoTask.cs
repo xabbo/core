@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Interceptor.Attributes;
 
 namespace Xabbo.Core.Tasks
 {
@@ -17,7 +18,7 @@ namespace Xabbo.Core.Tasks
             _petId = petId;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetNewPetInfo, (LegacyLong)_petId);
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetNewPetInfo, (LegacyLong)_petId);
 
         [InterceptIn(nameof(Incoming.PetInfo))]
         protected void OnPetInfo(InterceptArgs e)

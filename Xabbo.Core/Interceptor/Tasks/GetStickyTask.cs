@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Interceptor.Attributes;
 
 namespace Xabbo.Core.Tasks
 {
@@ -17,7 +18,7 @@ namespace Xabbo.Core.Tasks
             _stickyId = stickyId;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetItemData, (LegacyLong)_stickyId);
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetItemData, (LegacyLong)_stickyId);
 
         [InterceptIn(nameof(Incoming.ItemData))]
         protected void OnPostItData(InterceptArgs e)

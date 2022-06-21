@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Interceptor.Attributes;
 
 namespace Xabbo.Core.Tasks
 {
@@ -17,7 +18,7 @@ namespace Xabbo.Core.Tasks
             _groupId = groupId;
         }
 
-        protected override async Task OnExecuteAsync() => await SendAsync(Out.GetHabboGroupDetails, (LegacyLong)_groupId, false);
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetHabboGroupDetails, (LegacyLong)_groupId, false);
 
         [InterceptIn(nameof(Incoming.HabboGroupDetails))]
         protected void OnHabboGroupDetails(InterceptArgs e)

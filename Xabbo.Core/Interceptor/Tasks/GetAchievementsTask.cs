@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using Xabbo.Messages;
+using Xabbo.Messages.Attributes;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
@@ -13,7 +14,7 @@ namespace Xabbo.Core.Tasks
             : base(interceptor)
         { }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetUserAchievements);
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetUserAchievements);
 
         [InterceptIn(nameof(Incoming.PossibleUserAchievements))]
         protected void OnAchievementList(InterceptArgs e)

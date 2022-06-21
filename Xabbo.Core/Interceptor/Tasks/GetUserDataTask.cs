@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Interceptor.Attributes;
 
 namespace Xabbo.Core.Tasks
 {
@@ -13,7 +14,7 @@ namespace Xabbo.Core.Tasks
             : base(interceptor)
         { }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.InfoRetrieve);
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.InfoRetrieve);
 
         [InterceptIn(nameof(Incoming.UserObject))]
         protected void HandleUserData(InterceptArgs e)

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Interceptor.Attributes;
 
 namespace Xabbo.Core.Tasks
 {
@@ -17,7 +18,7 @@ namespace Xabbo.Core.Tasks
             _roomId = roomId;
         }
 
-        protected override Task OnExecuteAsync() => SendAsync(Out.GetRoomSettings, (LegacyLong)_roomId);
+        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetRoomSettings, (LegacyLong)_roomId);
 
         [InterceptIn(nameof(Incoming.RoomSettingsData))]
         protected void OnRoomSettingsData(InterceptArgs e)
