@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 
 using Xabbo.Messages;
-using Xabbo.Messages.Attributes;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Interceptor.Attributes;
 
 namespace Xabbo.Core.Tasks
 {
