@@ -6,18 +6,22 @@ using System.Linq;
 
 using Xabbo.Core.GameData;
 
-namespace Xabbo.Core
+namespace Xabbo.Core.Extensions
 {
+    /// <summary>
+    /// Provides convenient extension methods utilizing Xabbo.Core.
+    /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class XabboCoreExtensions
     {
         private static FurniData? _furniData;
         private static ExternalTexts? _texts;
-        private static FurniData FurniData => _furniData ?? throw new InvalidOperationException("Xabbo Core extensions have not been initialized.");
-        private static ExternalTexts Texts => _texts ?? throw new InvalidOperationException("Xabbo Core extensions have not been initialized.");
+
+        private static FurniData FurniData => _furniData ?? throw new InvalidOperationException($"{nameof(XabboCoreExtensions)} has not been initialized.");
+        private static ExternalTexts Texts => _texts ?? throw new InvalidOperationException($"{nameof(XabboCoreExtensions)} has not been initialized.");
         
         /// <summary>
-        /// Initializes core extensions with the specified game data.
+        /// Initializes <see cref="XabboCoreExtensions"/> with the specified game data.
         /// </summary>
         public static void Initialize(FurniData furniData, ExternalTexts texts)
         {
@@ -52,97 +56,6 @@ namespace Xabbo.Core
             {
                 throw new Exception($"Failed to find variant for item type: {item.GetType()}.");
             }
-        }
-
-        /// <summary>
-        /// Selects floor items.
-        /// </summary>
-        public static IEnumerable<T> GetFloorItems<T>(this IEnumerable<T> items)
-            where T : IItem => items.Where(x => x.Type == ItemType.Floor);
-
-        /// <summary>
-        /// Selects wall items.
-        /// </summary>
-        public static IEnumerable<T> GetWallItems<T>(this IEnumerable<T> items)
-            where T : IItem => items.Where(x => x.Type == ItemType.Wall);
-
-        /// <summary>
-        /// Selects items of the specified type and kind.
-        /// </summary>
-        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, ItemType type, int kind)
-            where T : IItem => items.Where(item => item.Type == type && item.Kind == kind);
-
-        /// <summary>
-        /// Selects items of the same type and kind as the specified furni info.
-        /// </summary>
-        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, FurniInfo furniInfo)
-            where T : IItem => OfKind(items, furniInfo.Type, furniInfo.Kind);
-
-        /// <summary>
-        /// Selects items of the same type and kind as any of the specified furni info.
-        /// </summary>
-        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, IEnumerable<FurniInfo> furniInfo) where T : IItem
-        {
-            var set = new HashSet<(ItemType, int)>(furniInfo.Select(info => (info.Type, info.Kind)));
-            return items.Where(item => set.Contains((item.Type, item.Kind)));
-        }
-
-        /// <summary>
-        /// Selects items of the same type and kind as any of the specified furni info.
-        /// </summary>
-        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, params FurniInfo[] furniInfo)
-            where T : IItem => OfKinds(items, (IEnumerable<FurniInfo>)furniInfo);
-
-        /// <summary>
-        /// Selects items of the specified category.
-        /// </summary>
-        public static IEnumerable<T> OfCategory<T>(this IEnumerable<T> items, FurniCategory category)
-            where T : IItem => items.Where(x => FurniData.GetInfo(x)?.Category == category);
-
-        /// <summary>
-        /// Selects items with the specified furni identifier.
-        /// </summary>
-        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, string identifier)
-            where T : IItem => items.Where(x => FurniData.GetInfo(x)?.Identifier.Equals(identifier, StringComparison.OrdinalIgnoreCase) == true);
-
-        /// <summary>
-        /// Selects items with any of the specified furni identifiers.
-        /// </summary>
-        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, IEnumerable<string> identifiers)
-            where T : IItem
-        {
-            HashSet<string> set = new(identifiers, StringComparer.OrdinalIgnoreCase);
-            return items.Where(x => set.Contains(FurniData.GetInfo(x)?.Identifier ?? string.Empty));
-        }
-
-        /// <summary>
-        /// Selects items with any of the specified furni identifiers.
-        /// </summary>
-        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, params string[] identifiers)
-            where T : IItem => OfKinds(items, (IEnumerable<string>)identifiers);
-
-        /// <summary>
-        /// Selects items of the specified furni line.
-        /// </summary>
-        public static IEnumerable<T> OfLine<T>(this IEnumerable<T> items, string line)
-            where T : IItem => items.Where(x => FurniData.GetInfo(x).Line.Equals(line, StringComparison.OrdinalIgnoreCase));
-
-        /// <summary>
-        /// Selects items with names matching the specified name.
-        /// </summary>
-        public static IEnumerable<T> Named<T>(this IEnumerable<T> items, string name)
-            where T : IItem
-        {
-            return items.Where(x => FurniData.GetInfo(x)?.Name.Equals(name, StringComparison.OrdinalIgnoreCase) == true);
-        }
-
-        /// <summary>
-        /// Selects items with names containing the specified search text.
-        /// </summary>
-        public static IEnumerable<T> NamedLike<T>(this IEnumerable<T> items, string searchText)
-            where T : IItem
-        {
-            return items.Where(x => FurniData.GetInfo(x)?.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) == true);
         }
 
         /// <summary>
@@ -213,6 +126,97 @@ namespace Xabbo.Core
         /// Gets the furni line of this item.
         /// </summary>
         public static string GetLine(this IItem item) => GetInfo(item).Line;
+
+        /// <summary>
+        /// Selects floor items.
+        /// </summary>
+        public static IEnumerable<T> GetFloorItems<T>(this IEnumerable<T> items)
+            where T : IItem => items.Where(x => x.Type == ItemType.Floor);
+
+        /// <summary>
+        /// Selects wall items.
+        /// </summary>
+        public static IEnumerable<T> GetWallItems<T>(this IEnumerable<T> items)
+            where T : IItem => items.Where(x => x.Type == ItemType.Wall);
+
+        /// <summary>
+        /// Selects items of the specified type and kind.
+        /// </summary>
+        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, ItemType type, int kind)
+            where T : IItem => items.Where(item => item.Type == type && item.Kind == kind);
+
+        /// <summary>
+        /// Selects items of the same kind as the specified furni info.
+        /// </summary>
+        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, FurniInfo furniInfo)
+            where T : IItem => OfKind(items, furniInfo.Type, furniInfo.Kind);
+
+        /// <summary>
+        /// Selects items of the same kind as any of the specified furni info.
+        /// </summary>
+        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, IEnumerable<FurniInfo> furniInfo) where T : IItem
+        {
+            var set = new HashSet<(ItemType, int)>(furniInfo.Select(info => (info.Type, info.Kind)));
+            return items.Where(item => set.Contains((item.Type, item.Kind)));
+        }
+
+        /// <summary>
+        /// Selects items of the same kind as any of the specified furni info.
+        /// </summary>
+        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, params FurniInfo[] furniInfo)
+            where T : IItem => OfKinds(items, (IEnumerable<FurniInfo>)furniInfo);
+
+        /// <summary>
+        /// Selects items of the specified category.
+        /// </summary>
+        public static IEnumerable<T> OfCategory<T>(this IEnumerable<T> items, FurniCategory category)
+            where T : IItem => items.Where(x => FurniData.GetInfo(x)?.Category == category);
+
+        /// <summary>
+        /// Selects items with the specified furni identifier.
+        /// </summary>
+        public static IEnumerable<T> OfKind<T>(this IEnumerable<T> items, string identifier)
+            where T : IItem => items.Where(x => FurniData.GetInfo(x)?.Identifier.Equals(identifier, StringComparison.OrdinalIgnoreCase) == true);
+
+        /// <summary>
+        /// Selects items with any of the specified furni identifiers.
+        /// </summary>
+        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, IEnumerable<string> identifiers)
+            where T : IItem
+        {
+            HashSet<string> set = new(identifiers, StringComparer.OrdinalIgnoreCase);
+            return items.Where(x => set.Contains(FurniData.GetInfo(x)?.Identifier ?? string.Empty));
+        }
+
+        /// <summary>
+        /// Selects items with any of the specified furni identifiers.
+        /// </summary>
+        public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, params string[] identifiers)
+            where T : IItem => OfKinds(items, (IEnumerable<string>)identifiers);
+
+        /// <summary>
+        /// Selects items of the specified furni line.
+        /// </summary>
+        public static IEnumerable<T> OfLine<T>(this IEnumerable<T> items, string line)
+            where T : IItem => items.Where(x => FurniData.GetInfo(x).Line.Equals(line, StringComparison.OrdinalIgnoreCase));
+
+        /// <summary>
+        /// Selects items with names matching the specified name.
+        /// </summary>
+        public static IEnumerable<T> Named<T>(this IEnumerable<T> items, string name)
+            where T : IItem
+        {
+            return items.Where(x => FurniData.GetInfo(x)?.Name.Equals(name, StringComparison.OrdinalIgnoreCase) == true);
+        }
+
+        /// <summary>
+        /// Selects items with names containing the specified search text.
+        /// </summary>
+        public static IEnumerable<T> NamedLike<T>(this IEnumerable<T> items, string searchText)
+            where T : IItem
+        {
+            return items.Where(x => FurniData.GetInfo(x)?.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) == true);
+        }
         #endregion
 
         #region - Furni -
@@ -232,8 +236,8 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets floor items intersecting the specified area.
         /// </summary>
-        public static IEnumerable<T> Intersecting<T>(this IEnumerable<T> items, Area area)
-            where T : IFloorItem
+        public static IEnumerable<TFloorItem> Intersecting<TFloorItem>(this IEnumerable<TFloorItem> items, Area area)
+            where TFloorItem : IFloorItem
         {
             return items.Where(item => GetArea(item).Intersects(area));
         }
@@ -272,9 +276,12 @@ namespace Xabbo.Core
         public static IEnumerable<T> OwnedBy<T>(this IEnumerable<T> items, string ownerName) where T : IFurni
             => items.Where(item => string.Equals(item.OwnerName, ownerName, StringComparison.OrdinalIgnoreCase));
 
-        public static IEnumerable<IWallItem> At(this IEnumerable<IWallItem> items,
+        /// <summary>
+        /// Gets wall items placed at the specified location.
+        /// </summary>
+        public static IEnumerable<TWallItem> At<TWallItem>(this IEnumerable<TWallItem> items,
             int? wallX = null, int? wallY = null, int? x = null, int? y = null,
-            WallOrientation? orientation = null)
+            WallOrientation? orientation = null) where TWallItem : IWallItem
         {
             foreach (var item in items)
             {
@@ -290,20 +297,29 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets wall items placed at the specified location.
         /// </summary>
-        public static IEnumerable<IWallItem> At(this IEnumerable<IWallItem> items, WallLocation location)
+        public static IEnumerable<TWallItem> At<TWallItem>(this IEnumerable<TWallItem> items, WallLocation location) where TWallItem : IWallItem
             => At(items, location.WX, location.WY, location.LX, location.LY, location.Orientation);
         #endregion
 
         #region - Inventory -
+        /// <summary>
+        /// Gets tradeable inventory items.
+        /// </summary>
         public static IEnumerable<IInventoryItem> GetTradeable(this IEnumerable<IInventoryItem> items)
             => items.Where(item => item.IsTradeable);
+        /// <summary>
+        /// Gets sellable inventory items.
+        /// </summary>
         public static IEnumerable<IInventoryItem> GetSellable(this IEnumerable<IInventoryItem> items)
             => items.Where(item => item.IsSellable);
 
+        /// <summary>
+        /// Splits inventory items into groups limited by the specified maximum slot and item counts.
+        /// </summary>
         public static IEnumerable<IGrouping<int, IInventoryItem>> Group(this IEnumerable<IInventoryItem> items, int maxSlots = 9, int maxItems = 1500)
         {
-            if (maxSlots < 1 || maxSlots > 9) throw new ArgumentOutOfRangeException(nameof(maxSlots));
-            if (maxItems < 1 || maxItems > 1500) throw new ArgumentOutOfRangeException(nameof(maxItems));
+            if (maxSlots < 1) throw new ArgumentOutOfRangeException(nameof(maxSlots));
+            if (maxItems < 1) throw new ArgumentOutOfRangeException(nameof(maxItems));
 
             int groupIndex = 0, currentSlots = 0, currentCount = 0;
             var lastKind = ((ItemType)(-1), -1);
