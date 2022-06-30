@@ -118,26 +118,30 @@ namespace Xabbo.Core
         /// <summary>
         /// Gets the hotel with the specified identifier. (ex. <c>us</c>)
         /// </summary>
-        public static Hotel? FromIdentifier(string identifier) => All.FirstOrDefault(x => x.Identifier == identifier);
+        public static Hotel FromIdentifier(string identifier) => All.FirstOrDefault(x => x.Identifier == identifier)
+            ?? throw new Exception($"Unknown hotel identifier: \"{identifier}\".");
 
         /// <summary>
         /// Gets the hotel with the specified domain. (ex. <c>com</c>)
         /// </summary>
-        public static Hotel? FromDomain(string domain) => All.FirstOrDefault(x => x.Domain == domain);
+        public static Hotel FromDomain(string domain) => All.FirstOrDefault(x => x.Domain == domain)
+            ?? throw new Exception($"Unknown hotel domain: \"{domain}\".");
 
         /// <summary>
         /// Gets the hotel with the specified host. (ex. <c>www.habbo.com</c>)
         /// </summary>
-        public static Hotel? FromHost(string host)
+        public static Hotel FromHost(string host)
         {
             if (host.StartsWith("habbo."))
                 host = "www." + host;
-            return All.FirstOrDefault(x => x.Host.Equals(host, StringComparison.OrdinalIgnoreCase));
+            return All.FirstOrDefault(x => x.Host.Equals(host, StringComparison.OrdinalIgnoreCase))
+                ?? throw new Exception($"Unknown hotel host: \"{host}\".");
         }
 
         /// <summary>
         /// Gets the hotel with the specified game host. (ex. <c>game-us.habbo.com</c>)
         /// </summary>
-        public static Hotel? FromGameHost(string gameHost) => All.FirstOrDefault(x => x.GameHost.Equals(gameHost, StringComparison.OrdinalIgnoreCase));
+        public static Hotel FromGameHost(string gameHost) => All.FirstOrDefault(x => x.GameHost.Equals(gameHost, StringComparison.OrdinalIgnoreCase))
+            ?? throw new Exception($"Unknown game host: \"{gameHost}\".");
     }
 }
