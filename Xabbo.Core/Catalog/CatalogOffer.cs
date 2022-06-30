@@ -10,18 +10,18 @@ namespace Xabbo.Core
         public int Id { get; set; }
         public CatalogPage? Page { get; set; }
         ICatalogPage? ICatalogOffer.Page => Page;
-        public string FurniLine { get; set; }
+        public string FurniLine { get; set; } = string.Empty;
         public bool IsRentable { get; set; }
         public int PriceInCredits { get; set; }
         public int PriceInActivityPoints { get; set; }
         public ActivityPointType ActivityPointType { get; set; }
         public bool CanPurchaseAsGift { get; set; }
-        public List<CatalogProduct> Products { get; set; } = new List<CatalogProduct>();
+        public List<CatalogProduct> Products { get; set; } = new();
         IReadOnlyList<ICatalogProduct> ICatalogOffer.Products => Products;
         public int ClubLevel { get; set; }
         public bool CanPurchaseMultiple { get; set; }
         public bool IsPet { get; set; }
-        public string PreviewImage { get; set; }
+        public string PreviewImage { get; set; } = string.Empty;
 
         public CatalogOffer()
         {
@@ -64,7 +64,7 @@ namespace Xabbo.Core
                 .WriteInt(PriceInActivityPoints)
                 .WriteInt((int)ActivityPointType)
                 .WriteBool(CanPurchaseAsGift)
-                .WriteValues(Products)
+                .WriteCollection(Products)
                 .WriteInt(ClubLevel)
                 .WriteBool(CanPurchaseMultiple);
 
@@ -79,6 +79,6 @@ namespace Xabbo.Core
         void IComposable.Compose(IPacket packet) => Compose(packet, true);
 
         public static CatalogOffer Parse(IReadOnlyPacket packet, bool fromCatalog = true)
-            => new CatalogOffer(packet, fromCatalog);
+            => new(packet, fromCatalog);
     }
 }

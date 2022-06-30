@@ -45,12 +45,12 @@ namespace Xabbo.Core.GameData
         /// <summary>
         /// Gets the category name of the furni.
         /// </summary>
-        public string CategoryName { get; init; }
+        public string CategoryName { get; init; } = string.Empty;
         public bool CanStandOn { get; init; }
         public bool CanSitOn { get; init; }
         public bool CanLayOn { get; init; }
-        public string Line { get; init; }
-        public string Environment { get; init; }
+        public string Line { get; init; } = string.Empty;
+        public string Environment { get; init; } = string.Empty;
         public bool IsRare { get; init; }
 
         internal FurniInfo(ItemType type, Xml.FurniInfo proxy)

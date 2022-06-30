@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+
+using Xabbo.Common;
 using Xabbo.Messages;
 
 namespace Xabbo.Core
@@ -21,10 +23,10 @@ namespace Xabbo.Core
         public bool HasRentPeriodStarted { get; set; }
         public long RoomId { get; set; }
         public short _Short1 { get; set; }
-        public string SlotId { get; set; }
+        public string SlotId { get; set; } = string.Empty;
         public int _Int3 { get; set; }
 
-        public string _String3 { get; set; }
+        public string _String3 { get; set; } = string.Empty;
         public long Extra { get; set; }
         public int _Int5 { get; set; }
 
@@ -34,9 +36,6 @@ namespace Xabbo.Core
         public InventoryItem()
         {
             Data = new LegacyData();
-
-            SlotId =
-            _String3 = string.Empty;
         }
 
         public InventoryItem(IInventoryItem item)

@@ -10,15 +10,15 @@ namespace Xabbo.Core
         public int Id { get; set; }
         public string CatalogType { get; set; }
         public string LayoutCode { get; set; }
-        public List<string> Images { get; set; } = new List<string>();
+        public List<string> Images { get; set; }
         IReadOnlyList<string> ICatalogPage.Images => Images;
-        public List<string> Texts { get; set; } = new List<string>();
+        public List<string> Texts { get; set; }
         IReadOnlyList<string> ICatalogPage.Texts => Texts;
-        public List<CatalogOffer> Offers { get; set; } = new List<CatalogOffer>();
+        public List<CatalogOffer> Offers { get; set; }
         IReadOnlyList<ICatalogOffer> ICatalogPage.Offers => Offers;
         public int OfferId { get; set; }
         public bool AcceptSeasonCurrencyAsCredits { get; set; }
-        public List<CatalogPageItem> FrontPageItems { get; set; } = new List<CatalogPageItem>();
+        public List<CatalogPageItem> FrontPageItems { get; set; }
         IReadOnlyList<ICatalogPageItem> ICatalogPage.Data => FrontPageItems;
 
         public CatalogPage()
@@ -26,10 +26,10 @@ namespace Xabbo.Core
             CatalogType =
             LayoutCode = string.Empty;
 
-            Images = new List<string>();
-            Texts = new List<string>();
-            Offers = new List<CatalogOffer>();
-            FrontPageItems = new List<CatalogPageItem>();
+            Images = new();
+            Texts = new();
+            Offers = new();
+            FrontPageItems = new();
         }
 
         protected CatalogPage(IReadOnlyPacket packet)
@@ -38,15 +38,11 @@ namespace Xabbo.Core
             CatalogType = packet.ReadString();
             LayoutCode = packet.ReadString();
 
-            short n = packet.ReadLegacyShort();
-            for (int i = 0; i < n; i++)
-                Images.Add(packet.ReadString());
+            Images = packet.ReadList<string>();
+            Texts = packet.ReadList<string>();
 
-            n = packet.ReadLegacyShort();
-            for (int i = 0; i < n; i++)
-                Texts.Add(packet.ReadString());
-
-            n = packet.ReadLegacyShort();
+            Offers = new();
+            int n = packet.ReadLegacyShort();
             for (int i = 0; i < n; i++)
             {
                 CatalogOffer offer = CatalogOffer.Parse(packet);
@@ -56,6 +52,8 @@ namespace Xabbo.Core
 
             OfferId = packet.ReadInt();
             AcceptSeasonCurrencyAsCredits = packet.ReadBool();
+
+            FrontPageItems = new();
             if (packet.Available > 0)
             {
                 n = packet.ReadLegacyShort();
@@ -70,10 +68,12 @@ namespace Xabbo.Core
                 .WriteInt(Id)
                 .WriteString(CatalogType)
                 .WriteString(LayoutCode)
-                .WriteValues(Images, Texts, Offers)
+                .WriteCollection(Images)
+                .WriteCollection(Texts)
+                .WriteCollection(Offers)
                 .WriteInt(OfferId)
                 .WriteBool(AcceptSeasonCurrencyAsCredits)
-                .WriteValues(FrontPageItems);
+                .WriteCollection(FrontPageItems);
         }
 
         public static CatalogPage Parse(IReadOnlyPacket packet) => new CatalogPage(packet);
