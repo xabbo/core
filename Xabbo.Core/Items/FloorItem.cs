@@ -21,7 +21,8 @@ namespace Xabbo.Core
         public float Height { get; set; }
         public long Extra { get; set; }
 
-        public IItemData Data { get; set; }
+        public ItemData Data { get; set; }
+        IItemData IFloorItem.Data => Data;
 
         public override int State => double.TryParse(Data.Value, out double state) ? (int)state : -1;
 
@@ -109,7 +110,7 @@ namespace Xabbo.Core
             if (Kind < 0) packet.WriteString(StaticClass);
             if (writeOwnerName) packet.WriteString(OwnerName);
         }
-
+        
 
         public static FloorItem Parse(IReadOnlyPacket packet, bool readName = true)
         {
