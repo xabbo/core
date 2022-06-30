@@ -64,24 +64,26 @@ namespace Xabbo.Core
         /// Writes the values of this <see cref="RoomSettings"/> to the specified packet
         /// to be sent to the server with <see cref="Outgoing.SaveRoomSettings"/>.
         /// </summary>
-        public void Compose(IPacket packet)
-        {
-            packet.WriteValues(
-                (LegacyLong)Id,
-                Name ?? string.Empty,
-                Description ?? string.Empty,
-                (int)Access,
-                Password ?? string.Empty,
-                MaxVisitors,
-                (int)Category,
-                Tags,
-                (int)Trading,
-                AllowPets, AllowOthersPetsToEat, DisableRoomBlocking, HideWalls,
-                (int)WallThickness, (int)FloorThickness,
-                Moderation, Chat,
-                EnlistByFurniContent
-            );
-        }
+        public void Compose(IPacket packet) => packet
+            .WriteLegacyLong(Id)
+            .WriteString(Name ?? string.Empty)
+            .WriteString(Description ?? string.Empty)
+            .WriteString(Description ?? string.Empty)
+            .WriteInt((int)Access)
+            .WriteString(Password ?? string.Empty)
+            .WriteInt(MaxVisitors)
+            .WriteInt((int)Category)
+            .WriteCollection(Tags)
+            .WriteInt((int)Trading)
+            .WriteBool(AllowPets)
+            .WriteBool(AllowOthersPetsToEat)
+            .WriteBool(DisableRoomBlocking)
+            .WriteBool(HideWalls)
+            .WriteInt((int)WallThickness)
+            .WriteInt((int)FloorThickness)
+            .Write(Moderation)
+            .Write(Chat)
+            .WriteBool(EnlistByFurniContent);
 
         public static RoomSettings Parse(IReadOnlyPacket packet) => new(packet);
     }

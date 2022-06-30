@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core
@@ -18,11 +19,10 @@ namespace Xabbo.Core
             WhoCanBan = (ModerationPermissions)packet.ReadInt();
         }
 
-        public void Compose(IPacket packet) => packet.WriteValues(
-            (int)WhoCanMute,
-            (int)WhoCanKick,
-            (int)WhoCanBan
-        );
+        public void Compose(IPacket packet) => packet
+            .WriteInt((int)WhoCanMute)
+            .WriteInt((int)WhoCanKick)
+            .WriteInt((int)WhoCanBan);
 
         public static ModerationSettings Parse(IReadOnlyPacket packet)
         {

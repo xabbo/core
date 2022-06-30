@@ -30,13 +30,12 @@ namespace Xabbo.Core
             FloodProtection = (ChatFloodProtection)packet.ReadInt();
         }
 
-        public void Compose(IPacket packet) => packet.WriteValues(
-            (int)Flow,
-            (int)BubbleWidth,
-            (int)ScrollSpeed,
-            TalkHearingDistance,
-            (int)FloodProtection
-        );
+        public void Compose(IPacket packet) => packet
+            .WriteInt((int)Flow)
+            .WriteInt((int)BubbleWidth)
+            .WriteInt((int)ScrollSpeed)
+            .WriteInt(TalkHearingDistance)
+            .WriteInt((int)FloodProtection);
 
         public static ChatSettings Parse(IReadOnlyPacket packet)
         {

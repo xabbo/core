@@ -58,23 +58,22 @@ namespace Xabbo.Core
             }
         }
 
-        public void Compose(IPacket packet) => packet.WriteValues(
-            Id,
-            Name,
-            Figure,
-            Gender.ToShortString(),
-            Motto,
-            RealName,
-            DirectMail,
-            TotalRespects,
-            RespectsLeft,
-            ScratchesLeft,
-            StreamPublishingAllowed,
-            LastAccessDate,
-            IsNameChangeable,
-            IsSafetyLocked,
-            _Bool5
-        );
+        public void Compose(IPacket packet) => packet
+            .WriteLegacyLong(Id)
+            .WriteString(Name)
+            .WriteString(Figure)
+            .WriteString(Gender.ToShortString())
+            .WriteString(Motto)
+            .WriteString(RealName)
+            .WriteBool(DirectMail)
+            .WriteInt(TotalRespects)
+            .WriteInt(RespectsLeft)
+            .WriteInt(ScratchesLeft)
+            .WriteBool(StreamPublishingAllowed)
+            .WriteString(LastAccessDate)
+            .WriteBool(IsNameChangeable)
+            .WriteBool(IsSafetyLocked)
+            .WriteBool(_Bool5);
 
         public static UserData Parse(IReadOnlyPacket packet) => new UserData(packet);
     }
