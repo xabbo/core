@@ -1,4 +1,4 @@
-﻿ using System;
+﻿using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -6,8 +6,10 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
+using Xabbo.Common;
 using Xabbo.Messages;
 using Xabbo.Interceptor;
+using Xabbo.Interceptor.Attributes;
 
 using Xabbo.Core.Events;
 
@@ -313,7 +315,7 @@ namespace Xabbo.Core.Game
         }
 
         /// <summary>
-        /// Invoked when a furni's visibility is toggled using <see cref="Hide(IFurni)"/> or <see cref="Show(IFurni)"/>.
+        /// Invoked when a furni's visibility is toggled using <see cref="HideFurni(IFurni)"/> or <see cref="ShowFurni(IFurni)"/>.
         /// </summary>
         public event EventHandler<FurniEventArgs>? FurniVisibilityToggled;
         protected virtual void OnFurniVisibilityToggled(IFurni furni)
@@ -568,18 +570,16 @@ namespace Xabbo.Core.Game
             };
         }
 
-        private void SetFurniHidden(ItemType type, long id, bool hide)
+        private bool SetFurniHidden(ItemType type, long id, bool hide)
         {
-            if (_currentRoom is null) return;
+            if (_currentRoom is null) return false;
 
             Furni furni;
 
             if (type == ItemType.Floor)
             {
-                if (!_currentRoom.FloorItems.TryGetValue(id, out FloorItem? item))
-                    return;
-
-                if (item.IsHidden == hide) return;
+                if (!_currentRoom.FloorItems.TryGetValue(id, out FloorItem? item) || item.IsHidden == hide)
+                    return false;
 
                 item.IsHidden = hide;
                 furni = _currentRoom.FloorItems.AddOrUpdate(
@@ -594,10 +594,8 @@ namespace Xabbo.Core.Game
             }
             else if (type == ItemType.Wall)
             {
-                if (!_currentRoom.WallItems.TryGetValue(id, out WallItem? item))
-                    return;
-
-                if (item.IsHidden == hide) return;
+                if (!_currentRoom.WallItems.TryGetValue(id, out WallItem? item) || item.IsHidden == hide)
+                    return false;
 
                 item.IsHidden = hide;
                 furni = _currentRoom.WallItems.AddOrUpdate(
@@ -612,7 +610,7 @@ namespace Xabbo.Core.Game
             }
             else
             {
-                return;
+                return false;
             }
 
             if (hide)
@@ -620,31 +618,32 @@ namespace Xabbo.Core.Game
                 if (furni.Type == ItemType.Floor)
                 {
                     if (Interceptor.Client == ClientType.Unity)
-                        Send(In.ActiveObjectRemove, furni.Id, false, -1L, 0);
+                        Interceptor.Send(In.ActiveObjectRemove, furni.Id, false, -1L, 0);
                     else
-                        Send(In.ActiveObjectRemove, furni.Id.ToString(), false, -1, 0);
+                        Interceptor.Send(In.ActiveObjectRemove, furni.Id.ToString(), false, -1, 0);
                 }
                 else if (furni.Type == ItemType.Wall)
                 {
                     if (Interceptor.Client == ClientType.Unity)
-                        Send(In.RemoveItem, furni.Id, -1L);
+                        Interceptor.Send(In.RemoveItem, furni.Id, -1L);
                     else
-                        Send(In.RemoveItem, furni.Id.ToString(), -1);
+                        Interceptor.Send(In.RemoveItem, furni.Id.ToString(), -1);
                 }
             }
             else
             {
-                Send(furni.Type == ItemType.Floor ? In.ActiveObjectAdd : In.AddItem, furni);
+                Interceptor.Send(furni.Type == ItemType.Floor ? In.ActiveObjectAdd : In.AddItem, furni);
             }
 
             OnFurniVisibilityToggled(furni);
+            return true;
         }
 
-        public void ShowFurni(ItemType type, long id) => SetFurniHidden(type, id, false);
-        public void HideFurni(ItemType type, long id) => SetFurniHidden(type, id, true);
+        public bool ShowFurni(ItemType type, long id) => SetFurniHidden(type, id, false);
+        public bool HideFurni(ItemType type, long id) => SetFurniHidden(type, id, true);
 
-        public void ShowFurni(IFurni furni) => SetFurniHidden(furni.Type, furni.Id, false);
-        public void HideFurni(IFurni furni) => SetFurniHidden(furni.Type, furni.Id, true);
+        public bool ShowFurni(IFurni furni) => SetFurniHidden(furni.Type, furni.Id, false);
+        public bool HideFurni(IFurni furni) => SetFurniHidden(furni.Type, furni.Id, true);
 
         #region - Room packet handlers -
         [Receive(nameof(Incoming.GetGuestRoomResult))]
@@ -1520,7 +1519,7 @@ namespace Xabbo.Core.Game
                 return;
             }
 
-            int index = e.Client switch
+            int index = e.Packet.Protocol switch
             {
                 ClientType.Flash => int.Parse(e.Packet.ReadString()),
                 ClientType.Unity => e.Packet.ReadInt(),
@@ -1915,29 +1914,29 @@ namespace Xabbo.Core.Game
 
         #region - Furni interaction -
         public void Place(long itemId, int x, int y, int direction)
-            => SendAsync(Out.PlaceRoomItem, itemId, x, y, direction);
+            => Interceptor.Send(Out.PlaceRoomItem, itemId, x, y, direction);
         public void Place(long itemId, (int X, int Y) location, int direction)
-            => SendAsync(Out.PlaceRoomItem, itemId, location.X, location.Y, direction);
+            => Interceptor.Send(Out.PlaceRoomItem, itemId, location.X, location.Y, direction);
         public void Place(IInventoryItem item, int x, int y, int direction)
             => Place(item.Id, x, y, direction);
         public void Place(IInventoryItem item, (int X, int Y) location, int direction)
             => Place(item.Id, location, direction);
 
         public void Place(long itemId, WallLocation location)
-            => SendAsync(Out.PlaceWallItem, itemId, location.WX, location.WY, location.LX, location.LY);
+            => Interceptor.Send(Out.PlaceWallItem, itemId, location.WX, location.WY, location.LX, location.LY);
         public void Place(IInventoryItem item, WallLocation location)
             => Place(item.Id, location);
 
         public void Move(long floorItemId, int x, int y, int direction)
-            => SendAsync(Out.MoveRoomItem, floorItemId, x, y, direction);
+            => Interceptor.Send(Out.MoveRoomItem, floorItemId, x, y, direction);
         public void Move(long floorItemId, (int X, int Y) location, int direction)
-            => SendAsync(Out.MoveRoomItem, floorItemId, location.X, location.Y, direction);
+            => Interceptor.Send(Out.MoveRoomItem, floorItemId, location.X, location.Y, direction);
         public void Move(IFloorItem item, int x, int y, int direction)
             => Move(item.Id, x, y, direction);
         public void Move(IFloorItem item, (int X, int Y) location, int direction)
             => Move(item.Id, location.X, location.Y, direction);
 
-        public void Move(long wallItemId, WallLocation location) => SendAsync(
+        public void Move(long wallItemId, WallLocation location) => Interceptor.Send(
             Out.MoveWallItem, wallItemId,
             location.WX, location.WY,
             location.LX, location.LY,
@@ -1950,14 +1949,14 @@ namespace Xabbo.Core.Game
         public void Pickup(ItemType type, long id)
         {
             if (type == ItemType.Floor)
-                SendAsync(Out.PickItemUpFromRoom, 2, (LegacyLong)id);
+                Interceptor.Send(Out.PickItemUpFromRoom, 2, (LegacyLong)id);
             else if (type == ItemType.Wall)
-                SendAsync(Out.PickItemUpFromRoom, 1, (LegacyLong)id);
+                Interceptor.Send(Out.PickItemUpFromRoom, 1, (LegacyLong)id);
         }
 
         public void UpdateStackTile(IFloorItem stackTile, float height) => UpdateStackTile(stackTile.Id, height);
         public void UpdateStackTile(long stackTileId, float height)
-            => SendAsync(Out.StackingHelperSetCaretHeight, stackTileId, (int)Math.Round(height * 100.0));
+            => Interceptor.Send(Out.StackingHelperSetCaretHeight, stackTileId, (int)Math.Round(height * 100.0));
         #endregion
     }
 }

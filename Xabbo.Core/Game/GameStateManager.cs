@@ -10,7 +10,7 @@ using Xabbo.Interceptor.Dispatcher;
 
 namespace Xabbo.Core.Game
 {
-    public abstract class GameStateManager : INotifyPropertyChanged, IDisposable
+    public abstract class GameStateManager : IInterceptHandler, INotifyPropertyChanged, IDisposable
     {
         public static IEnumerable<Type> GetManagerTypes()
         {
@@ -53,19 +53,14 @@ namespace Xabbo.Core.Game
         {
             if (!Interceptor.Dispatcher.IsBound(this))
             {
-                Interceptor.Dispatcher.Bind(this, Interceptor.Client);
+                Interceptor.Bind(this);
             }
         }
 
         protected virtual void OnDisconnected(object? sender, EventArgs e)
         {
-            Interceptor.Dispatcher.Release(this);
+            Interceptor.Release(this);
         }
-
-        protected void Send(Header header, params object[] values) => Interceptor.Send(header, values);
-        protected void Send(IReadOnlyPacket packet) => Interceptor.Send(packet);
-        protected Task SendAsync(Header header, params object[] values) => Interceptor.SendAsync(header, values);
-        protected Task SendAsync(IReadOnlyPacket packet) => Interceptor.SendAsync(packet);
 
         protected virtual void Dispose(bool disposing)
         {

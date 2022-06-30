@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Messages;
 using Xabbo.Interceptor;
+using Xabbo.Interceptor.Attributes;
 
 using Xabbo.Core.Events;
 
@@ -80,8 +82,21 @@ namespace Xabbo.Core.Game
             _isForceLoading = false;
         }
 
-        public void SendMessage(long id, string message) => SendAsync(Out.SendMessage, id, message);
+        /// <summary>
+        /// Sends a private message to a user with the specified ID.
+        /// </summary>
+        public void SendMessage(long id, string message) => Interceptor.Send(Out.SendMessage, id, message);
+
+        /// <summary>
+        /// Sends a private message to the specified friend.
+        /// </summary>
         public void SendMessage(Friend friend, string message) => SendMessage(friend.Id, message);
+
+        /// <inheritdoc cref="SendMessage(long, string)" />
+        public ValueTask SendMessageAsync(long id, string message) => Interceptor.SendAsync(Out.SendMessage, id, message);
+
+        /// <inheritdoc cref="SendMessage(Friend, string)" />
+        public ValueTask SendMessageAsync(Friend friend, string message) => SendMessageAsync(friend.Id, message);
 
         private void AddFriend(Friend friend, bool raiseEvent = true)
         {
@@ -153,7 +168,7 @@ namespace Xabbo.Core.Game
             if (!IsInitialized && !_isForceLoading && e.Step > 10)
             {
                 _isForceLoading = true;
-                await SendAsync(Out.MessengerInit);
+                await Interceptor.SendAsync(Out.MessengerInit);
             }
         }
 

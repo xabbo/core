@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 using Xabbo.Messages;
 using Xabbo.Interceptor;
+using Xabbo.Interceptor.Attributes;
 
 using Xabbo.Core.Events;
 
@@ -94,15 +95,15 @@ namespace Xabbo.Core.Game
             if (UserData is null && !_isLoadingProfile)
             {
                 _isLoadingProfile = true;
-                await SendAsync(Out.InfoRetrieve);
+                await Interceptor.SendAsync(Out.InfoRetrieve);
             }
 
-            if (Achievements is null) await SendAsync(Out.GetUserAchievements);
+            if (Achievements is null) await Interceptor.SendAsync(Out.GetUserAchievements);
 
             if (Credits is null && !_isLoadingCredits)
             {
                 _isLoadingCredits = true;
-                await SendAsync(Out.GetCredits);
+                await Interceptor.SendAsync(Out.GetCredits);
             }
         }
 

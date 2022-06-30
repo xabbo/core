@@ -9,6 +9,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Messages;
 using Xabbo.Interceptor;
+using Xabbo.Interceptor.Attributes;
+
 using Xabbo.Core.Events;
 
 namespace Xabbo.Core.Game
@@ -97,7 +99,7 @@ namespace Xabbo.Core.Game
                 {
                     if (!_forceLoadingInventory)
                     {
-                        Send(Out.GetInventory);
+                        await Interceptor.SendAsync(Out.GetInventory);
                         _forceLoadingInventory = true;
                     }
                     
