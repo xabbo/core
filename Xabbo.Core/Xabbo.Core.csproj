@@ -2,7 +2,7 @@
 
 	<!-- Project -->
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<RootNamespace>Xabbo.Core</RootNamespace>
 		<AssemblyName>Xabbo.Core</AssemblyName>
 		<AssemblyVersion>1.0.0</AssemblyVersion>
@@ -25,7 +25,8 @@
 		<LocalPackageSource>%USERPROFILE%\.nuget\local</LocalPackageSource>
 		<PackageId>Xabbo.Core</PackageId>
 		<Description>Provides parsers, composers, interactions &amp; game state management for Xabbo.Common.</Description>
-		<Version>1.0.0-beta.3</Version>
+		<Version Condition="'$(Configuration)'=='Debug'">0.0.0-dev</Version>
+		<Version Condition="'$(Configuration)'=='Release'">1.0.0-beta.3</Version>
 		<InformationalVersion>$(Version)</InformationalVersion>
 		<RepositoryUrl>https://github.com/b7c/Xabbo.Core.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
@@ -59,17 +60,14 @@
 
 	<!-- References -->
 	<ItemGroup>
-		<PackageReference Include="Xabbo.Common" Version="1.0.0-beta.2" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="res\img\" />
+		<ProjectReference Include="$(SolutionDir)\Xabbo.Common\Xabbo.Common\Xabbo.Common.csproj" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
 	</ItemGroup>
 
 	<!-- Add package to local source after pack -->
-	<Target Name="NugetAddPackage" AfterTargets="Pack" Condition="'$(Configuration)'=='Release'">
-		<Exec Command="nuget add bin\$(ConfigurationName)\$(PackageId).$(Version).nupkg -Source $(LocalPackageSource)" />
+	<Target Name="NugetAddPackage" AfterTargets="Pack">
+		<Exec Command="nuget delete $(PackageId) $(Version) -Source $(LocalPackageSource) -NonInteractive" ContinueOnError="true" />
+		<Exec Command="nuget add bin\$(Configuration)\$(PackageId).$(Version).nupkg -Source $(LocalPackageSource)" />
 	</Target>
 
 </Project>
