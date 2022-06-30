@@ -8,10 +8,10 @@ namespace Xabbo.Core
 {
     public class CatalogPageNode : ICatalogPageNode
     {
-        public Catalog Catalog { get; set; }
-        ICatalog ICatalogPageNode.Catalog => Catalog;
-        public CatalogPageNode Parent { get; set; }
-        ICatalogPageNode ICatalogPageNode.Parent => Parent;
+        public Catalog? Catalog { get; set; }
+        ICatalog? ICatalogPageNode.Catalog => Catalog;
+        public CatalogPageNode? Parent { get; set; }
+        ICatalogPageNode? ICatalogPageNode.Parent => Parent;
 
         public bool IsVisible { get; set; }
         public int Icon { get; set; }
@@ -50,16 +50,14 @@ namespace Xabbo.Core
                 Children.Add(new CatalogPageNode(packet, catalog, this));
         }
 
-        public void Compose(IPacket packet)
-        {
-            packet
-                .WriteBool(IsVisible)
-                .WriteInt(Icon)
-                .WriteInt(Id)
-                .WriteString(Name)
-                .WriteString(Title)
-                .WriteValues(OfferIds, Children);
-        }
+        public void Compose(IPacket packet) => packet
+            .WriteBool(IsVisible)
+            .WriteInt(Icon)
+            .WriteInt(Id)
+            .WriteString(Name)
+            .WriteString(Title)
+            .WriteCollection(OfferIds)
+            .WriteCollection(Children);
 
         public IEnumerable<CatalogPageNode> EnumerateDescendantsAndSelf()
         {
@@ -88,6 +86,6 @@ namespace Xabbo.Core
         }
         ICatalogPageNode? ICatalogPageNode.FindNode(string? title, string? name, int? id) => FindNode(title, name, id);
 
-        public static CatalogPageNode Parse(IReadOnlyPacket packet) => new CatalogPageNode(packet);
+        public static CatalogPageNode Parse(IReadOnlyPacket packet) => new(packet);
     }
 }
