@@ -19,6 +19,7 @@ namespace Xabbo.Core.Events
             Message = message;
         }
 
+        public void Reply(string message) => _friendManager.SendMessage(Friend.Id, message);
         public ValueTask ReplyAsync(string message) => _friendManager.SendMessageAsync(Friend.Id, message);
     }
 }
