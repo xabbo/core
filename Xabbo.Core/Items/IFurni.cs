@@ -31,7 +31,7 @@ namespace Xabbo.Core
         FurniUsage Usage { get; }
 
         /// <summary>
-        /// Gets whether the furni is hidden client-side or not by the <see cref="FurniManager"/>
+        /// Gets whether the furni is hidden client-side or not by the <see cref="RoomManager"/>
         /// </summary>
         bool IsHidden { get; }
 
