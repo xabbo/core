@@ -4,16 +4,17 @@ namespace Xabbo.Core
 {
     public enum RoomCategory
     {
-        ChatAndDiscussion = 0x0c,
-        PersonalSpace = 0x0a,
-        Agencies = 0x10,
-        Games = 0x03,
-        BuildingAndDecoration = 0x0b,
-        Trading = 0x0e,
-        Party = 0x02,
-        RolePlaying = 0x11,
-        FansiteSquare = 0x05,
-        HelpCenters = 0x06
+        Party = 2,
+        Games = 3,
+        FansiteSquare = 5,
+        HelpCenters = 6,
+        PersonalSpace = 10,
+        BuildingAndDecoration = 11,
+        ChatAndDiscussion = 12,
+        Trading = 14,
+        Agencies = 16,
+        RolePlaying = 17
+        
     }
 
     public static partial class XabboEnumExtensions
@@ -22,16 +23,16 @@ namespace Xabbo.Core
         {
             switch (category)
             {
-                case RoomCategory.ChatAndDiscussion: return "Chat and Discussion";
-                case RoomCategory.PersonalSpace: return "Personal Spaces";
-                case RoomCategory.Agencies: return "Agencies";
-                case RoomCategory.Games: return "Games";
-                case RoomCategory.BuildingAndDecoration: return "Building and Decoration";
-                case RoomCategory.Trading: return "Trading";
                 case RoomCategory.Party: return "Parties";
-                case RoomCategory.RolePlaying: return "Role Playing";
+                case RoomCategory.Games: return "Games";
                 case RoomCategory.FansiteSquare: return "Fansite Squares";
                 case RoomCategory.HelpCenters: return "Help Centers";
+                case RoomCategory.PersonalSpace: return "Personal Spaces";
+                case RoomCategory.BuildingAndDecoration: return "Building and Decoration";
+                case RoomCategory.ChatAndDiscussion: return "Chat and Discussion";
+                case RoomCategory.Trading: return "Trading";
+                case RoomCategory.Agencies: return "Agencies";
+                case RoomCategory.RolePlaying: return "Role Playing";
                 default: return category.ToString();
             }
         }
