@@ -1,4 +1,6 @@
 ﻿using System;
+
+using Xabbo.Common;
 using Xabbo.Messages;
 
 namespace Xabbo.Core

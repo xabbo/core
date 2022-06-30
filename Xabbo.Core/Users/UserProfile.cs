@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+
+using Xabbo.Common;
 using Xabbo.Messages;
 
 namespace Xabbo.Core
@@ -101,7 +103,7 @@ namespace Xabbo.Core
             }
         }
 
-        public void Compose(IPacket packet) => packet.WriteValues(
+        public void Compose(IPacket packet) => packet.Write(
             Id,
             Name,
             Figure,

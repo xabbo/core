@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
+
+using Xabbo.Common;
 using Xabbo.Messages;
 
 namespace Xabbo.Core
