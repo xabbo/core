@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 
 using Xabbo.Messages;
 using Xabbo.Interceptor;
-using Xabbo.Interceptor.Attributes;
 
 using Xabbo.Core.Events;
 

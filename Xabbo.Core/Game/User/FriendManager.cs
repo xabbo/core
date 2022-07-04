@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Messages;
 using Xabbo.Interceptor;
-using Xabbo.Interceptor.Attributes;
 
 using Xabbo.Core.Events;
 
