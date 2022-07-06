@@ -12,8 +12,6 @@ namespace Xabbo.Core
         public ItemType Type { get; set; }
         public int Kind { get; set; }
         public IItemData Data { get; set; }
-        public int LimitedNumber { get; set; }
-        public int LimitedTotal { get; set; }
         public int Price { get; set; }
         public int TimeRemaining { get; set; }
         public int Average { get; set; }

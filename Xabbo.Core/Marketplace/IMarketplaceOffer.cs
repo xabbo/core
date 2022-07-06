@@ -18,14 +18,6 @@ namespace Xabbo.Core
         /// </summary>
         IItemData Data { get; }
         /// <summary>
-        /// Gets the limited rare number of this item.
-        /// </summary>
-        int LimitedNumber { get; }
-        /// <summary>
-        /// Gets the total number of limited rares of this item.
-        /// </summary>
-        int LimitedTotal { get; }
-        /// <summary>
         /// Gets the price of the marketplace offer.
         /// </summary>
         int Price { get; }
