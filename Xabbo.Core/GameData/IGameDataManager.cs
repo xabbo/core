@@ -44,15 +44,9 @@ namespace Xabbo.Core.GameData
         event Action<Exception> LoadFailed;
 
         /// <summary>
-        /// Loads game data for the specified host / domain.
-        /// </summary>
-        Task LoadAsync(string domain = "com", string host = "www.habbo.{domain}", CancellationToken cancellationToken = default);
-
-        /// <summary>
         /// Loads game data for the specified hotel.
         /// </summary>
-        public Task LoadAsync(Hotel hotel, CancellationToken cancellationToken = default)
-           => LoadAsync(hotel.Domain, hotel.Host, cancellationToken);
+        Task LoadAsync(Hotel hotel, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Waits for game data to load.

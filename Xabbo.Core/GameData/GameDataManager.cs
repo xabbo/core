@@ -63,13 +63,13 @@ namespace Xabbo.Core.GameData
 
         private async Task LoadDataAsync(
             HttpClient http,
-            string host,
+            Hotel hotel,
             GameDataType type,
             string url,
             string hash,
             CancellationToken cancellationToken)
         {
-            string cacheFolderPath = Path.Combine(CachePath, host, type.ToString().ToLower());
+            string cacheFolderPath = Path.Combine(CachePath, hotel.Identifier, type.ToString().ToLower());
             Directory.CreateDirectory(cacheFolderPath);
 
             string filePath = Path.Combine(cacheFolderPath, hash);
@@ -93,14 +93,13 @@ namespace Xabbo.Core.GameData
             }
         }
 
-        public Task LoadAsync(Hotel hotel, CancellationToken cancellationToken) => LoadAsync(hotel.Domain, hotel.Host, cancellationToken);
-
-        public async Task LoadAsync(string domain = "com", string host = "www.habbo.{domain}", CancellationToken cancellationToken = default)
+        public async Task LoadAsync(Hotel hotel, CancellationToken cancellationToken = default)
         {
             if (!_loadSemaphore.Wait(0, cancellationToken))
                 throw new InvalidOperationException("Game data is currently being loaded.");
 
-            host = host.Replace("{domain}", domain);
+            string hotelCachePath = Path.Combine(CachePath, hotel.Identifier);
+            Directory.CreateDirectory(hotelCachePath);
 
             try
             {
@@ -118,9 +117,6 @@ namespace Xabbo.Core.GameData
 
                 GameDataHashesContainer? hashesContainer = null;
 
-                string hotelCachePath = Path.Combine(CachePath, host);
-                Directory.CreateDirectory(hotelCachePath);
-
                 FileInfo hashesFile = new(Path.Combine(hotelCachePath, "hashes.json"));
                 if (hashesFile.Exists &&
                     (DateTime.Now - hashesFile.LastWriteTime) < TimeSpan.FromMinutes(15))
@@ -132,7 +128,7 @@ namespace Xabbo.Core.GameData
                 else
                 {
                     string json = await http.GetStringAsync(
-                        $"https://{host}/gamedata/hashes2",
+                        $"https://{hotel.Host}/gamedata/hashes2",
                         cancellationToken
                     );
                     hashesContainer = JsonSerializer.Deserialize<GameDataHashesContainer>(json);
@@ -158,7 +154,7 @@ namespace Xabbo.Core.GameData
 
                     if (!Enum.IsDefined(type)) continue;
 
-                    loadTasks.Add(LoadDataAsync(http, host, type, entry.Url, entry.Hash, cancellationToken));
+                    loadTasks.Add(LoadDataAsync(http, hotel, type, entry.Url, entry.Hash, cancellationToken));
                 }
 
                 await Task.WhenAll(loadTasks);
