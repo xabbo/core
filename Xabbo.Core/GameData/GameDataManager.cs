@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Xabbo.Core.Extensions;
 using Xabbo.Core.Web;
 
 namespace Xabbo.Core.GameData
@@ -158,6 +159,7 @@ namespace Xabbo.Core.GameData
                 }
 
                 await Task.WhenAll(loadTasks);
+                XabboCoreExtensions.Initialize(Furni!, Texts!);
 
                 Loaded?.Invoke();
                 _tcsLoad.TrySetResult();
