@@ -10,28 +10,28 @@ namespace Xabbo.Core
         /// <summary>
         /// Represents a wall location with all coordinates at zero, and the orientation set to the left wall.
         /// </summary>
-        public static readonly WallLocation Zero = new WallLocation(0, 0, 0, 0, 'l');
+        public static readonly WallLocation Zero = new(0, 0, 0, 0, 'l');
 
         /// <summary>
         /// Gets the wall X coordinate.
         /// </summary>
-        public int WX { get; }
+        public int WX { get; set; }
         /// <summary>
         /// Gets the wall Y coordinate.
         /// </summary>
-        public int WY { get; }
+        public int WY { get; set; }
         /// <summary>
         /// Gets the location X coordinate.
         /// </summary>
-        public int LX { get; }
+        public int LX { get; set; }
         /// <summary>
         /// Gets the location Y coordinate.
         /// </summary>
-        public int LY { get; }
+        public int LY { get; set; }
         /// <summary>
         /// Gets the wall orientation.
         /// </summary>
-        public WallOrientation Orientation { get; }
+        public WallOrientation Orientation { get; set; }
 
         public WallLocation(int wx, int wy, int lx, int ly, WallOrientation orientation)
         {

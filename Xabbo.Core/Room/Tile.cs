@@ -7,11 +7,11 @@ namespace Xabbo.Core
 {
     public struct Tile : IComposable
     {
-        public static readonly Tile Zero = new Tile(0, 0, 0);
+        public static readonly Tile Zero = new(0, 0, 0);
 
-        public int X { get; }
-        public int Y { get; }
-        public float Z { get; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public float Z { get; set; }
         public (int X, int Y) XY => (X, Y);
         public (int X, int Y, float Z) XYZ => (X, Y, Z);
 
