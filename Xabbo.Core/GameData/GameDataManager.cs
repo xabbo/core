@@ -99,9 +99,6 @@ namespace Xabbo.Core.GameData
             if (!_loadSemaphore.Wait(0, cancellationToken))
                 throw new InvalidOperationException("Game data is currently being loaded.");
 
-            string hotelCachePath = Path.Combine(CachePath, hotel.Identifier);
-            Directory.CreateDirectory(hotelCachePath);
-
             try
             {
                 if (_tcsLoad is null)
@@ -112,6 +109,9 @@ namespace Xabbo.Core.GameData
 
                 Reset();
                 Loading?.Invoke();
+
+                string hotelCachePath = Path.Combine(CachePath, hotel.Identifier);
+                Directory.CreateDirectory(hotelCachePath);
 
                 using var http = new HttpClient();
                 http.DefaultRequestHeaders.Add("User-Agent", H.UserAgent);
