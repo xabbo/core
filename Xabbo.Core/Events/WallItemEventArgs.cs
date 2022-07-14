@@ -1,14 +1,13 @@
 ﻿using System;
 
-namespace Xabbo.Core.Events
-{
-    public class WallItemEventArgs : EventArgs
-    {
-        public IWallItem Item { get; }
+namespace Xabbo.Core.Events;
 
-        public WallItemEventArgs(IWallItem item)
-        {
-            Item = item;
-        }
+public class WallItemEventArgs : EventArgs
+{
+    public IWallItem Item { get; }
+
+    public WallItemEventArgs(IWallItem item)
+    {
+        Item = item;
     }
 }

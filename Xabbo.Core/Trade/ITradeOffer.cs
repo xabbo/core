@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public interface ITradeOffer
 {
-    public interface ITradeOffer
-    {
-        int UserId { get; }
-        IReadOnlyList<ITradeItem> Items { get; }
-        int FurniCount { get; }
-        int CreditCount { get; }
-    }
+    int UserId { get; }
+    IReadOnlyList<ITradeItem> Items { get; }
+    int FurniCount { get; }
+    int CreditCount { get; }
 }

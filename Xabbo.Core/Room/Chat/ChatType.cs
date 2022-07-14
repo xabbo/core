@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum ChatType
 {
-    public enum ChatType
-    {
-        Talk,
-        Shout,
-        Whisper
-    }
+    Talk,
+    Shout,
+    Whisper
 }

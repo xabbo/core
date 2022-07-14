@@ -1,28 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public interface IBot : IEntity
 {
-    public interface IBot : IEntity
-    {
-        /// <summary>
-        /// Gets the gender of the bot.
-        /// </summary>
-        Gender Gender { get; }
+    /// <summary>
+    /// Gets the gender of the bot.
+    /// </summary>
+    Gender Gender { get; }
 
-        /// <summary>
-        /// Gets the owner of the bot's ID.
-        /// </summary>
-        long OwnerId { get; }
+    /// <summary>
+    /// Gets the owner of the bot's ID.
+    /// </summary>
+    long OwnerId { get; }
 
-        /// <summary>
-        /// Gets the owner of the bot's name.
-        /// </summary>
-        string OwnerName { get; }
+    /// <summary>
+    /// Gets the owner of the bot's name.
+    /// </summary>
+    string OwnerName { get; }
 
-        /// <summary>
-        /// Gets the data of the bot.
-        /// </summary>
-        IReadOnlyList<short> Data { get; }
-    }
+    /// <summary>
+    /// Gets the data of the bot.
+    /// </summary>
+    IReadOnlyList<short> Data { get; }
 }

@@ -1,13 +1,12 @@
 ﻿using System;
 
-namespace Xabbo.Core.Events
-{
-    public class RoomUserEventArgs : EntityEventArgs
-    {
-        public IRoomUser User => (IRoomUser)Entity;
+namespace Xabbo.Core.Events;
 
-        public RoomUserEventArgs(IRoomUser user)
-            : base(user)
-        { }
-    }
+public class RoomUserEventArgs : EntityEventArgs
+{
+    public IRoomUser User => (IRoomUser)Entity;
+
+    public RoomUserEventArgs(IRoomUser user)
+        : base(user)
+    { }
 }

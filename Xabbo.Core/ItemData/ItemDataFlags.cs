@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+[Flags]
+public enum ItemDataFlags
 {
-    [Flags]
-    public enum ItemDataFlags
-    {
-        IsLimitedRare = 1
-    }
+    IsLimitedRare = 1
 }

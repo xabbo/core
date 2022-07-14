@@ -1,13 +1,12 @@
 ﻿using System;
 
-namespace Xabbo.Core.GameData
+namespace Xabbo.Core.GameData;
+
+public enum GameDataType
 {
-    public enum GameDataType
-    {
-        Furni,
-        Product,
-        Variables,
-        Texts,
-        Figure
-    }
+    Furni,
+    Product,
+    Variables,
+    Texts,
+    Figure
 }

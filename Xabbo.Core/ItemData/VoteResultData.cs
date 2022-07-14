@@ -2,36 +2,35 @@
 
 using Xabbo.Messages;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public class VoteResultData : ItemData, IVoteResultData
 {
-    public class VoteResultData : ItemData, IVoteResultData
+    public int Result { get; set; }
+
+    public VoteResultData()
+        : base(ItemDataType.VoteResult)
+    { }
+
+    public VoteResultData(IVoteResultData data)
+        : base(data)
     {
-        public int Result { get; set; }
+        Result = data.Result;
+    }
 
-        public VoteResultData()
-            : base(ItemDataType.VoteResult)
-        { }
+    protected override void Initialize(IReadOnlyPacket packet)
+    {
+        Value = packet.ReadString();
+        Result = packet.ReadInt();
 
-        public VoteResultData(IVoteResultData data)
-            : base(data)
-        {
-            Result = data.Result;
-        }
+        base.Initialize(packet);
+    }
 
-        protected override void Initialize(IReadOnlyPacket packet)
-        {
-            Value = packet.ReadString();
-            Result = packet.ReadInt();
+    protected override void WriteData(IPacket packet)
+    {
+        packet.WriteString(Value);
+        packet.WriteInt(Result);
 
-            base.Initialize(packet);
-        }
-
-        protected override void WriteData(IPacket packet)
-        {
-            packet.WriteString(Value);
-            packet.WriteInt(Result);
-
-            WriteBase(packet);
-        }
+        WriteBase(packet);
     }
 }

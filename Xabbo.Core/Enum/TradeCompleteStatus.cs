@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum TradeCompleteStatus
 {
-    public enum TradeCompleteStatus
-    {
-        Success = 0
-    }
+    Success = 0
 }

@@ -5,22 +5,21 @@ using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
-namespace Xabbo.Core.Tasks
+namespace Xabbo.Core.Tasks;
+
+public class GetUserMarketplaceOffersTask : InterceptorTask<IUserMarketplaceOffers>
 {
-    public class GetUserMarketplaceOffersTask : InterceptorTask<IUserMarketplaceOffers>
+    public GetUserMarketplaceOffersTask(IInterceptor interceptor)
+        : base(interceptor)
+    { }
+
+    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.MarketplaceListOwnOffers);
+
+    [InterceptIn(nameof(Incoming.MarketplaceOwnOfferList))]
+    protected void HandleMarketplaceOwnOfferList(InterceptArgs e)
     {
-        public GetUserMarketplaceOffersTask(IInterceptor interceptor)
-            : base(interceptor)
-        { }
+        e.Block();
 
-        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.MarketplaceListOwnOffers);
-
-        [InterceptIn(nameof(Incoming.MarketplaceOwnOfferList))]
-        protected void HandleMarketplaceOwnOfferList(InterceptArgs e)
-        {
-            e.Block();
-
-            SetResult(UserMarketplaceOffers.Parse(e.Packet));
-        }
+        SetResult(UserMarketplaceOffers.Parse(e.Packet));
     }
 }

@@ -1,13 +1,12 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public interface IChatSettings
 {
-    public interface IChatSettings
-    {
-        ChatFlow Flow { get; }
-        ChatBubbleWidth BubbleWidth { get; }
-        ChatScrollSpeed ScrollSpeed { get; }
-        int TalkHearingDistance { get; }
-        ChatFloodProtection FloodProtection { get; }
-    }
+    ChatFlow Flow { get; }
+    ChatBubbleWidth BubbleWidth { get; }
+    ChatScrollSpeed ScrollSpeed { get; }
+    int TalkHearingDistance { get; }
+    ChatFloodProtection FloodProtection { get; }
 }

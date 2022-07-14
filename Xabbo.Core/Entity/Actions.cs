@@ -1,15 +1,14 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum Actions
 {
-    public enum Actions
-    {
-        None = 0,
-        Wave = 1,
-        Kiss = 2,
-        Laugh = 3,
-        Idle = 5,
-        Jump = 6,
-        ThumbsUp = 7
-    }
+    None = 0,
+    Wave = 1,
+    Kiss = 2,
+    Laugh = 3,
+    Idle = 5,
+    Jump = 6,
+    ThumbsUp = 7
 }

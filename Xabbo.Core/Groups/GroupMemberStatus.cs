@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum GroupMemberStatus
 {
-    public enum GroupMemberStatus
-    {
-        NonMember = 0,
-        Member = 1,
-        Requested = 2
-    }
+    NonMember = 0,
+    Member = 1,
+    Requested = 2
 }

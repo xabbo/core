@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public interface ITradeItem : IInventoryItem
 {
-    public interface ITradeItem : IInventoryItem
-    {
-        int CreationDay { get; }
-        int CreationMonth { get; }
-        int CreationYear { get; }
-    }
+    int CreationDay { get; }
+    int CreationMonth { get; }
+    int CreationYear { get; }
 }

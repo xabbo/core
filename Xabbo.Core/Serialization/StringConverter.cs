@@ -2,28 +2,27 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Xabbo.Core.Serialization
+namespace Xabbo.Core.Serialization;
+
+internal class StringConverter : JsonConverter<string>
 {
-    internal class StringConverter : JsonConverter<string>
+    public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        if (reader.TokenType == JsonTokenType.Number)
         {
-            if (reader.TokenType == JsonTokenType.Number)
-            {
-                int stringValue = reader.GetInt32();
-                return stringValue.ToString();
-            }
-            else if (reader.TokenType == JsonTokenType.String)
-            {
-                return reader.GetString();
-            }
-
-            throw new JsonException();
+            int stringValue = reader.GetInt32();
+            return stringValue.ToString();
+        }
+        else if (reader.TokenType == JsonTokenType.String)
+        {
+            return reader.GetString();
         }
 
-        public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(value);
-        }
+        throw new JsonException();
+    }
+
+    public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value);
     }
 }

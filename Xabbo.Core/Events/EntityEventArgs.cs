@@ -1,14 +1,13 @@
 ﻿using System;
 
-namespace Xabbo.Core.Events
-{
-    public class EntityEventArgs : EventArgs
-    {
-        public IEntity Entity { get; }
+namespace Xabbo.Core.Events;
 
-        public EntityEventArgs(IEntity entity)
-        {
-            Entity = entity;
-        }
+public class EntityEventArgs : EventArgs
+{
+    public IEntity Entity { get; }
+
+    public EntityEventArgs(IEntity entity)
+    {
+        Entity = entity;
     }
 }

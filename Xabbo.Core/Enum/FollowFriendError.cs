@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum FollowFriendError
 {
-    public enum FollowFriendError
-    {
-        NotFriend = 0,
-        Offline = 1,
-        NotInRoom = 2,
-        CannotFollow = 3
-    }
+    NotFriend = 0,
+    Offline = 1,
+    NotInRoom = 2,
+    CannotFollow = 3
 }

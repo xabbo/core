@@ -2,14 +2,13 @@
 
 using Xabbo.Messages; 
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public interface ICatalogProduct : IItem, IComposable
 {
-    public interface ICatalogProduct : IItem, IComposable
-    {
-        string Variant { get; }
-        int Count { get; }
-        bool IsLimited { get; }
-        int LimitedTotal { get; }
-        int LimitedRemaining { get; }
-    }
+    string Variant { get; }
+    int Count { get; }
+    bool IsLimited { get; }
+    int LimitedTotal { get; }
+    int LimitedRemaining { get; }
 }

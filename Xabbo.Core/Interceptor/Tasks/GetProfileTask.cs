@@ -5,33 +5,32 @@ using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
-namespace Xabbo.Core.Tasks
+namespace Xabbo.Core.Tasks;
+
+public class GetProfileTask : InterceptorTask<IUserProfile>
 {
-    public class GetProfileTask : InterceptorTask<IUserProfile>
+    private readonly long _userId;
+
+    public GetProfileTask(IInterceptor interceptor, long userId)
+        : base(interceptor)
     {
-        private readonly long _userId;
+        _userId = userId;
+    }
 
-        public GetProfileTask(IInterceptor interceptor, long userId)
-            : base(interceptor)
+    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetExtendedProfile, (LegacyLong)_userId, false);
+
+    [InterceptIn(nameof(Incoming.ExtendedProfile))]
+    protected void OnUserProfile(InterceptArgs e)
+    {
+        try
         {
-            _userId = userId;
-        }
-
-        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetExtendedProfile, (LegacyLong)_userId, false);
-
-        [InterceptIn(nameof(Incoming.ExtendedProfile))]
-        protected void OnUserProfile(InterceptArgs e)
-        {
-            try
+            var userProfile = UserProfile.Parse(e.Packet);
+            if (userProfile.Id == _userId)
             {
-                var userProfile = UserProfile.Parse(e.Packet);
-                if (userProfile.Id == _userId)
-                {
-                    if (SetResult(userProfile))
-                        e.Block();
-                }
+                if (SetResult(userProfile))
+                    e.Block();
             }
-            catch (Exception ex) { SetException(ex); }
         }
+        catch (Exception ex) { SetException(ex); }
     }
 }

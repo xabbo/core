@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum ChatScrollSpeed
 {
-    public enum ChatScrollSpeed
-    {
-        Fast = 0,
-        Normal = 1,
-        Slow = 2
-    }
+    Fast = 0,
+    Normal = 1,
+    Slow = 2
 }

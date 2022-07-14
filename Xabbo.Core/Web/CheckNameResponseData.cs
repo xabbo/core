@@ -2,11 +2,10 @@
 
 using System.Text.Json.Serialization;
 
-namespace Xabbo.Core.Web
+namespace Xabbo.Core.Web;
+
+public class CheckNameResponse
 {
-    public class CheckNameResponse
-    {
-        [JsonPropertyName("isAvailable")]
-        public bool IsAvailable { get; set; }
-    }
+    [JsonPropertyName("isAvailable")]
+    public bool IsAvailable { get; set; }
 }

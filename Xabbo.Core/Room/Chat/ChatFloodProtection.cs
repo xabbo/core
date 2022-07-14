@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum ChatFloodProtection
 {
-    public enum ChatFloodProtection
-    {
-        Extra = 0,
-        Standard = 1,
-        Minimal = 2
-    }
+    Extra = 0,
+    Standard = 1,
+    Minimal = 2
 }

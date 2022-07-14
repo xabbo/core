@@ -2,18 +2,17 @@
 
 using Xabbo.Messages;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public class EmptyItemData : ItemData, IEmptyItemData
 {
-    public class EmptyItemData : ItemData, IEmptyItemData
-    {
-        public EmptyItemData()
-            : base(ItemDataType.Empty)
-        { }
+    public EmptyItemData()
+        : base(ItemDataType.Empty)
+    { }
 
-        public EmptyItemData(IEmptyItemData data)
-            : this()
-        { }
+    public EmptyItemData(IEmptyItemData data)
+        : this()
+    { }
 
-        protected override void WriteData(IPacket packet) { }
-    }
+    protected override void WriteData(IPacket packet) { }
 }

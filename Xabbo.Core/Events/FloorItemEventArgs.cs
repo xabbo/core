@@ -1,14 +1,13 @@
 ﻿using System;
 
-namespace Xabbo.Core.Events
-{
-    public class FloorItemEventArgs  : EventArgs
-    {
-        public IFloorItem Item { get; }
+namespace Xabbo.Core.Events;
 
-        public FloorItemEventArgs(IFloorItem item)
-        {
-            Item = item;
-        }
+public class FloorItemEventArgs  : EventArgs
+{
+    public IFloorItem Item { get; }
+
+    public FloorItemEventArgs(IFloorItem item)
+    {
+        Item = item;
     }
 }

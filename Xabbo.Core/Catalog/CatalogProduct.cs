@@ -3,84 +3,83 @@
 using Xabbo.Common;
 using Xabbo.Messages;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public class CatalogProduct : ICatalogProduct
 {
-    public class CatalogProduct : ICatalogProduct
+    public static CatalogProduct Parse(IReadOnlyPacket packet) => new CatalogProduct(packet);
+
+    public ItemType Type { get; set; }
+    public int Kind { get; set; }
+    public string Variant { get; set; }
+    public int Count { get; set; }
+    public bool IsLimited { get; set; }
+    public int LimitedTotal { get; set; }
+    public int LimitedRemaining { get; set; }
+
+    public bool IsFloorItem => Type == ItemType.Floor;
+    public bool IsWallItem => Type == ItemType.Wall;
+    long IItem.Id => -1;
+
+    public CatalogProduct()
     {
-        public static CatalogProduct Parse(IReadOnlyPacket packet) => new CatalogProduct(packet);
+        Variant = string.Empty;
+    }
 
-        public ItemType Type { get; set; }
-        public int Kind { get; set; }
-        public string Variant { get; set; }
-        public int Count { get; set; }
-        public bool IsLimited { get; set; }
-        public int LimitedTotal { get; set; }
-        public int LimitedRemaining { get; set; }
-
-        public bool IsFloorItem => Type == ItemType.Floor;
-        public bool IsWallItem => Type == ItemType.Wall;
-        long IItem.Id => -1;
-
-        public CatalogProduct()
+    protected CatalogProduct(IReadOnlyPacket packet)
+    {
+        Type = packet.Protocol switch
         {
-            Variant = string.Empty;
+            ClientType.Flash => H.ToItemType(packet.ReadString()),
+            ClientType.Unity => H.ToItemType(packet.ReadShort()),
+            _ => throw new Exception($"Unknown client protocol: {packet.Protocol}.")
+        };
+
+        if (Type == ItemType.Badge)
+        {
+            Variant = packet.ReadString();
+            Count = 1;
         }
-
-        protected CatalogProduct(IReadOnlyPacket packet)
+        else
         {
-            Type = packet.Protocol switch
+            Kind = packet.ReadInt();
+            Variant = packet.ReadString();
+            Count = packet.ReadInt();
+            IsLimited = packet.ReadBool();
+            if (IsLimited)
             {
-                ClientType.Flash => H.ToItemType(packet.ReadString()),
-                ClientType.Unity => H.ToItemType(packet.ReadShort()),
-                _ => throw new Exception($"Unknown client protocol: {packet.Protocol}.")
-            };
-
-            if (Type == ItemType.Badge)
-            {
-                Variant = packet.ReadString();
-                Count = 1;
-            }
-            else
-            {
-                Kind = packet.ReadInt();
-                Variant = packet.ReadString();
-                Count = packet.ReadInt();
-                IsLimited = packet.ReadBool();
-                if (IsLimited)
-                {
-                    LimitedTotal = packet.ReadInt();
-                    LimitedRemaining = packet.ReadInt();
-                }
+                LimitedTotal = packet.ReadInt();
+                LimitedRemaining = packet.ReadInt();
             }
         }
+    }
 
-        public void Compose(IPacket packet)
+    public void Compose(IPacket packet)
+    {
+        switch (packet.Protocol)
         {
-            switch (packet.Protocol)
-            {
-                case ClientType.Flash: packet.WriteString(Type.ToShortString()); break;
-                case ClientType.Unity: packet.WriteShort(Type.GetValue()); break;
-                default: throw new Exception($"Unknown client protocol: {packet.Protocol}.");
-            }
+            case ClientType.Flash: packet.WriteString(Type.ToShortString()); break;
+            case ClientType.Unity: packet.WriteShort(Type.GetValue()); break;
+            default: throw new Exception($"Unknown client protocol: {packet.Protocol}.");
+        }
 
-            if (Type == ItemType.Badge)
-            {
-                packet.WriteString(Variant);
-            }
-            else
+        if (Type == ItemType.Badge)
+        {
+            packet.WriteString(Variant);
+        }
+        else
+        {
+            packet
+                .WriteInt(Kind)
+                .WriteString(Variant)
+                .WriteInt(Count)
+                .WriteBool(IsLimited);
+
+            if (IsLimited)
             {
                 packet
-                    .WriteInt(Kind)
-                    .WriteString(Variant)
-                    .WriteInt(Count)
-                    .WriteBool(IsLimited);
-
-                if (IsLimited)
-                {
-                    packet
-                        .WriteInt(LimitedTotal)
-                        .WriteInt(LimitedRemaining);
-                }
+                    .WriteInt(LimitedTotal)
+                    .WriteInt(LimitedRemaining);
             }
         }
     }

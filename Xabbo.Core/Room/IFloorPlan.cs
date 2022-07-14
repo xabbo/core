@@ -2,38 +2,37 @@
 
 using Xabbo.Messages;
 
-namespace Xabbo.Core
-{
-    public interface IFloorPlan : IComposable
-    {
-        /// <summary>
-        /// Gets the original string that this floor plan was parsed from.
-        /// </summary>
-        string? OriginalString { get; }
+namespace Xabbo.Core;
 
-        /// <summary>
-        /// Gets the wall scaling for this floor plan.
-        /// </summary>
-        int Scale { get; }
-        /// <summary>
-        /// Gets the wall height for this floor plan.
-        /// </summary>
-        int WallHeight { get; }
-        /// <summary>
-        /// Gets the width of this floor plan.
-        /// </summary>
-        int Width { get; }
-        /// <summary>
-        /// Gets the length of this floor plan.
-        /// </summary>
-        int Length { get; }
-        /// <summary>
-        /// Gets the tile height at the specified coordinates in this floor plan.
-        /// </summary>
-        int this[int x, int y] { get; }
-        /// <summary>
-        /// Gets if the tile at the specified coordinates in this floor plan is walkable.
-        /// </summary>
-        bool IsWalkable(int x, int y);
-    }
+public interface IFloorPlan : IComposable
+{
+    /// <summary>
+    /// Gets the original string that this floor plan was parsed from.
+    /// </summary>
+    string? OriginalString { get; }
+
+    /// <summary>
+    /// Gets the wall scaling for this floor plan.
+    /// </summary>
+    int Scale { get; }
+    /// <summary>
+    /// Gets the wall height for this floor plan.
+    /// </summary>
+    int WallHeight { get; }
+    /// <summary>
+    /// Gets the width of this floor plan.
+    /// </summary>
+    int Width { get; }
+    /// <summary>
+    /// Gets the length of this floor plan.
+    /// </summary>
+    int Length { get; }
+    /// <summary>
+    /// Gets the tile height at the specified coordinates in this floor plan.
+    /// </summary>
+    int this[int x, int y] { get; }
+    /// <summary>
+    /// Gets if the tile at the specified coordinates in this floor plan is walkable.
+    /// </summary>
+    bool IsWalkable(int x, int y);
 }

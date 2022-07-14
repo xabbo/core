@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum Thickness
 {
-    public enum Thickness
-    {
-        Thinnest = -2,
-        Thin = -1,
-        Normal = 0,
-        Thick = 1
-    }
+    Thinnest = -2,
+    Thin = -1,
+    Normal = 0,
+    Thick = 1
 }

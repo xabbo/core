@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum GroupMemberSearchType
 {
-    public enum GroupMemberSearchType
-    {
-        Members = 0,
-        Admins = 1,
-        Requests = 2
-    }
+    Members = 0,
+    Admins = 1,
+    Requests = 2
 }

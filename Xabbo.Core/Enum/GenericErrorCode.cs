@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum GenericErrorCode
 {
-    public enum GenericErrorCode
-    {
-        InvalidRoomPassword = -100002,
-        Kicked = 4008
-    }
+    InvalidRoomPassword = -100002,
+    Kicked = 4008
 }

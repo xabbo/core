@@ -3,34 +3,33 @@ using System.IO;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace Xabbo.Core.GameData.Xml
+namespace Xabbo.Core.GameData.Xml;
+
+[XmlRoot("furnidata")]
+public class FurniData
 {
-    [XmlRoot("furnidata")]
-    public class FurniData
+    private static readonly XmlSerializer _serializer = new(typeof(FurniData));
+
+    public static FurniData Load(Stream stream) => (FurniData?)_serializer.Deserialize(stream)
+        ?? throw new Exception("Failed to deserialize furni data.");
+
+    public static FurniData Load(string path)
     {
-        private static readonly XmlSerializer _serializer = new(typeof(FurniData));
+        using Stream stream = File.OpenRead(path);
+        return Load(stream);
+    }
 
-        public static FurniData Load(Stream stream) => (FurniData?)_serializer.Deserialize(stream)
-            ?? throw new Exception("Failed to deserialize furni data.");
+    [XmlArray("roomitemtypes")]
+    [XmlArrayItem("furnitype")]
+    public List<FurniInfo> FloorItems { get; set; }
 
-        public static FurniData Load(string path)
-        {
-            using Stream stream = File.OpenRead(path);
-            return Load(stream);
-        }
+    [XmlArray("wallitemtypes")]
+    [XmlArrayItem("furnitype")]
+    public List<FurniInfo> WallItems { get; set; }
 
-        [XmlArray("roomitemtypes")]
-        [XmlArrayItem("furnitype")]
-        public List<FurniInfo> FloorItems { get; set; }
-
-        [XmlArray("wallitemtypes")]
-        [XmlArrayItem("furnitype")]
-        public List<FurniInfo> WallItems { get; set; }
-
-        public FurniData()
-        {
-            FloorItems = new List<FurniInfo>();
-            WallItems = new List<FurniInfo>();
-        }
+    public FurniData()
+    {
+        FloorItems = new List<FurniInfo>();
+        WallItems = new List<FurniInfo>();
     }
 }

@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum MarketplaceOfferStatus
 {
-    public enum MarketplaceOfferStatus
-    {
-        Open = 1,
-        Sold = 2,
-        NotSold = 3
-    }
+    Open = 1,
+    Sold = 2,
+    NotSold = 3
 }

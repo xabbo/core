@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum ChatBubbleWidth
 {
-    public enum ChatBubbleWidth
-    {
-        Wide = 0,
-        Normal = 1,
-        Thin = 2
-    }
+    Wide = 0,
+    Normal = 1,
+    Thin = 2
 }

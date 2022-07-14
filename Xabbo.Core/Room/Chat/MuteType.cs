@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum MuteType
 {
-    public enum MuteType
-    {
-        Muted,
-        Flooded
-    }
+    Muted,
+    Flooded
 }

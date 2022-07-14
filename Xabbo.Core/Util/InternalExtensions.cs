@@ -1,28 +1,27 @@
 ﻿using System;
 using System.Collections.Concurrent;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+internal static class InternalExtensions
 {
-    internal static class InternalExtensions
+    public static TValue AddOrUpdate<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dictionary,
+        TKey key, TValue addValue, Func<TKey, TValue, TValue> updateValue, out bool added) where TKey : notnull
     {
-        public static TValue AddOrUpdate<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dictionary,
-            TKey key, TValue addValue, Func<TKey, TValue, TValue> updateValue, out bool added) where TKey : notnull
+        while (true)
         {
-            while (true)
+            if (dictionary.TryAdd(key, addValue))
             {
-                if (dictionary.TryAdd(key, addValue))
+                added = true;
+                return addValue;
+            }
+            else if (dictionary.TryGetValue(key, out TValue? existingValue))
+            {
+                TValue newValue = updateValue(key, existingValue);
+                if (dictionary.TryUpdate(key, newValue, existingValue))
                 {
-                    added = true;
-                    return addValue;
-                }
-                else if (dictionary.TryGetValue(key, out TValue? existingValue))
-                {
-                    TValue newValue = updateValue(key, existingValue);
-                    if (dictionary.TryUpdate(key, newValue, existingValue))
-                    {
-                        added = false;
-                        return newValue;
-                    }
+                    added = false;
+                    return newValue;
                 }
             }
         }

@@ -1,40 +1,39 @@
 ﻿using System;
 using Xabbo.Messages;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public class CrackableFurniData : ItemData, ICrackableFurniData
 {
-    public class CrackableFurniData : ItemData, ICrackableFurniData
+    public int Hits { get; set; }
+    public int Target { get; set; }
+
+    public CrackableFurniData()
+        : base(ItemDataType.CrackableFurni)
+    { }
+
+    public CrackableFurniData(ICrackableFurniData data)
+        : base(data)
     {
-        public int Hits { get; set; }
-        public int Target { get; set; }
+        Hits = data.Hits;
+        Target = data.Target;
+    }
 
-        public CrackableFurniData()
-            : base(ItemDataType.CrackableFurni)
-        { }
+    protected override void Initialize(IReadOnlyPacket packet)
+    {
+        Value = packet.ReadString();
+        Hits = packet.ReadInt();
+        Target = packet.ReadInt();
 
-        public CrackableFurniData(ICrackableFurniData data)
-            : base(data)
-        {
-            Hits = data.Hits;
-            Target = data.Target;
-        }
+        base.Initialize(packet);
+    }
 
-        protected override void Initialize(IReadOnlyPacket packet)
-        {
-            Value = packet.ReadString();
-            Hits = packet.ReadInt();
-            Target = packet.ReadInt();
+    protected override void WriteData(IPacket packet)
+    {
+        packet.WriteString(Value);
+        packet.WriteInt(Hits);
+        packet.WriteInt(Target);
 
-            base.Initialize(packet);
-        }
-
-        protected override void WriteData(IPacket packet)
-        {
-            packet.WriteString(Value);
-            packet.WriteInt(Hits);
-            packet.WriteInt(Target);
-
-            WriteBase(packet);
-        }
+        WriteBase(packet);
     }
 }

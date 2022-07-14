@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public interface IVoteResultData : IItemData
 {
-    public interface IVoteResultData : IItemData
-    {
-        int Result { get; }
-    }
+    int Result { get; }
 }

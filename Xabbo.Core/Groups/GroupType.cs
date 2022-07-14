@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum GroupType
 {
-    public enum GroupType
-    {
-        Open = 0,
-        Exclusive = 1,
-        Closed = 2,
-        Large = 3
-    }
+    Open = 0,
+    Exclusive = 1,
+    Closed = 2,
+    Large = 3
 }

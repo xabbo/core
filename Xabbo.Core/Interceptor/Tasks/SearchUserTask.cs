@@ -5,29 +5,28 @@ using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
-namespace Xabbo.Core.Tasks
+namespace Xabbo.Core.Tasks;
+
+public class SearchUserTask : InterceptorTask<UserSearchResults>
 {
-    public class SearchUserTask : InterceptorTask<UserSearchResults>
+    private readonly string _searchName;
+
+    public SearchUserTask(IInterceptor interceptor, string searchName)
+        : base(interceptor)
     {
-        private readonly string _searchName;
+        _searchName = searchName;
+    }
 
-        public SearchUserTask(IInterceptor interceptor, string searchName)
-            : base(interceptor)
+    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.HabboSearch, _searchName);
+
+    [InterceptIn(nameof(Incoming.HabboSearchResult))]
+    protected void OnUserSearchResult(InterceptArgs e)
+    {
+        try
         {
-            _searchName = searchName;
+            if (SetResult(UserSearchResults.Parse(e.Packet)))
+                e.Block();
         }
-
-        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.HabboSearch, _searchName);
-
-        [InterceptIn(nameof(Incoming.HabboSearchResult))]
-        protected void OnUserSearchResult(InterceptArgs e)
-        {
-            try
-            {
-                if (SetResult(UserSearchResults.Parse(e.Packet)))
-                    e.Block();
-            }
-            catch (Exception ex) { SetException(ex); }
-        }
+        catch (Exception ex) { SetException(ex); }
     }
 }

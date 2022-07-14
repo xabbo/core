@@ -1,13 +1,12 @@
 ﻿using System;
 
-namespace Xabbo.Core.Events
+namespace Xabbo.Core.Events;
+
+public class InventoryItemEventArgs : EventArgs
 {
-    public class InventoryItemEventArgs : EventArgs
+    public IInventoryItem Item { get; }
+    public InventoryItemEventArgs(IInventoryItem item)
     {
-        public IInventoryItem Item { get; }
-        public InventoryItemEventArgs(IInventoryItem item)
-        {
-            Item = item;
-        }
+        Item = item;
     }
 }

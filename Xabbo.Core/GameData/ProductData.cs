@@ -9,75 +9,74 @@ using System.Diagnostics.CodeAnalysis;
 
 using Xabbo.Core.Serialization;
 
-namespace Xabbo.Core.GameData
+namespace Xabbo.Core.GameData;
+
+public sealed class ProductData : IReadOnlyDictionary<string, ProductInfo>
 {
-    public sealed class ProductData : IReadOnlyDictionary<string, ProductInfo>
+    private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions()
     {
-        private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true,
-            NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString,
-            Converters = { new StringConverter() }
-        };
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+        NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString,
+        Converters = { new StringConverter() }
+    };
 
-        public static ProductData LoadJsonFile(string path) => LoadJson(File.ReadAllText(path));
-        public static ProductData LoadJson(string json)
-        {
-            return new ProductData(
-                JsonSerializer.Deserialize<Json.ProductData>(json, _jsonSerializerOptions)
-                ?? throw new Exception("Failed to deserialize product data.")
-            );
-        }
-
-        private readonly Dictionary<string, ProductInfo> _map = new();
-
-        public ProductInfo this[string key] => _map[key];
-        public IEnumerable<string> Keys => _map.Keys;
-        public IEnumerable<ProductInfo> Values => _map.Values;
-        public int Count => _map.Count;
-
-        internal ProductData(Json.ProductData productDataProxy)
-        {
-            foreach (var productInfoProxy in productDataProxy.Container.Product)
-            {
-                ProductInfo productInfo = new(productInfoProxy);
-                
-                if (_map.ContainsKey(productInfo.Code))
-                {
-                    Debug.WriteLine($"[!] Duplicate product code '{productInfo.Code}' in JSON product data.");
-                }
-                else
-                {
-                    _map.Add(productInfo.Code, productInfo);
-                }
-            }
-        }
-
-        public bool ContainsKey(string key) => _map.ContainsKey(key);
-        public IEnumerator<KeyValuePair<string, ProductInfo>> GetEnumerator() => _map.GetEnumerator();
-        public bool TryGetValue(string key, [NotNullWhen(true)] out ProductInfo? value) => _map.TryGetValue(key, out value);
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    public static ProductData LoadJsonFile(string path) => LoadJson(File.ReadAllText(path));
+    public static ProductData LoadJson(string json)
+    {
+        return new ProductData(
+            JsonSerializer.Deserialize<Json.ProductData>(json, _jsonSerializerOptions)
+            ?? throw new Exception("Failed to deserialize product data.")
+        );
     }
 
-    public class ProductInfo
+    private readonly Dictionary<string, ProductInfo> _map = new();
+
+    public ProductInfo this[string key] => _map[key];
+    public IEnumerable<string> Keys => _map.Keys;
+    public IEnumerable<ProductInfo> Values => _map.Values;
+    public int Count => _map.Count;
+
+    internal ProductData(Json.ProductData productDataProxy)
     {
-        public string Code { get; }
-        public string Name { get; }
-        public string Description { get; }
-
-        public ProductInfo(string code, string name, string description)
+        foreach (var productInfoProxy in productDataProxy.Container.Product)
         {
-            Code = code;
-            Name = name;
-            Description = description;
+            ProductInfo productInfo = new(productInfoProxy);
+            
+            if (_map.ContainsKey(productInfo.Code))
+            {
+                Debug.WriteLine($"[!] Duplicate product code '{productInfo.Code}' in JSON product data.");
+            }
+            else
+            {
+                _map.Add(productInfo.Code, productInfo);
+            }
         }
+    }
 
-        internal ProductInfo(Json.ProductInfo proxy)
-        {
-            Code = proxy.Code;
-            Name = proxy.Name;
-            Description = proxy.Description;
-        }
+    public bool ContainsKey(string key) => _map.ContainsKey(key);
+    public IEnumerator<KeyValuePair<string, ProductInfo>> GetEnumerator() => _map.GetEnumerator();
+    public bool TryGetValue(string key, [NotNullWhen(true)] out ProductInfo? value) => _map.TryGetValue(key, out value);
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+}
+
+public class ProductInfo
+{
+    public string Code { get; }
+    public string Name { get; }
+    public string Description { get; }
+
+    public ProductInfo(string code, string name, string description)
+    {
+        Code = code;
+        Name = name;
+        Description = description;
+    }
+
+    internal ProductInfo(Json.ProductInfo proxy)
+    {
+        Code = proxy.Code;
+        Name = proxy.Name;
+        Description = proxy.Description;
     }
 }

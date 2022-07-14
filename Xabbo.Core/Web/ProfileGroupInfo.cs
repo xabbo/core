@@ -2,11 +2,10 @@
 
 using System.Text.Json.Serialization;
 
-namespace Xabbo.Core.Web
+namespace Xabbo.Core.Web;
+
+public class ProfileGroupInfo : GroupInfo
 {
-    public class ProfileGroupInfo : GroupInfo
-    {
-        [JsonPropertyName("isAdmin")]
-        public bool IsAdmin { get; set; }
-    }
+    [JsonPropertyName("isAdmin")]
+    public bool IsAdmin { get; set; }
 }

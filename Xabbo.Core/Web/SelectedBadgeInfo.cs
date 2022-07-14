@@ -2,11 +2,10 @@
 
 using System.Text.Json.Serialization;
 
-namespace Xabbo.Core.Web
+namespace Xabbo.Core.Web;
+
+public class SelectedBadgeInfo : BadgeInfo
 {
-    public class SelectedBadgeInfo : BadgeInfo
-    {
-        [JsonPropertyName("badgeIndex")]
-        public int Index { get; set; }
-    }
+    [JsonPropertyName("badgeIndex")]
+    public int Index { get; set; }
 }

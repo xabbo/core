@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum Stances
 {
-    public enum Stances
-    {
-        Stand,
-        Sit,
-        Lay
-    }
+    Stand,
+    Sit,
+    Lay
 }

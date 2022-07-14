@@ -5,33 +5,32 @@ using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
-namespace Xabbo.Core.Tasks
+namespace Xabbo.Core.Tasks;
+
+public class GetRoomSettingsTask : InterceptorTask<RoomSettings>
 {
-    public class GetRoomSettingsTask : InterceptorTask<RoomSettings>
+    private readonly long _roomId;
+
+    public GetRoomSettingsTask(IInterceptor interceptor, long roomId)
+        : base(interceptor)
     {
-        private readonly long _roomId;
+        _roomId = roomId;
+    }
 
-        public GetRoomSettingsTask(IInterceptor interceptor, long roomId)
-            : base(interceptor)
+    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetRoomSettings, (LegacyLong)_roomId);
+
+    [InterceptIn(nameof(Incoming.RoomSettingsData))]
+    protected void OnRoomSettingsData(InterceptArgs e)
+    {
+        try
         {
-            _roomId = roomId;
-        }
-
-        protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetRoomSettings, (LegacyLong)_roomId);
-
-        [InterceptIn(nameof(Incoming.RoomSettingsData))]
-        protected void OnRoomSettingsData(InterceptArgs e)
-        {
-            try
+            var roomSettings = RoomSettings.Parse(e.Packet);
+            if (roomSettings.Id == _roomId)
             {
-                var roomSettings = RoomSettings.Parse(e.Packet);
-                if (roomSettings.Id == _roomId)
-                {
-                    if (SetResult(roomSettings))
-                        e.Block();
-                }
+                if (SetResult(roomSettings))
+                    e.Block();
             }
-            catch (Exception ex) { SetException(ex); }
         }
+        catch (Exception ex) { SetException(ex); }
     }
 }

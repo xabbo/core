@@ -1,6 +1,5 @@
 ﻿using System;
 
-namespace Xabbo.Core
-{
-    public interface ILegacyData : IItemData { }
-}
+namespace Xabbo.Core;
+
+public interface ILegacyData : IItemData { }

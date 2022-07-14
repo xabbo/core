@@ -2,12 +2,11 @@
 
 using Xabbo.Messages;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public interface ICatalogPageItem : IComposable
 {
-    public interface ICatalogPageItem : IComposable
-    {
-        int Position { get; }
-        int Type { get; }
-        int SecondsToExpiration { get; set; }
-    }
+    int Position { get; }
+    int Type { get; }
+    int SecondsToExpiration { get; set; }
 }

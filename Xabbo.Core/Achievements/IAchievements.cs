@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public interface IAchievements : IReadOnlyCollection<IAchievement>
 {
-    public interface IAchievements : IReadOnlyCollection<IAchievement>
-    {
-        IAchievement? this[int id] { get; }
-    }
+    IAchievement? this[int id] { get; }
 }

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace Xabbo.Core.Web
+namespace Xabbo.Core.Web;
+
+public class ErrorMessageInfo
 {
-    public class ErrorMessageInfo
-    {
-        [JsonPropertyName("errorMsg")]
-        public string ErrorMsg { get; set; } = string.Empty;
-    }
+    [JsonPropertyName("errorMsg")]
+    public string ErrorMsg { get; set; } = string.Empty;
 }

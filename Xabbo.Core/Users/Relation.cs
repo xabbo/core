@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public enum Relation
 {
-    public enum Relation
-    {
-        None,
-        Heart,
-        Smile,
-        Skull
-    }
+    None,
+    Heart,
+    Smile,
+    Skull
 }

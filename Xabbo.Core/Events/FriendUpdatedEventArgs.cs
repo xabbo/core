@@ -1,15 +1,14 @@
 ﻿using System;
 
-namespace Xabbo.Core.Events
-{
-    public class FriendUpdatedEventArgs : FriendEventArgs
-    {
-        public IFriend Previous { get; }
+namespace Xabbo.Core.Events;
 
-        public FriendUpdatedEventArgs(IFriend previous, IFriend current)
-            : base(current)
-        {
-            Previous = previous;
-        }
+public class FriendUpdatedEventArgs : FriendEventArgs
+{
+    public IFriend Previous { get; }
+
+    public FriendUpdatedEventArgs(IFriend previous, IFriend current)
+        : base(current)
+    {
+        Previous = previous;
     }
 }

@@ -1,15 +1,14 @@
 ﻿using System;
 
-namespace Xabbo.Core.Events
-{
-    public class EntityNameChangedEventArgs : EntityEventArgs
-    {
-        public string PreviousName { get; }
+namespace Xabbo.Core.Events;
 
-        public EntityNameChangedEventArgs(IEntity entity, string previousName)
-            : base(entity)
-        {
-            PreviousName = previousName;
-        }
+public class EntityNameChangedEventArgs : EntityEventArgs
+{
+    public string PreviousName { get; }
+
+    public EntityNameChangedEventArgs(IEntity entity, string previousName)
+        : base(entity)
+    {
+        PreviousName = previousName;
     }
 }

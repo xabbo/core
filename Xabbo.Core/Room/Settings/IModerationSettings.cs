@@ -1,12 +1,11 @@
 ﻿using System;
 using Xabbo.Messages;
 
-namespace Xabbo.Core
+namespace Xabbo.Core;
+
+public interface IModerationSettings : IComposable
 {
-    public interface IModerationSettings : IComposable
-    {
-        ModerationPermissions WhoCanMute { get; }
-        ModerationPermissions WhoCanKick { get; }
-        ModerationPermissions WhoCanBan { get; }
-    }
+    ModerationPermissions WhoCanMute { get; }
+    ModerationPermissions WhoCanKick { get; }
+    ModerationPermissions WhoCanBan { get; }
 }

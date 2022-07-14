@@ -2,11 +2,10 @@
 
 using System.Text.Json.Serialization;
 
-namespace Xabbo.Core.Web
+namespace Xabbo.Core.Web;
+
+public class ClientUrlData
 {
-    public class ClientUrlData
-    {
-        [JsonPropertyName("clientUrl")]
-        public string ClientUrl { get; set; } = string.Empty;
-    }
+    [JsonPropertyName("clientUrl")]
+    public string ClientUrl { get; set; } = string.Empty;
 }
