@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Xabbo.Core.Web;
 
-public class GameDataHash
+internal class GameDataHash
 {
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;

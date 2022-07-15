@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 using Xabbo.Core.Serialization;
-using Xabbo.Core.Web;
-
-using static Xabbo.Core.XabboConst;
 
 namespace Xabbo.Core;
 
@@ -30,6 +24,8 @@ public static class H
 
     private static readonly Regex regexAvatarValidator
            = new Regex(@"^[a-zA-Z0-9_\-=?!@:.,]{3,15}$", RegexOptions.Compiled);
+
+    public static string UserAgent = XabboConst.DEFAULT_USER_AGENT;
 
     public static bool IsValidAvatarName(string avatarName) => regexAvatarValidator.IsMatch(avatarName);
 
@@ -230,102 +226,6 @@ public static class H
                 sb.Append(c);
         }
         return sb.ToString();
-    }
-    #endregion
-
-    #region - Web API -
-    public static string UserAgent { get; set; } = DEFAULT_USER_AGENT;
-
-    private static async Task<string> DownloadStringAsync(string url, string referer = "https://www.habbo.com/")
-    {
-        var req = WebRequest.CreateHttp(url);
-        req.UserAgent = UserAgent;
-        req.Referer = referer;
-
-        using (var res = await req.GetResponseAsync().ConfigureAwait(false))
-        using (var reader = new StreamReader(res.GetResponseStream()))
-        {
-            return await reader.ReadToEndAsync().ConfigureAwait(false);
-        }
-    }
-
-    private static async Task<byte[]> DownloadDataAsync(string url, string referer = "https://www.habbo.com/")
-    {
-        var req = WebRequest.CreateHttp(url);
-        req.UserAgent = UserAgent;
-
-        if (referer != null) req.Referer = referer;
-
-        using (var res = await req.GetResponseAsync().ConfigureAwait(false))
-        {
-            int len = (int)res.ContentLength;
-            byte[] data = new byte[len];
-            using (var ins = res.GetResponseStream())
-            {
-                int totalRead = 0;
-                while (totalRead < len)
-                {
-                    int bytesRead = await ins.ReadAsync(data, totalRead, len - totalRead).ConfigureAwait(false);
-                    if (bytesRead <= 0) throw new EndOfStreamException();
-                    totalRead += bytesRead;
-                }
-            }
-            return data;
-        }
-    }
-
-    public static Task<string> LoadExternalVariablesAsync() => LoadExternalVariablesAsync("com"); 
-
-    public static Task<string> LoadExternalVariablesAsync(string domain)
-        => DownloadStringAsync(URL_EXTERNAL_VARIABLES.Replace("$domain", domain));
-
-    public static async Task<UserInfo?> FindUserAsync(string name)
-    {
-        string json = await DownloadStringAsync(API_USER_LOOKUP.Replace("$name", WebUtility.UrlEncode(name))).ConfigureAwait(false);
-
-        UserInfo? userInfo = JsonSerializer.Deserialize<UserInfo>(json, _jsonSerializerOptions);
-        if (userInfo?.UniqueId is null) return null;
-
-        return userInfo;
-    }
-
-    public static async Task<Web.UserProfile?> GetProfileAsync(string uniqueId)
-    {
-        string json = await DownloadStringAsync(API_USER_PROFILE.Replace("$uniqueId", uniqueId)).ConfigureAwait(false);
-
-        var userProfile = JsonSerializer.Deserialize<Web.UserProfile>(json, _jsonSerializerOptions);
-        if (userProfile?.UniqueId is null) return null;
-
-        return userProfile;
-    }
-
-    public static Task<byte[]> DownloadFigureImageAsync(string figureString, string size = "m", int direction = 4, int headDirection = 4)
-    {
-        return DownloadDataAsync(
-            API_FIGURE_IMAGE
-            .Replace("$size", size)
-            .Replace("$figure", figureString)
-            .Replace("$dir", direction.ToString())
-            .Replace("$headdir", headDirection.ToString())
-        );
-    }
-
-    public static async Task<PhotoData> GetPhotoDataAsync(string id)
-    {
-        string json = await DownloadStringAsync(API_FURNI_EXTRADATA.Replace("$id", id)).ConfigureAwait(false);
-        return JsonSerializer.Deserialize<PhotoData>(json, _jsonSerializerOptions)
-            ?? throw new FormatException("Failed to deserialize photo data.");
-    }
-
-    public static async Task<byte[]> DownloadPhotoAsync(string id)
-    {
-        var photoData = await GetPhotoDataAsync(id).ConfigureAwait(false);
-        return await DownloadPhotoAsync(photoData).ConfigureAwait(false);
-    }
-
-    public static Task<byte[]> DownloadPhotoAsync(PhotoData photoData)
-    {
-        return DownloadDataAsync(photoData.Url);
     }
     #endregion
 }
