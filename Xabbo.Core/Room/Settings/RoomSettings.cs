@@ -68,7 +68,6 @@ public class RoomSettings : IComposable
         .WriteLegacyLong(Id)
         .WriteString(Name ?? string.Empty)
         .WriteString(Description ?? string.Empty)
-        .WriteString(Description ?? string.Empty)
         .WriteInt((int)Access)
         .WriteString(Password ?? string.Empty)
         .WriteInt(MaxVisitors)
