@@ -3,8 +3,13 @@ using System.Collections.Immutable;
 
 namespace Xabbo.Core.GameData;
 
-public record FurniInfo
+/// <summary>
+/// Contains information of a furni.
+/// </summary>
+public record FurniInfo : IItem
 {
+    long IItem.Id => -1;
+
     /// <summary>
     /// Gets the type of the furni.
     /// </summary>
