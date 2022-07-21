@@ -25,7 +25,7 @@ public static class H
     private static readonly Regex regexAvatarValidator
            = new Regex(@"^[a-zA-Z0-9_\-=?!@:.,]{3,15}$", RegexOptions.Compiled);
 
-    public static string UserAgent = XabboConst.DEFAULT_USER_AGENT;
+    public static string UserAgent = XabboConst.DefaultUserAgent;
 
     public static bool IsValidAvatarName(string avatarName) => regexAvatarValidator.IsMatch(avatarName);
 
