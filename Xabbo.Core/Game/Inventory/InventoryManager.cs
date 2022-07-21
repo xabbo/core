@@ -80,7 +80,7 @@ public class InventoryManager : GameStateManager
     /// Note that the user must be in a room to retrieve the inventory from the server.
     /// If the user is not in a room and a request to load the inventory is made, this method will time out.
     /// </summary>
-    public async Task<IInventory> GetInventoryAsync(int timeout = XabboConst.DEFAULT_TIMEOUT,
+    public async Task<IInventory> GetInventoryAsync(int timeout = XabboConst.DefaultTimeout,
         CancellationToken cancellationToken = default)
     {
         if (_inventory?.IsInvalidated == false)
