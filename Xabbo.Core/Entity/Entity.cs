@@ -24,10 +24,10 @@ public abstract class Entity : IEntity, IComposable
     public Tile Location { get; set; }
     [JsonIgnore] public int X => Location.X;
     [JsonIgnore] public int Y => Location.Y;
-    [JsonIgnore] public (int X, int Y) XY => Location.XY;
+    [JsonIgnore] public Point XY => Location.XY;
     [JsonIgnore] public float Z => Location.Z;
-    [JsonIgnore] public (int X, int Y, float Z) XYZ => Location.XYZ;
     public int Direction { get; set; }
+    public Area Area => new(Location.XY, 1, 1);
 
     // States
     public int Dance { get; set; }
@@ -50,7 +50,7 @@ public abstract class Entity : IEntity, IComposable
         Name = "";
         Motto = "";
         Figure = "";
-        Location = Tile.Zero;
+        Location = default;
         Direction = 0;
     }
 
@@ -83,7 +83,7 @@ public abstract class Entity : IEntity, IComposable
             .WriteInt((int)Type);
     }
 
-    public override string ToString() => $"{Name} [{Id}:{Index}]";
+    public override string ToString() => Name;
 
     public static Entity Parse(IReadOnlyPacket packet)
     {

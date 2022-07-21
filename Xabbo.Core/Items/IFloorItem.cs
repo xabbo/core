@@ -2,12 +2,11 @@
 
 namespace Xabbo.Core;
 
-public interface IFloorItem : IFurni
+/// <summary>
+/// Represents a floor furniture.
+/// </summary>
+public interface IFloorItem : IFurni, IFloorEntity
 {
-    /// <summary>
-    /// Gets the location of the floor item.
-    /// </summary>
-    Tile Location { get; }
     /// <summary>
     /// Gets the X coordinate of the floor item.
     /// </summary>
@@ -19,19 +18,11 @@ public interface IFloorItem : IFurni
     /// <summary>
     /// Gets the XY coordinates of the floor item.
     /// </summary>
-    (int X, int Y) XY { get; }
+    Point XY { get; }
     /// <summary>
     /// Gets the Z coordinate of the floor item.
     /// </summary>
     double Z { get; }
-    /// <summary>
-    /// Gets the XYZ coordinates of the floor item.
-    /// </summary>
-    (int X, int Y, double Z) XYZ { get; }
-    /// <summary>
-    /// Gets the direction of the floor item.
-    /// </summary>
-    int Direction { get; }
     /// <summary>
     /// Gets the height of the floor item.
     /// </summary>

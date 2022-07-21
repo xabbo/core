@@ -198,7 +198,7 @@ public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<strin
 
     public EntityStatusUpdate()
     {
-        Location = Tile.Zero;
+        Location = default;
         HeadDirection = 0;
         Direction = 0;
     }
@@ -241,15 +241,13 @@ public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<strin
         foreach (string part in parts)
         {
             string type;
-            string[] args = new string[0];
+            string[] args = Array.Empty<string>();
 
             int spaceIndex = part.IndexOf(' ');
             if (spaceIndex > 0)
             {
-                type = part.Substring(0, spaceIndex);
-                args = part
-                    .Substring(spaceIndex + 1)
-                    .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                type = part[..spaceIndex];
+                args = part[(spaceIndex + 1)..].Split(' ', StringSplitOptions.RemoveEmptyEntries);
             }
             else
             {
@@ -263,14 +261,14 @@ public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<strin
     public string CompileStatus()
     {
         var sb = new StringBuilder();
-        foreach (var pair in fragments)
+        foreach (var (k, v) in fragments)
         {
             sb.Append('/');
-            sb.Append(pair.Key);
-            for (int i = 0; i < pair.Value.Length; i++)
+            sb.Append(k);
+            for (int i = 0; i < v.Length; i++)
             {
                 sb.Append(' ');
-                sb.Append(pair.Value[i]);
+                sb.Append(v[i]);
             }
         }
         sb.Append('/');

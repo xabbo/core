@@ -12,11 +12,11 @@ public class FloorItem : Furni, IFloorItem
     public override ItemType Type => ItemType.Floor;
 
     public Tile Location { get; set; }
+    public Area Area => Extensions.XabboCoreExtensions.GetArea(this);
     [JsonIgnore] public int X => Location.X;
     [JsonIgnore] public int Y => Location.Y;
-    [JsonIgnore] public (int X, int Y) XY => Location.XY;
+    [JsonIgnore] public Point XY => Location.XY;
     [JsonIgnore] public double Z => Location.Z;
-    [JsonIgnore] public (int X, int Y, double Z) XYZ => Location.XYZ;
     public int Direction { get; set; }
     public float Height { get; set; }
     public long Extra { get; set; }
@@ -30,7 +30,7 @@ public class FloorItem : Furni, IFloorItem
 
     public FloorItem()
     {
-        Location = Tile.Zero;
+        Location = default;
         Data = new LegacyData();
         SecondsToExpiration = -1;
         Usage = FurniUsage.None;

@@ -6,7 +6,10 @@ using Xabbo.Core.Game;
 
 namespace Xabbo.Core;
 
-public interface IEntity : IRoomEntity, IComposable
+/// <summary>
+/// Represents a living entity in a room.
+/// </summary>
+public interface IEntity : IFloorEntity, IComposable
 {
     /// <summary>
     /// Gets if the entity has been removed from the room.
@@ -61,17 +64,12 @@ public interface IEntity : IRoomEntity, IComposable
     /// <summary>
     /// Gets the XY coordinates of the entity.
     /// </summary>
-    public (int X, int Y) XY => Location.XY;
+    public Point XY => Location.XY;
 
     /// <summary>
     /// Gets the Z coordinate of the entity.
     /// </summary>
     public float Z => Location.Z;
-
-    /// <summary>
-    /// Gets the XYZ coordinates of the entity.
-    /// </summary>
-    public (int X, int Y, float Z) XYZ => Location.XYZ;
 
     /// <summary>
     /// Gets the current dance of the entity.
