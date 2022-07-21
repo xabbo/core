@@ -17,7 +17,7 @@ public class GetRoomDataTask : InterceptorTask<IRoomData>
         _roomId = roomId;
     }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetGuestRoom, (LegacyLong)_roomId, 0, 0);
+    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetGuestRoom, _roomId, 0, 0);
 
     [InterceptIn(nameof(Incoming.GetGuestRoomResult))]
     protected void OnRoomData(InterceptArgs e)

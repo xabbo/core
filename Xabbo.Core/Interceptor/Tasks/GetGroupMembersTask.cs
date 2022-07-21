@@ -24,7 +24,7 @@ public class GetGroupMembersTask : InterceptorTask<IGroupMembers>
     }
 
     /// <inheritdoc/>
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetGuildMembers, (LegacyLong)_groupId, _page, _filter, (int)_searchType);
+    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetGuildMembers, _groupId, _page, _filter, (int)_searchType);
 
     [InterceptIn(nameof(Incoming.GuildMembers))] 
     protected void OnGuildMembers(InterceptArgs e)

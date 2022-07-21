@@ -17,7 +17,7 @@ public class GetStickyTask : InterceptorTask<Sticky>
         _stickyId = stickyId;
     }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetItemData, (LegacyLong)_stickyId);
+    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetItemData, _stickyId);
 
     [InterceptIn(nameof(Incoming.ItemData))]
     protected void OnPostItData(InterceptArgs e)

@@ -18,7 +18,7 @@ public class GetRightsListTask : InterceptorTask<List<(long Id, string Name)>>
         _roomId = roomId;
     }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetFlatControllers, (LegacyLong)_roomId);
+    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetFlatControllers, _roomId);
 
     [InterceptIn(nameof(Incoming.FlatControllers))]
     protected void OnRoomRightsList(InterceptArgs e)

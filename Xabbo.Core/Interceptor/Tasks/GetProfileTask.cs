@@ -17,7 +17,7 @@ public class GetProfileTask : InterceptorTask<IUserProfile>
         _userId = userId;
     }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetExtendedProfile, (LegacyLong)_userId, false);
+    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetExtendedProfile, _userId, false);
 
     [InterceptIn(nameof(Incoming.ExtendedProfile))]
     protected void OnUserProfile(InterceptArgs e)

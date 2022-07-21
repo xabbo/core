@@ -17,7 +17,7 @@ public class GetGroupDataTask : InterceptorTask<IGroupData>
         _groupId = groupId;
     }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetHabboGroupDetails, (LegacyLong)_groupId, false);
+    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetHabboGroupDetails, _groupId, false);
 
     [InterceptIn(nameof(Incoming.HabboGroupDetails))]
     protected void OnHabboGroupDetails(InterceptArgs e)

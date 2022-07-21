@@ -17,7 +17,7 @@ public class GetPetInfoTask : InterceptorTask<PetInfo>
         _petId = petId;
     }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetNewPetInfo, (LegacyLong)_petId);
+    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetNewPetInfo, _petId);
 
     [InterceptIn(nameof(Incoming.PetInfo))]
     protected void OnPetInfo(InterceptArgs e)
