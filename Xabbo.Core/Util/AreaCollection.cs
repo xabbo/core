@@ -5,29 +5,28 @@ using System.Linq;
 
 namespace Xabbo.Core;
 
-public class AreaCollection : ICollection<Area>
+public class AreaSet : ICollection<Area>
 {
     private readonly HashSet<Area> _areas = new();
 
     public int Count => _areas.Count;
     public bool IsReadOnly => false;
 
-    public IReadOnlyList<(int X, int Y)> Tiles { get; private set; } = Array.Empty<(int, int)>();
+    public IReadOnlyList<Point> Tiles { get; private set; } = Array.Empty<Point>();
 
-    public AreaCollection() { }
+    public AreaSet() { }
 
-    public AreaCollection(params Area[] areas)
+    public AreaSet(params Area[] areas)
         : this((IEnumerable<Area>)areas)
     { }
 
-    public AreaCollection(IEnumerable<Area> areas)
+    public AreaSet(IEnumerable<Area> areas)
     {
         _areas = new HashSet<Area>(areas);
         UpdateTiles();
     }
 
-    public bool Contains(Tile tile) => Contains(tile.X, tile.Y);
-    public bool Contains((int X, int Y) position) => Contains(position.X, position.Y);
+    public bool Contains(Point point) => Contains(point.X, point.Y);
     public bool Contains(int x, int y) => _areas.Any(area => area.Contains(x, y));
 
     private void UpdateTiles() => Tiles = Area.GetAllPoints(_areas).AsReadOnly();

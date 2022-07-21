@@ -5,6 +5,9 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a wall location.
+/// </summary>
 public struct WallLocation : IComposable
 {
     /// <summary>
@@ -33,6 +36,9 @@ public struct WallLocation : IComposable
     /// </summary>
     public WallOrientation Orientation { get; set; }
 
+    /// <summary>
+    /// Constructs a new wall location with the specified coordinates and orientation.
+    /// </summary>
     public WallLocation(int wx, int wy, int lx, int ly, WallOrientation orientation)
     {
         WX = wx;
@@ -41,10 +47,6 @@ public struct WallLocation : IComposable
         LY = ly;
         Orientation = orientation;
     }
-
-    public WallLocation(int wx, int wy, int lx, int ly)
-        : this(wx, wy, lx, ly, 'l')
-    { }
 
     /// <summary>
     /// Offsets the wall coordinates by the specified values
