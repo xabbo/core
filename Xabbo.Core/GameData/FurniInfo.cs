@@ -6,10 +6,8 @@ namespace Xabbo.Core.GameData;
 /// <summary>
 /// Contains information of a furni.
 /// </summary>
-public record FurniInfo : IItem
+public record FurniInfo
 {
-    long IItem.Id => -1;
-
     /// <summary>
     /// Gets the type of the furni.
     /// </summary>
