@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Xabbo.Core.GameData;
 
@@ -41,7 +42,7 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
     /// <summary>
     /// Gets the information of the furni with the specified identifier.
     /// </summary>
-    public FurniInfo? this[string identifier] => GetInfo(identifier);
+    public FurniInfo this[string identifier] => GetInfo(identifier);
 
     internal FurniData(Xml.FurniData proxy)
     {
@@ -74,7 +75,7 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
     }
 
     /// <summary>
-    /// Returns whether furni info with the specified type and kind exists or not.
+    /// Gets whether furni info with the specified type and kind exists or not.
     /// </summary>
     public bool Exists(ItemType type, int kind)
     {
@@ -86,15 +87,22 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
         };
     }
     /// <summary>
-    /// Returns whether furni info for the specified item exists or not.
+    /// Gets whether furni info for the specified item exists or not.
     /// </summary>
     public bool Exists(IItem item) => Exists(item.Type, item.Kind);
+
     /// <summary>
-    /// Returns whether floor furni info with the specified kind exists or not.
+    /// Gets whether furni info with the specified identifier exists or not.
+    /// </summary>
+    public bool Exists(string identifier) => _identifierMap.ContainsKey(identifier);
+
+    /// <summary>
+    /// Gets whether floor furni info with the specified kind exists or not.
     /// </summary>
     public bool FloorItemExists(int kind) => Exists(ItemType.Floor, kind);
+
     /// <summary>
-    /// Returns whether wall furni info with the specified kind exists or not.
+    /// Gets whether wall furni info with the specified kind exists or not.
     /// </summary>
     public bool WallItemExists(int kind) => Exists(ItemType.Wall, kind);
 
@@ -105,21 +113,46 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
     {
         ItemType.Floor => GetFloorItem(kind),
         ItemType.Wall => GetWallItem(kind),
-        _ => throw new Exception($"Invalid item type specified: {type}.")
+        _ => throw new Exception($"Cannot get furni info for item type: {type}.")
     };
 
     /// <summary>
-    /// Gets the furni info of the specified item.
+    /// Gets the information of the specified item.
     /// </summary>
     public FurniInfo GetInfo(IItem item) => GetInfo(item.Type, item.Kind);
 
     /// <summary>
-    /// Gets the furni info of the furni with the specified identifier.
+    /// Gets the information of the furni with the specified identifier.
     /// </summary>
-    public FurniInfo? GetInfo(string identifier) => _identifierMap.TryGetValue(identifier, out FurniInfo? info) ? info : null;
+    public FurniInfo GetInfo(string identifier) => _identifierMap[identifier];
 
     /// <summary>
-    /// Gets the furni info for the floor item of the specified kind.
+    /// Gets the information of the furni with the specified type and kind.
+    /// </summary>
+    public bool TryGetInfo(ItemType type, int kind, [NotNullWhen(true)] out FurniInfo? info)
+    {
+        info = null;
+        return type switch
+        {
+            ItemType.Floor => _floorItemMap.TryGetValue(kind, out info),
+            ItemType.Wall => _wallItemMap.TryGetValue(kind, out info),
+            _ => false
+        };
+    }
+
+    /// <summary>
+    /// Gets the information of the specified item.
+    /// </summary>
+    public bool TryGetInfo(IItem item, [NotNullWhen(true)] out FurniInfo? info) => TryGetInfo(item.Type, item.Kind, out info);
+
+    /// <summary>
+    /// Gets the information of the furni with the specified identifier.
+    /// </summary>
+    public bool TryGetInfo(string identifier, [NotNullWhen(true)] out FurniInfo? info)
+        => _identifierMap.TryGetValue(identifier, out info);
+
+    /// <summary>
+    /// Gets the information of the floor item with the specified kind.
     /// </summary>
     public FurniInfo GetFloorItem(int kind)
     {
@@ -130,7 +163,7 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
     }
 
     /// <summary>
-    /// Gets the furni info for the wall item of the specified kind.
+    /// Gets the information of the wall item with the specified kind.
     /// </summary>
     public FurniInfo GetWallItem(int kind)
     {
