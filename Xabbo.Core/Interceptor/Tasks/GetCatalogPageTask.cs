@@ -7,7 +7,10 @@ using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks;
 
-public class GetCatalogPageTask : InterceptorTask<ICatalogPage>
+/// <summary>
+/// Gets a catalog page by its ID.
+/// </summary>
+public sealed class GetCatalogPageTask : InterceptorTask<ICatalogPage>
 {
     private readonly int _pageId;
     private readonly string _catalogType;
@@ -15,6 +18,9 @@ public class GetCatalogPageTask : InterceptorTask<ICatalogPage>
     public GetCatalogPageTask(IInterceptor interceptor, int pageId, string catalogType)
         : base(interceptor)
     {
+        if (pageId <= 0)
+            throw new ArgumentException($"Invalid catalog page ID: {pageId}.");
+
         _pageId = pageId;
         _catalogType = catalogType;
     }
@@ -22,7 +28,7 @@ public class GetCatalogPageTask : InterceptorTask<ICatalogPage>
     protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetCatalogPage, _pageId, -1, _catalogType);
 
     [InterceptIn(nameof(Incoming.CatalogPage))]
-    protected void HandleCatalogPage(InterceptArgs e)
+    internal void HandleCatalogPage(InterceptArgs e)
     {
         try
         {
