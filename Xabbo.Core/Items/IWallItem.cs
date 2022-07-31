@@ -2,6 +2,9 @@
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a wall furniture.
+/// </summary>
 public interface IWallItem : IFurni
 {
     /// <summary>

@@ -5,14 +5,17 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a room furniture.
+/// </summary>
 public interface IFurni : IItem, IComposable
 {
     /// <summary>
-    /// Gets the owner of the furni's ID
+    /// Gets the owner of the furni's ID.
     /// </summary>
     long OwnerId { get; }
     /// <summary>
-    /// Gets the owner of the furni's name
+    /// Gets the owner of the furni's name.
     /// </summary>
     string OwnerName { get; }
 
@@ -31,9 +34,12 @@ public interface IFurni : IItem, IComposable
     FurniUsage Usage { get; }
 
     /// <summary>
-    /// Gets whether the furni is hidden client-side or not by the <see cref="RoomManager"/>
+    /// Gets whether the furni is hidden client-side or not by the <see cref="RoomManager"/>.
     /// </summary>
     bool IsHidden { get; }
 
+    /// <summary>
+    /// Composes this furniture to the packet and specifies whether to write the owner's name.
+    /// </summary>
     void Compose(IPacket packet, bool writeOwnerName);
 }
