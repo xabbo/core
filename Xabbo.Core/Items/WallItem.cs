@@ -106,6 +106,8 @@ public class WallItem : Furni, IWallItem
         }
     }
 
+    public override string ToString() => $"{nameof(WallItem)}#{Id}/{Kind}";
+
     public static WallItem Parse(IReadOnlyPacket packet, bool readName = true)
     {
         return new WallItem(packet, readName);
@@ -157,5 +159,4 @@ public class WallItem : Furni, IWallItem
     {
         WriteAll(packet, (IEnumerable<IWallItem>)items);
     }
-
 }

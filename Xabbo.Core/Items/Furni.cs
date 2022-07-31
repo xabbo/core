@@ -1,6 +1,5 @@
-﻿using System;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
+using Xabbo.Core.Extensions;
 
 namespace Xabbo.Core;
 
@@ -30,6 +29,4 @@ public abstract class Furni : IFurni
     {
         OwnerName = string.Empty;
     }
-
-    public override string ToString() => $"[{Id}:{Type.ToShortString()}{Kind}]";
 }

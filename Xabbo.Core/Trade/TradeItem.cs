@@ -78,5 +78,5 @@ public class TradeItem : ITradeItem
         return new TradeItem(packet);
     }
 
-    public override string ToString() => $"{ItemId}:{Type.ToShortString()}{Kind}";
+    public override string ToString() => $"{nameof(TradeItem)}#{ItemId}/{Type}:{Kind}";
 }

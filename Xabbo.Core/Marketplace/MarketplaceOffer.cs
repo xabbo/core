@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
@@ -120,5 +120,5 @@ public class MarketplaceOffer : IMarketplaceOffer
             yield return Parse(packet, hasOfferCount);
     }
 
-    public override string ToString() => $"{Id}/{Type.ToShortString()}:{Kind}";
+    public override string ToString() => $"{nameof(MarketplaceOffer)}#{Id}/{Type}:{Kind}";
 }

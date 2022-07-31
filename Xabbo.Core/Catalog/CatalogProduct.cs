@@ -83,4 +83,16 @@ public class CatalogProduct : ICatalogProduct
             }
         }
     }
+
+    public override string ToString()
+    {
+        if (string.IsNullOrWhiteSpace(Variant))
+        {
+            return $"{nameof(CatalogProduct)}/{Type}:{Kind}";
+        }
+        else
+        {
+            return $"{nameof(CatalogProduct)}/{Type}:{Kind}:{Variant}";
+        }
+    }
 }

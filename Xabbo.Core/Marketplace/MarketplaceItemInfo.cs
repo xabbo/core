@@ -42,4 +42,6 @@ public class MarketplaceItemInfo : IMarketplaceItemInfo
     }
 
     public static MarketplaceItemInfo Parse(IReadOnlyPacket packet) => new MarketplaceItemInfo(packet);
+
+    public override string ToString() => $"{nameof(MarketplaceItemInfo)}/{Type}:{Kind}";
 }

@@ -110,7 +110,8 @@ public class FloorItem : Furni, IFloorItem
         if (Kind < 0) packet.WriteString(StaticClass);
         if (writeOwnerName) packet.WriteString(OwnerName);
     }
-    
+
+    public override string ToString() => $"{nameof(FloorItem)}#{Id}/{Kind}";
 
     public static FloorItem Parse(IReadOnlyPacket packet, bool readName = true)
     {

@@ -225,5 +225,5 @@ public class InventoryItem : IInventoryItem
         }
     }
 
-    public override string ToString() => $"[{Id}:{Type.ToShortString()}{Kind}]";
+    public override string ToString() => $"{nameof(InventoryItem)}#{ItemId}/{Type}:{Kind}";
 }
