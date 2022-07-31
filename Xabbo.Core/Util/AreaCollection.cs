@@ -57,4 +57,9 @@ public class AreaSet : ICollection<Area>
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    /// <summary>
+    /// Creates a new AreaSet consisting of the specified areas.
+    /// </summary>
+    public static AreaSet Of(params Area[] areas) => new(areas);
 }
