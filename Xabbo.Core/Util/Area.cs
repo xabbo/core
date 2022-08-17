@@ -180,6 +180,15 @@ public struct Area : IEnumerable<Point>
     public static bool operator ==(Area a, Area b) => a.Equals(b);
     public static bool operator !=(Area a, Area b) => !(a == b);
 
+    public static implicit operator Area((Point A, Point B) corners)
+        => new(corners.A, corners.B);
+
+    public static implicit operator Area((int X1, int Y1, int X2, int Y2) points)
+        => new(points.X1, points.Y1, points.X2, points.Y2);
+
+    public static implicit operator Area((Point Origin, int Width, int Length) area)
+        => new(area.Origin, area.Width, area.Length);
+
     public static List<Point> GetAllPoints(IEnumerable<Area> areas)
     {
         return areas
@@ -192,5 +201,5 @@ public struct Area : IEnumerable<Point>
 
     public static List<Point> GetAllPoints(params Area[] areas) => GetAllPoints((IEnumerable<Area>)areas);
 
-    public override string ToString() => $"{X1}, {Y1}, {X2}, {Y2}";
+    public override string ToString() => $"({X1}, {Y1}, {X2}, {Y2})";
 }

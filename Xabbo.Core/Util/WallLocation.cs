@@ -56,7 +56,7 @@ public struct WallLocation : IComposable
     /// <param name="wxOffset">The amount to offset wall X by.</param>
     /// <param name="wyOffset">The amount to offset wall Y by.</param>
     /// <param name="scale">The scale value of the room as specified in the floor plan.</param>
-    public WallLocation Offset(int wxOffset, int wyOffset, int scale)
+    public readonly WallLocation Offset(int wxOffset, int wyOffset, int scale)
     {
         int halfTileWidth = scale / 2;
 
@@ -74,7 +74,7 @@ public struct WallLocation : IComposable
     /// the floor plan which affects the offset of the LY coordinate.
     /// </summary>
     /// <param name="scale">The scale value of the room as specified in the floor plan.</param>
-    public WallLocation Adjust(int scale)
+    public readonly WallLocation Adjust(int scale)
     {
         int
             lx = LX,
@@ -106,17 +106,17 @@ public struct WallLocation : IComposable
     /// <summary>
     /// Flips the wall orientation between left and right, and returns the new wall location.
     /// </summary>
-    public WallLocation Flip() => new WallLocation(WX, WY, LX, LY, Orientation.IsLeft ? WallOrientation.Right : WallOrientation.Left);
+    public readonly WallLocation Flip() => new WallLocation(WX, WY, LX, LY, Orientation.IsLeft ? WallOrientation.Right : WallOrientation.Left);
 
     /// <summary>
     /// Returns a new wall location with the specified orientation.
     /// </summary>
-    public WallLocation Orient(WallOrientation orientation) => new WallLocation(WX, WY, LX, LY, orientation);
+    public readonly WallLocation Orient(WallOrientation orientation) => new WallLocation(WX, WY, LX, LY, orientation);
 
     /// <summary>
     /// Adds the specified offset values and returns the new wall location.
     /// </summary>
-    public WallLocation Add(int wx, int wy, int lx, int ly) => new WallLocation(
+    public readonly WallLocation Add(int wx, int wy, int lx, int ly) => new WallLocation(
         WX + wx, WY + wy,
         LX + lx, LY + ly,
         Orientation
@@ -129,9 +129,9 @@ public struct WallLocation : IComposable
         WX, WY, LX + lxOffset, LY + lyOffset, Orientation
     );
 
-    public override int GetHashCode() => (WX, WY, LX, LY, Orientation.Value).GetHashCode();
+    public readonly override int GetHashCode() => (WX, WY, LX, LY, Orientation.Value).GetHashCode();
 
-    public bool Equals(WallLocation other)
+    public readonly bool Equals(WallLocation other)
     {
         return
             WX == other.WX &&
@@ -141,13 +141,14 @@ public struct WallLocation : IComposable
             Orientation == other.Orientation;
     }
 
-    public override bool Equals(object? obj)
+    public readonly override bool Equals(object? obj)
         => obj is WallLocation loc && Equals(loc);
 
-    public override string ToString() => ToString(WX, WY, LX, LY, Orientation);
+    public readonly override string ToString() => ToString(WX, WY, LX, LY, Orientation);
+
     public static string ToString(int wx, int wy, int lx, int ly, WallOrientation orientation) => $":w={wx},{wy} l={lx},{ly} {orientation.Value}";
 
-    public void Compose(IPacket packet)
+    public readonly void Compose(IPacket packet)
     {
         if (packet.Protocol == ClientType.Flash)
         {
