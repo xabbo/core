@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 
 using Xabbo.Messages;
-using Xabbo.Interceptor;
-using Xabbo.Interceptor.Dispatcher;
+using Xabbo.Messages.Dispatcher;
+using Xabbo.Extension;
 
 namespace Xabbo.Core.Game;
 
-public abstract class GameStateManager : IInterceptHandler, INotifyPropertyChanged, IDisposable
+public abstract class GameStateManager : IMessageHandler, INotifyPropertyChanged, IDisposable
 {
     public static IEnumerable<Type> GetManagerTypes()
     {
@@ -37,29 +36,29 @@ public abstract class GameStateManager : IInterceptHandler, INotifyPropertyChang
 
     private bool _disposed;
 
-    protected IInterceptor Interceptor { get; }
-    protected IInterceptDispatcher Dispatcher => Interceptor.Dispatcher;
-    protected Incoming In => Interceptor.Messages.In;
-    protected Outgoing Out => Interceptor.Messages.Out;
+    protected IExtension Extension { get; }
+    protected IMessageDispatcher Dispatcher => Extension.Dispatcher;
+    protected Incoming In => Extension.Messages.In;
+    protected Outgoing Out => Extension.Messages.Out;
 
-    public GameStateManager(IInterceptor interceptor)
+    public GameStateManager(IExtension extension)
     {
-        Interceptor = interceptor;
-        Interceptor.Connected += OnConnected;
-        Interceptor.Disconnected += OnDisconnected;
+        Extension = extension;
+        Extension.Connected += OnConnected;
+        Extension.Disconnected += OnDisconnected;
     }
 
-    protected virtual void OnConnected(object? sender, EventArgs e)
+    protected virtual void OnConnected(object? sender, GameConnectedEventArgs e)
     {
-        if (!Interceptor.Dispatcher.IsBound(this))
+        if (!Extension.Dispatcher.IsBound(this))
         {
-            Interceptor.Bind(this);
+            Extension.Bind(this);
         }
     }
 
     protected virtual void OnDisconnected(object? sender, EventArgs e)
     {
-        Interceptor.Release(this);
+        Extension.Release(this);
     }
 
     protected virtual void Dispose(bool disposing)
@@ -69,7 +68,7 @@ public abstract class GameStateManager : IInterceptHandler, INotifyPropertyChang
 
         if (disposing)
         {
-            Interceptor.Dispatcher.Release(this);
+            Extension.Dispatcher.Release(this);
         }
     }
 

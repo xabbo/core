@@ -9,12 +9,13 @@ namespace Xabbo.Core;
 /// <summary>
 /// Represents a 3-dimensional location.
 /// </summary>
-public struct Tile : IComposable
+public readonly struct Tile : IComposable
 {
-    public int X { get; set; }
-    public int Y { get; set; }
-    public readonly Point XY => new(X, Y);
-    public float Z { get; set; }
+    public readonly int X;
+    public readonly int Y;
+    public readonly float Z;
+
+    public Point XY => new(X, Y);
 
     public Tile(int x, int y, float z)
     {

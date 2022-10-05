@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 
 using Xabbo.Messages;
-using Xabbo.Interceptor;
 
 using Xabbo.Core.Events;
+using Xabbo.Extension;
 
 namespace Xabbo.Core.Game;
 
@@ -54,8 +54,8 @@ public class ProfileManager : GameStateManager
     #endregion
 
 #pragma warning disable CS8618
-    public ProfileManager(IInterceptor interceptor)
-        : base(interceptor)
+    public ProfileManager(IExtension extension)
+        : base(extension)
     {
         Reset();
     }
@@ -94,15 +94,15 @@ public class ProfileManager : GameStateManager
         if (UserData is null && !_isLoadingProfile)
         {
             _isLoadingProfile = true;
-            await Interceptor.SendAsync(Out.InfoRetrieve);
+            await Extension.SendAsync(Out.InfoRetrieve);
         }
 
-        if (Achievements is null) await Interceptor.SendAsync(Out.GetUserAchievements);
+        if (Achievements is null) await Extension.SendAsync(Out.GetUserAchievements);
 
         if (Credits is null && !_isLoadingCredits)
         {
             _isLoadingCredits = true;
-            await Interceptor.SendAsync(Out.GetCredits);
+            await Extension.SendAsync(Out.GetCredits);
         }
     }
 

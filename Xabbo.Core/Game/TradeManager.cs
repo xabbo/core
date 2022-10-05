@@ -1,7 +1,7 @@
 ﻿using System;
 
 using Xabbo.Messages;
-using Xabbo.Interceptor;
+using Xabbo.Extension;
 
 using Xabbo.Core.Events;
 
@@ -47,9 +47,9 @@ public class TradeManager : GameStateManager
         ITradeOffer ownOffer, ITradeOffer partnerOffer)
         => Completed?.Invoke(this, new TradeCompleteEventArgs(wasTrader, self, partner, ownOffer, partnerOffer));
 
-    public TradeManager(IInterceptor interceptor, ProfileManager profileManager,
+    public TradeManager(IExtension extension, ProfileManager profileManager,
         RoomManager roomManager)
-        : base(interceptor)
+        : base(extension)
     {
         _profileManager = profileManager;
         _roomManager = roomManager;

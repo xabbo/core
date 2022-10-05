@@ -1,6 +1,5 @@
 ﻿using System;
 
-using Xabbo.Common;
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
@@ -8,7 +7,7 @@ namespace Xabbo.Core;
 /// <summary>
 /// Represents a wall location.
 /// </summary>
-public struct WallLocation : IComposable
+public readonly struct WallLocation : IComposable
 {
     /// <summary>
     /// Represents a wall location with all coordinates at zero, and the orientation set to the left wall.
@@ -18,23 +17,23 @@ public struct WallLocation : IComposable
     /// <summary>
     /// Gets the wall X coordinate.
     /// </summary>
-    public int WX { get; set; }
+    public readonly int WX;
     /// <summary>
     /// Gets the wall Y coordinate.
     /// </summary>
-    public int WY { get; set; }
+    public readonly int WY;
     /// <summary>
     /// Gets the location X coordinate.
     /// </summary>
-    public int LX { get; set; }
+    public readonly int LX;
     /// <summary>
     /// Gets the location Y coordinate.
     /// </summary>
-    public int LY { get; set; }
+    public readonly int LY;
     /// <summary>
     /// Gets the wall orientation.
     /// </summary>
-    public WallOrientation Orientation { get; set; }
+    public readonly WallOrientation Orientation;
 
     /// <summary>
     /// Constructs a new wall location with the specified coordinates and orientation.

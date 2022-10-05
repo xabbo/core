@@ -8,22 +8,27 @@ namespace Xabbo.Core;
 /// <summary>
 /// Represents an area in a 2-dimensional space.
 /// </summary>
-public struct Area : IEnumerable<Point>
+public readonly struct Area : IEnumerable<Point>
 {
     /// <summary>
-    /// The origin point of this area.
+    /// Gets the X coordinate of the origin.
     /// </summary>
-    public Point Origin { get; set; }
+    public readonly int X1;
+
+    /// <summary>
+    /// Gets the Y coordinate of the origin.
+    /// </summary>
+    public readonly int Y1;
 
     /// <summary>
     /// The width (on the X plane) of this area.
     /// </summary>
-    public int Width { get; set; }
+    public readonly int Width;
 
     /// <summary>
     /// The length (on the Y plane) of this area.
     /// </summary>
-    public int Length { get; set; }
+    public readonly int Length;
 
     /// <summary>
     /// Gets the size of this area.
@@ -31,22 +36,22 @@ public struct Area : IEnumerable<Point>
     public Point Size => (Width, Length);
 
     /// <summary>
-    /// Gets the X coordinate of the origin point.
+    /// The origin point of this area.
     /// </summary>
-    public int X1 => Origin.X;
+    public Point Origin => new(X1, Y2);
 
     /// <summary>
-    /// Gets the Y coordinate of the origin point.
+    /// The point opposite the origin of this area.
     /// </summary>
-    public int Y1 => Origin.Y;
+    public Point Opposite => new(X2, Y2);
 
     /// <summary>
-    /// Gets the X coordinate of the end point.
+    /// Gets the X coordinate of the corner opposite the origin.
     /// </summary>
     public int X2 => Origin.X + Width - 1;
 
     /// <summary>
-    /// Gets the Y coordinate of the end point.
+    /// Gets the Y coordinate of the corner opposite the origin.
     /// </summary>
     public int Y2 => Origin.Y + Length - 1;
 
@@ -64,7 +69,8 @@ public struct Area : IEnumerable<Point>
         if (width < 1) throw new ArgumentOutOfRangeException(nameof(width));
         if (length < 1) throw new ArgumentOutOfRangeException(nameof(length));
 
-        Origin = origin;
+        X1 = origin.X;
+        Y1 = origin.Y;
         Width = width;
         Length = length;
     }
@@ -77,7 +83,8 @@ public struct Area : IEnumerable<Point>
         if (x1 > x2) (x2, x1) = (x1, x2);
         if (y1 > y2) (y2, y1) = (y1, y2);
 
-        Origin = new(x1, y1);
+        X1 = x1;
+        Y1 = y1;
         Width = x2 - x1 + 1;
         Length = y2 - y1 + 1;
     }
@@ -180,15 +187,29 @@ public struct Area : IEnumerable<Point>
     public static bool operator ==(Area a, Area b) => a.Equals(b);
     public static bool operator !=(Area a, Area b) => !(a == b);
 
+    /// <summary>
+    /// Implicitly casts the specified corner points to an area.
+    /// </summary>
+    /// <param name="corners"></param>
     public static implicit operator Area((Point A, Point B) corners)
         => new(corners.A, corners.B);
 
+    /// <summary>
+    /// Implicitly casts the specified points to an area.
+    /// </summary>
     public static implicit operator Area((int X1, int Y1, int X2, int Y2) points)
         => new(points.X1, points.Y1, points.X2, points.Y2);
 
+    /// <summary>
+    /// Implicitly casts the specified origin point, width, and length to an area.
+    /// </summary>
+    /// <param name="area"></param>
     public static implicit operator Area((Point Origin, int Width, int Length) area)
         => new(area.Origin, area.Width, area.Length);
 
+    /// <summary>
+    /// Gets all points contained within the specified area.
+    /// </summary>
     public static List<Point> GetAllPoints(IEnumerable<Area> areas)
     {
         return areas
@@ -199,7 +220,13 @@ public struct Area : IEnumerable<Point>
             .ToList();
     }
 
+    /// <summary>
+    /// Gets all distinct points contained within the specified areas.
+    /// </summary>
     public static List<Point> GetAllPoints(params Area[] areas) => GetAllPoints((IEnumerable<Area>)areas);
 
+    /// <summary>
+    /// Gets a string representation of this area.
+    /// </summary>
     public override string ToString() => $"({X1}, {Y1}, {X2}, {Y2})";
 }

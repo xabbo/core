@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Messages;
-using Xabbo.Interceptor;
+using Xabbo.Extension;
 
 using Xabbo.Core.Events;
 
@@ -54,15 +54,15 @@ public class FriendManager : GameStateManager
         => MessageReceived?.Invoke(this, new FriendMessageEventArgs(this, friend, message));
     #endregion
 
-    public FriendManager(IInterceptor interceptor,
+    public FriendManager(IExtension extension,
         ILogger<FriendManager> logger)
-        : base(interceptor)
+        : base(extension)
     {
         _logger = logger;
     }
 
-    public FriendManager(IInterceptor interceptor)
-        : base(interceptor)
+    public FriendManager(IExtension extension)
+        : base(extension)
     {
         _logger = NullLogger.Instance;
     }
@@ -84,7 +84,7 @@ public class FriendManager : GameStateManager
     /// <summary>
     /// Sends a private message to a user with the specified ID.
     /// </summary>
-    public void SendMessage(long id, string message) => Interceptor.Send(Out.SendMessage, id, message);
+    public void SendMessage(long id, string message) => Extension.Send(Out.SendMessage, id, message);
 
     /// <summary>
     /// Sends a private message to the specified friend.
@@ -92,7 +92,7 @@ public class FriendManager : GameStateManager
     public void SendMessage(Friend friend, string message) => SendMessage(friend.Id, message);
 
     /// <inheritdoc cref="SendMessage(long, string)" />
-    public ValueTask SendMessageAsync(long id, string message) => Interceptor.SendAsync(Out.SendMessage, id, message);
+    public ValueTask SendMessageAsync(long id, string message) => Extension.SendAsync(Out.SendMessage, id, message);
 
     /// <inheritdoc cref="SendMessage(Friend, string)" />
     public ValueTask SendMessageAsync(Friend friend, string message) => SendMessageAsync(friend.Id, message);
@@ -167,7 +167,7 @@ public class FriendManager : GameStateManager
         if (!IsInitialized && !_isForceLoading && e.Step > 10)
         {
             _isForceLoading = true;
-            await Interceptor.SendAsync(Out.MessengerInit);
+            await Extension.SendAsync(Out.MessengerInit);
         }
     }
 

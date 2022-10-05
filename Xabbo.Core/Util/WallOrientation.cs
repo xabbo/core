@@ -5,7 +5,7 @@ namespace Xabbo.Core;
 /// <summary>
 /// Represents a wall orientation.
 /// </summary>
-public struct WallOrientation
+public readonly struct WallOrientation
 {
     /// <summary>
     /// Represents a left wall orientation.
@@ -20,7 +20,7 @@ public struct WallOrientation
     /// <summary>
     /// Gets the character value of this wall orientation.
     /// </summary>
-    public char Value { get; }
+    public readonly char Value;
 
     /// <summary>
     /// Gets if this is a left wall orientation.

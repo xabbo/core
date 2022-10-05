@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Xabbo.Common;
 using Xabbo.Messages;
 
 namespace Xabbo.Core;

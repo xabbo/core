@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-using Xabbo.Common;
 using Xabbo.Messages;
 
 namespace Xabbo.Core;

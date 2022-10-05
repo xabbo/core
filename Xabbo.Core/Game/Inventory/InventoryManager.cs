@@ -11,6 +11,7 @@ using Xabbo.Messages;
 using Xabbo.Interceptor;
 
 using Xabbo.Core.Events;
+using Xabbo.Extension;
 
 namespace Xabbo.Core.Game;
 
@@ -52,14 +53,14 @@ public class InventoryManager : GameStateManager
     protected virtual void OnItemRemoved(InventoryItem item)
         => ItemRemoved?.Invoke(this, new InventoryItemEventArgs(item));
 
-    public InventoryManager(ILogger<InventoryManager> logger, IInterceptor interceptor)
-        : base(interceptor)
+    public InventoryManager(ILogger<InventoryManager> logger, IExtension extension)
+        : base(extension)
     {
         _logger = logger;
     }
 
-    public InventoryManager(IInterceptor interceptor)
-        : base(interceptor)
+    public InventoryManager(IExtension extension)
+        : base(extension)
     {
         _logger = NullLogger.Instance;
     }
@@ -98,7 +99,7 @@ public class InventoryManager : GameStateManager
             {
                 if (!_forceLoadingInventory)
                 {
-                    await Interceptor.SendAsync(Out.GetInventory);
+                    await Extension.SendAsync(Out.GetInventory);
                     _forceLoadingInventory = true;
                 }
                 
