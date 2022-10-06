@@ -5,8 +5,6 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<RootNamespace>Xabbo.Core</RootNamespace>
 		<AssemblyName>Xabbo.Core</AssemblyName>
-		<AssemblyVersion>1.0.0</AssemblyVersion>
-		<FileVersion>1.0.0</FileVersion>
 		<Nullable>enable</Nullable>
 		<DebugType>embedded</DebugType>
 		<Configurations>Debug;Release</Configurations>
@@ -20,14 +18,16 @@
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
 	</PropertyGroup>
 
+  <!-- GitVersion -->
+  <ItemGroup>
+    <PackageReference Include="GitVersion.MsBuild" Version="5.10.3" PrivateAssets="all" />
+  </ItemGroup>
+
 	<!-- Package -->
 	<PropertyGroup>
 		<LocalPackageSource>%USERPROFILE%\.nuget\local</LocalPackageSource>
 		<PackageId>Xabbo.Core</PackageId>
 		<Description>Provides parsers, composers, interactions &amp; game state management for Xabbo.Common.</Description>
-		<Version Condition="'$(Configuration)'=='Debug'">0.0.0-dev</Version>
-		<Version Condition="'$(Configuration)'=='Release'">1.0.0-beta.3</Version>
-		<InformationalVersion>$(Version)</InformationalVersion>
 		<RepositoryUrl>https://github.com/b7c/Xabbo.Core.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -63,11 +63,5 @@
 		<ProjectReference Include="$(SolutionDir)\Xabbo.Common\Xabbo.Common\Xabbo.Common.csproj" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
 	</ItemGroup>
-
-	<!-- Add package to local source after pack -->
-	<Target Name="NugetAddPackage" AfterTargets="Pack">
-		<Exec Command="nuget delete $(PackageId) $(Version) -Source $(LocalPackageSource) -NonInteractive" ContinueOnError="true" />
-		<Exec Command="nuget add bin\$(Configuration)\$(PackageId).$(Version).nupkg -Source $(LocalPackageSource)" />
-	</Target>
 
 </Project>
