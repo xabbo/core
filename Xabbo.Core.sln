@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Core", "Xabbo.Core\Xabbo.Core.csproj", "{2D314D9C-89AF-43A6-A638-23C959EE4DE9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Core", "src\Xabbo.Core\Xabbo.Core.csproj", "{2D314D9C-89AF-43A6-A638-23C959EE4DE9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Common", "Xabbo.Common\Xabbo.Common\Xabbo.Common.csproj", "{FF0D7D75-B865-4DEB-925A-557128CC4FDC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Common", "lib\Xabbo.Common\Xabbo.Common\Xabbo.Common.csproj", "{FF0D7D75-B865-4DEB-925A-557128CC4FDC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Core.Tests", "Xabbo.Core.Tests\Xabbo.Core.Tests.csproj", "{E2C94DAB-B102-47BC-814E-ABA84FDB887B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Core.Tests", "src\Xabbo.Core.Tests\Xabbo.Core.Tests.csproj", "{E2C94DAB-B102-47BC-814E-ABA84FDB887B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Common.SourceGeneration", "lib\Xabbo.Common\Xabbo.Common.SourceGeneration\Xabbo.Common.SourceGeneration.csproj", "{6DB55B0D-D284-4CC1-9E83-F0698B9DE8CD}"
 EndProject
