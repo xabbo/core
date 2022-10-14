@@ -60,7 +60,7 @@
 
 	<!-- References -->
 	<ItemGroup>
-		<ProjectReference Include="$(SolutionDir)\Xabbo.Common\Xabbo.Common\Xabbo.Common.csproj" />
+		<ProjectReference Include="$(XabboCommonDir)\Xabbo.Common\Xabbo.Common.csproj" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
 	</ItemGroup>
 
