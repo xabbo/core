@@ -38,7 +38,7 @@ public readonly struct Area : IEnumerable<Point>
     /// <summary>
     /// The origin point of this area.
     /// </summary>
-    public Point Origin => new(X1, Y2);
+    public Point Origin => new(X1, Y1);
 
     /// <summary>
     /// The point opposite the origin of this area.
