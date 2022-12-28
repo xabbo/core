@@ -900,22 +900,58 @@ public static class XabboCoreExtensions
     }
 
     /// <summary>
+    /// Gets room entities not a the specified X, Y, Z location and/or direction.
+    /// </summary>
+    public static IEnumerable<T> NotAt<T>(this IEnumerable<T> entities,
+        int? x = null, int? y = null, float? z = null, int? dir = null,
+        float epsilon = XabboConst.DefaultEpsilon) where T : IFloorEntity
+    {
+        foreach (var e in entities)
+        {
+            if (x.HasValue && e.Location.X == x) continue;
+            if (y.HasValue && e.Location.Y == y) continue;
+            if (z.HasValue && Math.Abs(e.Location.Z - z.Value) < epsilon) continue;
+            if (dir.HasValue && e.Direction == dir) continue;
+            yield return e;
+        }
+    }
+
+    /// <summary>
     /// Gets entities at the specified X, Y location and optionally direction.
     /// </summary>
     public static IEnumerable<TFloorEntity> At<TFloorEntity>(this IEnumerable<TFloorEntity> entities,
-        (int X, int Y) location, int? dir = null) where TFloorEntity : IFloorEntity
+        Point location, int? dir = null) where TFloorEntity : IFloorEntity
     {
-        return At(entities, location.X, location.Y, null, dir);
+        return At(entities, location.X, location.Y, dir: dir);
+    }
+
+    /// <summary>
+    /// Gets entities not at the specified X, Y location and optionally direction.
+    /// </summary>
+    public static IEnumerable<TFloorEntity> NotAt<TFloorEntity>(this IEnumerable<TFloorEntity> entities,
+        Point location, int? dir = null) where TFloorEntity : IFloorEntity
+    {
+        return NotAt(entities, location.X, location.Y, dir: dir);
     }
 
     /// <summary>
     /// Gets entities at the specified X, Y, Z location and optionally direction.
     /// </summary>
     public static IEnumerable<TFloorEntity> At<TFloorEntity>(this IEnumerable<TFloorEntity> entities,
-        (int X, int Y, float Z) location, int? dir = null,
+        Tile location, int? dir = null,
         float epsilon = XabboConst.DefaultEpsilon) where TFloorEntity : IFloorEntity
     {
         return At(entities, location.X, location.Y, location.Z, dir, epsilon);
+    }
+
+    /// <summary>
+    /// Gets entities not at the specified X, Y, Z location and optionally direction.
+    /// </summary>
+    public static IEnumerable<TFloorEntity> NotAt<TFloorEntity>(this IEnumerable<TFloorEntity> entities,
+        Tile location, int? dir = null,
+        float epsilon = XabboConst.DefaultEpsilon) where TFloorEntity : IFloorEntity
+    {
+        return NotAt(entities, location.X, location.Y, location.Z, dir, epsilon);
     }
 
     /// <summary>
