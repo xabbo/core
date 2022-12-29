@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-
+using System.Threading.Tasks;
 using Xabbo.Core.GameData;
 
 namespace Xabbo.Core.Extensions;
@@ -675,19 +675,44 @@ public static class XabboCoreExtensions
         return items.Where(item => item.State == state);
     }
 
+    /// <inheritdoc cref="OfState{TFurni}(IEnumerable{TFurni}, int)" />
+    public static IEnumerable<TFurni> OfState<TFurni, TEnum>(this IEnumerable<TFurni> items, TEnum state)
+        where TFurni : IFurni
+        where TEnum : unmanaged, Enum
+    {
+        return OfState(items, state.AsInt32());
+    }
+
     /// <summary>
-    /// Gets furni the are in any of the specified states.
+    /// Gets furni that are in any of the specified states.
     /// </summary>
     public static IEnumerable<TFurni> OfState<TFurni>(this IEnumerable<TFurni> items, IEnumerable<int> states)
         where TFurni : IFurni
     {
-        HashSet<int> set = new(states);
-        return items.Where(item => states.Contains(item.State));
+        if (states is not HashSet<int> set)
+            set = new(states);
+        return items.Where(item => set.Contains(item.State));
     }
 
-    /// <inheritdoc cref="OfState{TFurni}(IEnumerable{TFurni}, int[])" />
+    /// <inheritdoc cref="OfState{TFurni}(IEnumerable{TFurni}, IEnumerable{int})" />
+    public static IEnumerable<TFurni> OfState<TFurni, TState>(this IEnumerable<TFurni> items, IEnumerable<TState> states)
+        where TFurni : IFurni
+        where TState : unmanaged, Enum
+    {
+        return OfState(items, states.Select(state => state.AsInt32()));
+    }
+
+    /// <inheritdoc cref="OfState{TFurni}(IEnumerable{TFurni}, IEnumerable{int})" />
     public static IEnumerable<TFurni> OfState<TFurni>(this IEnumerable<TFurni> items, params int[] states)
         where TFurni : IFurni => OfState(items, (IEnumerable<int>)states);
+
+    /// <inheritdoc cref="OfState{TFurni}(IEnumerable{TFurni}, IEnumerable{int})" />
+    public static IEnumerable<TFurni> OfState<TFurni, TState>(this IEnumerable<TFurni> items, params TState[] states)
+        where TFurni : IFurni
+        where TState : unmanaged, Enum
+    {
+        return OfState(items, (IEnumerable<TState>)states);
+    }
 
     /// <summary>
     /// Gets furni that are not in the specified state.
@@ -698,19 +723,44 @@ public static class XabboCoreExtensions
         return items.Where(item => item.State != state);
     }
 
+    /// <inheritdoc cref="NotOfState{TFurni}(IEnumerable{TFurni}, int)" />
+    public static IEnumerable<TFurni> NotOfState<TFurni, TState>(this IEnumerable<TFurni> items, TState state)
+        where TFurni : IFurni
+        where TState : unmanaged, Enum
+    {
+        return NotOfState(items, state.AsInt32());
+    }
+
     /// <summary>
     /// Gets furni that are not in any of the specified states.
     /// </summary>
     public static IEnumerable<TFurni> NotOfState<TFurni>(this IEnumerable<TFurni> items, IEnumerable<int> states)
         where TFurni : IFurni
     {
-        HashSet<int> set = new(states);
+        if (states is not HashSet<int> set)
+            set = new(states);
         return items.Where(item => !set.Contains(item.State));
+    }
+
+    /// <inheritdoc cref="NotOfState{TFurni}(IEnumerable{TFurni}, IEnumerable{int})" />
+    public static IEnumerable<TFurni> NotOfState<TFurni, TState>(this IEnumerable<TFurni> items, IEnumerable<TState> states)
+        where TFurni : IFurni
+        where TState : unmanaged, Enum
+    {
+        return NotOfState(items, states.Select(state => state.AsInt32()));
     }
 
     /// <inheritdoc cref="NotOfState{TFurni}(IEnumerable{TFurni}, IEnumerable{int})" />
     public static IEnumerable<TFurni> NotOfState<TFurni>(this IEnumerable<TFurni> items, params int[] states)
         where TFurni : IFurni => NotOfState(items, (IEnumerable<int>)states);
+
+    /// <inheritdoc cref="NotOfState{TFurni}(IEnumerable{TFurni}, IEnumerable{int})" />
+    public static IEnumerable<TFurni> NotOfState<TFurni, TState>(this IEnumerable<TFurni> items, params TState[] states)
+        where TFurni : IFurni
+        where TState : unmanaged, Enum
+    {
+        return NotOfState(items, (IEnumerable<TState>)states);
+    }
 
     /// <summary>
     /// Gets floor items intersecting the specified area.
