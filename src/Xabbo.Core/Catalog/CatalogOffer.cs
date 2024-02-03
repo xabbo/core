@@ -15,6 +15,7 @@ public class CatalogOffer : ICatalogOffer
     public int PriceInCredits { get; set; }
     public int PriceInActivityPoints { get; set; }
     public ActivityPointType ActivityPointType { get; set; }
+    public int PriceInSilver { get; set; }
     public bool CanPurchaseAsGift { get; set; }
     public List<CatalogProduct> Products { get; set; } = new();
     IReadOnlyList<ICatalogProduct> ICatalogOffer.Products => Products;
@@ -38,6 +39,7 @@ public class CatalogOffer : ICatalogOffer
         PriceInCredits = packet.ReadInt();
         PriceInActivityPoints = packet.ReadInt();
         ActivityPointType = (ActivityPointType)packet.ReadInt();
+        PriceInSilver = packet.ReadInt();
         CanPurchaseAsGift = packet.ReadBool();
 
         short n = packet.ReadLegacyShort();
@@ -63,6 +65,7 @@ public class CatalogOffer : ICatalogOffer
             .WriteInt(PriceInCredits)
             .WriteInt(PriceInActivityPoints)
             .WriteInt((int)ActivityPointType)
+            .WriteInt(PriceInSilver)
             .WriteBool(CanPurchaseAsGift)
             .WriteCollection(Products)
             .WriteInt(ClubLevel)
