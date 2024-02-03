@@ -262,6 +262,15 @@ public class RoomManager : GameStateManager
     }
 
     /// <summary>
+    /// Invoked when users or furni are moved by wired.
+    /// </summary>
+    public event EventHandler<WiredMovementsEventArgs>? WiredMovements;
+    protected virtual void OnWiredMovements(IEnumerable<WiredMovement> movements)
+    {
+        WiredMovements?.Invoke(this, new WiredMovementsEventArgs(movements));
+    }
+
+    /// <summary>
     /// Invoked when a floor item is removed from the room.
     /// </summary>
     public event EventHandler<FloorItemEventArgs>? FloorItemRemoved;
@@ -1603,6 +1612,36 @@ public class RoomManager : GameStateManager
                 _logger.LogError("Failed to find entity with index {index} to update.", rollerUpdate.EntityIndex);
             }
         }
+    }
+    
+    [InterceptIn("WiredMovements")]
+    private void HandleWiredMovements(InterceptArgs e)
+    {
+        var room = _currentRoom;
+
+        int n = e.Packet.ReadInt();
+        var movements = new WiredMovement[n];
+        for (int i = 0; i < n; i++)
+        {
+            var movement = movements[i] = WiredMovement.Parse(e.Packet);
+            if (room is null) continue;
+            switch (movement) {
+                case UserWiredMovement m:
+                    if (room.Entities.TryGetValue(m.UserIndex, out Entity? entity))
+                        entity.Location = m.Destination;
+                    break;
+                case FloorItemWiredMovement m:
+                    if (room.FloorItems.TryGetValue(m.FurniId, out FloorItem? item))
+                        item.Location = m.Destination;
+                    break;
+                case WallItemWiredMovement m:
+                    if (room.WallItems.TryGetValue(m.ItemId, out WallItem? wallItem))
+                        wallItem.Location = m.Destination;
+                    break;
+            }
+        }
+
+        OnWiredMovements(movements);
     }
 
     [InterceptIn(nameof(Incoming.UpdateAvatar))]
