@@ -129,7 +129,7 @@ public class GameDataManager : IGameDataManager
             else
             {
                 string json = await http.GetStringAsync(
-                    $"https://{hotel.Host}/gamedata/hashes2",
+                    $"https://{hotel.WebHost}/gamedata/hashes2",
                     cancellationToken
                 );
                 hashesContainer = JsonSerializer.Deserialize<GameDataHashesContainer>(json);
