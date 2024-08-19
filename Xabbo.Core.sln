@@ -11,6 +11,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Core.Tests", "src\Xab
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{27DEEA8B-8686-4990-B31C-82B7E4693A35}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "messages", "messages", "{65A44189-C275-4AE8-A8AB-66DBFC414A79}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9B63A8BB-F2D2-4B5F-AC61-36F692917AF4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xabbo.Messages", "lib\messages\src\Xabbo.Messages\Xabbo.Messages.csproj", "{363CF745-6ED3-45EB-A9CD-D5EAFDC3CB90}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,12 +35,19 @@ Global
 		{E2C94DAB-B102-47BC-814E-ABA84FDB887B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2C94DAB-B102-47BC-814E-ABA84FDB887B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2C94DAB-B102-47BC-814E-ABA84FDB887B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{363CF745-6ED3-45EB-A9CD-D5EAFDC3CB90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{363CF745-6ED3-45EB-A9CD-D5EAFDC3CB90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{363CF745-6ED3-45EB-A9CD-D5EAFDC3CB90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{363CF745-6ED3-45EB-A9CD-D5EAFDC3CB90}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FF0D7D75-B865-4DEB-925A-557128CC4FDC} = {27DEEA8B-8686-4990-B31C-82B7E4693A35}
+		{65A44189-C275-4AE8-A8AB-66DBFC414A79} = {27DEEA8B-8686-4990-B31C-82B7E4693A35}
+		{9B63A8BB-F2D2-4B5F-AC61-36F692917AF4} = {65A44189-C275-4AE8-A8AB-66DBFC414A79}
+		{363CF745-6ED3-45EB-A9CD-D5EAFDC3CB90} = {9B63A8BB-F2D2-4B5F-AC61-36F692917AF4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FCB533B3-E5E4-4101-90E9-B076D854E73E}

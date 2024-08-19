@@ -1,3 +1,6 @@
 [submodule "common"]
 	path = lib/common
 	url = https://github.com/xabbo/common
+[submodule "messages"]
+	path = lib/messages
+	url = https://github.com/xabbo/messages
