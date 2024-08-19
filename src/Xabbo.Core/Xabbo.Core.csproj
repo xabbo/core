@@ -1,59 +1,53 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup Label="Project">
-		<TargetFramework>net8.0</TargetFramework>
-		<RootNamespace>Xabbo.Core</RootNamespace>
-		<AssemblyName>Xabbo.Core</AssemblyName>
-		<Nullable>enable</Nullable>
-		<DebugType>embedded</DebugType>
-		<Configurations>Debug;Release</Configurations>
-    <XabboCommonDir Condition="$(XabboCommonDir) == ''">..\..\lib\Xabbo.Common\</XabboCommonDir>
-	</PropertyGroup>
+  <PropertyGroup Label="Project">
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Xabbo.Core</AssemblyName>
+    <RootNamespace>Xabbo.Core</RootNamespace>
+    <Nullable>enable</Nullable>
+    <DebugType>embedded</DebugType>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DefineConstants>DEBUG;TRACE</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Develop|AnyCPU'">
-		<DefineConstants>DEBUG;TRACE</DefineConstants>
-	</PropertyGroup>
+  <PropertyGroup Label="Package">
+    <PackageId>Xabbo.Core</PackageId>
+    <PackageProjectUrl>https://xabbo.b7c.io/core</PackageProjectUrl>
+    <Description>Provides data structures, parsers, composers &amp; game state management for Xabbo.</Description>
+    <RepositoryUrl>https://github.com/xabbo/core.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>icon.png</PackageIcon>
+    <Authors>xabbo</Authors>
+    <Copyright>Copyright (c) xabbo 2024</Copyright>
+    <PackageTags>xabbo;habbo</PackageTags>
+  </PropertyGroup>
 
-  <ItemGroup Label="GitVersion">
-    <PackageReference Include="GitVersion.MsBuild" Version="5.12.0" PrivateAssets="all" />
+  <ItemGroup Label="Include package icon">
+    <None Include="..\..\res\xabbo-skull-128.png" Pack="true" PackagePath="icon.png" />
   </ItemGroup>
 
-	<PropertyGroup Label="Package">
-		<LocalPackageSource>%USERPROFILE%\.nuget\local</LocalPackageSource>
-		<PackageId>Xabbo.Core</PackageId>
-		<Description>Provides parsers, composers, interactions &amp; game state management for Xabbo.Common.</Description>
-		<RepositoryUrl>https://github.com/b7c/Xabbo.Core.git</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageIcon>img\package-icon.png</PackageIcon>
-		<Authors>b7</Authors>
-		<PackageTags>xabbo;habbo</PackageTags>
-	</PropertyGroup>
+  <PropertyGroup Label="Rename paths">
+    <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
+    <PathMap>$(AppOutputBase)=Xabbo.Core\</PathMap>
+  </PropertyGroup>
 
-	<ItemGroup Label="Include package icon">
-		<None Include="res\img\xabbo-skull-128.png" Pack="true" PackagePath="img\package-icon.png" />
-	</ItemGroup>
+  <PropertyGroup Label="Include documentation">
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName).xml</DocumentationFile>
+  </PropertyGroup>
 
-	<PropertyGroup Label="Rename paths">
-		<AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
-		<PathMap>$(AppOutputBase)=Xabbo.Core\</PathMap>
-	</PropertyGroup>
+  <ItemGroup Label="Resources">
+    <None Remove="Resources\figure_part_genders" />
+    <EmbeddedResource Include="Resources\figure_part_genders" />
+  </ItemGroup>
 
-	<PropertyGroup Label="Documentation">
-		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName).xml</DocumentationFile>
-	</PropertyGroup>
+  <PropertyGroup Label="Project import paths">
+    <XabboCommonDir Condition="$(XabboCommonDir) == ''">..\..\lib\common\</XabboCommonDir>
+  </PropertyGroup>
 
-	<ItemGroup Label="Resources">
-		<None Remove="Resources\figure_part_genders" />
-		<EmbeddedResource Include="Resources\figure_part_genders" />
-	</ItemGroup>
-
-	<ItemGroup Label="References">
-		<ProjectReference Include="$(XabboCommonDir)src\Xabbo.Common\Xabbo.Common.csproj" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
-	</ItemGroup>
+  <ItemGroup Label="References">
+    <PackageReference Include="GitVersion.MsBuild" Version="6.0.2" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
+    <ProjectReference Include="$(XabboCommonDir)src\Xabbo.Common\Xabbo.Common.csproj" />
+  </ItemGroup>
 
 </Project>
