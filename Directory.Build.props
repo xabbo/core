@@ -1,0 +1,6 @@
+<Project>
+    <PropertyGroup>
+        <XabboCommonDir>$(MSBuildThisFileDirectory)lib\common\</XabboCommonDir>
+        <XabboMessagesDir>$(MSBuildThisFileDirectory)lib\messages\</XabboMessagesDir>
+    </PropertyGroup>
+</Project>
