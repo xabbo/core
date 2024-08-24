@@ -1,6 +1,4 @@
-﻿using System;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 using Xabbo.Core.Game;
 
@@ -9,7 +7,7 @@ namespace Xabbo.Core;
 /// <summary>
 /// Represents a living entity in a room.
 /// </summary>
-public interface IEntity : IFloorEntity, IComposable
+public interface IEntity : IFloorEntity, IComposer
 {
     /// <summary>
     /// Gets if the entity has been removed from the room.
@@ -29,7 +27,7 @@ public interface IEntity : IFloorEntity, IComposable
     /// <summary>
     /// Gets the ID of the entity.
     /// </summary>
-    long Id { get; }
+    Id Id { get; }
 
     /// <summary>
     /// Gets the index of the entity.
@@ -75,7 +73,7 @@ public interface IEntity : IFloorEntity, IComposable
     /// Gets the current dance of the entity.
     /// </summary>
     int Dance { get; }
-    
+
     /// <summary>
     /// Gets if the entity is idle or not.
     /// </summary>

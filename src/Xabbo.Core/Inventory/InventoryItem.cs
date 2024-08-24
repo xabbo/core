@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class InventoryItem : IInventoryItem
+public sealed class InventoryItem : IInventoryItem, IComposer, IParser<InventoryItem>
 {
-    public long ItemId { get; set; }
+    public Id ItemId { get; set; }
     public ItemType Type { get; set; }
-    public long Id { get; set; }
+    public Id Id { get; set; }
     public int Kind { get; set; }
     public FurniCategory Category { get; set; }
     public ItemData Data { get; set; }
@@ -49,53 +46,53 @@ public class InventoryItem : IInventoryItem
 
     }
 
-    protected InventoryItem(IReadOnlyPacket packet)
+    protected InventoryItem(in PacketReader p)
         : this()
     {
-        ItemId = packet.ReadLegacyLong();
+        ItemId = p.Read<Id>();
 
-        if (packet.Protocol == ClientType.Flash)
+        if (p.Client == ClientType.Flash)
         {
-            Type = H.ToItemType(packet.ReadString());
+            Type = H.ToItemType(p.Read<string>());
         }
         else
         {
-            Type = H.ToItemType(packet.ReadShort());
+            Type = H.ToItemType(p.Read<short>());
         }
 
-        Id = packet.ReadLegacyLong();
-        Kind = packet.ReadInt();
-        Category = (FurniCategory)packet.ReadInt();
-        Data = ItemData.Parse(packet);
-        IsRecyclable = packet.ReadBool();
-        IsTradeable = packet.ReadBool();
-        IsGroupable = packet.ReadBool();
-        IsSellable = packet.ReadBool();
-        SecondsToExpiration = packet.ReadInt();
-        HasRentPeriodStarted = packet.ReadBool();
-        RoomId = packet.ReadLegacyLong();
+        Id = p.Read<Id>();
+        Kind = p.Read<int>();
+        Category = (FurniCategory)p.Read<int>();
+        Data = ItemData.Parse(p);
+        IsRecyclable = p.Read<bool>();
+        IsTradeable = p.Read<bool>();
+        IsGroupable = p.Read<bool>();
+        IsSellable = p.Read<bool>();
+        SecondsToExpiration = p.Read<int>();
+        HasRentPeriodStarted = p.Read<bool>();
+        RoomId = p.Read<Id>();
 
-        if (packet.Protocol == ClientType.Unity)
+        if (p.Client == ClientType.Unity)
         {
             // - Seems to be consistent
-            _Short1 = packet.ReadShort(); // ?
-            SlotId = packet.ReadString(); // string "r" / "s"
-            _Int3 = packet.ReadInt(); // int 1187551480
+            _Short1 = p.Read<short>(); // ?
+            SlotId = p.Read<string>(); // string "r" / "s"
+            _Int3 = p.Read<int>(); // int 1187551480
         }
 
         if (Type == ItemType.Floor)
         {
-            if (packet.Protocol == ClientType.Flash)
+            if (p.Client == ClientType.Flash)
             {
-                SlotId = packet.ReadString();
-                Extra = packet.ReadInt();
+                SlotId = p.Read<string>();
+                Extra = p.Read<int>();
             }
             else
             {
                 // 10 bytes ?
-                _String3 = packet.ReadString();
-                Extra = packet.ReadInt();
-                _Int5 = packet.ReadInt();
+                _String3 = p.Read<string>();
+                Extra = p.Read<int>();
+                _Int5 = p.Read<int>();
             }
         }
         else
@@ -105,53 +102,53 @@ public class InventoryItem : IInventoryItem
 
         /*if (clientType == ClientType.Flash)
         {
-            ItemId = packet.ReadInt();
-            Type = H.ToItemType(packet.ReadString());
-            Id = packet.ReadInt();
-            Kind = packet.ReadInt();
-            Category = (FurniCategory)packet.ReadInt();
+            ItemId = packet.Read<int>();
+            Type = H.ToItemType(packet.Read<string>());
+            Id = packet.Read<int>();
+            Kind = packet.Read<int>();
+            Category = (FurniCategory)packet.Read<int>();
             Data = StuffData.Parse(packet, clientType);
-            _Bool1 = packet.ReadBool();
-            IsTradeable = packet.ReadBool();
-            IsGroupable = packet.ReadBool();
-            IsSellable = packet.ReadBool();
-            SecondsToExpiration = packet.ReadInt();
-            HasRentPeriodStarted = packet.ReadBool();
-            RoomId = packet.ReadInt();
+            _Bool1 = packet.Read<bool>();
+            IsTradeable = packet.Read<bool>();
+            IsGroupable = packet.Read<bool>();
+            IsSellable = packet.Read<bool>();
+            SecondsToExpiration = packet.Read<int>();
+            HasRentPeriodStarted = packet.Read<bool>();
+            RoomId = packet.Read<int>();
 
             if (Type == ItemType.Floor)
             {
-                _String2 = packet.ReadString();
-                Extra = packet.ReadInt();
+                _String2 = packet.Read<string>();
+                Extra = packet.Read<int>();
             }
         }
         else
         {
-            ItemId = packet.ReadLong();
-            Type = H.ToItemType(packet.ReadShort());
-            Id = packet.ReadLong();
-            Kind = packet.ReadInt();
-            Category = (FurniCategory)packet.ReadInt();
+            ItemId = packet.Read<long>();
+            Type = H.ToItemType(packet.Read<short>());
+            Id = packet.Read<long>();
+            Kind = packet.Read<int>();
+            Category = (FurniCategory)packet.Read<int>();
             Data = StuffData.Parse(packet, clientType);
-            _Bool1 = packet.ReadBool();
-            IsTradeable = packet.ReadBool();
-            IsGroupable = packet.ReadBool();
-            IsSellable = packet.ReadBool();
-            SecondsToExpiration = packet.ReadInt();
-            HasRentPeriodStarted = packet.ReadBool();
-            RoomId = packet.ReadLong();
+            _Bool1 = packet.Read<bool>();
+            IsTradeable = packet.Read<bool>();
+            IsGroupable = packet.Read<bool>();
+            IsSellable = packet.Read<bool>();
+            SecondsToExpiration = packet.Read<int>();
+            HasRentPeriodStarted = packet.Read<bool>();
+            RoomId = packet.Read<long>();
 
             // - Seems to be consistent
-            _String1 = packet.ReadString(); // string ""
-            _String2 = packet.ReadString(); // string "r" / "s"
-            _Int3 = packet.ReadInt(); // int 1187551480
+            _String1 = packet.Read<string>(); // string ""
+            _String2 = packet.Read<string>(); // string "r" / "s"
+            _Int3 = packet.Read<int>(); // int 1187551480
 
             if (Type == ItemType.Floor)
             {
                 // 10 bytes ?
-                _String3 = packet.ReadString();
-                Extra = packet.ReadInt();
-                _Int5 = packet.ReadInt();
+                _String3 = packet.Read<string>();
+                Extra = packet.Read<int>();
+                _Int5 = packet.Read<int>();
             }
             else
             {
@@ -160,69 +157,56 @@ public class InventoryItem : IInventoryItem
         }*/
     }
 
-    public void Compose(IPacket packet)
+    public void Compose(in PacketWriter p)
     {
-        packet.WriteLegacyLong(ItemId);
+        p.Write(ItemId);
 
-        if (packet.Protocol == ClientType.Flash)
+        if (p.Client == ClientType.Flash)
         {
-            packet.WriteString(Type.ToShortString().ToUpper());
+            p.Write(Type.ToShortString().ToUpper());
         }
         else
         {
-            packet.WriteShort(Type.GetValue());
+            p.Write(Type.GetValue());
         }
 
-        packet
-            .WriteLegacyLong(Id)
-            .WriteInt(Kind)
-            .WriteInt((int)Category)
-            .Write(Data)
-            .WriteBool(IsRecyclable)
-            .WriteBool(IsTradeable)
-            .WriteBool(IsGroupable)
-            .WriteBool(IsSellable)
-            .WriteInt(SecondsToExpiration)
-            .WriteBool(HasRentPeriodStarted)
-            .WriteLegacyLong(RoomId);
+        p.Write(Id);
+        p.Write(Kind);
+        p.Write((int)Category);
+        p.Write(Data);
+        p.Write(IsRecyclable);
+        p.Write(IsTradeable);
+        p.Write(IsGroupable);
+        p.Write(IsSellable);
+        p.Write(SecondsToExpiration);
+        p.Write(HasRentPeriodStarted);
+        p.Write(RoomId);
 
-        if (packet.Protocol == ClientType.Unity)
+        if (p.Client == ClientType.Unity)
         {
-            packet
-                .WriteShort(_Short1)
-                .WriteString(SlotId)
-                .WriteInt(_Int3);
+            p.Write(_Short1);
+            p.Write(SlotId);
+            p.Write(_Int3);
         }
 
         if (Type == ItemType.Floor)
         {
-            if (packet.Protocol == ClientType.Flash)
+            if (p.Client == ClientType.Flash)
             {
-                packet
-                    .WriteString(SlotId)
-                    .WriteLegacyLong(Extra);
+                p.Write(SlotId);
+                p.Write(Extra);
             }
             else
             {
                 // 10 bytes ?
-                packet
-                    .WriteString(_String3)
-                    .WriteLegacyLong(Extra)
-                    .WriteInt(_Int5);
+                p.Write(_String3);
+                p.Write(Extra);
+                p.Write(_Int5);
             }
         }
     }
 
-    public static InventoryItem Parse(IReadOnlyPacket packet) => new InventoryItem(packet);
-
-    public static IEnumerable<InventoryItem> ParseMany(IReadOnlyPacket packet)
-    {
-        short n = packet.ReadLegacyShort();
-        for (int i = 0; i < n; i++)
-        {
-            yield return Parse(packet);
-        }
-    }
+    public static InventoryItem Parse(in PacketReader p) => new(in p);
 
     public override string ToString() => $"{nameof(InventoryItem)}#{ItemId}/{Type}:{Kind}";
 }

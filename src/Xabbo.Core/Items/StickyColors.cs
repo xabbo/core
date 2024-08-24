@@ -6,12 +6,12 @@ namespace Xabbo.Core;
 
 public sealed class StickyColors : IReadOnlyList<StickyColor>
 {
-    public static readonly StickyColor Blue = new StickyColor("Blue", "9CCEFF");
-    public static readonly StickyColor Pink = new StickyColor("Pink", "FF9CFF");
-    public static readonly StickyColor Green = new StickyColor("Green", "9CFF9C");
-    public static readonly StickyColor Yellow = new StickyColor("Yellow", "FFFF33");
+    public static readonly StickyColor Blue = new("Blue", "9CCEFF");
+    public static readonly StickyColor Pink = new("Pink", "FF9CFF");
+    public static readonly StickyColor Green = new("Green", "9CFF9C");
+    public static readonly StickyColor Yellow = new("Yellow", "FFFF33");
 
-    public static readonly StickyColors All = new StickyColors();
+    public static readonly StickyColors All = new();
 
     private readonly List<StickyColor> colors;
 

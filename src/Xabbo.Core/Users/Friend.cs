@@ -4,17 +4,17 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class Friend : IFriend
+public class Friend : IFriend, IComposer, IParser<Friend>
 {
-    public static Friend Parse(IReadOnlyPacket packet) => new(packet);
+    public static Friend Parse(in PacketReader packet) => new(packet);
 
-    public long Id { get; set; }
+    public Id Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public Gender Gender { get; set; }
     public bool IsOnline { get; set; }
     public bool CanFollow { get; set; }
     public string FigureString { get; set; } = string.Empty;
-    public long CategoryId { get; set; }
+    public Id CategoryId { get; set; }
     public string Motto { get; set; } = string.Empty;
     public string RealName { get; set; } = string.Empty;
     public string FacebookId { get; set; } = string.Empty;
@@ -25,51 +25,53 @@ public class Friend : IFriend
 
     public Friend() { }
 
-    protected Friend(IReadOnlyPacket packet)
+    protected Friend(in PacketReader packet)
     {
-        Id = packet.ReadLegacyLong();
-        Name = packet.ReadString();
-        Gender = H.ToGender(packet.ReadInt());
-        IsOnline = packet.ReadBool();
-        CanFollow = packet.ReadBool();
-        FigureString = packet.ReadString();
-        CategoryId = packet.ReadLegacyLong();
-        Motto = packet.ReadString();
+        Id = packet.Read<Id>();
+        Name = packet.Read<string>();
+        Gender = H.ToGender(packet.Read<int>());
+        IsOnline = packet.Read<bool>();
+        CanFollow = packet.Read<bool>();
+        FigureString = packet.Read<string>();
+        CategoryId = packet.Read<Id>();
+        Motto = packet.Read<string>();
 
-        if (packet.Protocol == ClientType.Flash)
+        if (packet.Client == ClientType.Flash)
         {
-            RealName = packet.ReadString();
-            FacebookId = packet.ReadString();
+            RealName = packet.Read<string>();
+            FacebookId = packet.Read<string>();
         }
 
-        IsAcceptingOfflineMessages = packet.ReadBool();
-        IsVipMember = packet.ReadBool();
-        IsPocketHabboUser = packet.ReadBool();
+        IsAcceptingOfflineMessages = packet.Read<bool>();
+        IsVipMember = packet.Read<bool>();
+        IsPocketHabboUser = packet.Read<bool>();
 
-        if (packet.Protocol == ClientType.Unity)
+        if (packet.Client == ClientType.Unity)
         {
-            RealName = packet.ReadString();
-            FacebookId = packet.ReadString();
+            RealName = packet.Read<string>();
+            FacebookId = packet.Read<string>();
         }
 
-        Relation = (Relation)packet.ReadShort();
+        Relation = (Relation)packet.Read<short>();
     }
 
-    public void Compose(IPacket packet) => packet
-        .WriteLegacyLong((LegacyLong)Id)
-        .WriteString(Name)
-        .WriteInt(Gender.GetValue())
-        .WriteBool(IsOnline)
-        .WriteBool(CanFollow)
-        .WriteString(FigureString)
-        .WriteLegacyLong(CategoryId)
-        .WriteString(Motto)
-        .WriteString(RealName)
-        .WriteString(FacebookId)
-        .WriteBool(IsAcceptingOfflineMessages)
-        .WriteBool(IsVipMember)
-        .WriteBool(IsPocketHabboUser)
-        .WriteShort((short)Relation);
+    public void Compose(in PacketWriter p)
+    {
+        p.Write(Id);
+        p.Write(Name);
+        p.Write(Gender.GetValue());
+        p.Write(IsOnline);
+        p.Write(CanFollow);
+        p.Write(FigureString);
+        p.Write(CategoryId);
+        p.Write(Motto);
+        p.Write(RealName);
+        p.Write(FacebookId);
+        p.Write(IsAcceptingOfflineMessages);
+        p.Write(IsVipMember);
+        p.Write(IsPocketHabboUser);
+        p.Write((short)Relation);
+    }
 
     public override string ToString() => Name;
 }

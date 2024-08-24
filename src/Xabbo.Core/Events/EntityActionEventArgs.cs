@@ -1,14 +1,7 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class EntityActionEventArgs : EntityEventArgs
+public sealed class EntityActionEventArgs(IEntity entity, Actions action)
+    : EntityEventArgs(entity)
 {
-    public Actions Action { get; }
-
-    public EntityActionEventArgs(IEntity entity, Actions action)
-        :  base(entity)
-    {
-        Action = action;
-    }
+    public Actions Action { get; } = action;
 }

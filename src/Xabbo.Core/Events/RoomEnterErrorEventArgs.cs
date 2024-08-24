@@ -1,13 +1,6 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class RoomEnterErrorEventArgs : EventArgs
+public sealed class RoomEnterErrorEventArgs(RoomEnterError error)
 {
-    public RoomEnterError Error { get; }
-
-    public RoomEnterErrorEventArgs(RoomEnterError error)
-    {
-        Error = error;
-    }
+    public RoomEnterError Error { get; } = error;
 }

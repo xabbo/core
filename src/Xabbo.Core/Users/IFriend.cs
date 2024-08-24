@@ -6,12 +6,12 @@ namespace Xabbo.Core;
 /// <summary>
 /// Contains information about the user's friend.
 /// </summary>
-public interface IFriend : IComposable
+public interface IFriend : IComposer
 {
     /// <summary>
     /// Gets the ID of the friend.
     /// </summary>
-    long Id { get; }
+    Id Id { get; }
     /// <summary>
     /// Gets the name of the friend.
     /// </summary>
@@ -35,7 +35,7 @@ public interface IFriend : IComposable
     /// <summary>
     /// Gets the category in the friend list that the friend belongs to.
     /// </summary>
-    long CategoryId { get; }
+    Id CategoryId { get; }
     /// <summary>
     /// Gets the motto of the friend.
     /// </summary>

@@ -4,7 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface ICatalogPageItem : IComposable
+public interface ICatalogPageItem : IComposer
 {
     int Position { get; }
     int Type { get; }

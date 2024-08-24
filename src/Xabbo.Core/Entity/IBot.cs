@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Xabbo.Core;
 
@@ -13,7 +12,7 @@ public interface IBot : IEntity
     /// <summary>
     /// Gets the owner of the bot's ID.
     /// </summary>
-    long OwnerId { get; }
+    Id OwnerId { get; }
 
     /// <summary>
     /// Gets the owner of the bot's name.

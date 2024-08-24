@@ -2,15 +2,18 @@
 
 using Xabbo.Messages;
 using Xabbo.Extension;
+using Xabbo.Interceptor;
 
 using Xabbo.Core.Events;
+using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Game;
 
-public class TradeManager : GameStateManager
+public sealed class TradeManager(IExtension extension, ProfileManager profileManager, RoomManager roomManager)
+    : GameStateManager(extension)
 {
-    private readonly ProfileManager _profileManager;
-    private readonly RoomManager _roomManager;
+    private readonly ProfileManager _profileManager = profileManager;
+    private readonly RoomManager _roomManager = roomManager;
 
     public bool IsTrading { get; private set; }
     public bool IsTrader { get; private set; }
@@ -32,28 +35,30 @@ public class TradeManager : GameStateManager
     public event EventHandler<TradeStopEventArgs>? Closed;
     public event EventHandler<TradeCompleteEventArgs>? Completed;
 
-    protected virtual void OnOpened(bool isTrader, IRoomUser partner)
+    private void OnOpened(bool isTrader, IRoomUser partner)
         => Opened?.Invoke(this, new TradeStartEventArgs(isTrader, partner));
-    protected virtual void OnTradeOpenFailed(int reason, string name)
+    private void OnTradeOpenFailed(int reason, string name)
         => OpenFailed?.Invoke(this, new TradeStartFailEventArgs(reason, name));
-    protected virtual void OnUpdated(ITradeOffer ownOffer, ITradeOffer partnerOffer)
+    private void OnUpdated(ITradeOffer ownOffer, ITradeOffer partnerOffer)
         => Updated?.Invoke(this, new TradeOfferEventArgs(ownOffer, partnerOffer));
-    protected virtual void OnAccepted(IRoomUser user, bool accepted)
+    private void OnAccepted(IRoomUser user, bool accepted)
         => Accepted?.Invoke(this, new TradeAcceptEventArgs(user, accepted));
-    protected virtual void OnWaitingConfirm() => WaitingConfirm?.Invoke(this, EventArgs.Empty);
-    protected virtual void OnClosed(IRoomUser user, int reason)
+    private void OnWaitingConfirm() => WaitingConfirm?.Invoke(this, EventArgs.Empty);
+    private void OnClosed(IRoomUser user, int reason)
         => Closed?.Invoke(this, new TradeStopEventArgs(user, reason));
-    protected virtual void OnCompleted(bool wasTrader, IRoomUser self, IRoomUser partner,
+    private void OnCompleted(bool wasTrader, IRoomUser self, IRoomUser partner,
         ITradeOffer ownOffer, ITradeOffer partnerOffer)
         => Completed?.Invoke(this, new TradeCompleteEventArgs(wasTrader, self, partner, ownOffer, partnerOffer));
 
-    public TradeManager(IExtension extension, ProfileManager profileManager,
-        RoomManager roomManager)
-        : base(extension)
-    {
-        _profileManager = profileManager;
-        _roomManager = roomManager;
-    }
+    public override IDisposable Attach(IInterceptor ix) => ix.Dispatcher.Register([
+        new(In.TradingOpen, HandleTradeOpen),
+        new(In.TradeOpenFailed, HandleTradeOpenFail),
+        new(In.TradingItemList, HandleTradeItems),
+        new(In.TradingAccept, HandleTradeAccept),
+        new(In.TradingConfirmation, HandleTradeConfirmation),
+        new(In.TradingCompleted, HandleTradeCompleted),
+        new(In.TradingClose, HandleTradeClose),
+    ]);
 
     protected override void OnDisconnected(object? sender, EventArgs e)
     {
@@ -66,7 +71,7 @@ public class TradeManager : GameStateManager
     {
         IsTrading =
         IsTrader =
-        HasAccepted = 
+        HasAccepted =
         HasPartnerAccepted =
         IsWaitingConfirmation =
         IsCompleted = false;
@@ -78,41 +83,41 @@ public class TradeManager : GameStateManager
         PartnerOffer = null;
     }
 
-    [Receive(nameof(Incoming.TradeOpen))]
-    private void HandleTradeOpen(IReadOnlyPacket packet)
+    // [Receive(nameof(In.TradeOpen))]
+    private void HandleTradeOpen(Intercept e)
     {
         if (_profileManager.UserData == null)
         {
-            DebugUtil.Log("user data not loaded");
+            Debug.Log("user data not loaded");
             return;
         }
 
         if (!_roomManager.IsInRoom || _roomManager.Room is null)
         {
-            DebugUtil.Log("not in room");
+            Debug.Log("not in room");
             return;
         }
 
         if (IsTrading)
         {
-            DebugUtil.Log("already trading!");
+            Debug.Log("already trading!");
             return;
         }
 
-        int traderId = packet.ReadInt();
-        int traderCanTrade = packet.ReadInt();
-        int tradeeId = packet.ReadInt();
-        int tradeeCanTrade = packet.ReadInt();
+        int traderId = e.Packet.Read<int>();
+        int traderCanTrade = e.Packet.Read<int>();
+        int tradeeId = e.Packet.Read<int>();
+        int tradeeCanTrade = e.Packet.Read<int>();
 
         if (!_roomManager.Room.TryGetEntityById(traderId, out IRoomUser? trader))
         {
-            DebugUtil.Log($"failed to find user with id {traderId}");
+            Debug.Log($"failed to find user with id {traderId}");
             return;
         }
 
         if (!_roomManager.Room.TryGetEntityById(tradeeId, out IRoomUser? tradee))
         {
-            DebugUtil.Log($"failed to find user with id {tradeeId}");
+            Debug.Log($"failed to find user with id {tradeeId}");
             return;
         }
 
@@ -124,46 +129,46 @@ public class TradeManager : GameStateManager
 
         IsTrading = true;
 
-        DebugUtil.Log($"trade opened with {Partner}");
+        Debug.Log($"trade opened with {Partner}");
         OnOpened(IsTrader, Partner);
     }
 
-    [Receive(nameof(Incoming.TradeOpenFail))]
-    private void HandleTradeOpenFail(IReadOnlyPacket packet)
+    // [Receive(nameof(In.TradeOpenFail))]
+    private void HandleTradeOpenFail(Intercept e)
     {
         if (!_roomManager.IsInRoom)
         {
-            DebugUtil.Log("not in room");
+            Debug.Log("not in room");
             return;
         }
 
-        int reason = packet.ReadInt();
-        string name = packet.ReadString();
+        int reason = e.Packet.Read<int>();
+        string name = e.Packet.Read<string>();
 
         OnTradeOpenFailed(reason, name);
     }
 
-    [Receive(nameof(Incoming.TradeItems))]
-    private void HandleTradeItems(IReadOnlyPacket packet)
+    // [Receive(nameof(In.TradeItems))]
+    private void HandleTradeItems(Intercept e)
     {
         if (!_roomManager.IsInRoom)
         {
-            DebugUtil.Log("not in room");
+            Debug.Log("not in room");
             return;
         }
 
         if (!IsTrading)
         {
-            DebugUtil.Log("not trading");
+            Debug.Log("not trading");
             return;
         }
 
-        HasAccepted = 
+        HasAccepted =
         HasPartnerAccepted = false;
-        OwnOffer = TradeOffer.Parse(packet);
-        PartnerOffer = TradeOffer.Parse(packet);
+        OwnOffer = e.Packet.Parse<TradeOffer>();
+        PartnerOffer = e.Packet.Parse<TradeOffer>();
 
-        DebugUtil.Log(
+        Debug.Log(
             $"user {OwnOffer.UserId}: " +
             $"{OwnOffer.FurniCount} furni, " +
             $"{OwnOffer.CreditCount} credits / " +
@@ -175,24 +180,24 @@ public class TradeManager : GameStateManager
         OnUpdated(OwnOffer, PartnerOffer);
     }
 
-    [Receive(nameof(Incoming.TradeAccept))]
-    private void HandleTradeAccept(IReadOnlyPacket packet)
+    // [Receive(nameof(In.TradeAccept))]
+    private void HandleTradeAccept(Intercept e)
     {
         if (!_roomManager.IsInRoom)
         {
-            DebugUtil.Log("not in room");
+            Debug.Log("not in room");
             return;
         }
 
         if (!IsTrading)
         {
-            DebugUtil.Log("not trading");
+            Debug.Log("not trading");
             return;
         }
 
         IRoomUser user;
-        int userId = packet.ReadInt();
-        bool accepted = packet.ReadInt() == 1;
+        int userId = e.Packet.Read<int>();
+        bool accepted = e.Packet.Read<int>() == 1;
 
         if (userId == Self?.Id)
         {
@@ -206,26 +211,26 @@ public class TradeManager : GameStateManager
         }
         else
         {
-            DebugUtil.Log($"user id {userId} does not match self {Self} or partner {Partner} ids");
+            Debug.Log($"user id {userId} does not match self {Self} or partner {Partner} ids");
             return;
         }
 
-        DebugUtil.Log($"user {user} {(accepted ? "" : "un")}accepted");
+        Debug.Log($"user {user} {(accepted ? "" : "un")}accepted");
         OnAccepted(user, accepted);
     }
 
-    [Receive(nameof(Incoming.TradeConfirmation))]
-    private void HandleTradeConfirmation(IReadOnlyPacket packet)
+    // [Receive(nameof(In.TradeConfirmation))]
+    private void HandleTradeConfirmation(Intercept e)
     {
         if (!_roomManager.IsInRoom)
         {
-            DebugUtil.Log("not in room");
+            Debug.Log("not in room");
             return;
         }
 
         if (!IsTrading)
         {
-            DebugUtil.Log("not trading");
+            Debug.Log("not trading");
             return;
         }
 
@@ -233,14 +238,14 @@ public class TradeManager : GameStateManager
         OnWaitingConfirm();
     }
 
-    [Receive(nameof(Incoming.TradeCompleted))]
-    private void HandleTradeCompleted(IReadOnlyPacket packet)
+    // [Receive(nameof(In.TradeCompleted))]
+    private void HandleTradeCompleted(Intercept e)
     {
         if (!IsTrading) return;
 
         if (IsCompleted)
         {
-            DebugUtil.Log($"trade already complete!");
+            Debug.Log($"trade already complete!");
             return;
         }
 
@@ -256,33 +261,32 @@ public class TradeManager : GameStateManager
             return;
         }
 
-        DebugUtil.Log($"complete, partner = {partner}");
+        Debug.Log($"complete, partner = {partner}");
 
         IsCompleted = true;
         OnCompleted(wasTrader, self, partner, ownOffer, partnerOffer);
     }
 
-    [Receive(nameof(Incoming.TradeClose))]
-    private void HandleTradeClose(IReadOnlyPacket packet)
+    // [Receive(nameof(In.TradeClose))]
+    private void HandleTradeClose(Intercept e)
     {
         if (!IsTrading) return;
 
-        int userId = packet.ReadInt();
-        int reason = packet.ReadInt();
+        int userId = e.Packet.Read<int>();
+        int reason = e.Packet.Read<int>();
 
         IRoomUser? user = null;
         if (userId == Self?.Id) user = Self;
         else if (userId == Partner?.Id) user = Partner;
-        
+
         if (user is null)
         {
-            DebugUtil.Log($"user id mismatch: {userId}.");
+            Debug.Log($"user id mismatch: {userId}.");
             return;
         }
 
-        DebugUtil.Log($"trade closed by {user}, reason = {reason}");
+        Debug.Log($"trade closed by {user}, reason = {reason}");
         OnClosed(user, reason);
         ResetTrade();
     }
-
 }

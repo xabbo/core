@@ -4,7 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class ChatSettings : IChatSettings, IComposable
+public class ChatSettings : IChatSettings, IComposer, IParser<ChatSettings>
 {
     public ChatFlow Flow { get; set; }
     public ChatBubbleWidth BubbleWidth { get; set; }
@@ -21,24 +21,23 @@ public class ChatSettings : IChatSettings, IComposable
         FloodProtection = ChatFloodProtection.Standard;
     }
 
-    internal ChatSettings(IReadOnlyPacket packet)
+    internal ChatSettings(in PacketReader p)
     {
-        Flow = (ChatFlow)packet.ReadInt();
-        BubbleWidth = (ChatBubbleWidth)packet.ReadInt();
-        ScrollSpeed = (ChatScrollSpeed)packet.ReadInt();
-        TalkHearingDistance = packet.ReadInt();
-        FloodProtection = (ChatFloodProtection)packet.ReadInt();
+        Flow = (ChatFlow)p.Read<int>();
+        BubbleWidth = (ChatBubbleWidth)p.Read<int>();
+        ScrollSpeed = (ChatScrollSpeed)p.Read<int>();
+        TalkHearingDistance = p.Read<int>();
+        FloodProtection = (ChatFloodProtection)p.Read<int>();
     }
 
-    public void Compose(IPacket packet) => packet
-        .WriteInt((int)Flow)
-        .WriteInt((int)BubbleWidth)
-        .WriteInt((int)ScrollSpeed)
-        .WriteInt(TalkHearingDistance)
-        .WriteInt((int)FloodProtection);
-
-    public static ChatSettings Parse(IReadOnlyPacket packet)
+    public void Compose(in PacketWriter p)
     {
-        return new ChatSettings(packet);
+        p.Write((int)Flow);
+        p.Write((int)BubbleWidth);
+        p.Write((int)ScrollSpeed);
+        p.Write(TalkHearingDistance);
+        p.Write((int)FloodProtection);
     }
+
+    public static ChatSettings Parse(in PacketReader p) => new(in p);
 }

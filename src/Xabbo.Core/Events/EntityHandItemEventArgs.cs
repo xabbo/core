@@ -1,14 +1,7 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class EntityHandItemEventArgs : EntityEventArgs
+public sealed class EntityHandItemEventArgs(IEntity entity, int previousItem)
+    : EntityEventArgs(entity)
 {
-    public int PreviousItem { get; }
-
-    public EntityHandItemEventArgs(IEntity entity, int previousItem)
-        : base(entity)
-    {
-        PreviousItem = previousItem;
-    }
+    public int PreviousItem { get; } = previousItem;
 }

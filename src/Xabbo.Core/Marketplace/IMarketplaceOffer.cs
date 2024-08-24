@@ -3,12 +3,12 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface IMarketplaceOffer : IItem, IComposable
+public interface IMarketplaceOffer : IItem, IComposer
 {
     /// <summary>
     /// Gets the ID of the marketplace offer.
     /// </summary>
-    new long Id { get; }
+    Id OfferId { get; }
     /// <summary>
     /// Gets the current status of this marketplace offer.
     /// </summary>

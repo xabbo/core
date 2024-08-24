@@ -6,7 +6,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class Catalog : ICatalog, IEnumerable<CatalogPageNode>
+public class Catalog : ICatalog, IEnumerable<CatalogPageNode>, IComposer, IParser<Catalog>
 {
     public CatalogPageNode RootNode { get; set; }
     ICatalogPageNode ICatalog.RootNode => RootNode;
@@ -18,20 +18,12 @@ public class Catalog : ICatalog, IEnumerable<CatalogPageNode>
         RootNode = new CatalogPageNode();
         Type = string.Empty;
     }
-    
-    protected Catalog(IReadOnlyPacket packet)
-    {
-        RootNode = CatalogPageNode.Parse(packet);
-        NewAdditionsAvailable = packet.ReadBool();
-        Type = packet.ReadString();
-    }
 
-    public void Compose(IPacket packet)
+    protected Catalog(in PacketReader p)
     {
-        packet
-            .Write(RootNode)
-            .WriteBool(NewAdditionsAvailable)
-            .WriteString(Type);
+        RootNode = p.Parse<CatalogPageNode>();
+        NewAdditionsAvailable = p.Read<bool>();
+        Type = p.Read<string>();
     }
 
     public CatalogPageNode? FindNode(Func<CatalogPageNode, bool> predicate) => RootNode.FindNode(predicate);
@@ -43,5 +35,12 @@ public class Catalog : ICatalog, IEnumerable<CatalogPageNode>
     IEnumerator<ICatalogPageNode> IEnumerable<ICatalogPageNode>.GetEnumerator() => GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    public static Catalog Parse(IReadOnlyPacket packet) => new Catalog(packet);
+    public void Compose(in PacketWriter p)
+    {
+        p.Write(RootNode);
+        p.Write(NewAdditionsAvailable);
+        p.Write(Type);
+    }
+
+    public static Catalog Parse(in PacketReader p) => new(in p);
 }

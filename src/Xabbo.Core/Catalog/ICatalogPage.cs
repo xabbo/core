@@ -5,7 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface ICatalogPage : IComposable
+public interface ICatalogPage : IComposer
 {
     int Id { get; }
     string CatalogType { get; }

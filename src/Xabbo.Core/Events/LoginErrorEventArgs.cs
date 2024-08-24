@@ -1,8 +1,6 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class LoginErrorEventArgs : EventArgs
+public sealed class LoginErrorEventArgs
 {
     public bool HasErrorCode { get; }
     public int ErrorCode { get; }

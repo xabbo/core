@@ -25,7 +25,7 @@ public class ExternalTexts : IReadOnlyDictionary<string, string>
             int index = line.IndexOf('=');
             if (index < 0)
             {
-                DebugUtil.Log($"invalid line {line}");
+                Debug.Log($"invalid line {line}");
                 continue;
             }
 
@@ -34,7 +34,7 @@ public class ExternalTexts : IReadOnlyDictionary<string, string>
             if (!dict.ContainsKey(key))
                 dict.Add(key, value);
             else
-                DebugUtil.Log($"duplicate key '{key}'");
+                Debug.Log($"duplicate key '{key}'");
         }
     }
 

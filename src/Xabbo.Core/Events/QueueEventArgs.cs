@@ -1,13 +1,6 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class QueueEventArgs : EventArgs
+public sealed class QueueEventArgs(int position)
 {
-    public int Position { get; }
-
-    public QueueEventArgs(int position)
-    {
-        Position = position;
-    }
+    public int Position { get; } = position;
 }

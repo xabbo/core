@@ -2,7 +2,7 @@
 
 namespace Xabbo.Core.Events;
 
-public class EntityDataUpdatedEventArgs : EntityEventArgs
+public sealed class EntityDataUpdatedEventArgs : EntityEventArgs
 {
     public string PreviousFigure { get; }
     public Gender PreviousGender { get; }

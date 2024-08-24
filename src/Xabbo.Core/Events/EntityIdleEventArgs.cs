@@ -1,14 +1,7 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class EntityIdleEventArgs : EntityEventArgs
+public sealed class EntityIdleEventArgs(IEntity entity, bool wasIdle)
+    : EntityEventArgs(entity)
 {
-    public bool WasIdle { get; }
-
-    public EntityIdleEventArgs(IEntity entity, bool wasIdle)
-        : base(entity)
-    {
-        WasIdle = wasIdle;
-    }
+    public bool WasIdle { get; } = wasIdle;
 }

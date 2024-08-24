@@ -1,14 +1,7 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class EntitySlideEventArgs : EntityEventArgs
+public sealed class EntitySlideEventArgs(IEntity entity, Tile previousTile)
+    : EntityEventArgs(entity)
 {
-    public Tile PreviousTile { get; set; }
-
-    public EntitySlideEventArgs(IEntity entity, Tile previousTile)
-        : base(entity)
-    {
-        PreviousTile = previousTile;
-    }
+    public Tile PreviousTile { get; set; } = previousTile;
 }

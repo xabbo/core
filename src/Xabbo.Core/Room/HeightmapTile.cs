@@ -4,7 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class HeightmapTile : IHeightmapTile
+public class HeightmapTile : IHeightmapTile, IComposer
 {
     public int X { get; }
     public int Y { get; }
@@ -30,9 +30,9 @@ public class HeightmapTile : IHeightmapTile
         Height = value >= 0 ? ((value & 0x3FFF) / 256.0) : -1;
     }
 
-    public void Compose(IPacket packet)
+    public void Compose(in PacketWriter p)
     {
-        packet.WriteShort((short)(
+        p.Write((short)(
             (IsFloor ? 0x0000 : 0x8000) |
             (IsBlocked ? 0x4000 : 0x0000) |
             ((int)(Height * 256.0) & 0x3FFF)

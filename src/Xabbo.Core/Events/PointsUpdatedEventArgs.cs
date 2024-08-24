@@ -1,17 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class PointsUpdatedEventArgs : EventArgs
+public sealed class PointsUpdatedEventArgs(ActivityPointType type, int amount, int change)
 {
-    public ActivityPointType Type { get; }
-    public int Amount { get; }
-    public int Change { get; }
-
-    public PointsUpdatedEventArgs(ActivityPointType type, int amount, int change)
-    {
-        Type = type;
-        Amount = amount;
-        Change = change;
-    }
+    public ActivityPointType Type { get; } = type;
+    public int Amount { get; } = amount;
+    public int Change { get; } = change;
 }

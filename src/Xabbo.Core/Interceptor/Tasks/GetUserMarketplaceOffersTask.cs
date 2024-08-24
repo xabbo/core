@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
@@ -13,13 +10,13 @@ public class GetUserMarketplaceOffersTask : InterceptorTask<IUserMarketplaceOffe
         : base(interceptor)
     { }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.MarketplaceListOwnOffers);
+    protected override void OnExecute() => Interceptor.Send(Out.GetMarketplaceOwnOffers);
 
-    [InterceptIn(nameof(Incoming.MarketplaceOwnOfferList))]
-    protected void HandleMarketplaceOwnOfferList(InterceptArgs e)
+    [InterceptIn(nameof(In.MarketPlaceOwnOffers))]
+    protected void HandleMarketplaceOwnOffers(Intercept e)
     {
         e.Block();
 
-        SetResult(UserMarketplaceOffers.Parse(e.Packet));
+        SetResult(e.Packet.Parse<UserMarketplaceOffers>());
     }
 }

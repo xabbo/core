@@ -1,10 +1,8 @@
-﻿using System;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class CatalogPageItem : ICatalogPageItem
+public sealed class CatalogPageItem : ICatalogPageItem, IComposer, IParser<CatalogPageItem>
 {
     public int Position { get; set; }
     public string Name { get; set; }
@@ -23,57 +21,55 @@ public class CatalogPageItem : ICatalogPageItem
         ProductCode = string.Empty;
     }
 
-    protected CatalogPageItem(IReadOnlyPacket packet)
-        : this()
+    private CatalogPageItem(in PacketReader packet) : this()
     {
-        Position = packet.ReadInt();
-        Name = packet.ReadString();
-        PromotionalImage = packet.ReadString();
-        Type = packet.ReadInt();
+        Position = packet.Read<int>();
+        Name = packet.Read<string>();
+        PromotionalImage = packet.Read<string>();
+        Type = packet.Read<int>();
 
         switch (Type)
         {
             case 0:
-                Location = packet.ReadString();
+                Location = packet.Read<string>();
                 break;
             case 1:
-                ProductOfferId = packet.ReadInt();
+                ProductOfferId = packet.Read<int>();
                 break;
             case 2:
-                ProductCode = packet.ReadString();
+                ProductCode = packet.Read<string>();
                 break;
             default:
                 break;
         }
 
-        SecondsToExpiration = packet.ReadInt();
+        SecondsToExpiration = packet.Read<int>();
     }
 
-    public void Compose(IPacket packet)
+    public void Compose(in PacketWriter p)
     {
-        packet
-            .WriteInt(Position)
-            .WriteString(Name)
-            .WriteString(PromotionalImage)
-            .WriteInt(Type);
+        p.Write(Position);
+        p.Write(Name);
+        p.Write(PromotionalImage);
+        p.Write(Type);
 
         switch (Type)
         {
             case 0:
-                packet.WriteString(Location);
+                p.Write(Location);
                 break;
             case 1:
-                packet.WriteInt(ProductOfferId);
+                p.Write(ProductOfferId);
                 break;
             case 2:
-                packet.WriteString(ProductCode);
+                p.Write(ProductCode);
                 break;
             default:
                 break;
         }
 
-        packet.WriteInt(SecondsToExpiration);
+        p.Write(SecondsToExpiration);
     }
 
-    public static CatalogPageItem Parse(IReadOnlyPacket packet) => new CatalogPageItem(packet);
+    public static CatalogPageItem Parse(in PacketReader packet) => new(in packet);
 }

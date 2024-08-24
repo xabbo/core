@@ -4,22 +4,14 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 using Xabbo.Messages;
-using Xabbo.Messages.Dispatcher;
 using Xabbo.Extension;
+using Xabbo.Connection;
+using Xabbo.Interceptor;
 
 namespace Xabbo.Core.Game;
 
 public abstract class GameStateManager : IMessageHandler, INotifyPropertyChanged, IDisposable
 {
-    public static IEnumerable<Type> GetManagerTypes()
-    {
-        foreach (var type in typeof(GameStateManager).Assembly.GetExportedTypes())
-        {
-            if (type.IsSubclassOf(typeof(GameStateManager)))
-                yield return type;
-        }
-    }
-
     #region - INotifyPropertyChanged -
     public event PropertyChangedEventHandler? PropertyChanged;
     protected virtual void RaisePropertyChanged(string? propertyName)
@@ -35,31 +27,23 @@ public abstract class GameStateManager : IMessageHandler, INotifyPropertyChanged
     #endregion
 
     private bool _disposed;
+    private IDisposable? _attachment;
 
-    protected IExtension Extension { get; }
-    protected IMessageDispatcher Dispatcher => Extension.Dispatcher;
-    protected Incoming In => Extension.Messages.In;
-    protected Outgoing Out => Extension.Messages.Out;
+    protected IExtension Ext { get; }
+    protected IMessageDispatcher Dispatcher => Ext.Dispatcher;
 
     public GameStateManager(IExtension extension)
     {
-        Extension = extension;
-        Extension.Connected += OnConnected;
-        Extension.Disconnected += OnDisconnected;
+        Ext = extension;
+        Ext.Connected += OnConnected;
+        Ext.Disconnected += OnDisconnected;
     }
 
-    protected virtual void OnConnected(object? sender, GameConnectedEventArgs e)
-    {
-        if (!Extension.Dispatcher.IsBound(this))
-        {
-            Extension.Bind(this);
-        }
-    }
+    public abstract IDisposable Attach(IInterceptor interceptor);
 
-    protected virtual void OnDisconnected(object? sender, EventArgs e)
-    {
-        Extension.Release(this);
-    }
+    protected virtual void OnConnected(object? sender, GameConnectedArgs e) => _attachment = Attach(Ext);
+
+    protected virtual void OnDisconnected(object? sender, EventArgs e) { }
 
     protected virtual void Dispose(bool disposing)
     {
@@ -68,7 +52,7 @@ public abstract class GameStateManager : IMessageHandler, INotifyPropertyChanged
 
         if (disposing)
         {
-            Extension.Dispatcher.Release(this);
+            _attachment?.Dispose();
         }
     }
 

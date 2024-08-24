@@ -1,22 +1,15 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class DiceUpdatedEventArgs : FloorItemEventArgs
+public sealed class DiceUpdatedEventArgs(IFloorItem dice, int previous, int value)
+    : FloorItemEventArgs(dice)
 {
     /// <summary>
-    /// Gets the previous value of the dice.
+    /// The previous value of the dice.
     /// </summary>
-    public int PreviousValue { get; }
-    /// <summary>
-    /// Gets the current value of the dice.
-    /// </summary>
-    public int CurrentValue { get; }
+    public int PreviousValue { get; } = previous;
 
-    public DiceUpdatedEventArgs(IFloorItem item, int previousValue)
-        : base(item)
-    {
-        PreviousValue = previousValue;
-        CurrentValue = item.Data.State;
-    }
+    /// <summary>
+    /// The current value of the dice.
+    /// </summary>
+    public int Value { get; } = value;
 }

@@ -1,10 +1,8 @@
-﻿using System;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class ModerationSettings : IModerationSettings
+public class ModerationSettings : IModerationSettings, IComposer, IParser<ModerationSettings>
 {
     public ModerationPermissions WhoCanMute { get; set; }
     public ModerationPermissions WhoCanKick { get; set; }
@@ -12,20 +10,19 @@ public class ModerationSettings : IModerationSettings
 
     public ModerationSettings() { }
 
-    internal ModerationSettings(IReadOnlyPacket packet)
+    internal ModerationSettings(in PacketReader p)
     {
-        WhoCanMute = (ModerationPermissions)packet.ReadInt();
-        WhoCanKick = (ModerationPermissions)packet.ReadInt();
-        WhoCanBan = (ModerationPermissions)packet.ReadInt();
+        WhoCanMute = (ModerationPermissions)p.Read<int>();
+        WhoCanKick = (ModerationPermissions)p.Read<int>();
+        WhoCanBan = (ModerationPermissions)p.Read<int>();
     }
 
-    public void Compose(IPacket packet) => packet
-        .WriteInt((int)WhoCanMute)
-        .WriteInt((int)WhoCanKick)
-        .WriteInt((int)WhoCanBan);
-
-    public static ModerationSettings Parse(IReadOnlyPacket packet)
+    public void Compose(in PacketWriter p)
     {
-        return new ModerationSettings(packet);
+        p.Write((int)WhoCanMute);
+        p.Write((int)WhoCanKick);
+        p.Write((int)WhoCanBan);
     }
+
+    public static ModerationSettings Parse(in PacketReader p) => new(in p);
 }

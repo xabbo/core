@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
@@ -17,14 +17,14 @@ public class GetGroupDataTask : InterceptorTask<IGroupData>
         _groupId = groupId;
     }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetHabboGroupDetails, _groupId, false);
+    protected override void OnExecute() => Interceptor.Send(Out.GetHabboGroupDetails, _groupId, false);
 
-    [InterceptIn(nameof(Incoming.HabboGroupDetails))]
-    protected void OnHabboGroupDetails(InterceptArgs e)
+    [InterceptIn(nameof(In.HabboGroupDetails))]
+    protected void OnHabboGroupDetails(Intercept e)
     {
         try
         {
-            var groupData = GroupData.Parse(e.Packet);
+            var groupData = e.Packet.Parse<GroupData>();
             if (groupData.Id == _groupId)
             {
                 if (SetResult(groupData))

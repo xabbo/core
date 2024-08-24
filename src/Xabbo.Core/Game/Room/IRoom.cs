@@ -10,7 +10,7 @@ public interface IRoom
     /// <summary>
     /// Gets the ID of this room.
     /// </summary>
-    long Id { get; }
+    Id Id { get; }
 
     /// <summary>
     /// Gets the data of this room.
@@ -29,7 +29,7 @@ public interface IRoom
     /// <summary>
     /// Gets the owner of this room's ID.
     /// </summary>
-    long OwnerId => Data.OwnerId;
+    Id OwnerId => Data.OwnerId;
     /// <summary>
     /// Gets the owner of this room's name.
     /// </summary>
@@ -98,7 +98,7 @@ public interface IRoom
     /// <summary>
     /// Gets the ID of the group this room is home to.
     /// </summary>
-    long GroupId => Data.GroupId;
+    Id GroupId => Data.GroupId;
     /// <summary>
     /// Gets the name of the group this room is home to.
     /// </summary>
@@ -196,24 +196,24 @@ public interface IRoom
     /// <summary>
     /// Gets if a floor item with the specified ID exists in this room.
     /// </summary>
-    bool HasFloorItem(long id);
+    bool HasFloorItem(Id id);
     /// <summary>
     /// Gets if a wall item with the specified ID exists in this room.
     /// </summary>
-    bool HasWallItem(long id);
+    bool HasWallItem(Id id);
 
     /// <summary>
     /// Gets the furni of the specified type with the specified ID if it exists.
     /// </summary>
-    IFurni? GetFurni(ItemType type, long id);
+    IFurni? GetFurni(ItemType type, Id id);
     /// <summary>
     /// Gets the floor item with the specified ID if it exists.
     /// </summary>
-    IFloorItem? GetFloorItem(long id);
+    IFloorItem? GetFloorItem(Id id);
     /// <summary>
     /// Gets the wall item with the specified ID if it exists.
     /// </summary>
-    IWallItem? GetWallItem(long id);
+    IWallItem? GetWallItem(Id id);
     #endregion
 
     #region - Entities -
@@ -245,22 +245,22 @@ public interface IRoom
     /// <summary>
     /// Gets the entity with the specified ID if it exists.
     /// </summary>
-    TEntity? GetEntityById<TEntity>(long id) where TEntity : IEntity;
+    TEntity? GetEntityById<TEntity>(Id id) where TEntity : IEntity;
 
     bool TryGetEntityByIndex<TEntity>(int index, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity;
-    bool TryGetEntityById<TEntity>(long id, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity;
+    bool TryGetEntityById<TEntity>(Id id, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity;
     bool TryGetEntityByName<TEntity>(string name, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity;
 
     bool TryGetUserByIndex(int index, [NotNullWhen(true)] out IRoomUser? user) => TryGetEntityByIndex(index, out user);
-    bool TryGetUserById(long id, [NotNullWhen(true)] out IRoomUser? user) => TryGetEntityById(id, out user);
+    bool TryGetUserById(Id id, [NotNullWhen(true)] out IRoomUser? user) => TryGetEntityById(id, out user);
     bool TryGetUserByName(string name, [NotNullWhen(true)] out IRoomUser? user) => TryGetEntityByName(name, out user);
 
     bool TryGetPetByIndex(int index, [NotNullWhen(true)] out IPet? pet) => TryGetEntityByIndex(index, out pet);
-    bool TryGetPetById(long id, [NotNullWhen(true)] out IPet? pet) => TryGetEntityById(id, out pet);
+    bool TryGetPetById(Id id, [NotNullWhen(true)] out IPet? pet) => TryGetEntityById(id, out pet);
     bool TryGetPetByName(string name, [NotNullWhen(true)] out IPet? pet) => TryGetEntityByName(name, out pet);
 
     bool TryGetBotByIndex(int index, [NotNullWhen(true)] out IBot? bot) => TryGetEntityByIndex(index, out bot);
-    bool TryGetBotById(long id, [NotNullWhen(true)] out IBot? bot) => TryGetEntityById(id, out bot);
+    bool TryGetBotById(Id id, [NotNullWhen(true)] out IBot? bot) => TryGetEntityById(id, out bot);
     bool TryGetBotByName(string name, [NotNullWhen(true)] out IBot? bot) => TryGetEntityByName(name, out bot);
     #endregion
 }

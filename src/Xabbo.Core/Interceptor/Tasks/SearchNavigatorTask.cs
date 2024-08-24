@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
@@ -19,14 +19,14 @@ public class SearchNavigatorTask : InterceptorTask<NavigatorSearchResults>
         _filter = filter;
     }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.Navigator2Search, _category, _filter);
+    protected override void OnExecute() => Interceptor.Send(Out.NewNavigatorSearch, _category, _filter);
 
-    [InterceptIn(nameof(Incoming.Navigator2SearchResultBlocks))]
-    protected void OnNavigatorSearchResults(InterceptArgs e)
+    [InterceptIn(nameof(In.NavigatorSearchResultBlocks))]
+    protected void OnNavigatorSearchResults(Intercept e)
     {
         try
         {
-            var results = NavigatorSearchResults.Parse(e.Packet);
+            var results = e.Packet.Parse<NavigatorSearchResults>();
             if (results.Category == _category &&
                 results.Filter == _filter)
             {

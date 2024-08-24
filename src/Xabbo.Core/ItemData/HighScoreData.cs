@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
@@ -26,7 +26,7 @@ public class HighScoreData : ItemData, IHighScoreData, IList<HighScoreData.HighS
     public HighScoreData()
         : base(ItemDataType.HighScore)
     {
-        _list = new List<HighScore>();
+        _list = [];
     }
 
     public HighScoreData(IHighScoreData data)
@@ -38,24 +38,24 @@ public class HighScoreData : ItemData, IHighScoreData, IList<HighScoreData.HighS
         ClearType = data.ClearType;
     }
 
-    protected override void Initialize(IReadOnlyPacket packet)
+    protected override void Initialize(in PacketReader p)
     {
-        Value = packet.ReadString();
-        ScoreType = packet.ReadInt();
-        ClearType = packet.ReadInt();
+        Value = p.Read<string>();
+        ScoreType = p.Read<int>();
+        ClearType = p.Read<int>();
 
-        short n = packet.ReadLegacyShort();
+        int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
         {
             var highScore = new HighScore
             {
-                Value = packet.ReadInt()
+                Value = p.Read<int>()
             };
 
-            short k = packet.ReadLegacyShort();
+            int k = p.Read<Length>();
             for (int j = 0; j < k; j++)
             {
-                highScore.Names.Add(packet.ReadString());
+                highScore.Names.Add(p.Read<string>());
             }
 
             Add(highScore);
@@ -67,46 +67,38 @@ public class HighScoreData : ItemData, IHighScoreData, IList<HighScoreData.HighS
     public class HighScore : IHighScore
     {
         public int Value { get; set; }
-        public List<string> Names { get; set; }
+        public List<string> Names { get; set; } = [];
         IReadOnlyList<string> IHighScore.Names => Names;
 
-        public HighScore()
-        {
-            Names = new List<string>();
-        }
-
+        public HighScore() { }
         public HighScore(IHighScore highScore)
         {
             Value = highScore.Value;
             Names = new List<string>(highScore.Names);
         }
 
-        public void Compose(IPacket packet)
+        public void Compose(in PacketWriter p)
         {
-            packet.WriteInt(Value);
+            p.Write(Value);
 
-            packet.WriteLegacyShort((short)(Names?.Count ?? 0));
-
+            p.Write<Length>(Names?.Count ?? 0);
             if (Names != null)
             {
                 foreach (string name in Names)
-                {
-                    packet.WriteString(name);
-                }
+                    p.Write(name);
             }
         }
     }
 
-    protected override void WriteData(IPacket packet)
+    protected override void WriteData(in PacketWriter p)
     {
-        packet.WriteString(Value);
-        packet.WriteInt(ScoreType);
-        packet.WriteInt(ClearType);
+        p.Write(Value);
+        p.Write(ScoreType);
+        p.Write(ClearType);
 
-        packet.WriteLegacyShort((short)Count);
-
+        p.Write<Length>(Count);
         foreach (var highScore in this)
-            highScore.Compose(packet);
+            p.Write(highScore);
     }
 
     public int IndexOf(HighScore item) => _list.IndexOf(item);

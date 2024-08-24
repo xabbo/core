@@ -1,23 +1,22 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class UserMarketplaceOffers : IUserMarketplaceOffers, ICollection<MarketplaceOffer>
+public sealed class UserMarketplaceOffers : IUserMarketplaceOffers, ICollection<MarketplaceOffer>, IComposer, IParser<UserMarketplaceOffers>
 {
-    private readonly List<MarketplaceOffer> _list = new();
+    private readonly List<MarketplaceOffer> _list = [];
 
     public int CreditsWaiting { get; set; }
 
     public UserMarketplaceOffers() { }
 
-    protected UserMarketplaceOffers(IReadOnlyPacket packet)
+    private UserMarketplaceOffers(in PacketReader p)
     {
-        CreditsWaiting = packet.ReadInt();
-        _list.AddRange(MarketplaceOffer.ParseMany(packet, false));
+        CreditsWaiting = p.Read<int>();
+        _list.AddRange(MarketplaceOffer.ParseAll(in p, false));
     }
 
     public int Count => _list.Count;
@@ -34,5 +33,11 @@ public class UserMarketplaceOffers : IUserMarketplaceOffers, ICollection<Marketp
     IEnumerator<IMarketplaceOffer> IEnumerable<IMarketplaceOffer>.GetEnumerator() => GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    public static UserMarketplaceOffers Parse(IReadOnlyPacket packet) => new UserMarketplaceOffers(packet);
+    public static UserMarketplaceOffers Parse(in PacketReader packet) => new(in packet);
+
+    public void Compose(in PacketWriter p)
+    {
+        p.Write(CreditsWaiting);
+        p.Write(_list);
+    }
 }

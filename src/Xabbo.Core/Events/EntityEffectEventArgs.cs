@@ -1,14 +1,7 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class EntityEffectEventArgs : EntityEventArgs
+public sealed class EntityEffectEventArgs(IEntity entity, int previousEffect)
+    : EntityEventArgs(entity)
 {
-    public int PreviousEffect { get; }
-
-    public EntityEffectEventArgs(IEntity entity, int previousEffect)
-        : base(entity)
-    {
-        PreviousEffect = previousEffect;
-    }
+    public int PreviousEffect { get; } = previousEffect;
 }

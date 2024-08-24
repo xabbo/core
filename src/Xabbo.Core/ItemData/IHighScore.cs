@@ -8,7 +8,7 @@ namespace Xabbo.Core;
 /// <summary>
 /// Defines a high score value with a list of associated users.
 /// </summary>
-public interface IHighScore : IComposable
+public interface IHighScore : IComposer
 {
     /// <summary>
     /// The value of this high score.

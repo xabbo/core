@@ -2,12 +2,7 @@
 
 namespace Xabbo.Core.Events;
 
-public class FurniEventArgs : EventArgs
+public class FurniEventArgs(IFurni item) : EventArgs
 {
-    public IFurni Item { get; }
-
-    public FurniEventArgs(IFurni item)
-    {
-        Item = item;
-    }
+    public IFurni Item { get; } = item;
 }

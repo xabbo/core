@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,9 +6,9 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class InventoryFragment : IInventoryFragment, ICollection<InventoryItem>
+public sealed class InventoryFragment : IInventoryFragment, ICollection<InventoryItem>, IComposer, IParser<InventoryFragment>
 {
-    private readonly List<InventoryItem> _list = new List<InventoryItem>();
+    private readonly List<InventoryItem> _list = [];
 
     public int Total { get; set; }
     public int Index { get; set; }
@@ -38,12 +37,14 @@ public class InventoryFragment : IInventoryFragment, ICollection<InventoryItem>
         ));
     }
 
-    protected InventoryFragment(IReadOnlyPacket packet)
+    protected InventoryFragment(in PacketReader p)
     {
-        Total = packet.ReadInt();
-        Index = packet.ReadInt();
+        Total = p.Read<int>();
+        Index = p.Read<int>();
 
-        _list.AddRange(InventoryItem.ParseMany(packet));
+        int n = p.Read<Length>();
+        for (int i = 0; i < n; i++)
+            _list.Add(p.Parse<InventoryItem>());
     }
 
     public void Add(InventoryItem item) => _list.Add(item);
@@ -56,18 +57,15 @@ public class InventoryFragment : IInventoryFragment, ICollection<InventoryItem>
     IEnumerator<IInventoryItem> IEnumerable<IInventoryItem>.GetEnumerator() => GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    public void Compose(IPacket packet)
+    public void Compose(in PacketWriter p)
     {
-        packet
-            .WriteInt(Total)
-            .WriteInt(Index);
+        p.Write(Total);
+        p.Write(Index);
 
-        packet.WriteLegacyShort((short)_list.Count);
+        p.Write<Length>((short)_list.Count);
         foreach (InventoryItem item in _list)
-        {
-            item.Compose(packet);
-        }
+            p.Write(item);
     }
 
-    public static InventoryFragment Parse(IReadOnlyPacket packet) => new InventoryFragment(packet);
+    public static InventoryFragment Parse(in PacketReader packet) => new InventoryFragment(in packet);
 }

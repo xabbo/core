@@ -1,16 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class FloorItemSlideEventArgs : FloorItemEventArgs
+public sealed class FloorItemSlideEventArgs(IFloorItem item, Tile previousTile, Id rollerId)
+    : FloorItemEventArgs(item)
 {
-    public Tile PreviousTile { get; }
-    public long RollerId;
-
-    public FloorItemSlideEventArgs(IFloorItem item, Tile previousTile, long rollerId)
-        : base(item)
-    {
-        PreviousTile = previousTile;
-        RollerId = rollerId;
-    }
+    public Tile PreviousTile { get; } = previousTile;
+    public Id RollerId = rollerId;
 }

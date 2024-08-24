@@ -11,7 +11,7 @@ namespace Xabbo.Core;
 /// whether a furni may be placed on that tile,
 /// and the stack height at which a furni may be placed.
 /// </summary>
-public interface IHeightmap : IEnumerable<IHeightmapTile>, IComposable
+public interface IHeightmap : IEnumerable<IHeightmapTile>, IComposer
 {
     /// <summary>
     /// Gets the width of this heightmap.

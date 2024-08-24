@@ -7,18 +7,22 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Messages;
-using Xabbo.Interceptor;
+using Xabbo.Messages.Flash;
+using Xabbo.Extension;
 
 using Xabbo.Core.Events;
-using Xabbo.Extension;
+using Xabbo.Interceptor;
 
 namespace Xabbo.Core.Game;
 
 /// <summary>
 /// Manages information about the current room, the user's permissions in the room, its furni, entities and chat.
 /// </summary>
-public class RoomManager : GameStateManager
+[Intercepts]
+public sealed partial class RoomManager : GameStateManager
 {
+    public override IDisposable Attach(IInterceptor interceptor) => ((IMessageHandler)this).Attach(interceptor);
+
     private readonly ILogger _logger;
     private readonly Dictionary<long, RoomData> _roomDataCache = new();
 
@@ -119,82 +123,82 @@ public class RoomManager : GameStateManager
     /// <summary>
     /// Invoked when the user enters the queue to a room.
     /// </summary>
-    public event EventHandler? EnteredQueue;
-    protected virtual void OnEnteredQueue()
+    public event Action? EnteredQueue;
+    private void OnEnteredQueue()
     {
         _logger.LogTrace("Entered queue. (pos:{queuePosition})", QueuePosition);
-        EnteredQueue?.Invoke(this, EventArgs.Empty);
+        EnteredQueue?.Invoke();
     }
 
     /// <summary>
     /// Invoked when the user's position in the queue is updated.
     /// </summary>
-    public event EventHandler? QueuePositionUpdated;
-    protected virtual void OnQueuePositionUpdated()
+    public event Action? QueuePositionUpdated;
+    private void OnQueuePositionUpdated()
     {
         _logger.LogTrace("Queue position updated. (pos:{queuePosition})", QueuePosition);
-        QueuePositionUpdated?.Invoke(this, EventArgs.Empty);
+        QueuePositionUpdated?.Invoke();
     }
 
     /// <summary>
     /// Invoked when the user enters a room and begins loading the room state.
     /// </summary>
-    public event EventHandler? Entering;
-    protected virtual void OnEnteringRoom(long roomId)
+    public event Action? Entering;
+    private void OnEnteringRoom(long roomId)
     {
         _logger.LogTrace("Entering room. (id:{roomId})", roomId);
-        Entering?.Invoke(this, EventArgs.Empty);
+        Entering?.Invoke();
     }
 
     /// <summary>
     /// Invoked after the user has entered the room and the room state is fully loaded.
     /// </summary>
-    public event EventHandler<RoomEventArgs>? Entered;
-    protected virtual void OnEnteredRoom(IRoom room)
+    public event Action<RoomEventArgs>? Entered;
+    private void OnEnteredRoom(IRoom room)
     {
         _logger.LogTrace("Entered room. (id:{roomId})", room.Id);
-        Entered?.Invoke(this, new RoomEventArgs(room));
+        Entered?.Invoke(new RoomEventArgs(room));
     }
 
     /// <summary>
     /// Invoked when the room data is updated.
     /// </summary>
-    public event EventHandler<RoomDataEventArgs>? RoomDataUpdated;
-    protected virtual void OnRoomDataUpdated(RoomData roomData)
+    public event Action<RoomDataEventArgs>? RoomDataUpdated;
+    private void OnRoomDataUpdated(RoomData roomData)
     {
         _logger.LogTrace("Room data updated. (name:{name})", roomData.Name);
-        RoomDataUpdated?.Invoke(this, new RoomDataEventArgs(roomData));
+        RoomDataUpdated?.Invoke(new RoomDataEventArgs(roomData));
     }
 
     /// <summary>
     /// Invoked when the user leaves a room.
     /// </summary>
-    public event EventHandler? Left;
-    protected virtual void OnLeftRoom()
+    public event Action? Left;
+    private void OnLeftRoom()
     {
         _logger.LogTrace("Left room.");
-        Left?.Invoke(this, EventArgs.Empty);
+        Left?.Invoke();
     }
 
     /// <summary>
     /// Invoked when the user is kicked from the room.
     /// The user still remains in the room at this point until their avatar leaves through the door.
     /// </summary>
-    public event EventHandler? Kicked;
-    protected virtual void OnKicked()
+    public event Action? Kicked;
+    private void OnKicked()
     {
         _logger.LogTrace("Kicked from room.");
-        Kicked?.Invoke(this, EventArgs.Empty);
+        Kicked?.Invoke();
     }
 
     /// <summary>
     /// Invoked when the user's rights to the room are updated.
     /// </summary>
-    public event EventHandler? RightsUpdated;
-    protected virtual void OnRightsUpdated()
+    public event Action? RightsUpdated;
+    private void OnRightsUpdated()
     {
         _logger.LogTrace("Rights updated.");
-        RightsUpdated?.Invoke(this, EventArgs.Empty);
+        RightsUpdated?.Invoke();
     }
     #endregion
 
@@ -204,80 +208,80 @@ public class RoomManager : GameStateManager
     /// This may happen multiple times depending on
     /// how many items are in the room.
     /// </summary>
-    public event EventHandler<FloorItemsEventArgs>? FloorItemsLoaded;
-    protected virtual void OnFloorItemsLoaded(IEnumerable<IFloorItem> items)
+    public event Action<FloorItemsEventArgs>? FloorItemsLoaded;
+    private void OnFloorItemsLoaded(IEnumerable<IFloorItem> items)
     {
         _logger.LogTrace("Floor items loaded. ({n})", items.Count());
-        FloorItemsLoaded?.Invoke(this, new FloorItemsEventArgs(items));
+        FloorItemsLoaded?.Invoke(new FloorItemsEventArgs(items));
     }
 
     /// <summary>
     /// Invoked when a floor item is added to the room.
     /// </summary>
-    public event EventHandler<FloorItemEventArgs>? FloorItemAdded;
-    protected virtual void OnFloorItemAdded(IFloorItem item)
+    public event Action<FloorItemEventArgs>? FloorItemAdded;
+    private void OnFloorItemAdded(IFloorItem item)
     {
         _logger.LogTrace("Floor item added. (id:{id})", item.Id);
-        FloorItemAdded?.Invoke(this, new FloorItemEventArgs(item));
+        FloorItemAdded?.Invoke(new FloorItemEventArgs(item));
     }
 
     /// <summary>
     /// Invoked when a floor item is updated.
     /// </summary>
-    public event EventHandler<FloorItemUpdatedEventArgs>? FloorItemUpdated;
-    protected virtual void OnFloorItemUpdated(IFloorItem previousItem, IFloorItem updatedItem)
+    public event Action<FloorItemUpdatedEventArgs>? FloorItemUpdated;
+    private void OnFloorItemUpdated(IFloorItem previousItem, IFloorItem updatedItem)
     {
         _logger.LogTrace("Floor item updated. (id:{id})", updatedItem.Id);
-        FloorItemUpdated?.Invoke(this, new FloorItemUpdatedEventArgs(previousItem, updatedItem));
+        FloorItemUpdated?.Invoke(new FloorItemUpdatedEventArgs(previousItem, updatedItem));
     }
 
     /// <summary>
     /// Invoked when a floor item's data is updated.
     /// </summary>
-    public event EventHandler<FloorItemDataUpdatedEventArgs>? FloorItemDataUpdated;
-    protected virtual void OnFloorItemDataUpdated(IFloorItem item, IItemData previousData)
+    public event Action<FloorItemDataUpdatedEventArgs>? FloorItemDataUpdated;
+    private void OnFloorItemDataUpdated(IFloorItem item, IItemData previousData)
     {
         _logger.LogTrace("Floor item data updated. (id:{id})", item.Id);
-        FloorItemDataUpdated?.Invoke(this, new FloorItemDataUpdatedEventArgs(item, previousData));
+        FloorItemDataUpdated?.Invoke(new FloorItemDataUpdatedEventArgs(item, previousData));
     }
 
-    public event EventHandler<DiceUpdatedEventArgs>? DiceUpdated;
-    protected virtual void OnDiceUpdated(IFloorItem item, int previousValue)
+    public event Action<DiceUpdatedEventArgs>? DiceUpdated;
+    private void OnDiceUpdated(IFloorItem item, int previousValue, int currentValue)
     {
         _logger.LogTrace("Dice value updated. (id:{id})", item.Id);
-        DiceUpdated?.Invoke(this, new DiceUpdatedEventArgs(item, previousValue));
+        DiceUpdated?.Invoke(new DiceUpdatedEventArgs(item, previousValue, currentValue));
     }
 
     /// <summary>
     /// Invoked when a floor item slides due to a roller or wired update.
     /// </summary>
-    public event EventHandler<FloorItemSlideEventArgs>? FloorItemSlide;
-    protected virtual void OnFloorItemSlide(IFloorItem item, Tile previousTile, long rollerId)
+    public event Action<FloorItemSlideEventArgs>? FloorItemSlide;
+    private void OnFloorItemSlide(IFloorItem item, Tile previousTile, long rollerId)
     {
         _logger.LogTrace(
             "Floor item slide. (id:{id}, rollerId:{rollerId}, {from} -> {to})",
             item.Id, rollerId, previousTile, item.Location
         );
-        FloorItemSlide?.Invoke(this, new FloorItemSlideEventArgs(item, previousTile, rollerId));
+        FloorItemSlide?.Invoke(new FloorItemSlideEventArgs(item, previousTile, rollerId));
     }
 
     /// <summary>
     /// Invoked when users or furni are moved by wired.
     /// </summary>
-    public event EventHandler<WiredMovementsEventArgs>? WiredMovements;
-    protected virtual void OnWiredMovements(IEnumerable<WiredMovement> movements)
+    public event Action<WiredMovementsEventArgs>? WiredMovements;
+    private void OnWiredMovements(IEnumerable<WiredMovement> movements)
     {
-        WiredMovements?.Invoke(this, new WiredMovementsEventArgs(movements));
+        WiredMovements?.Invoke(new WiredMovementsEventArgs(movements));
     }
 
     /// <summary>
     /// Invoked when a floor item is removed from the room.
     /// </summary>
-    public event EventHandler<FloorItemEventArgs>? FloorItemRemoved;
-    protected virtual void OnFloorItemRemoved(IFloorItem item)
+    public event Action<FloorItemEventArgs>? FloorItemRemoved;
+    private void OnFloorItemRemoved(IFloorItem item)
     {
         _logger.LogTrace("Floor item removed. (id:{id})", item.Id);
-        FloorItemRemoved?.Invoke(this, new FloorItemEventArgs(item));
+        FloorItemRemoved?.Invoke(new FloorItemEventArgs(item));
     }
 
     /// <summary>
@@ -285,50 +289,50 @@ public class RoomManager : GameStateManager
     /// This may happen multiple times depending on
     /// how many items are in the room.
     /// </summary>
-    public event EventHandler<WallItemsEventArgs>? WallItemsLoaded;
-    protected virtual void OnWallItemsLoaded(IEnumerable<IWallItem> items)
+    public event Action<WallItemsEventArgs>? WallItemsLoaded;
+    private void OnWallItemsLoaded(IEnumerable<IWallItem> items)
     {
         _logger.LogTrace("Wall items loaded. ({n})", items.Count());
-        WallItemsLoaded?.Invoke(this, new WallItemsEventArgs(items));
+        WallItemsLoaded?.Invoke(new WallItemsEventArgs(items));
     }
 
     /// <summary>
     /// Invoked when a wall item is added to the room.
     /// </summary>
-    public event EventHandler<WallItemEventArgs>? WallItemAdded;
-    protected virtual void OnWallItemAdded(IWallItem item)
+    public event Action<WallItemEventArgs>? WallItemAdded;
+    private void OnWallItemAdded(IWallItem item)
     {
         _logger.LogTrace("Wall item added. (id:{id})", item.Id);
-        WallItemAdded?.Invoke(this, new WallItemEventArgs(item));
+        WallItemAdded?.Invoke(new WallItemEventArgs(item));
     }
 
     /// <summary>
     /// Invoked when a wall item is udpated.
     /// </summary>
-    public event EventHandler<WallItemUpdatedEventArgs>? WallItemUpdated;
-    protected virtual void OnWallItemUpdated(IWallItem previousItem, IWallItem updatedItem)
+    public event Action<WallItemUpdatedEventArgs>? WallItemUpdated;
+    private void OnWallItemUpdated(IWallItem previousItem, IWallItem updatedItem)
     {
         _logger.LogTrace("Wall item updated. (id:{id})", updatedItem.Id);
-        WallItemUpdated?.Invoke(this, new WallItemUpdatedEventArgs(previousItem, updatedItem));
+        WallItemUpdated?.Invoke(new WallItemUpdatedEventArgs(previousItem, updatedItem));
     }
 
     /// <summary>
     /// Invoked when a wall item is removed from the room.
     /// </summary>
-    public event EventHandler<WallItemEventArgs>? WallItemRemoved;
-    protected virtual void OnWallItemRemoved(IWallItem item)
+    public event Action<WallItemEventArgs>? WallItemRemoved;
+    private void OnWallItemRemoved(IWallItem item)
     {
         _logger.LogTrace("Wall item removed. (id:{id})", item.Id);
-        WallItemRemoved?.Invoke(this, new WallItemEventArgs(item));
+        WallItemRemoved?.Invoke(new WallItemEventArgs(item));
     }
 
     /// <summary>
     /// Invoked when a furni's visibility is toggled using <see cref="HideFurni(IFurni)"/> or <see cref="ShowFurni(IFurni)"/>.
     /// </summary>
-    public event EventHandler<FurniEventArgs>? FurniVisibilityToggled;
-    protected virtual void OnFurniVisibilityToggled(IFurni furni)
+    public event Action<FurniEventArgs>? FurniVisibilityToggled;
+    private void OnFurniVisibilityToggled(IFurni furni)
     {
-        FurniVisibilityToggled?.Invoke(this, new FurniEventArgs(furni));
+        FurniVisibilityToggled?.Invoke(new FurniEventArgs(furni));
     }
     #endregion
 
@@ -336,59 +340,59 @@ public class RoomManager : GameStateManager
     /// <summary>
     /// Invoked when an entity has been added to the room.
     /// </summary>
-    public event EventHandler<EntityEventArgs>? EntityAdded;
-    protected virtual void OnEntityAdded(IEntity entity)
+    public event Action<EntityEventArgs>? EntityAdded;
+    private void OnEntityAdded(IEntity entity)
     {
-        EntityAdded?.Invoke(this, new EntityEventArgs(entity));
+        EntityAdded?.Invoke(new EntityEventArgs(entity));
     }
 
     /// <summary>
     /// Invoked when entities have been added to the room.
     /// </summary>
-    public event EventHandler<EntitiesEventArgs>? EntitiesAdded;
-    protected virtual void OnEntitiesAdded(IEnumerable<IEntity> entities)
+    public event Action<EntitiesEventArgs>? EntitiesAdded;
+    private void OnEntitiesAdded(IEnumerable<IEntity> entities)
     {
         _logger.LogTrace("Entities added. ({n})", entities.Count());
-        EntitiesAdded?.Invoke(this, new EntitiesEventArgs(entities));
+        EntitiesAdded?.Invoke(new EntitiesEventArgs(entities));
     }
 
     /// <summary>
     /// Invoked when an entity in the room is updated.
     /// </summary>
-    public event EventHandler<EntityEventArgs>? EntityUpdated;
-    protected virtual void OnEntityUpdated(IEntity entity)
+    public event Action<EntityEventArgs>? EntityUpdated;
+    private void OnEntityUpdated(IEntity entity)
     {
-        EntityUpdated?.Invoke(this, new EntityEventArgs(entity));
+        EntityUpdated?.Invoke(new EntityEventArgs(entity));
     }
 
     /// <summary>
     /// Invoked when entities in the room are updated.
     /// </summary>
-    public event EventHandler<EntitiesEventArgs>? EntitiesUpdated;
-    protected virtual void OnEntitiesUpdated(IEnumerable<IEntity> entities)
+    public event Action<EntitiesEventArgs>? EntitiesUpdated;
+    private void OnEntitiesUpdated(IEnumerable<IEntity> entities)
     {
         _logger.LogTrace("Entities updated. ({n})", entities.Count());
-        EntitiesUpdated?.Invoke(this, new EntitiesEventArgs(entities));
+        EntitiesUpdated?.Invoke(new EntitiesEventArgs(entities));
     }
 
     /// <summary>
     /// Invoked when an entity slides along a roller.
     /// </summary>
-    public event EventHandler<EntitySlideEventArgs>? EntitySlide;
-    protected virtual void OnEntitySlide(IEntity entity, Tile previousTile)
+    public event Action<EntitySlideEventArgs>? EntitySlide;
+    private void OnEntitySlide(IEntity entity, Tile previousTile)
     {
         _logger.LogTrace(
             "Entity slide. ({entityName} [{entityId}:{entityIndex}], {from} -> {to})",
             entity.Name, entity.Id, entity.Index, previousTile, entity.Location
         );
-        EntitySlide?.Invoke(this, new EntitySlideEventArgs(entity, previousTile));
+        EntitySlide?.Invoke(new EntitySlideEventArgs(entity, previousTile));
     }
 
     /// <summary>
     /// Invoked when an entity's figure, gender, motto or achievement score is updated.
     /// </summary>
-    public event EventHandler<EntityDataUpdatedEventArgs>? EntityDataUpdated;
-    protected virtual void OnEntityDataUpdated(IEntity entity,
+    public event Action<EntityDataUpdatedEventArgs>? EntityDataUpdated;
+    private void OnEntityDataUpdated(IEntity entity,
         string previousFigure, Gender previousGender,
         string previousMotto, int previousAchievementScore)
     {
@@ -396,7 +400,7 @@ public class RoomManager : GameStateManager
             "Entity data updated. ({name} [{id}:{index}])",
             entity.Name, entity.Id, entity.Index
         );
-        EntityDataUpdated?.Invoke(this, new EntityDataUpdatedEventArgs(
+        EntityDataUpdated?.Invoke(new EntityDataUpdatedEventArgs(
             entity, previousFigure, previousGender,
             previousMotto, previousAchievementScore
         ));
@@ -405,118 +409,118 @@ public class RoomManager : GameStateManager
     /// <summary>
     /// Invoked when an entity's name changes.
     /// </summary>
-    public event EventHandler<EntityNameChangedEventArgs>? EntityNameChanged;
-    protected virtual void OnEntityNameChanged(IEntity entity, string previousName)
+    public event Action<EntityNameChangedEventArgs>? EntityNameChanged;
+    private void OnEntityNameChanged(IEntity entity, string previousName)
     {
         _logger.LogTrace(
             "Entity name changed. ({previousName} -> {entityName} [{entityId}:{entityIndex}])",
             previousName, entity.Name, entity.Id, entity.Index
         );
-        EntityNameChanged?.Invoke(this, new EntityNameChangedEventArgs(entity, previousName));
+        EntityNameChanged?.Invoke(new EntityNameChangedEventArgs(entity, previousName));
     }
 
     /// <summary>
     /// Invoked when an entity's idle status updates.
     /// </summary>
-    public event EventHandler<EntityIdleEventArgs>? EntityIdle;
-    protected virtual void OnEntityIdle(IEntity entity, bool wasIdle)
+    public event Action<EntityIdleEventArgs>? EntityIdle;
+    private void OnEntityIdle(IEntity entity, bool wasIdle)
     {
         _logger.LogTrace(
             "Entity idle. ({entityName} [{entityId}:{entityIndex}], {wasIdle} -> {isIdle})",
             entity.Name, entity.Id, entity.Index, wasIdle, entity.IsIdle
         );
-        EntityIdle?.Invoke(this, new EntityIdleEventArgs(entity, wasIdle));
+        EntityIdle?.Invoke(new EntityIdleEventArgs(entity, wasIdle));
     }
 
     /// <summary>
     /// Invoked when an entity's dance updates.
     /// </summary>
-    public event EventHandler<EntityDanceEventArgs>? EntityDance;
-    protected virtual void OnEntityDance(IEntity entity, int previousDance)
+    public event Action<EntityDanceEventArgs>? EntityDance;
+    private void OnEntityDance(IEntity entity, int previousDance)
     {
         _logger.LogTrace(
             "Entity dance. ({entityName} [{entityId}:{entityIndex}], {previousDance} -> {dance})",
             entity.Name, entity.Id, entity.Index, previousDance, entity.Dance
         );
-        EntityDance?.Invoke(this, new EntityDanceEventArgs(entity, previousDance));
+        EntityDance?.Invoke(new EntityDanceEventArgs(entity, previousDance));
     }
 
     /// <summary>
     /// Invoked when an entity's hand item updates.
     /// </summary>
-    public event EventHandler<EntityHandItemEventArgs>? EntityHandItem;
-    protected virtual void OnEntityHandItem(IEntity entity, int previousItem)
+    public event Action<EntityHandItemEventArgs>? EntityHandItem;
+    private void OnEntityHandItem(IEntity entity, int previousItem)
     {
         _logger.LogTrace(
             "Entity hand item. ({entityName} [{entityId}:{entityIndex}], {previousItemId} -> {itemId})",
             entity.Name, entity.Id, entity.Index, previousItem, entity.HandItem
         );
-        EntityHandItem?.Invoke(this, new EntityHandItemEventArgs(entity, previousItem));
+        EntityHandItem?.Invoke(new EntityHandItemEventArgs(entity, previousItem));
     }
 
     /// <summary>
     /// Invoked when an entity's effect updates.
     /// </summary>
-    public event EventHandler<EntityEffectEventArgs>? EntityEffect;
-    protected virtual void OnEntityEffect(IEntity entity, int previousEffect)
+    public event Action<EntityEffectEventArgs>? EntityEffect;
+    private void OnEntityEffect(IEntity entity, int previousEffect)
     {
         _logger.LogTrace(
             "Entity effect. ({entityName} [{entityId}:{entityIndex}], {previousEffect} -> {effect})",
             entity.Name, entity.Id, entity.Index, previousEffect, entity.Effect
         );
-        EntityEffect?.Invoke(this, new EntityEffectEventArgs(entity, previousEffect));
+        EntityEffect?.Invoke(new EntityEffectEventArgs(entity, previousEffect));
     }
 
     /// <summary>
     /// Invoked when an entity performs an action.
     /// </summary>
-    public event EventHandler<EntityActionEventArgs>? EntityAction;
-    protected virtual void OnEntityAction(IEntity entity, Actions action)
+    public event Action<EntityActionEventArgs>? EntityAction;
+    private void OnEntityAction(IEntity entity, Actions action)
     {
         _logger.LogTrace(
             "Entity action. ({entityName} [{entityId}:{entityIndex}], action:{action})",
             entity.Name, entity.Id, entity.Index, action
         );
-        EntityAction?.Invoke(this, new EntityActionEventArgs(entity, action));
+        EntityAction?.Invoke(new EntityActionEventArgs(entity, action));
     }
 
     /// <summary>
     /// Invoked when an entity's typing status updates.
     /// </summary>
-    public event EventHandler<EntityTypingEventArgs>? EntityTyping;
-    protected virtual void OnEntityTyping(IEntity entity, bool wasTyping)
+    public event Action<EntityTypingEventArgs>? EntityTyping;
+    private void OnEntityTyping(IEntity entity, bool wasTyping)
     {
         _logger.LogTrace(
             "Entity typing. ({entityName} [{entityId}:{entityIndex}], {wasTyping} -> {isTyping})",
             entity.Name, entity.Id, entity.Index, wasTyping, entity.IsTyping
         );
-        EntityTyping?.Invoke(this, new EntityTypingEventArgs(entity, wasTyping));
+        EntityTyping?.Invoke(new EntityTypingEventArgs(entity, wasTyping));
     }
 
     /// <summary>
     /// Invoked when an entity is removed from the room.
     /// </summary>
-    public event EventHandler<EntityEventArgs>? EntityRemoved;
-    protected virtual void OnEntityRemoved(IEntity entity)
+    public event Action<EntityEventArgs>? EntityRemoved;
+    private void OnEntityRemoved(IEntity entity)
     {
         _logger.LogTrace(
             "Entity removed. ({entityName} [{entityId}:{entityIndex}])",
             entity.Name, entity.Id, entity.Index
         );
-        EntityRemoved?.Invoke(this, new EntityEventArgs(entity));
+        EntityRemoved?.Invoke(new EntityEventArgs(entity));
     }
 
     /// <summary>
     /// Invoked when an entity in the room talks.
     /// </summary>
-    public event EventHandler<EntityChatEventArgs>? EntityChat;
-    protected virtual void OnEntityChat(EntityChatEventArgs e)
+    public event Action<EntityChatEventArgs>? EntityChat;
+    private void OnEntityChat(EntityChatEventArgs e)
     {
         _logger.LogTrace(
             "{type}:{bubble} {entity} {message}",
             e.ChatType, e.BubbleStyle, e.Entity, e.Message
         );
-        EntityChat?.Invoke(this, e);
+        EntityChat?.Invoke(e);
     }
     #endregion
 
@@ -571,14 +575,14 @@ public class RoomManager : GameStateManager
             ModerationPermissions.OwnerOnly => IsOwner,
             ModerationPermissions.GroupAdmins => RightsLevel >= 3,
             ModerationPermissions.RightsHolders or
-            (ModerationPermissions.GroupAdmins | ModerationPermissions.RightsHolders) 
+            (ModerationPermissions.GroupAdmins | ModerationPermissions.RightsHolders)
                 => RightsLevel > 0,
             ModerationPermissions.AllUsers => true,
             _ => false,
         };
     }
 
-    private bool SetFurniHidden(ItemType type, long id, bool hide)
+    private bool SetFurniHidden(ItemType type, Id id, bool hide)
     {
         if (_currentRoom is null) return false;
 
@@ -625,39 +629,39 @@ public class RoomManager : GameStateManager
         {
             if (furni.Type == ItemType.Floor)
             {
-                if (Extension.Client == ClientType.Unity)
-                    Extension.Send(In.ActiveObjectRemove, furni.Id, false, -1L, 0);
+                if (Ext.Session.IsUnity)
+                    Ext.Send(In.ObjectRemove, furni.Id, false, -1L, 0);
                 else
-                    Extension.Send(In.ActiveObjectRemove, furni.Id.ToString(), false, -1, 0);
+                    Ext.Send(In.ObjectRemove, furni.Id.ToString(), false, -1, 0);
             }
             else if (furni.Type == ItemType.Wall)
             {
-                if (Extension.Client == ClientType.Unity)
-                    Extension.Send(In.RemoveItem, furni.Id, -1L);
+                if (Ext.Session.IsUnity)
+                    Ext.Send(In.ItemRemove, furni.Id, -1L);
                 else
-                    Extension.Send(In.RemoveItem, furni.Id.ToString(), -1);
+                    Ext.Send(In.ItemRemove, furni.Id.ToString(), -1);
             }
         }
         else
         {
-            Extension.Send(furni.Type == ItemType.Floor ? In.ActiveObjectAdd : In.AddItem, furni);
+            Ext.Send(furni.IsFloorItem ? In.ObjectAdd : In.ItemAdd, furni);
         }
 
         OnFurniVisibilityToggled(furni);
         return true;
     }
 
-    public bool ShowFurni(ItemType type, long id) => SetFurniHidden(type, id, false);
-    public bool HideFurni(ItemType type, long id) => SetFurniHidden(type, id, true);
+    public bool ShowFurni(ItemType type, Id id) => SetFurniHidden(type, id, false);
+    public bool HideFurni(ItemType type, Id id) => SetFurniHidden(type, id, true);
 
     public bool ShowFurni(IFurni furni) => SetFurniHidden(furni.Type, furni.Id, false);
     public bool HideFurni(IFurni furni) => SetFurniHidden(furni.Type, furni.Id, true);
 
-    #region - Room packet handlers -
-    [Receive(nameof(Incoming.GetGuestRoomResult))]
-    private void HandleGetGuestRoomResult(IReadOnlyPacket packet)
+    #region - Room e.Packet handlers -
+    [InterceptIn(nameof(In.GetGuestRoomResult))]
+    private void HandleGetGuestRoomResult(Intercept e)
     {
-        var roomData = RoomData.Parse(packet);
+        var roomData = e.Packet.Parse<RoomData>();
 
         if (!_roomDataCache.ContainsKey(roomData.Id))
         {
@@ -691,8 +695,8 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [Receive(nameof(Incoming.OpenConnectionConfirmation))]
-    private void HandleOpenConnectionConfirmation(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.OpenConnection))]
+    private void HandleOpenConnection(Intercept e)
     {
         if (IsInQueue || IsRingingDoorbell || IsLoadingRoom || IsInRoom)
         {
@@ -700,7 +704,7 @@ public class RoomManager : GameStateManager
             OnLeftRoom();
         }
 
-        long roomId = packet.ReadLegacyLong();
+        long roomId = e.Packet.Read<Id>();
         CurrentRoomId = roomId;
 
         if (_roomDataCache.TryGetValue(roomId, out RoomData? data))
@@ -716,22 +720,22 @@ public class RoomManager : GameStateManager
         _currentRoom = new Room(roomId, data!);
     }
 
-    [Receive(nameof(Incoming.RoomQueueStatus))]
-    private void HandleRoomQueueStatus(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.RoomQueueStatus))]
+    private void HandleRoomQueueStatus(Intercept e)
     {
-        long roomId = packet.ReadLegacyLong();
+        long roomId = e.Packet.Read<Id>();
         if (roomId != _currentRoom?.Id) return;
 
-        if (packet.ReadShort() == 2 &&
-            packet.ReadString() == "visitors" &&
-            packet.ReadInt() == 2 &&
-            packet.ReadShort() == 1 &&
-            packet.ReadString() == "visitors")
+        if (e.Packet.Read<short>() == 2 &&
+            e.Packet.Read<string>() == "visitors" &&
+            e.Packet.Read<int>() == 2 &&
+            e.Packet.Read<short>() == 1 &&
+            e.Packet.Read<string>() == "visitors")
         {
             bool enteredQueue = !IsInQueue;
 
             IsInQueue = true;
-            QueuePosition = packet.ReadInt() + 1;
+            QueuePosition = e.Packet.Read<int>() + 1;
 
             if (enteredQueue)
             {
@@ -744,8 +748,8 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [Receive(nameof(Incoming.YouAreSpectator))]
-    private void HandleYouAreSpectator(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.YouAreSpectator))]
+    private void HandleYouAreSpectator(Intercept e)
     {
         if (!IsLoadingRoom)
         {
@@ -759,7 +763,7 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        long roomId = packet.ReadLegacyLong();
+        long roomId = e.Packet.Read<Id>();
         if (roomId != _currentRoom.Id)
         {
             _logger.LogError("Room ID mismatch.");
@@ -769,8 +773,8 @@ public class RoomManager : GameStateManager
         IsSpectating = true;
     }
 
-    [Receive(nameof(Incoming.RoomReady))]
-    private void HandleRoomReady(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.RoomReady))]
+    private void HandleRoomReady(Intercept e)
     {
         if (IsInQueue)
         {
@@ -783,8 +787,8 @@ public class RoomManager : GameStateManager
             OnLeftRoom();
         }
 
-        string model = packet.ReadString();
-        long roomId = packet.ReadLegacyLong();
+        string model = e.Packet.Read<string>();
+        long roomId = e.Packet.Read<Id>();
         CurrentRoomId = roomId;
 
         if (_currentRoom is null ||
@@ -809,23 +813,23 @@ public class RoomManager : GameStateManager
         OnEnteringRoom(roomId);
     }
 
-    [Receive(nameof(Incoming.FlatProperty))]
-    private void HandleFlatProperty(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.RoomProperty))]
+    private void HandleRoomProperty(Intercept e)
     {
         if (!IsLoadingRoom)
         {
-            _logger.LogWarning($"[{nameof(HandleFlatProperty)}] Not loading room!");
+            _logger.LogWarning($"[{nameof(HandleRoomProperty)}] Not loading room!");
             return;
         }
 
-        if (_currentRoom is null) 
+        if (_currentRoom is null)
         {
-            _logger.LogTrace($"[{nameof(HandleFlatProperty)}] Current room is null.");
+            _logger.LogTrace($"[{nameof(HandleRoomProperty)}] Current room is null.");
             return;
         }
 
-        string key = packet.ReadString();
-        string value = packet.ReadString();
+        string key = e.Packet.Read<string>();
+        string value = e.Packet.Read<string>();
         switch (key)
         {
             case "floor": _currentRoom.Floor = value; break;
@@ -840,39 +844,39 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [Receive(nameof(Incoming.YouAreController))]
-    private void HandleYouAreController(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.YouAreController))]
+    private void HandleYouAreController(Intercept e)
     {
-        if (_currentRoom is null) 
+        if (_currentRoom is null)
         {
             _logger.LogTrace($"[{nameof(HandleYouAreController)}] Current room is null.");
             return;
         }
 
-        long roomId = packet.ReadLegacyLong();
-        if (roomId != _currentRoom.Id) 
+        long roomId = e.Packet.Read<Id>();
+        if (roomId != _currentRoom.Id)
         {
             _logger.LogWarning($"[{nameof(HandleYouAreController)}] Room ID mismatch!");
             return;
         }
 
-        RightsLevel = packet.ReadInt();
+        RightsLevel = e.Packet.Read<int>();
         OnRightsUpdated();
     }
 
-    [Receive(nameof(Incoming.YouAreNotController))]
-    private void HandleRoomNoRights(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.YouAreNotController))]
+    private void HandleYouAreNotController(Intercept e)
     {
-        if (_currentRoom is null) 
+        if (_currentRoom is null)
         {
-            _logger.LogTrace($"[{nameof(HandleRoomNoRights)}] Current room is null.");
+            _logger.LogTrace($"[{nameof(HandleYouAreNotController)}] Current room is null.");
             return;
         }
 
-        long roomId = packet.ReadLegacyLong();
-        if (roomId != _currentRoom.Id) 
+        long roomId = e.Packet.Read<Id>();
+        if (roomId != _currentRoom.Id)
         {
-            _logger.LogWarning($"[{nameof(HandleRoomNoRights)}] Room ID mismatch!");
+            _logger.LogWarning($"[{nameof(HandleYouAreNotController)}] Room ID mismatch!");
             return;
         }
 
@@ -880,24 +884,24 @@ public class RoomManager : GameStateManager
         OnRightsUpdated();
     }
 
-    [Receive(nameof(Incoming.RoomEntryTile))]
-    private void HandleRoomEntryTile(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.RoomEntryTile))]
+    private void HandleRoomEntryTile(Intercept e)
     {
-        if (!IsLoadingRoom) 
+        if (!IsLoadingRoom)
         {
             _logger.LogWarning($"[{nameof(HandleRoomEntryTile)}] Not loading room!");
             return;
         }
 
-        if (_currentRoom is null) 
+        if (_currentRoom is null)
         {
             _logger.LogTrace($"[{nameof(HandleRoomEntryTile)}] Current room is null.");
             return;
         }
 
-        int x = packet.ReadInt();
-        int y = packet.ReadInt();
-        int dir = packet.ReadInt();
+        int x = e.Packet.Read<int>();
+        int y = e.Packet.Read<int>();
+        int dir = e.Packet.Read<int>();
 
         _currentRoom.DoorTile = new Tile(x, y, 0);
         _currentRoom.EntryDirection = dir;
@@ -905,51 +909,51 @@ public class RoomManager : GameStateManager
         _logger.LogTrace("Received room entry tile. (x:{x}, y:{y}, dir: {dir})", x, y, dir);
     }
 
-    [Receive(nameof(Incoming.StackingHeightmap))]
-    private void HandleStackingHeightmap(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.HeightMap))]
+    private void HandleHeightMap(Intercept e)
     {
-        if (!IsLoadingRoom) 
+        if (!IsLoadingRoom)
         {
-            _logger.LogWarning($"[{nameof(HandleStackingHeightmap)}] Not loading room!");
+            _logger.LogWarning($"[{nameof(HandleHeightMap)}] Not loading room!");
             return;
         }
 
-        if (_currentRoom is null) 
+        if (_currentRoom is null)
         {
-            _logger.LogTrace($"[{nameof(HandleStackingHeightmap)}] Current room is null.");
+            _logger.LogTrace($"[{nameof(HandleHeightMap)}] Current room is null.");
             return;
         }
 
-        Heightmap heightmap = Heightmap.Parse(packet);
+        Heightmap heightmap = e.Packet.Parse<Heightmap>();
         _currentRoom.Heightmap = heightmap;
 
         _logger.LogTrace("Received stacking heightmap. (size:{width}x{length})", heightmap.Width, heightmap.Length);
     }
 
-    [Receive(nameof(Incoming.StackingHeightmapDiff))]
-    private void HandleStackingHeightmapDiff(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.HeightMapUpdate))]
+    private void HandleHeightMapUpdate(Intercept e)
     {
         if (_currentRoom is null)
         {
-            _logger.LogTrace($"[{nameof(HandleStackingHeightmapDiff)}] Current room is null.");
+            _logger.LogTrace($"[{nameof(HandleHeightMapUpdate)}] Current room is null.");
             return;
         }
 
         if (_currentRoom.Heightmap is null) return;
 
-        int n = packet.ReadByte();
+        int n = e.Packet.Read<byte>();
         for (int i = 0; i < n; i++)
         {
-            int x = packet.ReadByte();
-            int y = packet.ReadByte();
-            _currentRoom.Heightmap[x, y].Update(packet.ReadShort());
+            int x = e.Packet.Read<byte>();
+            int y = e.Packet.Read<byte>();
+            _currentRoom.Heightmap[x, y].Update(e.Packet.Read<short>());
         }
 
         _logger.LogTrace("Received stacking heightmap diff. ({n} change(s))", n);
     }
 
-    [Receive(nameof(Incoming.FloorHeightmap))]
-    private void HandleFloorHeightmap(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.FloorHeightMap))]
+    private void HandleFloorHeightmap(Intercept e)
     {
         if (!IsLoadingRoom)
         {
@@ -957,48 +961,48 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        if (_currentRoom is null) 
+        if (_currentRoom is null)
         {
             _logger.LogTrace($"[{nameof(HandleFloorHeightmap)}] Current room is null.");
             return;
         }
 
-        FloorPlan floorPlan = FloorPlan.Parse(packet);
+        FloorPlan floorPlan = e.Packet.Read<FloorPlan>();
         _currentRoom.FloorPlan = floorPlan;
 
         _logger.LogTrace("Received floor heightmap. (size:{width}x{length})", floorPlan.Width, floorPlan.Length);
     }
 
-    [Receive(nameof(Incoming.RoomVisualizationSettings))]
-    private void HandleRoomVisualizationSettings(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.RoomVisualizationSettings))]
+    private void HandleRoomVisualizationSettings(Intercept e)
     {
         if (_currentRoom is null)
         {
             return;
         }
 
-        _currentRoom.HideWalls = packet.ReadBool();
-        _currentRoom.WallThickness = (Thickness)packet.ReadInt();
-        _currentRoom.FloorThickness = (Thickness)packet.ReadInt();
+        _currentRoom.HideWalls = e.Packet.Read<bool>();
+        _currentRoom.WallThickness = (Thickness)e.Packet.Read<int>();
+        _currentRoom.FloorThickness = (Thickness)e.Packet.Read<int>();
 
         // TODO event
     }
 
-    [Receive(nameof(Incoming.RoomChatSettings))]
-    private void HandleRoomChatSettings(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.RoomChatSettings))]
+    private void HandleRoomChatSettings(Intercept e)
     {
         if (_currentRoom is null)
         {
             return;
         }
 
-        _currentRoom.Data.ChatSettings = ChatSettings.Parse(packet);
+        _currentRoom.Data.ChatSettings = e.Packet.Parse<ChatSettings>();
 
         OnRoomDataUpdated(_currentRoom.Data);
     }
 
-    [Receive(nameof(Incoming.RoomEntryInfo))]
-    private void HandleRoomEntryInfo(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.RoomEntryInfo))]
+    private void HandleRoomEntryInfo(Intercept e)
     {
         if (!IsLoadingRoom)
         {
@@ -1006,7 +1010,7 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        long roomId = packet.ReadLegacyLong();
+        long roomId = e.Packet.Read<Id>();
         if (roomId != _currentRoom?.Id)
         {
             _logger.LogWarning(
@@ -1023,7 +1027,7 @@ public class RoomManager : GameStateManager
             _currentRoom.Data = roomData;
         }
 
-        IsOwner = packet.ReadBool();
+        IsOwner = e.Packet.Read<bool>();
         IsLoadingRoom = false;
         IsInRoom = true;
         Room = _currentRoom;
@@ -1031,10 +1035,10 @@ public class RoomManager : GameStateManager
         OnEnteredRoom(_currentRoom);
     }
 
-    [Receive(nameof(Incoming.CloseConnection))]
-    private void HandleCloseConnection(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.CloseConnection))]
+    private void HandleCloseConnection(Intercept e)
     {
-        if (_currentRoom is null) 
+        if (_currentRoom is null)
         {
             _logger.LogWarning($"[{nameof(HandleCloseConnection)}] Current room is null.");
             return;
@@ -1047,20 +1051,20 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [Receive(nameof(Incoming.Error))]
-    private void HandleError(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.ErrorReport))]
+    private void HandleErrorReport(Intercept e)
     {
         if (!IsInRoom) return;
 
-        GenericErrorCode errorCode = (GenericErrorCode)packet.ReadInt();
+        GenericErrorCode errorCode = (GenericErrorCode)e.Packet.Read<int>();
         if (errorCode == GenericErrorCode.Kicked)
             OnKicked();
     }
     #endregion
 
-    #region - Floor item packet handlers -
-    [Receive(nameof(Incoming.ActiveObjects))]
-    protected void HandleActiveObjects(IReadOnlyPacket packet)
+    #region - Floor item handlers -
+    [InterceptIn("f:"+nameof(In.Objects))]
+    private void HandleActiveObjects(Intercept e)
     {
         if (!IsLoadingRoom)
         {
@@ -1074,9 +1078,9 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        List<FloorItem> newItems = new List<FloorItem>();
+        List<FloorItem> newItems = [];
 
-        FloorItem[] items = FloorItem.ParseAll(packet);
+        FloorItem[] items = e.Packet.ParseAll<FloorItem>();
         foreach (FloorItem item in items)
         {
             if (_currentRoom.FloorItems.TryAdd(item.Id, item))
@@ -1095,22 +1099,22 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [Receive(nameof(Incoming.ActiveObjectAdd))]
-    protected void HandleAddFloorItem(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.ObjectAdd))]
+    private void HandleObjectAdd(Intercept e)
     {
         if (!IsInRoom)
         {
-            _logger.LogDebug($"[{nameof(HandleAddFloorItem)}] Not in room.");
+            _logger.LogDebug($"[{nameof(HandleObjectAdd)}] Not in room.");
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning($"[{nameof(HandleAddFloorItem)}] Current room is null.");
+            _logger.LogWarning($"[{nameof(HandleObjectAdd)}] Current room is null.");
             return;
         }
 
-        FloorItem item = FloorItem.Parse(packet);
+        FloorItem item = e.Packet.Parse<FloorItem>();
 
         if (_currentRoom.FloorItems.TryAdd(item.Id, item))
         {
@@ -1118,12 +1122,12 @@ public class RoomManager : GameStateManager
         }
         else
         {
-            _logger.LogError($"[{nameof(HandleAddFloorItem)}] Failed to add floor item {{itemId}}.", item.Id);
+            _logger.LogError($"[{nameof(HandleObjectAdd)}] Failed to add floor item {{itemId}}.", item.Id);
         }
     }
 
-    [Receive(nameof(Incoming.ActiveObjectRemove))]
-    protected void HandleActiveObjectRemove(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.ObjectRemove))]
+    private void HandleObjectRemove(Intercept e)
     {
         /*
             long id
@@ -1134,20 +1138,20 @@ public class RoomManager : GameStateManager
 
         if (!IsInRoom)
         {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleActiveObjectRemove));
+            _logger.LogDebug("[{method}] Not in room.", nameof(HandleObjectRemove));
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleActiveObjectRemove));
+            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleObjectRemove));
             return;
         }
 
-        long id = packet.Protocol switch
+        long id = e.Packet.Client switch
         {
-            ClientType.Flash => long.Parse(packet.ReadString()),
-            ClientType.Unity => packet.ReadLong(),
+            ClientType.Flash => long.Parse(e.Packet.Read<string>()),
+            ClientType.Unity => e.Packet.Read<long>(),
             _ => throw new InvalidOperationException("Unknown protocol type")
         };
 
@@ -1157,26 +1161,26 @@ public class RoomManager : GameStateManager
         }
         else
         {
-            _logger.LogError("[{method}] Failed to remove item {id} from the dictionary", nameof(HandleActiveObjectRemove), id);
+            _logger.LogError("[{method}] Failed to remove item {id} from the dictionary", nameof(HandleObjectRemove), id);
         }
     }
 
-    [Receive(nameof(Incoming.ActiveObjectUpdate))]
-    protected void HandleActiveObjectUpdate(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.ObjectUpdate))]
+    private void HandleObjectUpdate(Intercept e)
     {
         if (!IsInRoom)
         {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleActiveObjectUpdate));
+            _logger.LogDebug("[{method}] Not in room.", nameof(HandleObjectUpdate));
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleActiveObjectUpdate));
+            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleObjectUpdate));
             return;
         }
 
-        var updatedItem = FloorItem.Parse(packet);
+        var updatedItem = e.Packet.Parse<FloorItem>();
 
         if (_currentRoom.FloorItems.TryGetValue(updatedItem.Id, out FloorItem? previousItem))
         {
@@ -1189,31 +1193,31 @@ public class RoomManager : GameStateManager
             }
             else
             {
-                _logger.LogError("[{method}] Failed to update floor item {itemId}", nameof(HandleActiveObjectUpdate), updatedItem.Id);
+                _logger.LogError("[{method}] Failed to update floor item {itemId}", nameof(HandleObjectUpdate), updatedItem.Id);
             }
         }
         else
         {
-            _logger.LogError("[{method}] Failed to find floor item {itemId} to update", nameof(HandleActiveObjectUpdate), updatedItem.Id);
+            _logger.LogError("[{method}] Failed to find floor item {itemId} to update", nameof(HandleObjectUpdate), updatedItem.Id);
         }
     }
 
-    [Receive(nameof(Incoming.QueueMoveUpdate))]
-    protected void HandleObjectOnRoller(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.SlideObjectBundle))]
+    private void HandleSlideObjectBundleObject(Intercept e)
     {
         if (!IsInRoom)
         {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleObjectOnRoller));
+            _logger.LogDebug("[{method}] Not in room.", nameof(HandleSlideObjectBundleObject));
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleObjectOnRoller));
+            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleSlideObjectBundleObject));
             return;
         }
 
-        RollerUpdate rollerUpdate = RollerUpdate.Parse(packet);
+        RollerUpdate rollerUpdate = e.Packet.Parse<RollerUpdate>();
         foreach (RollerObjectUpdate objectUpdate in rollerUpdate.ObjectUpdates)
         {
             if (_currentRoom.FloorItems.TryGetValue(objectUpdate.Id, out FloorItem? item))
@@ -1224,68 +1228,68 @@ public class RoomManager : GameStateManager
             }
             else
             {
-                _logger.LogError("[{method}] Failed to find floor item {itemId} to update.", nameof(HandleObjectOnRoller), objectUpdate.Id);
+                _logger.LogError("[{method}] Failed to find floor item {itemId} to update.", nameof(HandleSlideObjectBundleObject), objectUpdate.Id);
             }
         }
     }
 
-    [Receive(nameof(Incoming.StuffDataUpdate))]
-    protected void HandleStuffDataUpdate(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.ObjectDataUpdate))]
+    private void HandleObjectDataUpdate(Intercept e)
     {
         if (!IsInRoom)
         {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleStuffDataUpdate));
+            _logger.LogDebug("[{method}] Not in room.", nameof(HandleObjectDataUpdate));
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleStuffDataUpdate));
+            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleObjectDataUpdate));
             return;
         }
 
-        long id = packet.Protocol switch
+        long id = e.Packet.Client switch
         {
-            ClientType.Flash => long.Parse(packet.ReadString()),
-            ClientType.Unity => packet.ReadLong(),
+            ClientType.Flash => long.Parse(e.Packet.Read<string>()),
+            ClientType.Unity => e.Packet.Read<long>(),
             _ => throw new InvalidOperationException("Unknown protocol.")
         };
 
         if (!_currentRoom.FloorItems.TryGetValue(id, out FloorItem? item))
         {
-            _logger.LogError("[{method}] Unable to find floor item {id} to update.", nameof(HandleStuffDataUpdate), id);
+            _logger.LogError("[{method}] Unable to find floor item {id} to update.", nameof(HandleObjectDataUpdate), id);
             return;
         }
 
         IItemData previousData = item.Data;
-        item.Data = ItemData.Parse(packet);
+        item.Data = e.Packet.Parse<ItemData>();
 
         OnFloorItemDataUpdated(item, previousData);
     }
 
-    [Receive(nameof(Incoming.MultipleStuffDataUpdate))]
-    protected void HandleItemsDataUpdate(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.ObjectsDataUpdate))]
+    private void HandleObjectsDataUpdate(Intercept e)
     {
         if (!IsInRoom)
         {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleItemsDataUpdate));
+            _logger.LogDebug("[{method}] Not in room.", nameof(HandleObjectsDataUpdate));
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleItemsDataUpdate));
+            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleObjectsDataUpdate));
             return;
         }
 
-        short n = packet.ReadLegacyShort();
+        int n = e.Packet.Read<Length>();
         for (int i = 0; i < n; i++)
         {
-            long itemId = packet.ReadLegacyLong();
-            ItemData data = ItemData.Parse(packet);
+            long itemId = e.Packet.Read<Id>();
+            ItemData data = e.Packet.Parse<ItemData>();
             if (!_currentRoom.FloorItems.TryGetValue(itemId, out FloorItem? item))
             {
-                _logger.LogError("[{method}] Failed to find floor item {id} to update.", itemId, nameof(HandleItemsDataUpdate));
+                _logger.LogError("[{method}] Failed to find floor item {id} to update.", itemId, nameof(HandleObjectsDataUpdate));
                 continue;
             }
 
@@ -1296,15 +1300,15 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [Receive(nameof(Incoming.DiceValue))]
-    protected void HandleDiceValue(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.DiceValue))]
+    private void HandleDiceValue(Intercept e)
     {
         if (!IsInRoom) return;
 
         if (_currentRoom is null) return;
 
-        long itemId = packet.ReadLegacyLong();
-        int diceValue = packet.ReadInt();
+        long itemId = e.Packet.Read<Id>();
+        int diceValue = e.Packet.Read<int>();
 
         if (!_currentRoom.FloorItems.TryGetValue(itemId, out FloorItem? item))
         {
@@ -1315,13 +1319,13 @@ public class RoomManager : GameStateManager
         int previousValue = item.Data.State;
         item.Data.Value = $"{diceValue}";
 
-        OnDiceUpdated(item, previousValue);
+        OnDiceUpdated(item, previousValue, diceValue);
     }
     #endregion
 
-    #region - Wall item packet handlers -
-    [Receive(nameof(Incoming.Items))]
-    protected void HandleItems(IReadOnlyPacket packet)
+    #region - Wall item handlers -
+    [InterceptIn(nameof(In.Items))]
+    private void HandleItems(Intercept e)
     {
         if (!IsLoadingRoom)
         {
@@ -1335,9 +1339,9 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        List<WallItem> newItems = new List<WallItem>();
+        List<WallItem> newItems = [];
 
-        WallItem[] items = WallItem.ParseAll(packet);
+        WallItem[] items = e.Packet.ParseAll<WallItem>();
         foreach (var item in items)
         {
             if (_currentRoom.WallItems.TryAdd(item.Id, item))
@@ -1356,8 +1360,8 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [Receive(nameof(Incoming.AddItem))]
-    protected void HandleAddItem(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.ItemAdd))]
+    private void HandleItemAdd(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1371,7 +1375,7 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        var item = WallItem.Parse(packet);
+        var item = e.Packet.Parse<WallItem>();
         if (_currentRoom.WallItems.TryAdd(item.Id, item))
         {
             OnWallItemAdded(item);
@@ -1382,8 +1386,8 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [Receive(nameof(Incoming.RemoveItem))]
-    protected void HandleRemoveItem(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.ItemRemove))]
+    private void HandleItemRemove(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1397,10 +1401,10 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        long id = packet.Protocol switch
+        long id = e.Packet.Client switch
         {
-            ClientType.Flash => long.Parse(packet.ReadString()),
-            ClientType.Unity => packet.ReadLong(),
+            ClientType.Flash => long.Parse(e.Packet.Read<string>()),
+            ClientType.Unity => e.Packet.Read<long>(),
             _ => throw new InvalidOperationException("Unknown protocol")
         };
         // long pickerId
@@ -1411,12 +1415,12 @@ public class RoomManager : GameStateManager
         }
         else
         {
-            DebugUtil.Log($"failed to remove item {id} from the dictionary");
+            Debug.Log($"failed to remove item {id} from the dictionary");
         }
     }
 
-    [Receive(nameof(Incoming.UpdateItem))]
-    protected void HandleUpdateItem(IReadOnlyPacket packet)
+    [InterceptIn(nameof(In.ItemUpdate))]
+    private void HandleItemUpdate(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1430,7 +1434,7 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        WallItem updatedItem = WallItem.Parse(packet);
+        WallItem updatedItem = e.Packet.Parse<WallItem>();
         WallItem? previousItem = null;
 
         updatedItem = _currentRoom.WallItems.AddOrUpdate(
@@ -1475,9 +1479,9 @@ public class RoomManager : GameStateManager
     }
     #endregion
 
-    #region - Entity packet handlers -
-    [InterceptIn(nameof(Incoming.UsersInRoom))]
-    private void HandleUsersInRoom(InterceptArgs e)
+    #region - Entity handlers -
+    [InterceptIn(nameof(In.Users))]
+    private void HandleUsers(Intercept e)
     {
         if (!IsLoadingRoom && !IsInRoom)
         {
@@ -1493,7 +1497,7 @@ public class RoomManager : GameStateManager
 
         List<Entity> newEntities = new List<Entity>();
 
-        foreach (Entity entity in Entity.ParseAll(e.Packet))
+        foreach (Entity entity in e.Packet.ParseAll<Entity>())
         {
             if (_currentRoom.Entities.TryAdd(entity.Index, entity))
             {
@@ -1512,8 +1516,8 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(Incoming.UserLoggedOut))]
-    private void HandleUserLoggedOut(InterceptArgs e)
+    [InterceptIn(nameof(In.UserRemove))]
+    private void HandleUserRemove(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1527,10 +1531,10 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.Protocol switch
+        int index = e.Packet.Client switch
         {
-            ClientType.Flash => int.Parse(e.Packet.ReadString()),
-            ClientType.Unity => e.Packet.ReadInt(),
+            ClientType.Flash => int.Parse(e.Packet.Read<string>()),
+            ClientType.Unity => e.Packet.Read<int>(),
             _ => throw new InvalidOperationException("Unknown protocol")
         };
 
@@ -1544,8 +1548,8 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(Incoming.Status))]
-    private void HandleStatus(InterceptArgs e)
+    [InterceptIn(nameof(In.UserUpdate))]
+    private void HandlerUserUpdate(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1561,10 +1565,10 @@ public class RoomManager : GameStateManager
 
         var updatedEntities = new List<IEntity>();
 
-        short n = e.Packet.ReadLegacyShort();
+        int n = e.Packet.Read<Length>();
         for (int i = 0; i < n; i++)
         {
-            EntityStatusUpdate update = EntityStatusUpdate.Parse(e.Packet);
+            EntityStatusUpdate update = e.Packet.Parse<EntityStatusUpdate>();
             if (!_currentRoom.Entities.TryGetValue(update.Index, out Entity? entity))
             {
                 _logger.LogError("Failed to find entity with index {index} to update", update.Index);
@@ -1580,8 +1584,8 @@ public class RoomManager : GameStateManager
         OnEntitiesUpdated(updatedEntities);
     }
 
-    [InterceptIn(nameof(Incoming.QueueMoveUpdate))]
-    private void HandleQueueMoveUpdate(InterceptArgs e)
+    [InterceptIn(nameof(In.SlideObjectBundle))]
+    private void HandleSlideObjectBundleEntity(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1595,7 +1599,7 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        RollerUpdate rollerUpdate = RollerUpdate.Parse(e.Packet);
+        RollerUpdate rollerUpdate = e.Packet.Parse<RollerUpdate>();
 
         if (rollerUpdate.Type == RollerUpdateType.MovingEntity ||
             rollerUpdate.Type == RollerUpdateType.StationaryEntity)
@@ -1613,17 +1617,17 @@ public class RoomManager : GameStateManager
             }
         }
     }
-    
-    [InterceptIn("WiredMovements")]
-    private void HandleWiredMovements(InterceptArgs e)
+
+    [InterceptIn(nameof(In.WiredMovements))]
+    private void HandleWiredMovements(Intercept e)
     {
         var room = _currentRoom;
 
-        int n = e.Packet.ReadInt();
+        int n = e.Packet.Read<int>();
         var movements = new WiredMovement[n];
         for (int i = 0; i < n; i++)
         {
-            var movement = movements[i] = WiredMovement.Parse(e.Packet);
+            var movement = movements[i] = e.Packet.Parse<WiredMovement>();
             if (room is null) continue;
             switch (movement) {
                 case UserWiredMovement m:
@@ -1644,12 +1648,12 @@ public class RoomManager : GameStateManager
         OnWiredMovements(movements);
     }
 
-    [InterceptIn(nameof(Incoming.UpdateAvatar))]
-    private void HandleUpdateAvatar(InterceptArgs e)
+    [InterceptIn(nameof(In.FigureUpdate))]
+    private void HandleFigureUpdate(Intercept e)
     {
         if (!IsInRoom)
         {
-            _logger.LogDebug("Not in room."); 
+            _logger.LogDebug("Not in room.");
             return;
         }
 
@@ -1659,7 +1663,7 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.ReadInt();
+        int index = e.Packet.Read<int>();
         if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
         {
             string previousFigure = entity.Figure;
@@ -1667,10 +1671,10 @@ public class RoomManager : GameStateManager
             string previousMotto = entity.Motto;
             int previousAchievementScore = 0;
 
-            string updatedFigure = e.Packet.ReadString();
-            Gender updatedGender = H.ToGender(e.Packet.ReadString());
-            string updatedMotto = e.Packet.ReadString();
-            int updatedAchievementScore = e.Packet.ReadInt();
+            string updatedFigure = e.Packet.Read<string>();
+            Gender updatedGender = H.ToGender(e.Packet.Read<string>());
+            string updatedMotto = e.Packet.Read<string>();
+            int updatedAchievementScore = e.Packet.Read<int>();
 
             entity.Figure = updatedFigure;
             entity.Motto = updatedMotto;
@@ -1705,8 +1709,8 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(Incoming.UserNameChanged))]
-    private void HandleUserNameChanged(InterceptArgs e)
+    [InterceptIn(nameof(In.UserNameChanged))]
+    private void HandleUserNameChanged(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1720,9 +1724,9 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        long id = e.Packet.ReadLegacyLong();
-        int index = e.Packet.ReadInt();
-        string newName = e.Packet.ReadString();
+        long id = e.Packet.Read<Id>();
+        int index = e.Packet.Read<int>();
+        string newName = e.Packet.Read<string>();
 
         if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
         {
@@ -1736,8 +1740,8 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(Incoming.RoomAvatarSleeping))]
-    private void HandleRoomAvatarSleeping(InterceptArgs e)
+    [InterceptIn(nameof(In.Sleep))]
+    private void HandleSleep(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1751,11 +1755,11 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.ReadInt();
+        int index = e.Packet.Read<int>();
         if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
         {
             bool wasIdle = entity.IsIdle;
-            entity.IsIdle = e.Packet.ReadBool();
+            entity.IsIdle = e.Packet.Read<bool>();
             OnEntityIdle(entity, wasIdle);
         }
         else
@@ -1764,8 +1768,8 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(Incoming.RoomDance))]
-    private void HandleRoomDance(InterceptArgs e)
+    [InterceptIn(nameof(In.Dance))]
+    private void HandleDance(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1779,11 +1783,11 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.ReadInt();
+        int index = e.Packet.Read<int>();
         if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
         {
             int previousDance = entity.Dance;
-            entity.Dance = e.Packet.ReadInt();
+            entity.Dance = e.Packet.Read<int>();
             OnEntityDance(entity, previousDance);
         }
         else
@@ -1793,8 +1797,8 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(Incoming.RoomExpression))]
-    private void HandleRoomExpression(InterceptArgs e)
+    [InterceptIn(nameof(In.Expression))]
+    private void HandleExpression(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1808,10 +1812,10 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.ReadInt();
+        int index = e.Packet.Read<int>();
         if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
         {
-            OnEntityAction(entity, (Actions)e.Packet.ReadInt());
+            OnEntityAction(entity, (Actions)e.Packet.Read<int>());
         }
         else
         {
@@ -1819,8 +1823,8 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(Incoming.RoomCarryObject))]
-    private void HandleRoomCarryObject(InterceptArgs e)
+    [InterceptIn(nameof(In.CarryObject))]
+    private void HandleCarryObject(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1834,11 +1838,11 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.ReadInt();
+        int index = e.Packet.Read<int>();
         if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
         {
             int previousItem = entity.HandItem;
-            entity.HandItem = e.Packet.ReadInt();
+            entity.HandItem = e.Packet.Read<int>();
             OnEntityHandItem(entity, previousItem);
         }
         else
@@ -1847,8 +1851,8 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(Incoming.RoomAvatarEffect))]
-    private void HandleRoomAvatarEffect(InterceptArgs e)
+    [InterceptIn(nameof(In.AvatarEffect))]
+    private void HandleAvatarEffect(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1862,12 +1866,12 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.ReadInt();
+        int index = e.Packet.Read<int>();
         // + int delay
         if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
         {
             int previousEffect = entity.Effect;
-            entity.Effect = e.Packet.ReadInt();
+            entity.Effect = e.Packet.Read<int>();
             OnEntityEffect(entity, previousEffect);
         }
         else
@@ -1876,8 +1880,8 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(Incoming.UserTypingStatusChange))]
-    private void HandleUserTypingStatusChange(InterceptArgs e)
+    [InterceptIn(nameof(In.UserTyping))]
+    private void HandleUserTyping(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1891,11 +1895,11 @@ public class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.ReadInt();
+        int index = e.Packet.Read<int>();
         if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
         {
             bool wasTyping = entity.IsTyping;
-            entity.IsTyping = e.Packet.ReadInt() != 0;
+            entity.IsTyping = e.Packet.Read<int>() != 0;
             OnEntityTyping(entity, wasTyping);
         }
         else
@@ -1904,8 +1908,8 @@ public class RoomManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(Incoming.Whisper), nameof(Incoming.Chat), nameof(Incoming.Shout))]
-    private void HandleChat(InterceptArgs e)
+    [InterceptIn(nameof(In.Whisper), nameof(In.Chat), nameof(In.Shout))]
+    private void HandleChat(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1921,25 +1925,25 @@ public class RoomManager : GameStateManager
 
         ChatType chatType;
 
-        if (e.Packet.Header == In.Whisper) chatType = ChatType.Whisper;
-        else if (e.Packet.Header == In.Chat) chatType = ChatType.Talk;
-        else if (e.Packet.Header == In.Shout) chatType = ChatType.Shout;
+        if (e.Is(In.Whisper)) chatType = ChatType.Whisper;
+        else if (e.Is(In.Chat)) chatType = ChatType.Talk;
+        else if (e.Is(In.Shout)) chatType = ChatType.Shout;
         else
         {
             _logger.LogError("Failed to detect chat type from header {header} !", e.Packet.Header);
             return;
         }
 
-        int index = e.Packet.ReadInt();
+        int index = e.Packet.Read<int>();
         if (!_currentRoom.Entities.TryGetValue(index, out Entity? entity))
         {
             _logger.LogError("Failed to find entity with index {index}.", index);
             return;
         }
 
-        string message = e.Packet.ReadString();
-        int expression = e.Packet.ReadInt();
-        int bubbleStyle = e.Packet.ReadInt();
+        string message = e.Packet.Read<string>();
+        int expression = e.Packet.Read<int>();
+        int bubbleStyle = e.Packet.Read<int>();
 
         // string? int
 
@@ -1952,29 +1956,29 @@ public class RoomManager : GameStateManager
 
     #region - Furni interaction -
     public void Place(long itemId, int x, int y, int direction)
-        => Extension.Send(Out.PlaceRoomItem, itemId, x, y, direction);
+        => Ext.Send(Out.PlaceObject, itemId, x, y, direction);
     public void Place(long itemId, (int X, int Y) location, int direction)
-        => Extension.Send(Out.PlaceRoomItem, itemId, location.X, location.Y, direction);
+        => Ext.Send(Out.PlaceObject, itemId, location.X, location.Y, direction);
     public void Place(IInventoryItem item, int x, int y, int direction)
         => Place(item.Id, x, y, direction);
     public void Place(IInventoryItem item, (int X, int Y) location, int direction)
         => Place(item.Id, location, direction);
 
     public void Place(long itemId, WallLocation location)
-        => Extension.Send(Out.PlaceWallItem, itemId, location.WX, location.WY, location.LX, location.LY);
+        => Ext.Send(Out.PlaceObject, itemId, location.WX, location.WY, location.LX, location.LY);
     public void Place(IInventoryItem item, WallLocation location)
         => Place(item.Id, location);
 
     public void Move(long floorItemId, int x, int y, int direction)
-        => Extension.Send(Out.MoveRoomItem, floorItemId, x, y, direction);
+        => Ext.Send(Out.MoveObject, floorItemId, x, y, direction);
     public void Move(long floorItemId, (int X, int Y) location, int direction)
-        => Extension.Send(Out.MoveRoomItem, floorItemId, location.X, location.Y, direction);
+        => Ext.Send(Out.MoveObject, floorItemId, location.X, location.Y, direction);
     public void Move(IFloorItem item, int x, int y, int direction)
         => Move(item.Id, x, y, direction);
     public void Move(IFloorItem item, (int X, int Y) location, int direction)
         => Move(item.Id, location.X, location.Y, direction);
 
-    public void Move(long wallItemId, WallLocation location) => Extension.Send(
+    public void Move(long wallItemId, WallLocation location) => Ext.Send(
         Out.MoveWallItem, wallItemId,
         location.WX, location.WY,
         location.LX, location.LY,
@@ -1984,16 +1988,18 @@ public class RoomManager : GameStateManager
         => Move(item.Id, location);
 
     public void Pickup(IFurni item) => Pickup(item.Type, item.Id);
-    public void Pickup(ItemType type, long id)
+    public void Pickup(ItemType type, Id id)
     {
         if (type == ItemType.Floor)
-            Extension.Send(Out.PickItemUpFromRoom, 2, (LegacyLong)id);
+            Ext.Send(Out.PickupObject, 2, id);
         else if (type == ItemType.Wall)
-            Extension.Send(Out.PickItemUpFromRoom, 1, (LegacyLong)id);
+            Ext.Send(Out.PickupObject, 1, id);
     }
 
     public void UpdateStackTile(IFloorItem stackTile, float height) => UpdateStackTile(stackTile.Id, height);
     public void UpdateStackTile(long stackTileId, float height)
-        => Extension.Send(Out.StackingHelperSetCaretHeight, stackTileId, (int)Math.Round(height * 100.0));
+        => Ext.Send(Out.SetCustomStackingHeight, stackTileId, (int)Math.Round(height * 100.0));
+
+
     #endregion
 }

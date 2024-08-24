@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface ICatalogOffer : IComposable
+public interface ICatalogOffer : IComposer
 {
     ICatalogPage? Page { get; }
 
@@ -15,7 +14,7 @@ public interface ICatalogOffer : IComposable
     int PriceInCredits { get; }
     int PriceInActivityPoints { get; }
     ActivityPointType ActivityPointType { get; }
-    bool CanPurchaseAsGift { get; } 
+    bool CanPurchaseAsGift { get; }
     IReadOnlyList<ICatalogProduct> Products { get; }
     int ClubLevel { get; }
     bool CanPurchaseMultiple { get; }

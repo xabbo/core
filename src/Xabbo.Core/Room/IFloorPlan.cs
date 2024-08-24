@@ -4,7 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface IFloorPlan : IComposable
+public interface IFloorPlan : IComposer
 {
     /// <summary>
     /// Gets the original string that this floor plan was parsed from.

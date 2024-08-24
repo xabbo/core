@@ -5,11 +5,11 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface IRoomInfo : IComposable
+public interface IRoomInfo : IComposer
 {
-    long Id { get; }
+    Id Id { get; }
     string Name { get; }
-    long OwnerId { get; }
+    Id OwnerId { get; }
     string OwnerName { get; }
     RoomAccess Access { get; }
     bool IsOpen { get; }

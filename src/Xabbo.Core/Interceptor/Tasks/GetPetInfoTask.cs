@@ -1,30 +1,25 @@
 ﻿using System;
-using System.Threading.Tasks;
 
-using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks;
 
-public class GetPetInfoTask : InterceptorTask<PetInfo>
+[Intercepts]
+public sealed partial class GetPetInfoTask(IInterceptor interceptor, Id petId)
+    : InterceptorTask<PetInfo>(interceptor)
 {
-    private readonly long _petId;
+    private readonly Id _petId = petId;
 
-    public GetPetInfoTask(IInterceptor interceptor, long petId)
-        : base(interceptor)
-    {
-        _petId = petId;
-    }
+    protected override void OnExecute() => Interceptor.Send(Out.GetPetInfo, _petId);
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetNewPetInfo, _petId);
-
-    [InterceptIn(nameof(Incoming.PetInfo))]
-    protected void OnPetInfo(InterceptArgs e)
+    [InterceptIn(nameof(In.PetInfo))]
+    private void HandlePetInfo(Intercept e)
     {
         try
         {
-            var petInfo = PetInfo.Parse(e.Packet);
+            var petInfo = e.Packet.Parse<PetInfo>();
             if (petInfo.Id == _petId)
             {
                 if (SetResult(petInfo))

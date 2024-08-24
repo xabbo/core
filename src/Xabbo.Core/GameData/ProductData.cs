@@ -42,10 +42,10 @@ public sealed class ProductData : IReadOnlyDictionary<string, ProductInfo>
         foreach (var productInfoProxy in productDataProxy.Container.Product)
         {
             ProductInfo productInfo = new(productInfoProxy);
-            
+
             if (_map.ContainsKey(productInfo.Code))
             {
-                Debug.WriteLine($"[!] Duplicate product code '{productInfo.Code}' in JSON product data.");
+                System.Diagnostics.Debug.WriteLine($"[!] Duplicate product code '{productInfo.Code}' in JSON product data.");
             }
             else
             {

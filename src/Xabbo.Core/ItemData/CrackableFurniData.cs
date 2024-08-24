@@ -1,5 +1,4 @@
-﻿using System;
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
@@ -19,21 +18,21 @@ public class CrackableFurniData : ItemData, ICrackableFurniData
         Target = data.Target;
     }
 
-    protected override void Initialize(IReadOnlyPacket packet)
+    protected override void Initialize(in PacketReader p)
     {
-        Value = packet.ReadString();
-        Hits = packet.ReadInt();
-        Target = packet.ReadInt();
+        Value = p.Read<string>();
+        Hits = p.Read<int>();
+        Target = p.Read<int>();
 
-        base.Initialize(packet);
+        base.Initialize(p);
     }
 
-    protected override void WriteData(IPacket packet)
+    protected override void WriteData(in PacketWriter p)
     {
-        packet.WriteString(Value);
-        packet.WriteInt(Hits);
-        packet.WriteInt(Target);
+        p.Write(Value);
+        p.Write(Hits);
+        p.Write(Target);
 
-        WriteBase(packet);
+        WriteBase(p);
     }
 }

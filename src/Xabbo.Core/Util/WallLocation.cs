@@ -7,7 +7,7 @@ namespace Xabbo.Core;
 /// <summary>
 /// Represents a wall location.
 /// </summary>
-public readonly struct WallLocation : IComposable
+public readonly struct WallLocation : IComposer
 {
     /// <summary>
     /// Represents a wall location with all coordinates at zero, and the orientation set to the left wall.
@@ -147,28 +147,26 @@ public readonly struct WallLocation : IComposable
 
     public static string ToString(int wx, int wy, int lx, int ly, WallOrientation orientation) => $":w={wx},{wy} l={lx},{ly} {orientation.Value}";
 
-    public readonly void Compose(IPacket packet)
+    public readonly void Compose(in PacketWriter p)
     {
-        if (packet.Protocol == ClientType.Flash)
+        switch (p.Client)
         {
-            packet.WriteString(ToString());
-        }
-        else if (packet.Protocol == ClientType.Unity)
-        {
-            packet
-                .WriteInt(WX)
-                .WriteInt(WY)
-                .WriteInt(LX)
-                .WriteInt(LY)
-                .WriteString(Orientation.Value.ToString());
-        }
-        else
-        {
+        case ClientType.Flash or ClientType.Shockwave:
+            p.Write(ToString());
+            break;
+        case ClientType.Unity:
+            p.Write(WX);
+            p.Write(WY);
+            p.Write(LX);
+            p.Write(LY);
+            p.Write(Orientation.Value.ToString());
+            break;
+        default:
             throw new Exception("Unknown client protocol.");
         }
     }
 
-    public static WallLocation Parse(IReadOnlyPacket packet) => Parse(packet.ReadString());
+    public static WallLocation Parse(in PacketReader p) => Parse(p.Read<string>());
 
     public static WallLocation Parse(string locationString)
     {

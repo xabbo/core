@@ -14,5 +14,5 @@ public class EmptyItemData : ItemData, IEmptyItemData
         : this()
     { }
 
-    protected override void WriteData(IPacket packet) { }
+    protected override void WriteData(in PacketWriter packet) { }
 }

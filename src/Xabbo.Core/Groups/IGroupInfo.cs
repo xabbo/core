@@ -1,17 +1,15 @@
-﻿using System;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface IGroupInfo : IComposable
+public interface IGroupInfo : IComposer
 {
-    long Id { get; }
+    Id Id { get; }
     string Name { get; }
     string BadgeCode { get;}
     string PrimaryColor { get; }
     string SecondaryColor { get; }
     bool IsFavorite { get; }
-    long OwnerId { get; }
+    Id OwnerId { get; }
     bool HasForum { get; }
 }

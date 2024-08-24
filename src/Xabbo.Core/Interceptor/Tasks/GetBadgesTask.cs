@@ -2,31 +2,29 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks;
 
-public class GetBadgesTask : InterceptorTask<List<Badge>>
+[Intercepts]
+public sealed partial class GetBadgesTask(IInterceptor interceptor)
+    : InterceptorTask<List<Badge>>(interceptor)
 {
     private int _totalExpected = -1, _currentIndex = 0;
-    private readonly List<Badge> _badges = new List<Badge>();
+    private readonly List<Badge> _badges = [];
 
-    public GetBadgesTask(IInterceptor interceptor)
-        : base(interceptor)
-    { }
+    protected override void OnExecute() => Interceptor.Send(Out.GetBadges);
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetAvailableBadges);
-
-    [InterceptIn(nameof(Incoming.AvailableBadges))]
-    protected void OnInventoryBadges(InterceptArgs e)
+    [InterceptIn(nameof(In.Badges))]
+    private void HandleBadges(Intercept e)
     {
         try
         {
             var packet = e.Packet;
-            int total = packet.ReadInt();
-            int index = packet.ReadInt();
+            int total = packet.Read<int>();
+            int index = packet.Read<int>();
 
             if (index != _currentIndex) return;
             if (_totalExpected == -1) _totalExpected = total;
@@ -35,9 +33,9 @@ public class GetBadgesTask : InterceptorTask<List<Badge>>
 
             e.Block();
 
-            int n = packet.ReadInt();
+            int n = packet.Read<int>();
             for (int i = 0; i < n; i++)
-                _badges.Add(Badge.Parse(packet));
+                _badges.Add(packet.Parse<Badge>());
 
             if (_currentIndex == _totalExpected)
                 SetResult(_badges);

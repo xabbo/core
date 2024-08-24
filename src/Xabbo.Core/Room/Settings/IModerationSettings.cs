@@ -3,7 +3,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface IModerationSettings : IComposable
+public interface IModerationSettings : IComposer
 {
     ModerationPermissions WhoCanMute { get; }
     ModerationPermissions WhoCanKick { get; }

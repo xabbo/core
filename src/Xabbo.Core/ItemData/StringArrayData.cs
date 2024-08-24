@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class StringArrayData : ItemData, IStringArrayData, IList<string>
+public sealed class StringArrayData : ItemData, IStringArrayData, IList<string>
 {
     private readonly List<string> _list;
 
@@ -22,7 +21,7 @@ public class StringArrayData : ItemData, IStringArrayData, IList<string>
     public StringArrayData()
         : base(ItemDataType.StringArray)
     {
-        _list = new List<string>();
+        _list = [];
     }
 
     public StringArrayData(IStringArrayData data)
@@ -31,26 +30,19 @@ public class StringArrayData : ItemData, IStringArrayData, IList<string>
         _list = new List<string>(data);
     }
 
-    protected override void Initialize(IReadOnlyPacket packet)
+    protected override void Initialize(in PacketReader p)
     {
-        short n = packet.ReadLegacyShort();
+        int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
-        {
-            _list.Add(packet.ReadString());
-        }
+            _list.Add(p.Read<string>());
 
-        base.Initialize(packet);
+        base.Initialize(in p);
     }
 
-    protected override void WriteData(IPacket packet)
+    protected override void WriteData(in PacketWriter p)
     {
-        packet.WriteLegacyShort((short)_list.Count);
-        foreach (string value in _list)
-        {
-            packet.WriteString(value);
-        }
-
-        WriteBase(packet);
+        p.Write(_list);
+        WriteBase(in p);
     }
 
     public int IndexOf(string item) => _list.IndexOf(item);

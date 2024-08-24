@@ -1,18 +1,9 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 
 namespace Xabbo.Core.Events;
 
-public class FloorItemsEventArgs : EventArgs
+public sealed class FloorItemsEventArgs(IEnumerable<IFloorItem> items)
 {
-    public IFloorItem[] Items { get; }
-
-    public FloorItemsEventArgs(IEnumerable<IFloorItem> items)
-    {
-        if (items is IFloorItem[] array)
-            Items = array;
-        else
-            Items = items.ToArray();
-    }
+    public IFloorItem[] Items { get; } = items.ToArray();
 }

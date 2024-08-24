@@ -1,5 +1,4 @@
 ﻿using Xabbo.Messages;
-using Xabbo.Core.Extensions;
 
 namespace Xabbo.Core;
 
@@ -11,8 +10,8 @@ public abstract class Furni : IFurni
     public bool IsWallItem => Type == ItemType.Wall;
 
     public int Kind { get; set; }
-    public long Id { get; set; }
-    public long OwnerId { get; set; }
+    public Id Id { get; set; }
+    public Id OwnerId { get; set; }
     public string OwnerName { get; set; }
 
     public abstract int State { get; }
@@ -22,11 +21,11 @@ public abstract class Furni : IFurni
 
     public bool IsHidden { get; set; }
 
-    public abstract void Compose(IPacket packet);
-    public abstract void Compose(IPacket packet, bool writeName = true);
-
     public Furni()
     {
         OwnerName = string.Empty;
     }
+
+    public abstract void Compose(in PacketWriter p);
+    public abstract void Compose(in PacketWriter p, bool writeOwnerName);
 }

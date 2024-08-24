@@ -5,6 +5,8 @@ using Xabbo.Messages;
 
 using Xabbo.Core.Events;
 using Xabbo.Extension;
+using Xabbo.Interceptor;
+using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Game;
 
@@ -20,8 +22,7 @@ public class ProfileManager : GameStateManager
     public Achievements? Achievements { get; private set; }
 
     public int? AchievementScore { get; private set; }
-    public int? Credits { get; private set; }
-    public ActivityPoints Points { get; private set; }
+    public int? Credits { get; private set; } public ActivityPoints Points { get; private set; }
     public int? Diamonds => Points.TryGetValue(ActivityPointType.Diamond, out int value) ? (int?)value : null;
     public int? Duckets => Points.TryGetValue(ActivityPointType.Ducket, out int value) ? (int?)value : null;
 
@@ -61,6 +62,19 @@ public class ProfileManager : GameStateManager
     }
 #pragma warning restore CS8618
 
+    public override IDisposable Attach(IInterceptor interceptor) => Dispatcher.Register([
+        new(In.LatencyPingResponse, HandleLatencyResponse),
+        new(In.UserObject, HandleUserObject),
+        new(In.FigureUpdate, HandleUpdateFigure), // TODO check this
+        new(In.UserUpdate, HandleUpdateAvatar), // TODO check this
+        // new(In.?, HandleUserHomeRoom),
+        new(In.CreditBalance, HandleWalletBalance),
+        new(In.ActivityPoints, HandleActivityPoints),
+        new(In.HabboActivityPointNotification, HandleActivityPointNotification),
+        new(In.Achievements, HandlePossibleUserAchievements),
+        new(In.Achievement, HandlePossibleAchievement),
+    ]);
+
     private void Reset()
     {
         _tcsUserData = new TaskCompletionSource<IUserData>();
@@ -86,28 +100,28 @@ public class ProfileManager : GameStateManager
     /// </summary>
     public Task<IUserData> GetUserDataAsync() => _taskUserData;
 
-    [InterceptIn(nameof(Incoming.ClientLatencyPingResponse))]
-    private async void HandleLatencyResponse(InterceptArgs e)
+    // [InterceptIn(nameof(In.ClientLatencyPingResponse))]
+    private void HandleLatencyResponse(Intercept e)
     {
-        if (e.Packet.ReadInt() == 0) return;
+        if (e.Packet.Read<int>() == 0) return;
 
         if (UserData is null && !_isLoadingProfile)
         {
             _isLoadingProfile = true;
-            await Extension.SendAsync(Out.InfoRetrieve);
+            Ext.Send(Out.InfoRetrieve);
         }
 
-        if (Achievements is null) await Extension.SendAsync(Out.GetUserAchievements);
+        if (Achievements is null) Ext.Send(Out.GetAchievements);
 
         if (Credits is null && !_isLoadingCredits)
         {
             _isLoadingCredits = true;
-            await Extension.SendAsync(Out.GetCredits);
+            Ext.Send(Out.GetCreditsInfo);
         }
     }
 
-    [InterceptIn(nameof(Incoming.UserObject))]
-    private void HandleUserObject(InterceptArgs e)
+    // [InterceptIn(nameof(In.UserObject))]
+    private void HandleUserObject(Intercept e)
     {
         if (_isLoadingProfile)
         {
@@ -115,7 +129,7 @@ public class ProfileManager : GameStateManager
             _isLoadingProfile = false;
         }
 
-        UserData = UserData.Parse(e.Packet);
+        UserData = e.Packet.Parse<UserData>();
 
         _taskUserData = Task.FromResult<IUserData>(UserData);
 
@@ -125,42 +139,42 @@ public class ProfileManager : GameStateManager
         OnLoadedUserData();
     }
 
-    [InterceptIn(nameof(Incoming.UpdateFigure))]
-    private void HandleUpdateFigure(InterceptArgs e)
+    // [InterceptIn(nameof(In.UpdateFigure))]
+    private void HandleUpdateFigure(Intercept e)
     {
         if (UserData is null) return;
 
-        UserData.Figure = e.Packet.ReadString();
-        UserData.Gender = H.ToGender(e.Packet.ReadString());
+        UserData.Figure = e.Packet.Read<string>();
+        UserData.Gender = H.ToGender(e.Packet.Read<string>());
 
         OnUserDataUpdated();
     }
 
-    [InterceptIn(nameof(Incoming.UpdateAvatar))]
-    private void HandleUpdateAvatar(InterceptArgs e)
+    // [InterceptIn(nameof(In.UpdateAvatar))]
+    private void HandleUpdateAvatar(Intercept e)
     {
         if (UserData is null) return;
 
-        int index = e.Packet.ReadInt();
+        int index = e.Packet.Read<int>();
         if (index == -1)
         {
-            UserData.Figure = e.Packet.ReadString();
-            UserData.Gender = H.ToGender(e.Packet.ReadString());
-            UserData.Motto = e.Packet.ReadString();
-            AchievementScore = e.Packet.ReadInt();
+            UserData.Figure = e.Packet.Read<string>();
+            UserData.Gender = H.ToGender(e.Packet.Read<string>());
+            UserData.Motto = e.Packet.Read<string>();
+            AchievementScore = e.Packet.Read<int>();
 
             OnUserDataUpdated();
         }
     }
 
-    // @Update [InterceptIn(nameof(Incoming.?)]
-    private void HandleUserHomeRoom(InterceptArgs e)
+    // @Update [InterceptIn(nameof(In.?)]
+    private void HandleUserHomeRoom(Intercept e)
     {
-        HomeRoom = e.Packet.ReadInt();
+        HomeRoom = e.Packet.Read<int>();
     }
 
-    [InterceptIn(nameof(Incoming.WalletBalance))]
-    private void HandleWalletBalance(InterceptArgs e)
+    // [InterceptIn(nameof(In.WalletBalance))]
+    private void HandleWalletBalance(Intercept e)
     {
         if (_isLoadingCredits)
         {
@@ -168,43 +182,43 @@ public class ProfileManager : GameStateManager
             e.Block();
         }
 
-        Credits = (int)e.Packet.ReadFloatAsString();
+        Credits = (int)e.Packet.Read<float>();
 
         OnCreditsUpdated();
     }
 
-    [InterceptIn(nameof(Incoming.ActivityPoints))]
-    private void HandleActivityPoints(InterceptArgs e)
+    // [InterceptIn(nameof(In.ActivityPoints))]
+    private void HandleActivityPoints(Intercept e)
     {
-        Points = ActivityPoints.Parse(e.Packet);
+        Points = e.Packet.Parse<ActivityPoints>();
 
         OnLoadedPoints();
     }
 
-    [InterceptIn(nameof(Incoming.ActivityPointNotification))]
-    private void HandleActivityPointNotification(InterceptArgs e)
+    // [InterceptIn(nameof(In.ActivityPointNotification))]
+    private void HandleActivityPointNotification(Intercept e)
     {
-        int amount = e.Packet.ReadInt();
-        int change = e.Packet.ReadInt();
-        ActivityPointType type = (ActivityPointType)e.Packet.ReadInt();
+        int amount = e.Packet.Read<int>();
+        int change = e.Packet.Read<int>();
+        ActivityPointType type = (ActivityPointType)e.Packet.Read<int>();
 
         Points[type] = amount;
 
         OnPointsUpdated(type, amount, change);
     }
 
-    [InterceptIn(nameof(Incoming.PossibleUserAchievements))]
-    private void HandlePossibleUserAchievements(InterceptArgs e)
+    // [InterceptIn(nameof(In.PossibleUserAchievements))]
+    private void HandlePossibleUserAchievements(Intercept e)
     {
-        Achievements = Achievements.Parse(e.Packet);
+        Achievements = e.Packet.Parse<Achievements>();
 
         OnLoadedAchievements();
     }
 
-    [InterceptIn(nameof(Incoming.PossibleAchievement))]
-    private void HandlePossibleAchievement(InterceptArgs e)
+    // [InterceptIn(nameof(In.PossibleAchievement))]
+    private void HandlePossibleAchievement(Intercept e)
     {
-        Achievement achievement = Achievement.Parse(e.Packet);
+        Achievement achievement = e.Packet.Parse<Achievement>();
         Achievements?.Update(achievement);
 
         OnAchievementUpdated(achievement);

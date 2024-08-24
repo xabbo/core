@@ -1,30 +1,24 @@
 ﻿using System;
-using System.Threading.Tasks;
 
-using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Tasks;
 
-public class GetStickyTask : InterceptorTask<Sticky>
+[Intercepts]
+public partial class GetStickyTask(IInterceptor interceptor, Id stickyId) : InterceptorTask<Sticky>(interceptor)
 {
-    private readonly long _stickyId;
+    private readonly Id _stickyId = stickyId;
 
-    public GetStickyTask(IInterceptor interceptor, long stickyId)
-        : base(interceptor)
-    {
-        _stickyId = stickyId;
-    }
+    protected override void OnExecute() => Interceptor.Send(Out.GetItemData, _stickyId);
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetItemData, _stickyId);
-
-    [InterceptIn(nameof(Incoming.ItemData))]
-    protected void OnPostItData(InterceptArgs e)
+    [InterceptIn(nameof(In.RequestSpamWallPostIt))] // TODO: check this
+    protected void OnPostItData(Intercept e)
     {
         try
         {
-            var sticky = Sticky.Parse(e.Packet);
+            var sticky = e.Packet.Parse<Sticky>();
             if (sticky.Id == _stickyId)
             {
                 if (SetResult(sticky))

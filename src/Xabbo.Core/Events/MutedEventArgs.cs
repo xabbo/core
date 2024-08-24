@@ -1,15 +1,7 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class MutedEventArgs : EventArgs
+public sealed class MutedEventArgs(MuteType type, int secondsLeft)
 {
-    public MuteType Type { get; }
-    public int SecondsLeft { get; }
-
-    public MutedEventArgs(MuteType type, int secondsLeft)
-    {
-        Type = type;
-        SecondsLeft = secondsLeft;
-    }
+    public MuteType Type { get; } = type;
+    public int SecondsLeft { get; } = secondsLeft;
 }

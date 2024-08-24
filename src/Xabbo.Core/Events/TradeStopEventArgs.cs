@@ -1,15 +1,7 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class TradeStopEventArgs : EventArgs
+public sealed class TradeStopEventArgs(IRoomUser user, int reason)
+    : RoomUserEventArgs(user)
 {
-    public IRoomUser User { get; }
-    public int Reason { get; }
-
-    public TradeStopEventArgs(IRoomUser user, int reason)
-    {
-        User = user;
-        Reason = reason;
-    }
+    public int Reason { get; } = reason;
 }

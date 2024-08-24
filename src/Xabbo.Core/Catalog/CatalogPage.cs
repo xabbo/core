@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class CatalogPage : ICatalogPage
+public sealed class CatalogPage : ICatalogPage, IComposer, IParser<CatalogPage>
 {
+    public static CatalogPage Parse(in PacketReader packet) => new(in packet);
+
     public int Id { get; set; }
     public string CatalogType { get; set; }
     public string LayoutCode { get; set; }
@@ -26,55 +27,52 @@ public class CatalogPage : ICatalogPage
         CatalogType =
         LayoutCode = string.Empty;
 
-        Images = new();
-        Texts = new();
-        Offers = new();
-        FrontPageItems = new();
+        Images = [];
+        Texts = [];
+        Offers = [];
+        FrontPageItems = [];
     }
 
-    protected CatalogPage(IReadOnlyPacket packet)
+    private CatalogPage(in PacketReader packet)
     {
-        Id = packet.ReadInt();
-        CatalogType = packet.ReadString();
-        LayoutCode = packet.ReadString();
+        Id = packet.Read<int>();
+        CatalogType = packet.Read<string>();
+        LayoutCode = packet.Read<string>();
 
-        Images = packet.ReadList<string>();
-        Texts = packet.ReadList<string>();
+        Images = [..packet.ReadArray<string>()];
+        Texts = [..packet.ReadArray<string>()];
 
-        Offers = new();
-        int n = packet.ReadLegacyShort();
+        Offers = [];
+        int n = packet.Read<Length>();
         for (int i = 0; i < n; i++)
         {
-            CatalogOffer offer = CatalogOffer.Parse(packet);
+            CatalogOffer offer = packet.Parse<CatalogOffer>();
             offer.Page = this;
             Offers.Add(offer);
         }
 
-        OfferId = packet.ReadInt();
-        AcceptSeasonCurrencyAsCredits = packet.ReadBool();
+        OfferId = packet.Read<int>();
+        AcceptSeasonCurrencyAsCredits = packet.Read<bool>();
 
-        FrontPageItems = new();
+        FrontPageItems = [];
         if (packet.Available > 0)
         {
-            n = packet.ReadLegacyShort();
+            n = packet.Read<Length>();
             for (int i = 0; i < n; i++)
-                FrontPageItems.Add(CatalogPageItem.Parse(packet));
+                FrontPageItems.Add(packet.Parse<CatalogPageItem>());
         }
     }
 
-    public void Compose(IPacket packet)
+    public void Compose(in PacketWriter p)
     {
-        packet
-            .WriteInt(Id)
-            .WriteString(CatalogType)
-            .WriteString(LayoutCode)
-            .WriteCollection(Images)
-            .WriteCollection(Texts)
-            .WriteCollection(Offers)
-            .WriteInt(OfferId)
-            .WriteBool(AcceptSeasonCurrencyAsCredits)
-            .WriteCollection(FrontPageItems);
+        p.Write(Id);
+        p.Write(CatalogType);
+        p.Write(LayoutCode);
+        p.Write(Images);
+        p.Write(Texts);
+        p.Write(Offers);
+        p.Write(OfferId);
+        p.Write(AcceptSeasonCurrencyAsCredits);
+        p.Write(FrontPageItems);
     }
-
-    public static CatalogPage Parse(IReadOnlyPacket packet) => new CatalogPage(packet);
 }

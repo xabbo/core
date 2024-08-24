@@ -4,7 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface IEntityStatusUpdate : IComposable
+public interface IEntityStatusUpdate : IComposer
 {
     int Index { get; }
     Tile Location { get; }

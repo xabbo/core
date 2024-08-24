@@ -5,7 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class CatalogOffer : ICatalogOffer
+public class CatalogOffer : ICatalogOffer, IComposer, IParser<CatalogOffer>
 {
     public int Id { get; set; }
     public CatalogPage? Page { get; set; }
@@ -31,56 +31,55 @@ public class CatalogOffer : ICatalogOffer
         PreviewImage = string.Empty;
     }
 
-    protected CatalogOffer(IReadOnlyPacket packet, bool fromCatalog)
+    protected CatalogOffer(in PacketReader p, bool fromCatalog)
     {
-        Id = packet.ReadInt();
-        FurniLine = packet.ReadString();
-        IsRentable = packet.ReadBool();
-        PriceInCredits = packet.ReadInt();
-        PriceInActivityPoints = packet.ReadInt();
-        ActivityPointType = (ActivityPointType)packet.ReadInt();
-        PriceInSilver = packet.ReadInt();
-        CanPurchaseAsGift = packet.ReadBool();
+        Id = p.Read<int>();
+        FurniLine = p.Read<string>();
+        IsRentable = p.Read<bool>();
+        PriceInCredits = p.Read<int>();
+        PriceInActivityPoints = p.Read<int>();
+        ActivityPointType = (ActivityPointType)p.Read<int>();
+        PriceInSilver = p.Read<int>();
+        CanPurchaseAsGift = p.Read<bool>();
 
-        short n = packet.ReadLegacyShort();
+        int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
-            Products.Add(CatalogProduct.Parse(packet));
+            Products.Add(p.Parse<CatalogProduct>());
 
-        ClubLevel = packet.ReadInt();
-        CanPurchaseMultiple = packet.ReadBool();
+        ClubLevel = p.Read<int>();
+        CanPurchaseMultiple = p.Read<bool>();
 
         if (fromCatalog)
         {
-            IsPet = packet.ReadBool();
-            PreviewImage = packet.ReadString();
+            IsPet = p.Read<bool>();
+            PreviewImage = p.Read<string>();
         }
     }
 
-    public void Compose(IPacket packet, bool fromCatalog = true)
+    public void Compose(in PacketWriter p, bool fromCatalog = true)
     {
-        packet
-            .WriteInt(Id)
-            .WriteString(FurniLine)
-            .WriteBool(IsRentable)
-            .WriteInt(PriceInCredits)
-            .WriteInt(PriceInActivityPoints)
-            .WriteInt((int)ActivityPointType)
-            .WriteInt(PriceInSilver)
-            .WriteBool(CanPurchaseAsGift)
-            .WriteCollection(Products)
-            .WriteInt(ClubLevel)
-            .WriteBool(CanPurchaseMultiple);
+        p.Write(Id);
+        p.Write(FurniLine);
+        p.Write(IsRentable);
+        p.Write(PriceInCredits);
+        p.Write(PriceInActivityPoints);
+        p.Write((int)ActivityPointType);
+        p.Write(PriceInSilver);
+        p.Write(CanPurchaseAsGift);
+        p.Write(Products);
+        p.Write(ClubLevel);
+        p.Write(CanPurchaseMultiple);
 
         if (fromCatalog)
         {
-            packet
-                .WriteBool(IsPet)
-                .WriteString(PreviewImage);
+            p.Write(IsPet);
+            p.Write(PreviewImage);
         }
     }
 
-    void IComposable.Compose(IPacket packet) => Compose(packet, true);
+    void IComposer.Compose(in PacketWriter p) => Compose(in p, true);
 
-    public static CatalogOffer Parse(IReadOnlyPacket packet, bool fromCatalog = true)
-        => new(packet, fromCatalog);
+    public static CatalogOffer Parse(in PacketReader p) => Parse(in p, true);
+    public static CatalogOffer Parse(in PacketReader p, bool fromCatalog = true)
+        => new(in p, fromCatalog);
 }

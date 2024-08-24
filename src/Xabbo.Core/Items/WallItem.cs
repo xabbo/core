@@ -7,7 +7,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class WallItem : Furni, IWallItem
+public class WallItem : Furni, IWallItem, IComposer, IParser<WallItem>, IManyParser<WallItem>
 {
     public override ItemType Type => ItemType.Wall;
 
@@ -61,70 +61,65 @@ public class WallItem : Furni, IWallItem
         IsHidden = item.IsHidden;
     }
 
-    protected WallItem(IReadOnlyPacket packet, bool readName)
+    protected WallItem(in PacketReader p, bool readName)
         : this()
     {
-        Id = packet.Protocol switch
+        Id = p.Client switch
         {
-            ClientType.Flash => long.Parse(packet.ReadString()),
-            ClientType.Unity => packet.ReadLong(),
+            ClientType.Flash => long.Parse(p.Read<string>()),
+            ClientType.Unity => p.Read<long>(),
             _ => throw new InvalidOperationException("Unknown protocol.")
         };
-        Kind = packet.ReadInt();
-        Location = WallLocation.Parse(packet.ReadString());
-        Data = packet.ReadString();
-        SecondsToExpiration = packet.ReadInt();
-        Usage = (FurniUsage)packet.ReadInt();
-        OwnerId = packet.ReadLegacyLong();
+        Kind = p.Read<int>();
+        Location = WallLocation.Parse(p.Read<string>());
+        Data = p.Read<string>();
+        SecondsToExpiration = p.Read<int>();
+        Usage = (FurniUsage)p.Read<int>();
+        OwnerId = p.Read<Id>();
 
-        if (readName && packet.CanReadString())
-            OwnerName = packet.ReadString();
+        if (readName && p.Available >= 2)
+            OwnerName = p.Read<string>();
     }
 
-    public override void Compose(IPacket packet)
-    {
-        Compose(packet, true);
-    }
+    public override void Compose(in PacketWriter p) => Compose(in p, true);
 
-    public override void Compose(IPacket packet, bool writeOwnerName = true)
+    public override void Compose(in PacketWriter p, bool writeOwnerName = true)
     {
-        if (packet.Protocol == ClientType.Flash) packet.WriteString(Id.ToString());
-        else if (packet.Protocol == ClientType.Unity) packet.WriteLong(Id);
+        if (p.Client == ClientType.Flash) p.Write(Id.ToString());
+        else if (p.Client == ClientType.Unity) p.Write(Id);
         else throw new InvalidOperationException("Unknown protocol");
 
-        packet.WriteInt(Kind);
-        packet.WriteString(Location.ToString());
-        packet.WriteString(Data);
-        packet.WriteInt(SecondsToExpiration);
-        packet.WriteInt((int)Usage);
-        packet.WriteLegacyLong(OwnerId);
+        p.Write(Kind);
+        p.Write(Location.ToString());
+        p.Write(Data);
+        p.Write(SecondsToExpiration);
+        p.Write((int)Usage);
+        p.Write(OwnerId);
 
         if (writeOwnerName)
         {
-            packet.WriteString(OwnerName);
+            p.Write(OwnerName);
         }
     }
 
     public override string ToString() => $"{nameof(WallItem)}#{Id}/{Kind}";
 
-    public static WallItem Parse(IReadOnlyPacket packet, bool readName = true)
-    {
-        return new WallItem(packet, readName);
-    }
+    public static WallItem Parse(in PacketReader p) => Parse(in p, true);
+    public static WallItem Parse(in PacketReader packet, bool readName) => new(in packet, readName);
 
-    public static WallItem[] ParseAll(IReadOnlyPacket packet)
+    public static IEnumerable<WallItem> ParseAll(in PacketReader p)
     {
         var ownerDictionary = new Dictionary<long, string>();
 
-        int n = packet.ReadLegacyShort();
+        int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
-            ownerDictionary.Add(packet.ReadLegacyLong(), packet.ReadString());
+            ownerDictionary.Add(p.Read<Id>(), p.Read<string>());
 
-        n = packet.ReadLegacyShort();
+        n = p.Read<Length>();
         WallItem[] wallItems = new WallItem[n];
         for (int i = 0; i < n; i++)
         {
-            var item = wallItems[i] = Parse(packet, false);
+            var item = wallItems[i] = Parse(p, false);
             if (ownerDictionary.TryGetValue(item.OwnerId, out string? ownerName))
                 item.OwnerName = ownerName;
         }
@@ -132,7 +127,7 @@ public class WallItem : Furni, IWallItem
         return wallItems;
     }
 
-    public static void WriteAll(IPacket packet, IEnumerable<IWallItem> items)
+    public static void ComposeAll(in PacketWriter p, IEnumerable<IWallItem> items)
     {
         var ownerIds = new HashSet<long>();
         var ownerDictionary = items
@@ -142,20 +137,17 @@ public class WallItem : Furni, IWallItem
                 val => val.OwnerName
             );
 
-        packet.WriteLegacyShort((short)ownerDictionary.Count);
+        p.Write<Length>(ownerDictionary.Count);
         foreach (var pair in ownerDictionary)
         {
-            packet.WriteLegacyLong(pair.Key);
-            packet.WriteString(pair.Value);
+            p.Write(pair.Key);
+            p.Write(pair.Value);
         }
 
-        packet.WriteLegacyShort((short)items.Count());
+        p.Write<Length>(items.Count());
         foreach (var item in items)
-            item.Compose(packet, false);
+            item.Compose(in p, false);
     }
 
-    public static void WriteAll(IPacket packet, params WallItem[] items)
-    {
-        WriteAll(packet, (IEnumerable<IWallItem>)items);
-    }
+    public static void ComposeAll(in PacketWriter p, params WallItem[] items) => ComposeAll(p, (IEnumerable<IWallItem>)items);
 }

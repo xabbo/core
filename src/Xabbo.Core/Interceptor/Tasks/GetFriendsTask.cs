@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
@@ -17,18 +17,18 @@ public class GetFriendsTask : InterceptorTask<List<Friend>>
         : base(interceptor)
     { }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.MessengerInit);
+    protected override void OnExecute() => Interceptor.Send(Out.MessengerInit);
 
-    [InterceptIn(nameof(Incoming.MessengerInit))]
-    protected void OnInitFriends(InterceptArgs e) => e.Block();
+    [InterceptIn(nameof(In.MessengerInit))]
+    protected void OnInitFriends(Intercept e) => e.Block();
 
-    [InterceptIn(nameof(Incoming.FriendListFragment))]
-    protected void OnFriends(InterceptArgs e)
+    [InterceptIn(nameof(In.FriendListFragment))]
+    protected void OnFriends(Intercept e)
     {
         try
         {
-            int total = e.Packet.ReadInt();
-            int current = e.Packet.ReadInt();
+            int total = e.Packet.Read<int>();
+            int current = e.Packet.Read<int>();
 
             if (current != _currentIndex) return;
             if (_totalExpected == -1) _totalExpected = total;
@@ -37,9 +37,9 @@ public class GetFriendsTask : InterceptorTask<List<Friend>>
 
             e.Block();
 
-            int n = e.Packet.ReadLegacyShort();
+            int n = e.Packet.Read<Length>();
             for (int i = 0; i < n; i++)
-                _friends.Add(Friend.Parse(e.Packet));
+                _friends.Add(e.Packet.Parse<Friend>());
 
             if (_currentIndex == total)
                 SetResult(_friends);

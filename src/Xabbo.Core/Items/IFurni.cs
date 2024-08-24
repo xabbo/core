@@ -1,19 +1,18 @@
-﻿using System;
+﻿using Xabbo.Messages;
 
 using Xabbo.Core.Game;
-using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
 /// <summary>
 /// Represents a room furniture.
 /// </summary>
-public interface IFurni : IItem, IComposable
+public interface IFurni : IItem, IComposer
 {
     /// <summary>
     /// Gets the owner of the furni's ID.
     /// </summary>
-    long OwnerId { get; }
+    Id OwnerId { get; }
     /// <summary>
     /// Gets the owner of the furni's name.
     /// </summary>
@@ -41,5 +40,5 @@ public interface IFurni : IItem, IComposable
     /// <summary>
     /// Composes this furniture to the packet and specifies whether to write the owner's name.
     /// </summary>
-    void Compose(IPacket packet, bool writeOwnerName);
+    void Compose(in PacketWriter p, bool writeOwnerName);
 }

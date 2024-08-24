@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
@@ -17,14 +17,14 @@ public class GetRoomSettingsTask : InterceptorTask<RoomSettings>
         _roomId = roomId;
     }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetRoomSettings, _roomId);
+    protected override void OnExecute() => Interceptor.Send(Out.GetRoomSettings, _roomId);
 
-    [InterceptIn(nameof(Incoming.RoomSettingsData))]
-    protected void OnRoomSettingsData(InterceptArgs e)
+    [InterceptIn(nameof(In.RoomSettingsData))]
+    protected void OnRoomSettingsData(Intercept e)
     {
         try
         {
-            var roomSettings = RoomSettings.Parse(e.Packet);
+            var roomSettings = e.Packet.Parse<RoomSettings>();
             if (roomSettings.Id == _roomId)
             {
                 if (SetResult(roomSettings))

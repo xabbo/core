@@ -11,12 +11,12 @@ public class Bot : Entity, IBot
     public bool IsPrivateBot => Type == EntityType.PrivateBot;
 
     public Gender Gender { get; set; }
-    public long OwnerId { get; set; }
+    public Id OwnerId { get; set; }
     public string OwnerName { get; set; }
     public List<short> Skills { get; set; }
     IReadOnlyList<short> IBot.Data => Skills;
 
-    public Bot(EntityType type, long id, int index)
+    public Bot(EntityType type, Id id, int index)
         : base(type, id, index)
     {
         if (type != EntityType.PublicBot &&
@@ -28,42 +28,36 @@ public class Bot : Entity, IBot
         Gender = Gender.Unisex;
         OwnerId = -1;
         OwnerName = string.Empty;
-        Skills = new List<short>();
+        Skills = [];
     }
 
-    public Bot(EntityType type, long id, int index, IReadOnlyPacket packet)
+    public Bot(EntityType type, Id id, int index, in PacketReader p)
         : this(type, id, index)
     {
         if (type == EntityType.PrivateBot)
         {
-            Gender = H.ToGender(packet.ReadString());
-            OwnerId = packet.ReadLegacyLong();
-            OwnerName = packet.ReadString();
+            Gender = H.ToGender(p.Read<string>());
+            OwnerId = p.Read<Id>();
+            OwnerName = p.Read<string>();
 
-            short n = packet.ReadLegacyShort();
+            int n = p.Read<Length>();
             for (int i = 0; i < n; i++)
             {
-                Skills.Add(packet.ReadShort());
+                Skills.Add(p.Read<short>());
             }
         }
     }
 
-    public override void Compose(IPacket packet)
+    public override void Compose(in PacketWriter p)
     {
-        base.Compose(packet);
+        base.Compose(in p);
 
         if (Type == EntityType.PrivateBot)
         {
-            packet
-                .WriteString(Gender.ToShortString().ToLower())
-                .WriteLegacyLong(OwnerId)
-                .WriteString(OwnerName);
-
-            packet.WriteLegacyShort((short)Skills.Count);
-            foreach (short value in Skills)
-            {
-                packet.WriteShort(value);
-            }
+            p.Write(Gender.ToShortString().ToLower());
+            p.Write(OwnerId);
+            p.Write(OwnerName);
+            p.Write(Skills);
         }
     }
 }

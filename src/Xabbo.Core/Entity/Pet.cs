@@ -1,14 +1,12 @@
-﻿using System;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class Pet : Entity, IPet
+public class Pet(long id, int index) : Entity(EntityType.Pet, id, index), IPet
 {
     public int Breed { get; set; }
-    public long OwnerId { get; set; }
-    public string OwnerName { get; set; }
+    public long OwnerId { get; set; } = -1;
+    public string OwnerName { get; set; } = "(unknown)";
     public int RarityLevel { get; set; }
     public bool HasSaddle { get; set; }
     public bool IsRiding { get; set; }
@@ -17,48 +15,39 @@ public class Pet : Entity, IPet
     public bool CanRevive { get; set; }
     public bool HasBreedingPermission { get; set; }
     public int Level { get; set; }
-    public string Posture { get; set; }
+    public string Posture { get; set; } = "";
 
-    public Pet(long id, int index)
-        : base(EntityType.Pet, id, index)
-    {
-        OwnerId = -1;
-        OwnerName = "(unknown)";
-        Posture = "";
-    }
-
-    internal Pet(long id, int index, IReadOnlyPacket packet)
+    internal Pet(long id, int index, in PacketReader p)
         : this(id, index)
     {
-        Breed = packet.ReadInt();
-        OwnerId = packet.ReadLegacyLong();
-        OwnerName = packet.ReadString();
-        RarityLevel = packet.ReadInt();
-        HasSaddle = packet.ReadBool();
-        IsRiding = packet.ReadBool();
-        CanBreed = packet.ReadBool();
-        CanHarvest = packet.ReadBool();
-        CanRevive = packet.ReadBool();
-        HasBreedingPermission = packet.ReadBool();
-        Level = packet.ReadInt();
-        Posture = packet.ReadString();
+        Breed = p.Read<int>();
+        OwnerId = p.Read<Id>();
+        OwnerName = p.Read<string>();
+        RarityLevel = p.Read<int>();
+        HasSaddle = p.Read<bool>();
+        IsRiding = p.Read<bool>();
+        CanBreed = p.Read<bool>();
+        CanHarvest = p.Read<bool>();
+        CanRevive = p.Read<bool>();
+        HasBreedingPermission = p.Read<bool>();
+        Level = p.Read<int>();
+        Posture = p.Read<string>();
     }
 
-    public override void Compose(IPacket packet)
+    public override void Compose(in PacketWriter p)
     {
-        base.Compose(packet);
+        base.Compose(in p);
 
-        packet
-            .WriteInt(Breed)
-            .WriteLegacyLong(OwnerId)
-            .WriteInt(RarityLevel)
-            .WriteBool(HasSaddle)
-            .WriteBool(IsRiding)
-            .WriteBool(CanBreed)
-            .WriteBool(CanHarvest)
-            .WriteBool(CanRevive)
-            .WriteBool(HasBreedingPermission)
-            .WriteInt(Level)
-            .WriteString(Posture);
+        p.Write(Breed);
+        p.Write(OwnerId);
+        p.Write(RarityLevel);
+        p.Write(HasSaddle);
+        p.Write(IsRiding);
+        p.Write(CanBreed);
+        p.Write(CanHarvest);
+        p.Write(CanRevive);
+        p.Write(HasBreedingPermission);
+        p.Write(Level);
+        p.Write(Posture);
     }
 }

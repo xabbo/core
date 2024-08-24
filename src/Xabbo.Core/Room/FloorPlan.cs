@@ -6,7 +6,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class FloorPlan : IFloorPlan
+public class FloorPlan : IFloorPlan, IComposer, IParser<FloorPlan>
 {
     public string? OriginalString { get; private set; }
 
@@ -106,18 +106,18 @@ public class FloorPlan : IFloorPlan
         return sb.ToString();
     }
 
-    public void Compose(IPacket packet)
+    public void Compose(in PacketWriter p)
     {
-        packet.WriteBool(UseLegacyScale);
-        packet.WriteInt(WallHeight);
-        packet.WriteString(ToString());
+        p.Write(UseLegacyScale);
+        p.Write(WallHeight);
+        p.Write(ToString());
     }
 
-    public static FloorPlan Parse(IReadOnlyPacket packet)
+    public static FloorPlan Parse(in PacketReader p)
     {
-        bool useLegacyScale = packet.ReadBool();
-        int wallHeight = packet.ReadInt();
-        string map = packet.ReadString();
+        bool useLegacyScale = p.Read<bool>();
+        int wallHeight = p.Read<int>();
+        string map = p.Read<string>();
 
         return new FloorPlan(map)
         {
@@ -126,7 +126,7 @@ public class FloorPlan : IFloorPlan
         };
     }
 
-    public static FloorPlan Parse(string map) => new FloorPlan(map);
+    public static FloorPlan Parse(string map) => new(map);
 
     private static int[] ParseString(string map, out int width, out int length)
     {

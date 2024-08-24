@@ -1,18 +1,9 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class EntityUpdateEventArgs : EntityEventArgs
+public sealed class EntityUpdateEventArgs(IEntity entity, string previousFigure, Gender previousGender, string previousMotto)
+    : EntityEventArgs(entity)
 {
-    public string PreviousFigure { get; }
-    public Gender PreviousGender { get; }
-    public string PreviousMotto { get; }
-    
-    public EntityUpdateEventArgs(IEntity entity, string previousFigure, Gender previousGender, string previousMotto)
-        : base(entity)
-    {
-        PreviousFigure = previousFigure;
-        PreviousGender = previousGender;
-        PreviousMotto = previousMotto;
-    }
+    public string PreviousFigure { get; } = previousFigure;
+    public Gender PreviousGender { get; } = previousGender;
+    public string PreviousMotto { get; } = previousMotto;
 }

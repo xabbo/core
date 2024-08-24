@@ -1,35 +1,26 @@
-﻿using System;
-
-namespace Xabbo.Core;
+﻿namespace Xabbo.Core;
 
 /// <summary>
 /// Represents an item type, kind, and variant (used for posters).
 /// </summary>
-public struct ItemDescriptor : IItem
+public readonly struct ItemDescriptor(ItemType type, int kind, string? variant = null) : IItem
 {
-    long IItem.Id => -1;
+    readonly Id IItem.Id => -1;
 
     /// <summary>
     /// Gets the item type.
     /// </summary>
-    public ItemType Type { get; }
+    public ItemType Type { get; } = type;
 
     /// <summary>
     /// Gets the item kind.
     /// </summary>
-    public int Kind { get; }
+    public int Kind { get; } = kind;
 
     /// <summary>
     /// Gets the item variant.
     /// </summary>
-    public string? Variant { get; }
-
-    public ItemDescriptor(ItemType type, int kind, string? variant = null)
-    {
-        Type = type;
-        Kind = kind;
-        Variant = variant;
-    }
+    public string? Variant { get; } = variant;
 
     public override int GetHashCode() => (Type, Kind, Variant).GetHashCode();
 

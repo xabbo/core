@@ -1,14 +1,7 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class FloorItemDataUpdatedEventArgs : FloorItemEventArgs
+public sealed class FloorItemDataUpdatedEventArgs(IFloorItem item, IItemData previousData)
+    : FloorItemEventArgs(item)
 {
-    public IItemData PreviousData { get; }
-
-    public FloorItemDataUpdatedEventArgs(IFloorItem item, IItemData previousData)
-        : base(item)
-    {
-        PreviousData = previousData;
-    }
+    public IItemData PreviousData { get; } = previousData;
 }

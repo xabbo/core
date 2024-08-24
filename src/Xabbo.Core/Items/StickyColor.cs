@@ -3,7 +3,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class StickyColor : IComposable
+public class StickyColor : IComposer
 {
     public string Name { get; }
     public string Value { get; }
@@ -16,5 +16,5 @@ public class StickyColor : IComposable
 
     public static implicit operator string(StickyColor color) => color.Value;
 
-    public void Compose(IPacket packet) => packet.WriteString(Value);
+    public void Compose(in PacketWriter packet) => packet.Write(Value);
 }

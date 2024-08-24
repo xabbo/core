@@ -1,13 +1,6 @@
-using System;
-
 namespace Xabbo.Core.Events;
 
-public class RoomIdEventArgs : EventArgs
+public sealed class RoomIdEventArgs(Id roomId)
 {
-    public long RoomId { get; }
-    
-    public RoomIdEventArgs(long roomId)
-    {
-        RoomId = roomId;
-    }
+    public Id RoomId { get; } = roomId;
 }

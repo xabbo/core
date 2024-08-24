@@ -7,26 +7,26 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public abstract class Entity : IEntity, IComposable
+public abstract class Entity(EntityType type, Id id, int index) : IEntity, IComposer, IParser<Entity>, IManyParser<Entity>
 {
     public bool IsRemoved { get; set; }
     public bool IsHidden { get; set; }
 
-    public EntityType Type { get; }
+    public EntityType Type { get; } = type;
 
-    public long Id { get; }
-    public int Index { get;  }
+    public Id Id { get; } = id;
+    public int Index { get; } = index;
 
-    public string Name { get; set; }
-    public string Motto { get; set; }
-    public string Figure { get; set; }
+    public string Name { get; set; } = "";
+    public string Motto { get; set; } = "";
+    public string Figure { get; set; } = "";
 
-    public Tile Location { get; set; }
+    public Tile Location { get; set; } = default;
     [JsonIgnore] public int X => Location.X;
     [JsonIgnore] public int Y => Location.Y;
     [JsonIgnore] public Point XY => Location.XY;
     [JsonIgnore] public float Z => Location.Z;
-    public int Direction { get; set; }
+    public int Direction { get; set; } = 0;
     public Area Area => new(Location.XY, 1, 1);
 
     // States
@@ -40,19 +40,6 @@ public abstract class Entity : IEntity, IComposable
     IEntityStatusUpdate? IEntity.CurrentUpdate => CurrentUpdate;
     public EntityStatusUpdate? PreviousUpdate { get; private set; }
     IEntityStatusUpdate? IEntity.PreviousUpdate => PreviousUpdate;
-
-    protected Entity(EntityType type, long id, int index)
-    {
-        Type = type;
-        Id = id;
-        Index = index;
-
-        Name = "";
-        Motto = "";
-        Figure = "";
-        Location = default;
-        Direction = 0;
-    }
 
     public void Update(EntityStatusUpdate update)
     {
@@ -70,37 +57,36 @@ public abstract class Entity : IEntity, IComposable
 
     protected virtual void OnUpdate(EntityStatusUpdate update) { }
 
-    public virtual void Compose(IPacket packet)
+    public virtual void Compose(in PacketWriter p)
     {
-        packet
-            .WriteLegacyLong(Id)
-            .WriteString(Name)
-            .WriteString(Motto)
-            .WriteString(Figure)
-            .WriteInt(Index)
-            .Write(Location)
-            .WriteInt(Direction)
-            .WriteInt((int)Type);
+        p.Write(Id);
+        p.Write(Name);
+        p.Write(Motto);
+        p.Write(Figure);
+        p.Write(Index);
+        p.Write(Location);
+        p.Write(Direction);
+        p.Write((int)Type);
     }
 
     public override string ToString() => Name;
 
-    public static Entity Parse(IReadOnlyPacket packet)
+    public static Entity Parse(in PacketReader p)
     {
-        long id = packet.ReadLegacyLong();
-        string name = packet.ReadString();
-        string motto = packet.ReadString();
-        string figure = packet.ReadString();
-        int index = packet.ReadInt();
-        var tile = Tile.Parse(packet);
-        int dir = packet.ReadInt();
-        var type = (EntityType)packet.ReadInt();
+        Id id = p.Read<Id>();
+        string name = p.Read<string>();
+        string motto = p.Read<string>();
+        string figure = p.Read<string>();
+        int index = p.Read<int>();
+        Tile tile = p.Parse<Tile>();
+        int dir = p.Read<int>();
+        EntityType type = (EntityType)p.Read<int>();
 
         Entity entity = type switch
         {
-            EntityType.User => new RoomUser(id, index, packet),
-            EntityType.Pet => new Pet(id, index, packet),
-            EntityType.PublicBot or EntityType.PrivateBot => new Bot(type, id, index, packet),
+            EntityType.User => new RoomUser(id, index, in p),
+            EntityType.Pet => new Pet(id, index, in p),
+            EntityType.PublicBot or EntityType.PrivateBot => new Bot(type, id, index, in p),
             _ => throw new Exception($"Unknown entity type: {type}"),
         };
 
@@ -113,30 +99,9 @@ public abstract class Entity : IEntity, IComposable
         return entity;
     }
 
-    public static Entity[] ParseAll(IReadOnlyPacket packet)
-    {
-        short n = packet.ReadLegacyShort();
+    public static IEnumerable<Entity> ParseAll(in PacketReader p) => p.ReadArray<Entity>();
 
-        Entity[] entities = new Entity[n];
-        for (int i = 0; i < n; i++)
-        {
-            entities[i] = Parse(packet);
-        }
+    public static void ComposeAll(in PacketWriter p, IEnumerable<IEntity> entities) => p.Write(entities);
 
-        return entities;
-    }
-
-    public static void ComposeAll(IPacket packet, IEnumerable<IEntity> entities)
-    {
-        packet.WriteLegacyShort((short)entities.Count());
-        foreach (var entity in entities)
-        {
-            entity.Compose(packet);
-        }
-    }
-
-    public static void ComposeAll(IPacket packet, params IEntity[] entities)
-    { 
-        ComposeAll(packet, (IEnumerable<IEntity>)entities);
-    }
+    public static void ComposeAll(in PacketWriter p, params IEntity[] entities) => ComposeAll(in p, (IEnumerable<IEntity>)entities);
 }

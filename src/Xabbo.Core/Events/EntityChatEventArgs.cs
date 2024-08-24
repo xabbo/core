@@ -1,22 +1,11 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class EntityChatEventArgs : EntityEventArgs
+public sealed class EntityChatEventArgs(IEntity entity, ChatType chatType, string message, int bubbleStyle)
+    : EntityEventArgs(entity)
 {
-    public ChatType ChatType { get; }
-    public string Message { get; }
-    public int BubbleStyle { get; }
-
+    public ChatType ChatType { get; } = chatType;
+    public string Message { get; } = message;
+    public int BubbleStyle { get; } = bubbleStyle;
     public bool IsBlocked { get; private set; }
-
-    public EntityChatEventArgs(IEntity entity, ChatType chatType, string message, int bubbleStyle)
-        : base(entity)
-    {
-        ChatType = chatType;
-        Message = message;
-        BubbleStyle = bubbleStyle;
-    }
-
-    public void Block() { IsBlocked = true; }
+    public void Block() => IsBlocked = true;
 }

@@ -2,13 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class UserSearchResults : IReadOnlyCollection<UserSearchResult>
+public class UserSearchResults : IReadOnlyCollection<UserSearchResult>, IComposer, IParser<UserSearchResults>
 {
-    public static UserSearchResults Parse(IReadOnlyPacket packet) => new UserSearchResults(packet);
+    public static UserSearchResults Parse(in PacketReader packet) => new(in packet);
 
     public IReadOnlyList<UserSearchResult> Friends { get; }
     public IReadOnlyList<UserSearchResult> Others { get; }
@@ -17,19 +18,18 @@ public class UserSearchResults : IReadOnlyCollection<UserSearchResult>
     public IEnumerator<UserSearchResult> GetEnumerator() => Friends.Concat(Others).GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    protected UserSearchResults(IReadOnlyPacket packet)
+    protected UserSearchResults(in PacketReader p)
     {
-        var results = new List<UserSearchResult>();
-
-        short n = packet.ReadLegacyShort();
+        int n = p.Read<Length>();
+        var results = new List<UserSearchResult>(n);
         for (int i = 0; i < n; i++)
-            results.Add(UserSearchResult.Parse(packet));
+            results.Add(p.Parse<UserSearchResult>());
         Friends = results.AsReadOnly();
 
-        results = new List<UserSearchResult>();
-        n = packet.ReadLegacyShort();
+        n = p.Read<Length>();
+        results = new List<UserSearchResult>(n);
         for (int i = 0; i < n; i++)
-            results.Add(UserSearchResult.Parse(packet));
+            results.Add(p.Parse<UserSearchResult>());
         Others = results.AsReadOnly();
     }
 
@@ -38,5 +38,11 @@ public class UserSearchResults : IReadOnlyCollection<UserSearchResult>
         return this.FirstOrDefault(result =>
             string.Equals(result.Name, name, StringComparison.OrdinalIgnoreCase)
         );
+    }
+
+    public void Compose(in PacketWriter p)
+    {
+        p.Write(Friends);
+        p.Write(Others);
     }
 }

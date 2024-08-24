@@ -7,7 +7,7 @@ namespace Xabbo.Core;
 /// <summary>
 /// Defines extra data attached to an item.
 /// </summary>
-public interface IItemData : IComposable
+public interface IItemData : IComposer
 {
     /// <summary>
     /// Gets the type of this item data.

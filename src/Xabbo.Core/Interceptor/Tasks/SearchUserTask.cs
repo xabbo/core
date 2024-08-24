@@ -1,30 +1,25 @@
 ﻿using System;
-using System.Threading.Tasks;
 
-using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Tasks;
 
-public class SearchUserTask : InterceptorTask<UserSearchResults>
+[Intercepts]
+public partial class SearchUserTask(IInterceptor interceptor, string searchName)
+    : InterceptorTask<UserSearchResults>(interceptor)
 {
-    private readonly string _searchName;
+    private readonly string _searchName = searchName;
 
-    public SearchUserTask(IInterceptor interceptor, string searchName)
-        : base(interceptor)
-    {
-        _searchName = searchName;
-    }
+    protected override void OnExecute() => Interceptor.Send(Out.HabboSearch, _searchName);
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.HabboSearch, _searchName);
-
-    [InterceptIn(nameof(Incoming.HabboSearchResult))]
-    protected void OnUserSearchResult(InterceptArgs e)
+    [InterceptIn(nameof(In.HabboSearchResult))]
+    void OnUserSearchResult(Intercept e)
     {
         try
         {
-            if (SetResult(UserSearchResults.Parse(e.Packet)))
+            if (SetResult(e.Packet.Parse<UserSearchResults>()))
                 e.Block();
         }
         catch (Exception ex) { SetException(ex); }

@@ -1,9 +1,10 @@
 ﻿using System;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public abstract class ItemData : IItemData
+public abstract class ItemData : IItemData, IComposer, IParser<ItemData>
 {
     public ItemDataType Type { get; }
 
@@ -32,31 +33,31 @@ public abstract class ItemData : IItemData
         UniqueSeriesSize = data.UniqueSeriesSize;
     }
 
-    protected virtual void Initialize(IReadOnlyPacket packet)
+    protected virtual void Initialize(in PacketReader p)
     {
         if (Flags.HasFlag(ItemDataFlags.IsLimitedRare))
         {
-            UniqueSerialNumber = packet.ReadInt();
-            UniqueSeriesSize = packet.ReadInt();
+            UniqueSerialNumber = p.Read<int>();
+            UniqueSeriesSize = p.Read<int>();
         }
     }
 
-    public void Compose(IPacket packet)
+    public void Compose(in PacketWriter p)
     {
-        packet.WriteInt(((int)Type & 0xFF) | ((int)Flags << 8));
-        WriteData(packet);
+        p.Write(((int)Type & 0xFF) | ((int)Flags << 8));
+        WriteData(in p);
     }
 
-    protected void WriteBase(IPacket packet)
+    protected void WriteBase(in PacketWriter p)
     {
         if (Flags.HasFlag(ItemDataFlags.IsLimitedRare))
         {
-            packet.WriteInt(UniqueSerialNumber);
-            packet.WriteInt(UniqueSeriesSize);
+            p.Write(UniqueSerialNumber);
+            p.Write(UniqueSeriesSize);
         }
     }
 
-    protected abstract void WriteData(IPacket packet);
+    protected abstract void WriteData(in PacketWriter p);
 
     public static ItemData Clone(IItemData data)
     {
@@ -74,9 +75,9 @@ public abstract class ItemData : IItemData
         };
     }
 
-    public static ItemData Parse(IReadOnlyPacket packet)
+    public static ItemData Parse(in PacketReader p)
     {
-        int value = packet.ReadInt();
+        int value = p.Read<int>();
         var type = (ItemDataType)(value & 0xFF);
 
         ItemData data = type switch
@@ -93,7 +94,7 @@ public abstract class ItemData : IItemData
         };
 
         data.Flags = (ItemDataFlags)(value >> 8);
-        data.Initialize(packet);
+        data.Initialize(in p);
 
         return data;
     }

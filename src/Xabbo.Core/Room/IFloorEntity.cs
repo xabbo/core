@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Xabbo.Core;
+﻿namespace Xabbo.Core;
 
 /// <summary>
 /// Represents an entity with an X, Y, Z location and direction in a room.

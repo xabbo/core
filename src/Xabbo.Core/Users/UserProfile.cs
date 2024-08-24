@@ -8,7 +8,7 @@ namespace Xabbo.Core;
 /// <summary>
 /// The user's information that is sent upon requesting their profile.
 /// </summary>
-public class UserProfile : IUserProfile
+public sealed class UserProfile : IUserProfile, IComposer, IParser<UserProfile>
 {
     public long Id { get; set; }
     public string Name { get; set; }
@@ -33,56 +33,55 @@ public class UserProfile : IUserProfile
         Figure =
         Motto =
         Created = string.Empty;
-        Groups = new List<GroupInfo>();
+        Groups = [];
     }
 
-    protected UserProfile(IReadOnlyPacket packet)
-        : this()
+    private UserProfile(in PacketReader packet) : this()
     {
-        if (packet.Protocol == ClientType.Flash)
+        if (packet.Client == ClientType.Flash)
         {
-            Id = packet.ReadInt();
-            Name = packet.ReadString();
-            Figure = packet.ReadString();
-            Motto = packet.ReadString();
-            Created = packet.ReadString();
-            ActivityPoints = packet.ReadInt();
-            Friends = packet.ReadInt();
-            IsFriend = packet.ReadBool();
-            IsFriendRequestSent = packet.ReadBool();
-            IsOnline = packet.ReadBool();
+            Id = packet.Read<int>();
+            Name = packet.Read<string>();
+            Figure = packet.Read<string>();
+            Motto = packet.Read<string>();
+            Created = packet.Read<string>();
+            ActivityPoints = packet.Read<int>();
+            Friends = packet.Read<int>();
+            IsFriend = packet.Read<bool>();
+            IsFriendRequestSent = packet.Read<bool>();
+            IsOnline = packet.Read<bool>();
 
-            int n = packet.ReadInt();
+            int n = packet.Read<int>();
             for (int i = 0; i < n; i++)
             {
                 Groups.Add(GroupInfo.Parse(packet));
             }
 
-            LastLogin = TimeSpan.FromSeconds(packet.ReadInt());
-            DisplayInClient = packet.ReadBool();
+            LastLogin = TimeSpan.FromSeconds(packet.Read<int>());
+            DisplayInClient = packet.Read<bool>();
 
             if (packet.Available > 0)
             {
-                packet.ReadBool();
-                Level = packet.ReadInt();
-                packet.ReadInt();
-                StarGems = packet.ReadInt();
-                packet.ReadBool();
-                packet.ReadBool();
+                packet.Read<bool>();
+                Level = packet.Read<int>();
+                packet.Read<int>();
+                StarGems = packet.Read<int>();
+                packet.Read<bool>();
+                packet.Read<bool>();
             }
         }
         else
         {
-            Id = packet.ReadLong();
-            Name = packet.ReadString();
-            Figure = packet.ReadString();
-            Motto = packet.ReadString();
-            Created = packet.ReadString();
-            // ActivityPoints = packet.ReadInt();
-            Friends = packet.ReadInt();
-            IsFriend = packet.ReadBool();
-            // IsFriendRequestSent = packet.ReadBool();
-            // IsOnline = packet.ReadBool();
+            Id = packet.Read<long>();
+            Name = packet.Read<string>();
+            Figure = packet.Read<string>();
+            Motto = packet.Read<string>();
+            Created = packet.Read<string>();
+            // ActivityPoints = packet.Read<int>();
+            Friends = packet.Read<int>();
+            IsFriend = packet.Read<bool>();
+            // IsFriendRequestSent = packet.Read<bool>();
+            // IsOnline = packet.Read<bool>();
 
             // long secondsSinceLastLogin
             // bool showInClient ???
@@ -93,31 +92,31 @@ public class UserProfile : IUserProfile
             // bool ?
             // bool ?
 
-            short n = packet.ReadShort();
+            short n = packet.Read<short>();
             for (int i = 0; i < n; i++)
                 Groups.Add(GroupInfo.Parse(packet));
 
-            LastLogin = TimeSpan.FromSeconds(packet.ReadInt());
-            DisplayInClient = packet.ReadBool();
+            LastLogin = TimeSpan.FromSeconds(packet.Read<int>());
+            DisplayInClient = packet.Read<bool>();
         }
     }
 
-    public void Compose(IPacket packet) => packet.Write(
-        Id,
-        Name,
-        Figure,
-        Motto,
-        Created,
-        ActivityPoints,
-        Friends,
-        IsFriend,
-        IsFriendRequestSent,
-        IsOnline,
-        Groups,
-        (int)LastLogin.TotalSeconds,
-        DisplayInClient
-    );
+    public void Compose(in PacketWriter p)
+    {
+        p.Write(Id);
+        p.Write(Name);
+        p.Write(Figure);
+        p.Write(Motto);
+        p.Write(Created);
+        p.Write(ActivityPoints);
+        p.Write(Friends);
+        p.Write(IsFriend);
+        p.Write(IsFriendRequestSent);
+        p.Write(IsOnline);
+        p.Write(Groups);
+        p.Write((int)LastLogin.TotalSeconds);
+        p.Write(DisplayInClient);
+    }
 
-
-    public static UserProfile Parse(IReadOnlyPacket packet) => new UserProfile(packet);
+    public static UserProfile Parse(in PacketReader packet) => new(in packet);
 }

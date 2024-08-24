@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 
 using Xabbo.Messages;
 
@@ -9,31 +7,17 @@ namespace Xabbo.Core;
 /// <summary>
 /// Represents a 3-dimensional location.
 /// </summary>
-public readonly struct Tile : IComposable
+public readonly struct Tile(int x, int y, float z) : IComposer, IParser<Tile>
 {
-    public readonly int X;
-    public readonly int Y;
-    public readonly float Z;
+    public readonly int X = x;
+    public readonly int Y = y;
+    public readonly float Z = z;
 
     public Point XY => new(X, Y);
-
-    public Tile(int x, int y, float z)
-    {
-        X = x;
-        Y = y;
-        Z = z;
-    }
 
     public Tile(int x, int y)
         : this(x, y, 0)
     { }
-
-    public readonly void Compose(IPacket packet)
-    {
-        packet.WriteInt(X);
-        packet.WriteInt(Y);
-        packet.WriteFloatAsString(Z);
-    }
 
     public readonly override int GetHashCode() => (X, Y, Z).GetHashCode();
 
@@ -55,7 +39,14 @@ public readonly struct Tile : IComposable
 
     public readonly override string ToString() => $"({X}, {Y}, {Z:0.0#######})";
 
-    public static Tile Parse(IReadOnlyPacket packet) => new(packet.ReadInt(), packet.ReadInt(), packet.ReadFloatAsString());
+    public readonly void Compose(in PacketWriter p)
+    {
+        p.Write(X);
+        p.Write(Y);
+        p.Write((FloatString)Z);
+    }
+
+    public static Tile Parse(in PacketReader p) => new(p.Read<int>(), p.Read<int>(), p.Read<FloatString>());
 
     public static bool TryParse(string format, out Tile tile)
     {

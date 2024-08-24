@@ -1,26 +1,20 @@
 ﻿using System;
-using System.Threading.Tasks;
 
-using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks;
 
-public class GetMarketplaceInfoTask : InterceptorTask<IMarketplaceItemInfo>
+[Intercepts]
+public sealed partial class GetMarketplaceInfoTask(IInterceptor interceptor, ItemType type, int kind)
+    : InterceptorTask<IMarketplaceItemInfo>(interceptor)
 {
-    private readonly ItemType _type;
-    private readonly int _kind;
+    private readonly ItemType _type = type;
+    private readonly int _kind = kind;
 
-    public GetMarketplaceInfoTask(IInterceptor interceptor, ItemType type, int kind)
-        : base(interceptor)
-    {
-        _type = type;
-        _kind = kind;
-    }
-
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(
-        Out.MarketplaceGetItemStats,
+    protected override void OnExecute() => Interceptor.Send(
+        Out.GetMarketplaceItemStats,
         _type switch
         {
             ItemType.Floor => 1,
@@ -30,10 +24,10 @@ public class GetMarketplaceInfoTask : InterceptorTask<IMarketplaceItemInfo>
         _kind
     );
 
-    [InterceptIn(nameof(Incoming.MarketplaceItemStats))]
-    protected void HandleMarketplaceItemStats(InterceptArgs e)
+    [InterceptIn(nameof(In.MarketplaceItemStats))]
+    private void HandleMarketplaceItemStats(Intercept e)
     {
-        MarketplaceItemInfo info = MarketplaceItemInfo.Parse(e.Packet);
+        MarketplaceItemInfo info = e.Packet.Parse<MarketplaceItemInfo>();
 
         if (info.Type == _type && info.Kind == _kind)
         {

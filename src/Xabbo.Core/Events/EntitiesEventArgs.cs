@@ -1,18 +1,9 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 
 namespace Xabbo.Core.Events;
 
-public class EntitiesEventArgs : EventArgs
+public sealed class EntitiesEventArgs(IEnumerable<IEntity> entities)
 {
-    public IEntity[] Entities { get; }
-
-    public EntitiesEventArgs(IEnumerable<IEntity> entities)
-    {
-        if (entities is IEntity[] array)
-            Entities = array;
-        else
-            Entities = entities.ToArray();
-    }
+    public IEntity[] Entities { get; } = entities.ToArray();
 }

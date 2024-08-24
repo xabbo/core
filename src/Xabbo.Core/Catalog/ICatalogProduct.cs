@@ -1,10 +1,10 @@
 ﻿using System;
 
-using Xabbo.Messages; 
+using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface ICatalogProduct : IItem, IComposable
+public interface ICatalogProduct : IItem, IComposer
 {
     string Variant { get; }
     int Count { get; }

@@ -1,16 +1,14 @@
-﻿using System;
-
-namespace Xabbo.Core;
+﻿namespace Xabbo.Core;
 
 public interface IGroupData
 {
-    long Id { get; }
+    Id Id { get; }
     bool IsGuild { get; }
     GroupType Type { get; }
     string Name { get; }
     string Description { get; }
     string Badge { get; }
-    long HomeRoomId { get; }
+    Id HomeRoomId { get; }
     string HomeRoomName { get; }
     GroupMemberStatus MemberStatus { get; }
     int MemberCount { get; }

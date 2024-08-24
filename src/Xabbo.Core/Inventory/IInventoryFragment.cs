@@ -5,7 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface IInventoryFragment : IReadOnlyCollection<IInventoryItem>, IComposable
+public interface IInventoryFragment : IReadOnlyCollection<IInventoryItem>, IComposer
 {
     /// <summary>
     /// Gets the total number of fragments.

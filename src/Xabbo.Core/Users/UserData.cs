@@ -1,12 +1,11 @@
-﻿using System;
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
 /// <summary>
 /// The user's own data that is sent upon requesting user data.
 /// </summary>
-public class UserData : IUserData
+public sealed class UserData : IUserData, IComposer, IParser<UserData>
 {
     public long Id { get; set; }
     public string Name { get; set; }
@@ -35,45 +34,47 @@ public class UserData : IUserData
         Gender = Gender.Unisex;
     }
 
-    protected UserData(IReadOnlyPacket packet)
+    private UserData(in PacketReader packet)
     {
-        Id = packet.ReadLegacyLong();
-        Name = packet.ReadString();
-        Figure = packet.ReadString();
-        Gender = H.ToGender(packet.ReadString());
-        Motto = packet.ReadString();
-        RealName = packet.ReadString();
-        DirectMail = packet.ReadBool();
-        TotalRespects = packet.ReadInt();
-        RespectsLeft = packet.ReadInt();
-        ScratchesLeft = packet.ReadInt();
-        StreamPublishingAllowed = packet.ReadBool();
-        LastAccessDate = packet.ReadString();
-        IsNameChangeable = packet.ReadBool();
-        IsSafetyLocked = packet.ReadBool();
+        Id = packet.Read<Id>();
+        Name = packet.Read<string>();
+        Figure = packet.Read<string>();
+        Gender = H.ToGender(packet.Read<string>());
+        Motto = packet.Read<string>();
+        RealName = packet.Read<string>();
+        DirectMail = packet.Read<bool>();
+        TotalRespects = packet.Read<int>();
+        RespectsLeft = packet.Read<int>();
+        ScratchesLeft = packet.Read<int>();
+        StreamPublishingAllowed = packet.Read<bool>();
+        LastAccessDate = packet.Read<string>();
+        IsNameChangeable = packet.Read<bool>();
+        IsSafetyLocked = packet.Read<bool>();
 
         if (packet.Available > 0)
         {
-            _Bool5 = packet.ReadBool();
+            _Bool5 = packet.Read<bool>();
         }
     }
 
-    public void Compose(IPacket packet) => packet
-        .WriteLegacyLong(Id)
-        .WriteString(Name)
-        .WriteString(Figure)
-        .WriteString(Gender.ToShortString())
-        .WriteString(Motto)
-        .WriteString(RealName)
-        .WriteBool(DirectMail)
-        .WriteInt(TotalRespects)
-        .WriteInt(RespectsLeft)
-        .WriteInt(ScratchesLeft)
-        .WriteBool(StreamPublishingAllowed)
-        .WriteString(LastAccessDate)
-        .WriteBool(IsNameChangeable)
-        .WriteBool(IsSafetyLocked)
-        .WriteBool(_Bool5);
+    public void Compose(in PacketWriter p)
+    {
+        p.Write(Id);
+        p.Write(Name);
+        p.Write(Figure);
+        p.Write(Gender.ToShortString());
+        p.Write(Motto);
+        p.Write(RealName);
+        p.Write(DirectMail);
+        p.Write(TotalRespects);
+        p.Write(RespectsLeft);
+        p.Write(ScratchesLeft);
+        p.Write(StreamPublishingAllowed);
+        p.Write(LastAccessDate);
+        p.Write(IsNameChangeable);
+        p.Write(IsSafetyLocked);
+        p.Write(_Bool5);
+    }
 
-    public static UserData Parse(IReadOnlyPacket packet) => new UserData(packet);
+    public static UserData Parse(in PacketReader packet) => new(in packet);
 }

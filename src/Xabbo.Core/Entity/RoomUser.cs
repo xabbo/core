@@ -1,6 +1,4 @@
-﻿using System;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
@@ -9,7 +7,7 @@ public class RoomUser : Entity, IRoomUser
     public Gender Gender { get; set; }
     public long GroupId { get; set; }
     public int GroupStatus { get; set; }
-    public string GroupName { get; set; } 
+    public string GroupName { get; set; }
     public string FigureExtra { get; set; }
     public int AchievementScore { get; set; }
     public bool IsModerator { get; set; }
@@ -26,31 +24,30 @@ public class RoomUser : Entity, IRoomUser
         FigureExtra = "";
     }
 
-    internal RoomUser(long id, int index, IReadOnlyPacket packet)
+    internal RoomUser(long id, int index, in PacketReader p)
         : this(id, index)
     {
-        Gender = H.ToGender(packet.ReadString());
-        GroupId = packet.ReadLegacyLong();
-        GroupStatus = packet.ReadInt();
-        GroupName = packet.ReadString();
-        FigureExtra = packet.ReadString();
-        AchievementScore = packet.ReadInt();
-        IsModerator = packet.ReadBool();
+        Gender = H.ToGender(p.Read<string>());
+        GroupId = p.Read<Id>();
+        GroupStatus = p.Read<int>();
+        GroupName = p.Read<string>();
+        FigureExtra = p.Read<string>();
+        AchievementScore = p.Read<int>();
+        IsModerator = p.Read<bool>();
     }
 
     protected override void OnUpdate(EntityStatusUpdate update) { }
 
-    public override void Compose(IPacket packet)
+    public override void Compose(in PacketWriter p)
     {
-        base.Compose(packet);
+        base.Compose(in p);
 
-        packet
-            .WriteString(Gender.ToShortString().ToLower())
-            .WriteLegacyLong(GroupId)
-            .WriteInt(GroupStatus)
-            .WriteString(GroupName)
-            .WriteString(FigureExtra)
-            .WriteInt(AchievementScore)
-            .WriteBool(IsModerator);
+        p.Write(Gender.ToShortString().ToLower());
+        p.Write(GroupId);
+        p.Write(GroupStatus);
+        p.Write(GroupName);
+        p.Write(FigureExtra);
+        p.Write(AchievementScore);
+        p.Write(IsModerator);
     }
 }

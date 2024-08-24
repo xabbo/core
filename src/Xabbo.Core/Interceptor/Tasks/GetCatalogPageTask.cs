@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Threading.Tasks;
 
-using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Tasks;
 
 /// <summary>
 /// Gets a catalog page by its ID.
 /// </summary>
-public sealed class GetCatalogPageTask : InterceptorTask<ICatalogPage>
+[Intercepts]
+public sealed partial class GetCatalogPageTask : InterceptorTask<ICatalogPage>
 {
     private readonly int _pageId;
     private readonly string _catalogType;
@@ -18,21 +18,20 @@ public sealed class GetCatalogPageTask : InterceptorTask<ICatalogPage>
     public GetCatalogPageTask(IInterceptor interceptor, int pageId, string catalogType)
         : base(interceptor)
     {
-        if (pageId <= 0)
-            throw new ArgumentException($"Invalid catalog page ID: {pageId}.");
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageId);
 
         _pageId = pageId;
         _catalogType = catalogType;
     }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetCatalogPage, _pageId, -1, _catalogType);
+    protected override void OnExecute() => Interceptor.Send(Out.GetCatalogPage, _pageId, -1, _catalogType);
 
-    [InterceptIn(nameof(Incoming.CatalogPage))]
-    internal void HandleCatalogPage(InterceptArgs e)
+    [InterceptIn(nameof(In.CatalogPage))]
+    private void HandleCatalogPage(Intercept e)
     {
         try
         {
-            var catalogPage = CatalogPage.Parse(e.Packet);
+            var catalogPage = e.Packet.Parse<CatalogPage>();
             if (catalogPage.Id == _pageId &&
                 catalogPage.CatalogType == _catalogType)
             {

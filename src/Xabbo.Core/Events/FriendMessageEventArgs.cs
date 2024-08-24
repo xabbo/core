@@ -1,24 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿namespace Xabbo.Core.Events;
 
-using Xabbo.Core.Game;
-
-namespace Xabbo.Core.Events;
-
-public class FriendMessageEventArgs : FriendEventArgs
+public sealed class FriendMessageEventArgs(IFriend friend, string message) : FriendEventArgs(friend)
 {
-    private readonly FriendManager _friendManager;
-
-    public string Message { get; }
-
-    public FriendMessageEventArgs(FriendManager friendManager,
-        IFriend friend, string message)
-        : base(friend)
-    {
-        _friendManager = friendManager;
-        Message = message;
-    }
-
-    public void Reply(string message) => _friendManager.SendMessage(Friend.Id, message);
-    public ValueTask ReplyAsync(string message) => _friendManager.SendMessageAsync(Friend.Id, message);
+    public string Message { get; } = message;
 }

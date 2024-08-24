@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
@@ -17,14 +17,14 @@ public class GetCatalogTask : InterceptorTask<ICatalog>
         _type = type;
     }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetCatalogIndex, _type);
+    protected override void OnExecute() => Interceptor.Send(Out.GetCatalogIndex, _type);
 
-    [InterceptIn(nameof(Incoming.CatalogIndex))]
-    protected void HandleCatalogIndex(InterceptArgs e)
+    [InterceptIn(nameof(In.CatalogIndex))]
+    protected void HandleCatalogIndex(Intercept e)
     {
         try
         {
-            var catalog = Catalog.Parse(e.Packet);
+            var catalog = e.Packet.Parse<Catalog>();
             if (catalog.Type == _type)
             {
                 if (SetResult(catalog))

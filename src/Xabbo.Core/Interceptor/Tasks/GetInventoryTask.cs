@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Threading.Tasks;
 
-using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
@@ -12,7 +11,7 @@ namespace Xabbo.Core.Tasks;
 public class GetInventoryTask : InterceptorTask<IInventory>
 {
     private int _total = -1, _index = 0;
-    private readonly Inventory inventory = new Inventory();
+    private readonly Inventory inventory = new();
 
     private readonly bool _blockPackets;
 
@@ -24,14 +23,14 @@ public class GetInventoryTask : InterceptorTask<IInventory>
 
     public GetInventoryTask(IInterceptor interceptor) : this(interceptor, true) { }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetInventory);
+    protected override void OnExecute() => Interceptor.Send(Out.RequestFurniInventory);
 
-    [InterceptIn(nameof(Incoming.InventoryPush))]
-    protected void OnInventoryItems(InterceptArgs e)
+    [InterceptIn(nameof(In.FurniList))]
+    protected void OnInventoryItems(Intercept e)
     {
         try
         {
-            InventoryFragment fragment = InventoryFragment.Parse(e.Packet);
+            InventoryFragment fragment = e.Packet.Parse<InventoryFragment>();
 
             if (fragment.Index != _index)
             {

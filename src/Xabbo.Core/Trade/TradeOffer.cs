@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class TradeOffer : ITradeOffer
+public sealed class TradeOffer : ITradeOffer, IComposer, IParser<TradeOffer>
 {
-    public static TradeOffer Parse(IReadOnlyPacket packet) => new TradeOffer(packet);
+    public static TradeOffer Parse(in PacketReader packet) => new(in packet);
 
-    public int UserId { get; set; }
+    public Id UserId { get; set; }
     public List<TradeItem> Items { get; set; }
     IReadOnlyList<ITradeItem> ITradeOffer.Items => Items;
     public int FurniCount { get; set; }
@@ -16,17 +16,28 @@ public class TradeOffer : ITradeOffer
 
     public TradeOffer()
     {
-        Items = new List<TradeItem>();
+        Items = [];
     }
 
-    protected TradeOffer(IReadOnlyPacket packet)
-        : this()
+    private TradeOffer(in PacketReader p) : this()
     {
-        UserId = packet.ReadInt();
-        int n = packet.ReadInt();
+        UserId = p.Read<Id>();
+        int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
-            Items.Add(TradeItem.Parse(packet));
-        FurniCount = packet.ReadInt();
-        CreditCount = packet.ReadInt();
+            Items.Add(p.Parse<TradeItem>());
+        FurniCount = p.Read<int>();
+        CreditCount = p.Read<int>();
     }
+
+    public void Compose(in PacketWriter p)
+    {
+        p.Write(UserId);
+        p.Write<Length>(Items.Count);
+        foreach (var item in Items)
+            p.Write(item);
+        p.Write(FurniCount);
+        p.Write(CreditCount);
+    }
+
+
 }

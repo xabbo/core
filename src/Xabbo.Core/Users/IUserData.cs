@@ -7,7 +7,7 @@ namespace Xabbo.Core;
 /// <summary>
 /// The current user's information that is sent upon requesting user data.
 /// </summary>
-public interface IUserData : IComposable
+public interface IUserData : IComposer
 {
     long Id { get; }
     string Name { get; }

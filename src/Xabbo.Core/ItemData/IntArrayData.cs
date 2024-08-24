@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 
 using Xabbo.Messages;
@@ -19,38 +18,32 @@ public class IntArrayData : ItemData, IIntArrayData, IList<int>
         set => _list[index] = value;
     }
 
-    public IntArrayData()
-        : base(ItemDataType.IntArray)
+    public IntArrayData() : base(ItemDataType.IntArray)
     {
-        _list = new List<int>();
+        _list = [];
     }
 
-    public IntArrayData(IIntArrayData data)
-        : base(data)
+    public IntArrayData(IIntArrayData data) : base(data)
     {
         _list = new List<int>(data);
     }
 
-    protected override void Initialize(IReadOnlyPacket packet)
+    protected override void Initialize(in PacketReader p)
     {
-        short n = packet.ReadLegacyShort();
+        int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
-        {
-            _list.Add(packet.ReadInt());
-        }
+            _list.Add(p.Read<int>());
 
-        base.Initialize(packet);
+        base.Initialize(in p);
     }
 
-    protected override void WriteData(IPacket packet)
+    protected override void WriteData(in PacketWriter p)
     {
-        packet.WriteLegacyShort((short)Count);
+        p.Write<Length>(Count);
         foreach (int value in this)
-        {
-            packet.WriteInt(value);
-        }
+            p.Write(value);
 
-        WriteBase(packet);
+        WriteBase(p);
     }
 
     public int IndexOf(int item) => _list.IndexOf(item);

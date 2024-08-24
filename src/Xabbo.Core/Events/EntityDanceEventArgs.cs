@@ -1,14 +1,7 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class EntityDanceEventArgs : EntityEventArgs
+public sealed class EntityDanceEventArgs(IEntity entity, int previousDance)
+    : EntityEventArgs(entity)
 {
-    public int PreviousDance { get; }
-
-    public EntityDanceEventArgs(IEntity entity, int previousDance)
-        : base(entity)
-    {
-        PreviousDance = previousDance;
-    }
+    public int PreviousDance { get; } = previousDance;
 }

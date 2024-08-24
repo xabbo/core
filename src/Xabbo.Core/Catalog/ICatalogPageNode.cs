@@ -5,7 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface ICatalogPageNode : IComposable
+public interface ICatalogPageNode
 {
     ICatalog? Catalog { get; }
     ICatalogPageNode? Parent { get; }

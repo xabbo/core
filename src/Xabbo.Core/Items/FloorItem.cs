@@ -7,7 +7,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class FloorItem : Furni, IFloorItem
+public class FloorItem : Furni, IFloorItem, IComposer, IParser<FloorItem>, IManyParser<FloorItem>
 {
     public override ItemType Type => ItemType.Floor;
 
@@ -53,89 +53,78 @@ public class FloorItem : Furni, IFloorItem
         StaticClass = item.StaticClass;
     }
 
-    protected FloorItem(IReadOnlyPacket packet, bool readName)
+    protected FloorItem(in PacketReader p, bool readName)
     {
-        Id = packet.ReadLegacyLong();
-        Kind = packet.ReadInt();
-        int x = packet.ReadInt();
-        int y = packet.ReadInt();
-        Direction = packet.ReadInt();
-        float z = packet.ReadLegacyFloat();
+        Id = p.Read<Id>();
+        Kind = p.Read<int>();
+        int x = p.Read<int>();
+        int y = p.Read<int>();
+        Direction = p.Read<int>();
+        float z = p.Read<float>();
         Location = new Tile(x, y, z);
-        Height = packet.ReadLegacyFloat();
-        Extra = packet.ReadLegacyLong();
+        Height = p.Read<float>();
+        Extra = p.Read<Id>();
         // - consumable state e.g. cabbage 0: full, 1: partly eaten, 2: mostly eaten
         // - linked teleport id
 
-        Data = ItemData.Parse(packet);
+        Data = p.Parse<ItemData>();
 
-        SecondsToExpiration = packet.ReadInt();
-        Usage = (FurniUsage)packet.ReadInt();
-        OwnerId = packet.ReadLegacyLong();
+        SecondsToExpiration = p.Read<int>();
+        Usage = (FurniUsage)p.Read<int>();
+        OwnerId = p.Read<Id>();
 
         if (Kind < 0)
         {
-            StaticClass = packet.ReadString();
+            StaticClass = p.Read<string>();
         }
         else
         {
             StaticClass = string.Empty;
         }
 
-        if (readName && packet.CanReadString())
-            OwnerName = packet.ReadString();
+        if (readName && p.Available >= 2)
+            OwnerName = p.Read<string>();
     }
 
-    public override void Compose(IPacket packet)
+    public override void Compose(in PacketWriter p) => Compose(in p, true);
+    public override void Compose(in PacketWriter p, bool writeOwnerName)
     {
-        Compose(packet, true);
-    }
+        p.Write(Id);
+        p.Write(Kind);
+        p.Write(Location.X);
+        p.Write(Location.Y);
+        p.Write(Direction);
+        p.Write(Location.Z);
+        p.Write(Height);
+        p.Write(Extra);
+        p.Write(Data);
+        p.Write(SecondsToExpiration);
+        p.Write((int)Usage);
+        p.Write(OwnerId);
 
-    public override void Compose(IPacket packet, bool writeOwnerName = true)
-    {
-        packet
-            .WriteLegacyLong(Id)
-            .WriteInt(Kind)
-            .WriteInt(Location.X)
-            .WriteInt(Location.Y)
-            .WriteInt(Direction)
-            .WriteLegacyFloat(Location.Z)
-            .WriteLegacyFloat(Height)
-            .WriteLegacyLong(Extra)
-            .Write(Data)
-            .WriteInt(SecondsToExpiration)
-            .WriteInt((int)Usage)
-            .WriteLegacyLong(OwnerId);
-
-        if (Kind < 0) packet.WriteString(StaticClass);
-        if (writeOwnerName) packet.WriteString(OwnerName);
+        if (Kind < 0) p.Write(StaticClass);
+        if (writeOwnerName) p.Write(OwnerName);
     }
 
     public override string ToString() => $"{nameof(FloorItem)}#{Id}/{Kind}";
 
-    public static FloorItem Parse(IReadOnlyPacket packet, bool readName = true)
-    {
-        return new FloorItem(packet, readName);
-    }
+    public static FloorItem Parse(in PacketReader p) => Parse(in p, true);
+    public static FloorItem Parse(in PacketReader p, bool readName) => new(in p, readName);
+    public static FloorItem ParseUpdate(in PacketReader p) => new(in p, false);
 
-    public static FloorItem ParseUpdate(IReadOnlyPacket packet)
-    {
-        return new FloorItem(packet, false);
-    }
-
-    public static FloorItem[] ParseAll(IReadOnlyPacket packet)
+    public static IEnumerable<FloorItem> ParseAll(in PacketReader p)
     {
         var ownerDictionary = new Dictionary<long, string>();
 
-        short n = packet.ReadLegacyShort();
+        int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
-            ownerDictionary.Add(packet.ReadLegacyLong(), packet.ReadString());
+            ownerDictionary.Add(p.Read<Id>(), p.Read<string>());
 
-        n = packet.ReadLegacyShort();
+        n = p.Read<Length>();
         var items = new FloorItem[n];
         for (int i = 0; i < n; i++)
         {
-            var item = items[i] = Parse(packet, false);
+            var item = items[i] = Parse(p, false);
             if (ownerDictionary.TryGetValue(item.OwnerId, out string? ownerName))
                 item.OwnerName = ownerName;
         }
@@ -143,7 +132,7 @@ public class FloorItem : Furni, IFloorItem
         return items;
     }
 
-    public static void ComposeAll(IPacket packet, IEnumerable<IFloorItem> items)
+    public static void ComposeAll(in PacketWriter p, IEnumerable<IFloorItem> items)
     {
         var ownerIds = new HashSet<long>();
         var ownerDictionary = items
@@ -153,21 +142,18 @@ public class FloorItem : Furni, IFloorItem
                 val => val.OwnerName
             );
 
-        packet.WriteLegacyShort((short)ownerDictionary.Count);
+        p.Write<Length>(ownerDictionary.Count);
         foreach (var pair in ownerDictionary)
         {
-            packet.WriteLegacyLong(pair.Key);
-            packet.WriteString(pair.Value);
+            p.Write(pair.Key);
+            p.Write(pair.Value);
         }
 
-        packet.WriteLegacyShort((short)items.Count());
+        p.Write<Length>(items.Count());
         foreach (IFloorItem item in items)
-            item.Compose(packet, false);
+            item.Compose(p, false);
     }
 
-    public static void ComposeAll(IPacket packet, params FloorItem[] items)
-    {
-        ComposeAll(packet, (IEnumerable<IFloorItem>)items);
-    }
-
+    public static void ComposeAll(in PacketWriter p, params FloorItem[] items)
+        => ComposeAll(in p, (IEnumerable<IFloorItem>)items);
 }

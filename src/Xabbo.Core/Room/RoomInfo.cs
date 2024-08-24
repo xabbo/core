@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class RoomInfo : IRoomInfo
+public class RoomInfo : IRoomInfo, IComposer, IParser<RoomInfo>
 {
-    public long Id { get; set; }
+    public Id Id { get; set; }
     public string Name { get; set; }
-    public long OwnerId { get; set; }
+    public Id OwnerId { get; set; }
     public string OwnerName { get; set; }
     public RoomAccess Access { get; set; }
     public bool IsOpen => Access == RoomAccess.Open;
@@ -25,7 +24,7 @@ public class RoomInfo : IRoomInfo
     public RoomCategory Category { get; set; }
     public List<string> Tags { get; set; }
     IReadOnlyList<string> IRoomInfo.Tags => Tags;
-    
+
     public RoomFlags Flags { get; set; }
     public bool HasOfficialRoomPic => Flags.HasFlag(RoomFlags.HasOfficialRoomPic);
     public bool IsGroupRoom => Flags.HasFlag(RoomFlags.IsGroupHomeRoom);
@@ -49,101 +48,97 @@ public class RoomInfo : IRoomInfo
         OfficialRoomPicRef =
         GroupName =
         GroupBadge =
-        EventName = 
+        EventName =
         EventDescription = string.Empty;
-        Tags = new List<string>();
+        Tags = [];
     }
 
-    protected RoomInfo(IReadOnlyPacket packet)
-        : this()
+    protected RoomInfo(in PacketReader p) : this()
     {
-        Id = packet.ReadLegacyLong();
-        Name = packet.ReadString();
-        OwnerId = packet.ReadLegacyLong();
-        OwnerName = packet.ReadString();
-        Access = (RoomAccess)packet.ReadInt();
-        Users = packet.ReadInt();
-        MaxUsers = packet.ReadInt();
-        Description = packet.ReadString();
-        Trading = (TradePermissions)packet.ReadInt();
-        Score = packet.ReadInt();
-        Ranking = packet.ReadInt();
-        Category = (RoomCategory)packet.ReadInt();
+        Id = p.Read<Id>();
+        Name = p.Read<string>();
+        OwnerId = p.Read<Id>();
+        OwnerName = p.Read<string>();
+        Access = (RoomAccess)p.Read<int>();
+        Users = p.Read<int>();
+        MaxUsers = p.Read<int>();
+        Description = p.Read<string>();
+        Trading = (TradePermissions)p.Read<int>();
+        Score = p.Read<int>();
+        Ranking = p.Read<int>();
+        Category = (RoomCategory)p.Read<int>();
 
-        int n = packet.ReadLegacyShort();
+        int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
         {
-            Tags.Add(packet.ReadString());
+            Tags.Add(p.Read<string>());
         }
 
-        Flags = (RoomFlags)packet.ReadInt();
+        Flags = (RoomFlags)p.Read<int>();
 
         if (Flags.HasFlag(RoomFlags.HasOfficialRoomPic))
         {
-            OfficialRoomPicRef = packet.ReadString();
+            OfficialRoomPicRef = p.Read<string>();
         }
 
         if (Flags.HasFlag(RoomFlags.IsGroupHomeRoom))
         {
-            GroupId = packet.ReadLegacyLong();
-            GroupName = packet.ReadString();
-            GroupBadge = packet.ReadString();
+            GroupId = p.Read<Id>();
+            GroupName = p.Read<string>();
+            GroupBadge = p.Read<string>();
         }
 
         if (Flags.HasFlag(RoomFlags.HasEvent))
         {
-            EventName = packet.ReadString();
-            EventDescription = packet.ReadString();
-            EventMinutesRemaining = packet.ReadInt();
+            EventName = p.Read<string>();
+            EventDescription = p.Read<string>();
+            EventMinutesRemaining = p.Read<int>();
         }
     }
 
-    public virtual void Compose(IPacket packet)
+    public virtual void Compose(in PacketWriter p)
     {
-        packet.WriteLegacyLong(Id);
-        packet.WriteString(Name);
+        p.Write(Id);
+        p.Write(Name);
 
-        packet.WriteLegacyLong(OwnerId);
-        packet.WriteString(OwnerName);
-        packet.WriteInt((int)Access);
-        packet.WriteInt(Users);
-        packet.WriteInt(MaxUsers);
-        packet.WriteString(Description);
-        packet.WriteInt((int)Trading);
-        packet.WriteInt(Score);
-        packet.WriteInt(Ranking);
-        packet.WriteInt((int)Category);
+        p.Write(OwnerId);
+        p.Write(OwnerName);
+        p.Write((int)Access);
+        p.Write(Users);
+        p.Write(MaxUsers);
+        p.Write(Description);
+        p.Write((int)Trading);
+        p.Write(Score);
+        p.Write(Ranking);
+        p.Write((int)Category);
 
-        packet.WriteLegacyShort((short)Tags.Count);
+        p.Write<Length>(Tags.Count);
         foreach (string tag in Tags)
         {
-            packet.WriteString(tag);
+            p.Write(tag);
         }
 
-        packet.WriteInt((int)Flags);
+        p.Write((int)Flags);
 
         if (Flags.HasFlag(RoomFlags.HasOfficialRoomPic))
         {
-            packet.WriteString(OfficialRoomPicRef);
+            p.Write(OfficialRoomPicRef);
         }
 
         if (Flags.HasFlag(RoomFlags.IsGroupHomeRoom))
         {
-            packet.WriteLegacyLong(GroupId);
-            packet.WriteString(GroupName);
-            packet.WriteString(GroupBadge);
+            p.Write(GroupId);
+            p.Write(GroupName);
+            p.Write(GroupBadge);
         }
 
         if (Flags.HasFlag(RoomFlags.HasEvent))
         {
-            packet.WriteString(EventName);
-            packet.WriteString(EventDescription);
-            packet.WriteInt(EventMinutesRemaining);
+            p.Write(EventName);
+            p.Write(EventDescription);
+            p.Write(EventMinutesRemaining);
         }
     }
 
-    public static RoomInfo Parse(IReadOnlyPacket packet)
-    {
-        return new RoomInfo(packet);
-    }
+    public static RoomInfo Parse(in PacketReader packet) => new(in packet);
 }

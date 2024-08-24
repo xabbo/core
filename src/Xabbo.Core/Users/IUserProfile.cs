@@ -5,7 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface IUserProfile : IComposable
+public interface IUserProfile : IComposer
 {
     long Id { get; }
     string Name { get; }

@@ -1,14 +1,12 @@
-﻿using System;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class Sticky
+public sealed class Sticky : IComposer, IParser<Sticky>
 {
-    public static readonly StickyColors Colors = new StickyColors();
+    public static readonly StickyColors Colors = new();
 
-    public long Id { get; set; }
+    public Id Id { get; set; }
     public string Color { get; set; }
     public string Text { get; set; }
 
@@ -18,15 +16,10 @@ public class Sticky
         Text = string.Empty;
     }
 
-    protected Sticky(IReadOnlyPacket packet)
+    private Sticky(in PacketReader p)
     {
-        Id = packet.Protocol switch
-        {
-            ClientType.Flash => long.Parse(packet.ReadString()),
-            ClientType.Unity => packet.ReadLong(),
-            _ => throw new Exception("Unknown client protocol.")
-        };
-        string text = packet.ReadString();
+        Id = p.Read<Id>();
+        string text = p.Read<string>();
         int spaceIndex = text.IndexOf(' ');
         Color = text[0..6];
         if (spaceIndex == 6)
@@ -39,5 +32,11 @@ public class Sticky
         }
     }
 
-    public static Sticky Parse(IReadOnlyPacket packet) => new Sticky(packet);
+    public static Sticky Parse(in PacketReader packet) => new(packet);
+
+    public void Compose(in PacketWriter p)
+    {
+        p.Write(Id);
+        p.Write($"{Color} {Text}");
+    }
 }

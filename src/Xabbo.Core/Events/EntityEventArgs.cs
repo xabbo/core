@@ -1,13 +1,6 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class EntityEventArgs : EventArgs
+public class EntityEventArgs(IEntity entity)
 {
-    public IEntity Entity { get; }
-
-    public EntityEventArgs(IEntity entity)
-    {
-        Entity = entity;
-    }
+    public IEntity Entity => entity;
 }

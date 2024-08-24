@@ -5,7 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface ICatalog : IEnumerable<ICatalogPageNode>, IComposable
+public interface ICatalog : IEnumerable<ICatalogPageNode>, IComposer
 {
     /// <summary>
     /// Gets the root <see cref="ICatalogPageNode"/>.

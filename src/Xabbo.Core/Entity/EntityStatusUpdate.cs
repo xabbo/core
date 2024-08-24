@@ -9,10 +9,9 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<string, IReadOnlyList<string>>
+public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<string, IReadOnlyList<string>>, IComposer, IParser<EntityStatusUpdate>
 {
-    private readonly Dictionary<string, string[]> fragments
-        = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, string[]> fragments = new(StringComparer.OrdinalIgnoreCase);
 
     public int Index { get; set; }
     public Tile Location { get; set; }
@@ -26,8 +25,7 @@ public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<strin
 
     // sit, lay
     public Stances Stance
-    {
-        get
+    { get
         {
             if (fragments.ContainsKey("sit"))
                 return Stances.Sit;
@@ -212,24 +210,23 @@ public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<strin
         Status = original.Status;
     }
 
-    private EntityStatusUpdate(IReadOnlyPacket packet)
+    private EntityStatusUpdate(in PacketReader p)
     {
-        Index = packet.ReadInt();
-        Location = Tile.Parse(packet);
-        HeadDirection = packet.ReadInt();
-        Direction = packet.ReadInt();
+        Index = p.Read<int>();
+        Location = Tile.Parse(p);
+        HeadDirection = p.Read<int>();
+        Direction = p.Read<int>();
 
-        ParseStatus(packet.ReadString());
+        ParseStatus(p.Read<string>());
     }
 
-    public void Compose(IPacket packet)
+    public void Compose(in PacketWriter p)
     {
-        packet
-            .WriteInt(Index)
-            .Write(Location)
-            .WriteInt(HeadDirection)
-            .WriteInt(Direction)
-            .WriteString(CompileStatus());
+        p.Write(Index);
+        p.Write(Location);
+        p.Write(HeadDirection);
+        p.Write(Direction);
+        p.Write(CompileStatus());
     }
 
     private void ParseStatus(string status)
@@ -293,34 +290,16 @@ public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<strin
 
     IEnumerator<KeyValuePair<string, IReadOnlyList<string>>>
         IEnumerable<KeyValuePair<string, IReadOnlyList<string>>>.GetEnumerator()
-    { 
+    {
         return fragments
             .Select(x => new KeyValuePair<string, IReadOnlyList<string>>(x.Key, x.Value))
             .GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
-    { 
+    {
         return ((IEnumerable<KeyValuePair<string, IReadOnlyCollection<string>>>)this).GetEnumerator();
     }
 
-    public static EntityStatusUpdate Parse(IReadOnlyPacket packet) => new EntityStatusUpdate(packet);
-    public static IEnumerable<EntityStatusUpdate> ParseMany(IReadOnlyPacket packet)
-    {
-        short n = packet.ReadLegacyShort();
-
-        for (int i = 0; i < n; i++)
-        {
-            yield return Parse(packet);
-        }
-    }
-
-    public static void ComposeAll(IPacket packet, IEnumerable<IEntityStatusUpdate> updates)
-    {
-        packet.WriteLegacyShort((short)updates.Count());
-        foreach (var update in updates)
-        {
-            update.Compose(packet);
-        }
-    }
+    public static EntityStatusUpdate Parse(in PacketReader p) => new(in p);
 }

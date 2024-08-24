@@ -1,37 +1,32 @@
 ﻿using System;
-using System.Threading.Tasks;
 
-using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks;
 
-public class GetGroupMembersTask : InterceptorTask<IGroupMembers>
+[Intercepts]
+public sealed partial class GetGroupMembersTask(
+    IInterceptor interceptor, Id groupId, int page, string filter, GroupMemberSearchType searchType
+)
+    : InterceptorTask<IGroupMembers>(interceptor)
 {
-    private readonly long _groupId;
-    private readonly int _page;
-    private readonly string _filter;
-    private readonly GroupMemberSearchType _searchType;
+    private readonly Id _groupId = groupId;
+    private readonly int _page = page;
+    private readonly string _filter = filter;
+    private readonly GroupMemberSearchType _searchType = searchType;
 
-    public GetGroupMembersTask(IInterceptor interceptor, long groupId, int page, string filter, GroupMemberSearchType searchType)
-        : base(interceptor)
-    {
-        _groupId = groupId;
-        _page = page;
-        _filter = filter;
-        _searchType = searchType;
-    }
 
     /// <inheritdoc/>
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetGuildMembers, _groupId, _page, _filter, (int)_searchType);
+    protected override void OnExecute() => Interceptor.Send(Out.GetGuildMembers, _groupId, _page, _filter, (int)_searchType);
 
-    [InterceptIn(nameof(Incoming.GuildMembers))] 
-    protected void OnGuildMembers(InterceptArgs e)
+    [InterceptIn(nameof(In.GuildMembers))]
+    private void HandleGuildMembers(Intercept e)
     {
         try
         {
-            var groupMembers = GroupMembers.Parse(e.Packet);
+            var groupMembers = e.Packet.Parse<GroupMembers>();
             if (groupMembers.GroupId == _groupId &&
                 groupMembers.PageIndex == _page &&
                 groupMembers.Filter == _filter &&

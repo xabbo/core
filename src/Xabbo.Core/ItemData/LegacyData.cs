@@ -17,15 +17,15 @@ public class LegacyData : ItemData, ILegacyData
         Value = data.Value;
     }
 
-    protected override void Initialize(IReadOnlyPacket packet)
+    protected override void Initialize(in PacketReader packet)
     {
-        Value = packet.ReadString();
+        Value = packet.Read<string>();
         base.Initialize(packet);
     }
 
-    protected override void WriteData(IPacket packet)
+    protected override void WriteData(in PacketWriter packet)
     {
-        packet.WriteString(Value);
+        packet.Write(Value);
         WriteBase(packet);
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -7,7 +6,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class MapData : ItemData, IMapData, IDictionary<string, string>
+public sealed class MapData : ItemData, IMapData, IDictionary<string, string>
 {
     private readonly Dictionary<string, string> _map;
 
@@ -25,39 +24,35 @@ public class MapData : ItemData, IMapData, IDictionary<string, string>
         set => _map[key] = value;
     }
 
-    public MapData()
-        : base(ItemDataType.Map)
+    public MapData() : base(ItemDataType.Map)
     {
-        _map = new Dictionary<string, string>();
+        _map = [];
     }
 
-    public MapData(IMapData data)
-        : base(data)
+    public MapData(IMapData data) : base(data)
     {
         _map = new Dictionary<string, string>(data);
     }
 
-    protected override void Initialize(IReadOnlyPacket packet)
+    protected override void Initialize(in PacketReader p)
     {
-        short n = packet.ReadLegacyShort();
+        int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
-        {
-            _map.Add(packet.ReadString(), packet.ReadString());
-        }
+            _map.Add(p.Read<string>(), p.Read<string>());
 
-        base.Initialize(packet);
+        base.Initialize(in p);
     }
 
-    protected override void WriteData(IPacket packet)
+    protected override void WriteData(in PacketWriter p)
     {
-        packet.WriteLegacyShort((short)_map.Count);
+        p.Write<Length>(_map.Count);
         foreach (var item in _map)
         {
-            packet.WriteString(item.Key);
-            packet.WriteString(item.Value);
+            p.Write(item.Key);
+            p.Write(item.Value);
         }
 
-        WriteBase(packet);
+        WriteBase(in p);
     }
 
     public bool ContainsKey(string key) => _map.ContainsKey(key);

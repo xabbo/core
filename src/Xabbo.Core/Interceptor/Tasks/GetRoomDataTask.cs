@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Threading.Tasks;
 
-using Xabbo.Messages;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Tasks;
 
-public class GetRoomDataTask : InterceptorTask<IRoomData>
+[Intercepts]
+public sealed partial class GetRoomDataTask : InterceptorTask<IRoomData>
 {
     private readonly long _roomId;
 
@@ -17,14 +17,14 @@ public class GetRoomDataTask : InterceptorTask<IRoomData>
         _roomId = roomId;
     }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetGuestRoom, _roomId, 0, 0);
+    protected override void OnExecute() => Interceptor.Send(Out.GetGuestRoom, _roomId, 0, 0);
 
-    [InterceptIn(nameof(Incoming.GetGuestRoomResult))]
-    protected void OnRoomData(InterceptArgs e)
+    [InterceptIn(nameof(In.GetGuestRoomResult))]
+    void OnRoomData(Intercept e)
     {
         try
         {
-            var roomData = RoomData.Parse(e.Packet);
+            var roomData = e.Packet.Parse<RoomData>();
             if (roomData.Id == _roomId)
             {
                 if (SetResult(roomData))

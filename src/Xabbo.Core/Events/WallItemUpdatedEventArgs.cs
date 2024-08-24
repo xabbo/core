@@ -1,14 +1,7 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class WallItemUpdatedEventArgs : WallItemEventArgs
+public sealed class WallItemUpdatedEventArgs(IWallItem previousItem, IWallItem updatedItem)
+    : WallItemEventArgs(updatedItem)
 {
-    public IWallItem PreviousItem { get; }
-
-    public WallItemUpdatedEventArgs(IWallItem previousItem, IWallItem updatedItem)
-        : base(updatedItem)
-    {
-        PreviousItem = previousItem;
-    }
+    public IWallItem PreviousItem { get; } = previousItem;
 }

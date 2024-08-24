@@ -15,8 +15,8 @@ public class FriendRequest
 
     protected FriendRequest(Packet packet)
     {
-        Id = packet.ReadInt();
-        Name = packet.ReadString();
-        Figure = packet.ReadString();
+        Id = packet.Read<int>();
+        Name = packet.Read<string>();
+        Figure = packet.Read<string>();
     }
 }

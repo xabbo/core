@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class ActivityPoints : IReadOnlyDictionary<ActivityPointType, int>
+public class ActivityPoints : IActivityPoints, IComposer, IParser<ActivityPoints>
 {
-    public static ActivityPoints Parse(IReadOnlyPacket packet) => new ActivityPoints(packet);
+    public static ActivityPoints Parse(in PacketReader packet) => new(in packet);
 
-    private readonly Dictionary<ActivityPointType, int> dictionary = new Dictionary<ActivityPointType, int>();
+    private readonly Dictionary<ActivityPointType, int> dictionary = [];
 
     public IEnumerable<ActivityPointType> Keys => dictionary.Keys;
     public IEnumerable<int> Values => dictionary.Values;
@@ -36,13 +36,13 @@ public class ActivityPoints : IReadOnlyDictionary<ActivityPointType, int>
 
     public ActivityPoints() { }
 
-    protected ActivityPoints(IReadOnlyPacket packet)
+    protected ActivityPoints(in PacketReader p)
     {
-        short n = packet.ReadLegacyShort();
+        int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
         {
-            var type = (ActivityPointType)packet.ReadInt();
-            dictionary[type] = packet.ReadInt();
+            var type = (ActivityPointType)p.Read<int>();
+            dictionary[type] = p.Read<int>();
         }
     }
 
@@ -51,4 +51,14 @@ public class ActivityPoints : IReadOnlyDictionary<ActivityPointType, int>
     public IEnumerator<KeyValuePair<ActivityPointType, int>> GetEnumerator() => dictionary.GetEnumerator();
     public bool TryGetValue(ActivityPointType key, out int value) => dictionary.TryGetValue(key, out value);
     IEnumerator IEnumerable.GetEnumerator() => dictionary.GetEnumerator();
+
+    public void Compose(in PacketWriter p)
+    {
+        p.Write<Length>(Count);
+        foreach (var (type, amount) in this)
+        {
+            p.Write((int)type);
+            p.Write(amount);
+        }
+    }
 }

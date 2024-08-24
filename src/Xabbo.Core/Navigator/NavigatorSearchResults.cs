@@ -5,9 +5,9 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class NavigatorSearchResults : List<NavigatorSearchResultList>
+public sealed class NavigatorSearchResults : List<NavigatorSearchResultList>, IComposer, IParser<NavigatorSearchResults>
 {
-    public static NavigatorSearchResults Parse(IReadOnlyPacket packet) => new NavigatorSearchResults(packet);
+    public static NavigatorSearchResults Parse(in PacketReader packet) => new NavigatorSearchResults(in packet);
 
     public string Category { get; set; }
     public string Filter { get; set; }
@@ -18,13 +18,13 @@ public class NavigatorSearchResults : List<NavigatorSearchResultList>
         Filter = filter;
     }
 
-    protected NavigatorSearchResults(IReadOnlyPacket packet)
+    private NavigatorSearchResults(in PacketReader p)
     {
-        Category = packet.ReadString();
-        Filter = packet.ReadString();
-        short n = packet.ReadLegacyShort();
+        Category = p.Read<string>();
+        Filter = p.Read<string>();
+        int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
-            Add(NavigatorSearchResultList.Parse(packet));
+            Add(p.Parse<NavigatorSearchResultList>());
     }
 
     public IEnumerable<RoomInfo> GetRooms()
@@ -50,15 +50,15 @@ public class NavigatorSearchResults : List<NavigatorSearchResultList>
     {
         foreach (var roomInfo in GetRooms())
         {
-            if (name != null && !roomInfo.Name.ToLower().Contains(name.ToLower())) continue;
-            if (description != null && !roomInfo.Description.ToLower().Contains(description.ToLower())) continue;
+            if (name != null && !roomInfo.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase)) continue;
+            if (description != null && !roomInfo.Description.Contains(description, StringComparison.CurrentCultureIgnoreCase)) continue;
             if (ownerId.HasValue && roomInfo.OwnerId != ownerId) continue;
             if (owner != null && !roomInfo.OwnerName.Equals(owner, StringComparison.InvariantCultureIgnoreCase)) continue;
             if (access.HasValue && roomInfo.Access != access) continue;
             if (trading.HasValue && roomInfo.Trading != trading) continue;
             if (category.HasValue && roomInfo.Category != category) continue;
             if (groupId.HasValue && (!roomInfo.IsGroupRoom || roomInfo.GroupId != groupId)) continue;
-            if (group != null && (!roomInfo.IsGroupRoom || !roomInfo.GroupName.ToLower().Contains(group.ToLower()))) continue;
+            if (group != null && (!roomInfo.IsGroupRoom || !roomInfo.GroupName.Contains(group, StringComparison.CurrentCultureIgnoreCase))) continue;
             yield return roomInfo;
         }
     }
@@ -66,4 +66,13 @@ public class NavigatorSearchResults : List<NavigatorSearchResultList>
     public RoomInfo? FindRoom(string name) => GetRooms().FirstOrDefault(
         roomInfo => roomInfo.Name.Contains(name, StringComparison.OrdinalIgnoreCase)
     );
+
+    public void Compose(in PacketWriter p)
+    {
+        p.Write(Category);
+        p.Write(Filter);
+        p.Write<Length>(Count);
+        for (int i = 0; i < Count; i++)
+            p.Write(this[i]);
+    }
 }

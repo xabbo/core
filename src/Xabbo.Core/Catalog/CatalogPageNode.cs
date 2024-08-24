@@ -6,7 +6,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class CatalogPageNode : ICatalogPageNode
+public class CatalogPageNode : ICatalogPageNode, IParser<CatalogPageNode>, IComposer
 {
     public Catalog? Catalog { get; set; }
     ICatalog? ICatalogPageNode.Catalog => Catalog;
@@ -28,43 +28,37 @@ public class CatalogPageNode : ICatalogPageNode
         Name =
         Title = string.Empty;
 
-        OfferIds = new List<int>();
-        Children = new List<CatalogPageNode>();
+        OfferIds = [];
+        Children = [];
     }
 
-    protected internal CatalogPageNode(IReadOnlyPacket packet,
+    protected internal CatalogPageNode(in PacketReader p,
         Catalog? catalog = null, CatalogPageNode? parent = null)
     {
-        IsVisible = packet.ReadBool();
-        Icon = packet.ReadInt();
-        Id = packet.ReadInt();
-        Name = packet.ReadString();
-        Title = packet.ReadString();
+        Parent = parent;
 
-        short n = packet.ReadLegacyShort();
-        for (int i = 0; i < n; i++)
-            OfferIds.Add(packet.ReadInt());
+        IsVisible = p.Read<bool>();
+        Icon = p.Read<int>();
+        Id = p.Read<int>();
+        Name = p.Read<string>();
+        Title = p.Read<string>();
 
-        n = packet.ReadLegacyShort();
+        int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
-            Children.Add(new CatalogPageNode(packet, catalog, this));
+            OfferIds.Add(p.Read<int>());
+
+        n = p.Read<Length>();
+        for (int i = 0; i < n; i++)
+            Children.Add(new CatalogPageNode(in p, catalog, this));
     }
 
-    public void Compose(IPacket packet) => packet
-        .WriteBool(IsVisible)
-        .WriteInt(Icon)
-        .WriteInt(Id)
-        .WriteString(Name)
-        .WriteString(Title)
-        .WriteCollection(OfferIds)
-        .WriteCollection(Children);
 
     public IEnumerable<CatalogPageNode> EnumerateDescendantsAndSelf()
     {
-        var queue = new Queue<CatalogPageNode>(new[] { this });
+        var queue = new Queue<CatalogPageNode>([this]);
 
         CatalogPageNode current;
-        while (queue.Any())
+        while (queue.Count != 0)
         {
             yield return current = queue.Dequeue();
             foreach (var child in current.Children)
@@ -86,5 +80,16 @@ public class CatalogPageNode : ICatalogPageNode
     }
     ICatalogPageNode? ICatalogPageNode.FindNode(string? title, string? name, int? id) => FindNode(title, name, id);
 
-    public static CatalogPageNode Parse(IReadOnlyPacket packet) => new(packet);
+    public void Compose(in PacketWriter p)
+    {
+        p.Write(IsVisible);
+        p.Write(Icon);
+        p.Write(Id);
+        p.Write(Name);
+        p.Write(Title);
+        p.Write(OfferIds);
+        p.Write(Children);
+    }
+
+    public static CatalogPageNode Parse(in PacketReader p) => new(in p);
 }

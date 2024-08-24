@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
@@ -13,14 +13,14 @@ public class GetUserDataTask : InterceptorTask<IUserData>
         : base(interceptor)
     { }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.InfoRetrieve);
+    protected override void OnExecute() => Interceptor.Send(Out.InfoRetrieve);
 
-    [InterceptIn(nameof(Incoming.UserObject))]
-    protected void HandleUserData(InterceptArgs e)
+    [InterceptIn(nameof(In.UserObject))]
+    protected void HandleUserData(Intercept e)
     {
         try
         {
-            if (SetResult(UserData.Parse(e.Packet)))
+            if (SetResult(e.Packet.Parse<UserData>()))
                 e.Block();
         }
         catch (Exception ex) { SetException(ex); }

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
@@ -17,5 +17,5 @@ public interface IItem
     /// <summary>
     /// Gets the ID of the item.
     /// </summary>
-    long Id { get; }
+    Id Id { get; }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,55 +6,54 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-using Xabbo.Messages;
 using Xabbo.Extension;
 
 using Xabbo.Core.Events;
+using Xabbo.Interceptor;
+using Xabbo.Messages.Flash;
+using Xabbo.Messages;
 
 namespace Xabbo.Core.Game;
 
-public class FriendManager : GameStateManager
+[Intercepts]
+public sealed partial class FriendManager : GameStateManager
 {
+    public override IDisposable Attach(IInterceptor interceptor) => ((IMessageHandler)this).Attach(interceptor);
+
     private readonly ILogger _logger;
 
-    private readonly ConcurrentDictionary<long, Friend> _friends = new();
+    private readonly ConcurrentDictionary<Id, Friend> _friends = new();
     private readonly ConcurrentDictionary<string, Friend> _nameMap = new(StringComparer.OrdinalIgnoreCase);
 
     private int _totalFragments = -1, _currentFragment = 0;
-    private readonly List<Friend> _loadList = new();
+    private readonly List<Friend> _loadList = [];
     private bool _isLoading = true, _isForceLoading;
 
     public bool IsInitialized { get; private set; }
     public IEnumerable<IFriend> Friends => _friends.Select(x => x.Value);
-    public bool IsFriend(long id) => _friends.ContainsKey(id);
+    public bool IsFriend(Id id) => _friends.ContainsKey(id);
     public bool IsFriend(string name) => _nameMap.ContainsKey(name);
-    public IFriend? GetFriend(long id) => _friends.TryGetValue(id, out Friend? friend) ? friend : null;
+    public IFriend? GetFriend(Id id) => _friends.TryGetValue(id, out Friend? friend) ? friend : null;
     public IFriend? GetFriend(string name) => _nameMap.TryGetValue(name, out Friend? friend) ? friend : null;
 
     #region - Events -
-    public event EventHandler? Loaded;
-    protected virtual void OnLoaded()
-        => Loaded?.Invoke(this, EventArgs.Empty);
+    public event Action? Loaded;
+    private void OnLoaded() => Loaded?.Invoke();
 
-    public event EventHandler<FriendEventArgs>? FriendAdded;
-    protected virtual void OnFriendAdded(IFriend friend)
-        => FriendAdded?.Invoke(this, new FriendEventArgs(friend));
+    public event Action<FriendEventArgs>? FriendAdded;
+    private void OnFriendAdded(IFriend friend) => FriendAdded?.Invoke(new FriendEventArgs(friend));
 
-    public event EventHandler<FriendEventArgs>? FriendRemoved;
-    protected virtual void OnFriendRemoved(IFriend friend)
-        => FriendRemoved?.Invoke(this, new FriendEventArgs(friend));
+    public event Action<FriendEventArgs>? FriendRemoved;
+    private void OnFriendRemoved(IFriend friend) => FriendRemoved?.Invoke(new FriendEventArgs(friend));
 
-    public event EventHandler<FriendUpdatedEventArgs>? FriendUpdated;
-    protected virtual void OnFriendUpdated(IFriend previous, IFriend current)
-        => FriendUpdated?.Invoke(this, new FriendUpdatedEventArgs(previous, current));
+    public event Action<FriendUpdatedEventArgs>? FriendUpdated;
+    private void OnFriendUpdated(IFriend previous, IFriend current) => FriendUpdated?.Invoke(new FriendUpdatedEventArgs(previous, current));
 
-    public event EventHandler<FriendMessageEventArgs>? MessageReceived;
-    protected virtual void OnMessageReceived(Friend friend, string message)
-        => MessageReceived?.Invoke(this, new FriendMessageEventArgs(this, friend, message));
+    public event Action<FriendMessageEventArgs>? MessageReceived;
+    private void OnMessageReceived(Friend friend, string message) => MessageReceived?.Invoke(new FriendMessageEventArgs(friend, message));
     #endregion
 
-    public FriendManager(IExtension extension,
-        ILogger<FriendManager> logger)
+    public FriendManager(IExtension extension, ILogger<FriendManager> logger)
         : base(extension)
     {
         _logger = logger;
@@ -84,18 +82,12 @@ public class FriendManager : GameStateManager
     /// <summary>
     /// Sends a private message to a user with the specified ID.
     /// </summary>
-    public void SendMessage(long id, string message) => Extension.Send(Out.SendMessage, id, message);
+    public void SendMessage(Id id, string message) => Ext.Send(Out.PostMessage, id, message); // TODO SendMessage
 
     /// <summary>
     /// Sends a private message to the specified friend.
     /// </summary>
     public void SendMessage(Friend friend, string message) => SendMessage(friend.Id, message);
-
-    /// <inheritdoc cref="SendMessage(long, string)" />
-    public ValueTask SendMessageAsync(long id, string message) => Extension.SendAsync(Out.SendMessage, id, message);
-
-    /// <inheritdoc cref="SendMessage(Friend, string)" />
-    public ValueTask SendMessageAsync(Friend friend, string message) => SendMessageAsync(friend.Id, message);
 
     private void AddFriend(Friend friend, bool raiseEvent = true)
     {
@@ -145,7 +137,7 @@ public class FriendManager : GameStateManager
         }
     }
 
-    private void RemoveFriend(long id)
+    private void RemoveFriend(Id id)
     {
         if (_friends.TryRemove(id, out Friend? friend))
         {
@@ -161,31 +153,31 @@ public class FriendManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(Incoming.ClientLatencyPingResponse))]
-    private async void HandleClientLatencyPingResponse(InterceptArgs e)
+    [InterceptIn(nameof(In.LatencyPingResponse))]
+    private void HandleLatencyPingResponse(Intercept e)
     {
-        if (!IsInitialized && !_isForceLoading && e.Step > 10)
+        if (!IsInitialized && !_isForceLoading && e.Sequence > 10)
         {
             _isForceLoading = true;
-            await Extension.SendAsync(Out.MessengerInit);
+            Ext.Send(Out.MessengerInit);
         }
     }
 
-    [InterceptIn(nameof(Incoming.MessengerInit))]
-    protected virtual void HandleMessengerInit(InterceptArgs e)
+    [InterceptIn(nameof(In.MessengerInit))]
+    private void HandleMessengerInit(Intercept e)
     {
         if (_isLoading && _isForceLoading)
             e.Block();
     }
 
-    [InterceptIn(nameof(Incoming.FriendListFragment))]
-    protected virtual void HandleFriendListFragment(InterceptArgs e)
+    [InterceptIn(nameof(In.FriendListFragment))]
+    private void HandleFriendListFragment(Intercept e)
     {
         if (!_isLoading)
             return;
 
-        int total = e.Packet.ReadInt();
-        int current = e.Packet.ReadInt();
+        int total = e.Packet.Read<int>();
+        int current = e.Packet.Read<int>();
 
         if (current != _currentFragment) return;
         if (_totalFragments == -1) _totalFragments = total;
@@ -195,9 +187,9 @@ public class FriendManager : GameStateManager
         if (_isForceLoading)
             e.Block();
 
-        short n = e.Packet.ReadLegacyShort();
+        int n = e.Packet.Read<Length>();
         for (int i = 0; i < n; i++)
-            _loadList.Add(Friend.Parse(e.Packet));
+            _loadList.Add(e.Packet.Parse<Friend>());
 
         if (_currentFragment == total)
         {
@@ -215,49 +207,49 @@ public class FriendManager : GameStateManager
         );
     }
 
-    [InterceptIn(nameof(Incoming.FriendListUpdate))]
-    protected virtual void HandleFriendListUpdate(InterceptArgs e)
+    [InterceptIn(nameof(In.FriendListUpdate))]
+    private void HandleFriendListUpdate(Intercept e)
     {
-        short n = e.Packet.ReadLegacyShort();
+        int n = e.Packet.Read<Length>();
         for (int i = 0; i < n; i++)
         {
-            e.Packet.ReadInt(); // category id : -1 = offline, 0 = online
-            e.Packet.ReadString(); // category name
+            e.Packet.Read<int>(); // category id : -1 = offline, 0 = online
+            e.Packet.Read<string>(); // category name
         }
 
-        n = e.Packet.ReadLegacyShort();
+        n = e.Packet.Read<Length>();
         for (int i = 0; i < n; i++)
         {
-            int updateType = e.Packet.ReadInt();
+            int updateType = e.Packet.Read<int>();
             if (updateType == -1) // removed
             {
-                long id = e.Packet.ReadLegacyLong();
+                long id = e.Packet.Read<Id>();
                 RemoveFriend(id);
             }
             else if (updateType == 0) // updated
             {
-                Friend friend = Friend.Parse(e.Packet);
+                Friend friend = e.Packet.Parse<Friend>();
                 UpdateFriend(friend);
             }
             else if (updateType == 1) // added
             {
-                Friend friend = Friend.Parse(e.Packet);
+                Friend friend = e.Packet.Parse<Friend>();
                 AddFriend(friend);
             }
         }
     }
 
-    [InterceptIn(nameof(Incoming.MessengerNewConsoleMessage))]
-    protected virtual void OnReceivePrivateMessage(InterceptArgs e)
+    [InterceptIn(nameof(In.NewConsole))]
+    private void HandleNewConsole(Intercept e)
     {
-        long id = e.Packet.ReadLong();
+        long id = e.Packet.Read<long>();
         if (!_friends.TryGetValue(id, out Friend? friend))
         {
-            DebugUtil.Log($"failed to get friend {friend} from id map");
+            Debug.Log($"failed to get friend {friend} from id map");
             return;
         }
 
-        string message = e.Packet.ReadString();
+        string message = e.Packet.Read<string>();
         // int secondsSinceSent
         // string extraData
 

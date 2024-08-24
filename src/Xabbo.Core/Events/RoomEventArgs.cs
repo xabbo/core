@@ -1,15 +1,8 @@
-﻿using System;
-
-using Xabbo.Core.Game;
+﻿using Xabbo.Core.Game;
 
 namespace Xabbo.Core.Events;
 
-public class RoomEventArgs : EventArgs
+public sealed class RoomEventArgs(IRoom room)
 {
-    public IRoom Room { get; }
-
-    public RoomEventArgs(IRoom room)
-    {
-        Room = room;
-    }
+    public IRoom Room { get; } = room;
 }

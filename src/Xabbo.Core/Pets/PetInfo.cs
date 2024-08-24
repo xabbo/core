@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class PetInfo : IComposable
+public sealed class PetInfo : IComposer, IParser<PetInfo>
 {
-    public int Id { get; set; }
+    public Id Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public int Level { get; set; }
     public int MaxLevel { get; set; }
@@ -36,76 +36,75 @@ public class PetInfo : IComposable
 
     public PetInfo() { }
 
-    protected PetInfo(IReadOnlyPacket packet)
-        : this()
+    private PetInfo(in PacketReader p) : this()
     {
-        Id = packet.ReadInt();
-        Name = packet.ReadString();
-        Level = packet.ReadInt();
-        MaxLevel = packet.ReadInt();
-        Experience = packet.ReadInt();
-        MaxExperience = packet.ReadInt();
-        Energy = packet.ReadInt();
-        MaxEnergy = packet.ReadInt();
-        Happiness = packet.ReadInt();
-        MaxHappiness = packet.ReadInt();
-        Scratches = packet.ReadInt();
-        OwnerId = packet.ReadInt();
-        Age = packet.ReadInt();
-        OwnerName = packet.ReadString();
-        Breed = packet.ReadInt();
-        HasFreeSaddle = packet.ReadBool();
-        IsRiding = packet.ReadBool();
+        Id = p.Read<Id>();
+        Name = p.Read<string>();
+        Level = p.Read<int>();
+        MaxLevel = p.Read<int>();
+        Experience = p.Read<int>();
+        MaxExperience = p.Read<int>();
+        Energy = p.Read<int>();
+        MaxEnergy = p.Read<int>();
+        Happiness = p.Read<int>();
+        MaxHappiness = p.Read<int>();
+        Scratches = p.Read<int>();
+        OwnerId = p.Read<int>();
+        Age = p.Read<int>();
+        OwnerName = p.Read<string>();
+        Breed = p.Read<int>();
+        HasFreeSaddle = p.Read<bool>();
+        IsRiding = p.Read<bool>();
 
-        int n = packet.ReadInt();
+        int n = p.Read<int>();
         for (int i = 0; i < n; i++)
-            SkillThresholds.Add(packet.ReadInt());
+            SkillThresholds.Add(p.Read<int>());
 
-        AccessRights = packet.ReadInt();
-        CanBreed = packet.ReadBool();
-        CanHarvest = packet.ReadBool();
-        CanRevive = packet.ReadBool();
-        RarityLevel = packet.ReadInt();
-        MaxWellbeingSeconds = packet.ReadInt();
-        RemainingWellbeingSeconds = packet.ReadInt();
-        RemainingGrowingSeconds = packet.ReadInt();
-        HasBreedingPermission = packet.ReadBool();
+        AccessRights = p.Read<int>();
+        CanBreed = p.Read<bool>();
+        CanHarvest = p.Read<bool>();
+        CanRevive = p.Read<bool>();
+        RarityLevel = p.Read<int>();
+        MaxWellbeingSeconds = p.Read<int>();
+        RemainingWellbeingSeconds = p.Read<int>();
+        RemainingGrowingSeconds = p.Read<int>();
+        HasBreedingPermission = p.Read<bool>();
     }
 
-    public void Compose(IPacket packet)
+    public void Compose(in PacketWriter p)
     {
-        packet.WriteInt(Id);
-        packet.WriteString(Name);
-        packet.WriteInt(Level);
-        packet.WriteInt(MaxLevel);
-        packet.WriteInt(Experience);
-        packet.WriteInt(MaxExperience);
-        packet.WriteInt(Energy);
-        packet.WriteInt(MaxEnergy);
-        packet.WriteInt(Happiness);
-        packet.WriteInt(MaxHappiness);
-        packet.WriteInt(Scratches);
-        packet.WriteInt(OwnerId);
-        packet.WriteInt(Age);
-        packet.WriteString(OwnerName);
-        packet.WriteInt(Breed);
-        packet.WriteBool(HasFreeSaddle);
-        packet.WriteBool(IsRiding);
+        p.Write(Id);
+        p.Write(Name);
+        p.Write(Level);
+        p.Write(MaxLevel);
+        p.Write(Experience);
+        p.Write(MaxExperience);
+        p.Write(Energy);
+        p.Write(MaxEnergy);
+        p.Write(Happiness);
+        p.Write(MaxHappiness);
+        p.Write(Scratches);
+        p.Write(OwnerId);
+        p.Write(Age);
+        p.Write(OwnerName);
+        p.Write(Breed);
+        p.Write(HasFreeSaddle);
+        p.Write(IsRiding);
 
-        packet.WriteInt(SkillThresholds.Count);
+        p.Write(SkillThresholds.Count);
         foreach (int value in SkillThresholds)
-            packet.WriteInt(value);
+            p.Write(value);
 
-        packet.WriteInt(AccessRights);
-        packet.WriteBool(CanBreed);
-        packet.WriteBool(CanHarvest);
-        packet.WriteBool(CanRevive);
-        packet.WriteInt(RarityLevel);
-        packet.WriteInt(MaxWellbeingSeconds);
-        packet.WriteInt(RemainingWellbeingSeconds);
-        packet.WriteInt(RemainingGrowingSeconds);
-        packet.WriteBool(HasBreedingPermission);
+        p.Write(AccessRights);
+        p.Write(CanBreed);
+        p.Write(CanHarvest);
+        p.Write(CanRevive);
+        p.Write(RarityLevel);
+        p.Write(MaxWellbeingSeconds);
+        p.Write(RemainingWellbeingSeconds);
+        p.Write(RemainingGrowingSeconds);
+        p.Write(HasBreedingPermission);
     }
 
-    public static PetInfo Parse(IReadOnlyPacket packet) => new(packet);
+    public static PetInfo Parse(in PacketReader packet) => new(packet);
 }

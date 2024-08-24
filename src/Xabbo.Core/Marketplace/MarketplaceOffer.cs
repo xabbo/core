@@ -5,9 +5,10 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class MarketplaceOffer : IMarketplaceOffer
+public sealed class MarketplaceOffer : IMarketplaceOffer, IComposer, IParser<MarketplaceOffer>
 {
-    public long Id { get; set; }
+    public Id Id => -1;
+    public Id OfferId { get; set; }
     public MarketplaceOfferStatus Status { get; set; }
     public ItemType Type { get; set; }
     public int Kind { get; set; }
@@ -22,102 +23,96 @@ public class MarketplaceOffer : IMarketplaceOffer
         Data = new LegacyData();
     }
 
-    protected MarketplaceOffer(IReadOnlyPacket packet, bool hasOfferCount)
+    private MarketplaceOffer(in PacketReader packet, bool hasOfferCount)
     {
-        Id = packet.ReadLegacyLong();
-        Status = (MarketplaceOfferStatus)packet.ReadInt();
+        OfferId = packet.Read<Id>();
+        Status = (MarketplaceOfferStatus)packet.Read<int>();
 
-        int itemType = packet.ReadInt();
+        int itemType = packet.Read<int>();
         switch (itemType)
         {
             case 1:
                 Type = ItemType.Floor;
-                Kind = packet.ReadInt();
+                Kind = packet.Read<int>();
                 Data = ItemData.Parse(packet);
                 break;
             case 2:
                 Type = ItemType.Wall;
-                Kind = packet.ReadInt();
-                Data = new LegacyData() { Value = packet.ReadString() };
+                Kind = packet.Read<int>();
+                Data = new LegacyData() { Value = packet.Read<string>() };
                 break;
             case 3:
                 Type = ItemType.Floor;
-                Kind = packet.ReadInt();
+                Kind = packet.Read<int>();
                 Data = new LegacyData()
                 {
                     Flags = ItemDataFlags.IsLimitedRare,
-                    UniqueSerialNumber = packet.ReadInt(),
-                    UniqueSeriesSize = packet.ReadInt()
+                    UniqueSerialNumber = packet.Read<int>(),
+                    UniqueSeriesSize = packet.Read<int>()
                 };
                 break;
             default: throw new Exception($"Unknown MarketplaceItem type: {itemType}");
         }
 
-        Price = packet.ReadInt();
-        TimeRemaining = packet.ReadInt();
-        Average = packet.ReadInt();
+        Price = packet.Read<int>();
+        TimeRemaining = packet.Read<int>();
+        Average = packet.Read<int>();
         if (hasOfferCount)
-            Offers = packet.ReadInt();
+            Offers = packet.Read<int>();
     }
 
-    public void Compose(IPacket packet)
+    public void Compose(in PacketWriter p)
     {
         if (Data == null)
             throw new Exception("Data cannot be null");
 
-        packet
-            .WriteLegacyLong(Id)
-            .WriteInt((int)Status);
+        p.Write(Id);
+        p.Write((int)Status);
 
         if (Type == ItemType.Floor)
         {
             if (Data.Flags.HasFlag(ItemDataFlags.IsLimitedRare))
             {
-                packet
-                    .WriteInt(3)
-                    .WriteInt(Kind)
-                    .WriteInt(Data.UniqueSerialNumber)
-                    .WriteInt(Data.UniqueSeriesSize);
+                p.Write(3);
+                p.Write(Kind);
+                p.Write(Data.UniqueSerialNumber);
+                p.Write(Data.UniqueSeriesSize);
             }
             else
             {
-                packet
-                    .WriteInt(1)
-                    .WriteInt(Kind)
-                    .Write(Data);
+                p.Write(1);
+                p.Write(Kind);
+                p.Write(Data);
             }
         }
         else if (Type == ItemType.Wall)
         {
-            packet
-                .WriteInt(2)
-                .WriteInt(Kind)
-                .WriteString(Data.Value);
+            p.Write(2);
+            p.Write(Kind);
+            p.Write(Data.Value);
         }
         else
         {
             throw new Exception($"Invalid MarketplaceItem type: {Type}");
         }
 
-        packet
-            .WriteInt(Price)
-            .WriteInt(TimeRemaining)
-            .WriteInt(Average);
+        p.Write(Price);
+        p.Write(TimeRemaining);
+        p.Write(Average);
 
         if (Offers > 0)
-            packet.WriteInt(Offers);
+            p.Write(Offers);
     }
 
-    public static MarketplaceOffer Parse(IReadOnlyPacket packet, bool hasOfferCount = true)
-    { 
-        return new MarketplaceOffer(packet, hasOfferCount);
-    }
-
-    public static IEnumerable<MarketplaceOffer> ParseMany(IReadOnlyPacket packet, bool hasOfferCount = true)
+    public static MarketplaceOffer Parse(in PacketReader p) => Parse(in p, true);
+    public static MarketplaceOffer Parse(in PacketReader packet, bool hasOfferCount) => new(in packet, hasOfferCount);
+    public static IEnumerable<MarketplaceOffer> ParseAll(in PacketReader p, bool hasOfferCount = true)
     {
-        short n = packet.ReadLegacyShort();
+        int n = p.Read<Length>();
+        var offers = new MarketplaceOffer[n];
         for (int i = 0; i < n; i++)
-            yield return Parse(packet, hasOfferCount);
+            offers[i] = Parse(in p, hasOfferCount);
+        return offers;
     }
 
     public override string ToString() => $"{nameof(MarketplaceOffer)}#{Id}/{Type}:{Kind}";

@@ -7,51 +7,50 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-using Xabbo.Messages;
+using Xabbo.Extension;
 using Xabbo.Interceptor;
+using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 
 using Xabbo.Core.Events;
-using Xabbo.Extension;
 
 namespace Xabbo.Core.Game;
 
 /// <summary>
 /// Manages the user's inventory.
 /// </summary>
-public class InventoryManager : GameStateManager
+[Intercepts]
+public sealed partial class InventoryManager : GameStateManager
 {
+    // TODO: handle in source generator.
+    public override IDisposable Attach(IInterceptor interceptor) => ((IMessageHandler)this).Attach(interceptor);
+
     private readonly ILogger _logger;
 
-    private readonly List<InventoryFragment> _fragments = new();
+    private readonly List<InventoryFragment> _fragments = [];
     private bool _forceLoadingInventory;
     private int _currentPacketIndex;
     private int _totalPackets;
 
-    private TaskCompletionSource<IInventory> _loadTcs
-        = new TaskCompletionSource<IInventory>(TaskCreationOptions.RunContinuationsAsynchronously);
+    private TaskCompletionSource<IInventory> _loadTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     private Inventory? _inventory;
     public IInventory? Inventory => _inventory;
 
-    public event EventHandler? Invalidated;
-    protected virtual void OnInvalidated()
-        => Invalidated?.Invoke(this, EventArgs.Empty);
+    public event Action? Invalidated;
+    private void OnInvalidated() => Invalidated?.Invoke();
 
-    public event EventHandler? Loaded;
-    protected virtual void OnLoaded()
-        => Loaded?.Invoke(this, EventArgs.Empty);
+    public event Action? Loaded;
+    private void OnLoaded() => Loaded?.Invoke();
 
-    public event EventHandler<InventoryItemEventArgs>? ItemAdded;
-    protected virtual void OnItemAdded(InventoryItem item)
-        => ItemAdded?.Invoke(this, new InventoryItemEventArgs(item));
+    public event Action<InventoryItemEventArgs>? ItemAdded;
+    private void OnItemAdded(InventoryItem item) => ItemAdded?.Invoke(new InventoryItemEventArgs(item));
 
-    public event EventHandler<InventoryItemEventArgs>? ItemUpdated;
-    protected virtual void OnItemUpdated(InventoryItem item)
-        => ItemUpdated?.Invoke(this, new InventoryItemEventArgs(item));
+    public event Action<InventoryItemEventArgs>? ItemUpdated;
+    private void OnItemUpdated(InventoryItem item) => ItemUpdated?.Invoke(new InventoryItemEventArgs(item));
 
-    public event EventHandler<InventoryItemEventArgs>? ItemRemoved;
-    protected virtual void OnItemRemoved(InventoryItem item)
-        => ItemRemoved?.Invoke(this, new InventoryItemEventArgs(item));
+    public event Action<InventoryItemEventArgs>? ItemRemoved;
+    private void OnItemRemoved(InventoryItem item) => ItemRemoved?.Invoke(new InventoryItemEventArgs(item));
 
     public InventoryManager(ILogger<InventoryManager> logger, IExtension extension)
         : base(extension)
@@ -99,10 +98,10 @@ public class InventoryManager : GameStateManager
             {
                 if (!_forceLoadingInventory)
                 {
-                    await Extension.SendAsync(Out.GetInventory);
+                    Ext.Send(Out.RequestFurniInventory);
                     _forceLoadingInventory = true;
                 }
-                
+
                 await await Task.WhenAny(loadTask, Task.Delay(Timeout.Infinite, cts.Token));
                 return await loadTask;
             }
@@ -116,8 +115,8 @@ public class InventoryManager : GameStateManager
         _loadTcs = new TaskCompletionSource<IInventory>(TaskCreationOptions.RunContinuationsAsynchronously);
     }
 
-    [InterceptIn(nameof(Incoming.InventoryInvalidate))]
-    protected void HandleInventoryInvalidate(InterceptArgs e)
+    [InterceptIn(nameof(In.FurniListInvalidate))]
+    private void HandleFurniListInvalidate(Intercept e)
     {
         _logger.LogTrace("Inventory invalidated.");
 
@@ -129,12 +128,12 @@ public class InventoryManager : GameStateManager
         OnInvalidated();
     }
 
-    [InterceptIn(nameof(Incoming.InventoryPush))]
-    protected void HandleInventoryPush(InterceptArgs e)
+    [InterceptIn(nameof(In.FurniList))]
+    private void HandleFurniList(Intercept e)
     {
         if (_forceLoadingInventory) e.Block();
 
-        InventoryFragment fragment = InventoryFragment.Parse(e.Packet);
+        InventoryFragment fragment = e.Packet.Parse<InventoryFragment>();
 
         if (fragment.Index == 0)
         {
@@ -185,12 +184,12 @@ public class InventoryManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(Incoming.InventoryAddOrUpdateFurni))]
-    protected virtual void HandleInventoryAddOrUpdateFurni(InterceptArgs e)
+    [InterceptIn(nameof(In.FurniListAddOrUpdate))]
+    private void HandleInventoryAddOrUpdateFurni(Intercept e)
     {
         if (_inventory is null) return;
 
-        InventoryItem item = InventoryItem.Parse(e.Packet);
+        InventoryItem item = e.Packet.Parse<InventoryItem>();
         _inventory.AddOrUpdate(item, out bool added);
 
         if (added)
@@ -205,12 +204,12 @@ public class InventoryManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(Incoming.InventoryRemoveFurni))]
-    protected virtual void HandleInventoryRemoveFurni(InterceptArgs e)
+    [InterceptIn(nameof(In.FurniListRemove))]
+    private void HandleFurniListRemove(Intercept e)
     {
         if (_inventory is null) return;
 
-        long itemId = e.Packet.ReadLegacyLong();
+        long itemId = e.Packet.Read<Id>();
         if (_inventory.TryRemove(itemId, out InventoryItem? item))
         {
             _logger.LogTrace("Inventory item {id} removed.", itemId);

@@ -1,13 +1,6 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class RoomDataEventArgs : EventArgs
+public sealed class RoomDataEventArgs(IRoomData data)
 {
-    public IRoomData Data { get; }
-
-    public RoomDataEventArgs(IRoomData data)
-    {
-        Data = data;
-    }
+    public IRoomData Data { get; } = data;
 }

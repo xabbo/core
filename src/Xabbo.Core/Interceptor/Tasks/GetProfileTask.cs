@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 
@@ -17,14 +17,14 @@ public class GetProfileTask : InterceptorTask<IUserProfile>
         _userId = userId;
     }
 
-    protected override ValueTask OnExecuteAsync() => Interceptor.SendAsync(Out.GetExtendedProfile, _userId, false);
+    protected override void OnExecute() => Interceptor.Send(Out.GetExtendedProfile, _userId, false);
 
-    [InterceptIn(nameof(Incoming.ExtendedProfile))]
-    protected void OnUserProfile(InterceptArgs e)
+    [InterceptIn(nameof(In.ExtendedProfile))]
+    protected void OnUserProfile(Intercept e)
     {
         try
         {
-            var userProfile = UserProfile.Parse(e.Packet);
+            var userProfile = e.Packet.Parse<UserProfile>();
             if (userProfile.Id == _userId)
             {
                 if (SetResult(userProfile))

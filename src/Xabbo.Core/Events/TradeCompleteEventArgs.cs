@@ -1,18 +1,11 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class TradeCompleteEventArgs : TradeOfferEventArgs
+public sealed class TradeCompleteEventArgs(
+    bool wasTrader, IRoomUser self, IRoomUser partner,
+    ITradeOffer ownOffer, ITradeOffer partnerOffer)
+    : TradeOfferEventArgs(ownOffer, partnerOffer)
 {
-    public bool WasTrader { get; }
-    public IRoomUser Self { get; }
-    public IRoomUser Partner { get; }
-
-    public TradeCompleteEventArgs(bool wasTrader, IRoomUser self, IRoomUser partner, ITradeOffer ownOffer, ITradeOffer partnerOffer)
-        : base(ownOffer, partnerOffer)
-    {
-        WasTrader = wasTrader;
-        Self = self;
-        Partner = partner;
-    }
+    public bool WasTrader { get; } = wasTrader;
+    public IRoomUser Self { get; } = self;
+    public IRoomUser Partner { get; } = partner;
 }

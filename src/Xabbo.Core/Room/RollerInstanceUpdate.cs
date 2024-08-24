@@ -4,7 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class RollerObjectUpdate : IComposable
+public class RollerObjectUpdate : IComposer, IParser<RollerObjectUpdate>
 {
     public long Id { get; set; }
     public float LocationZ { get; set; }
@@ -12,17 +12,19 @@ public class RollerObjectUpdate : IComposable
 
     public RollerObjectUpdate() { }
 
-    protected RollerObjectUpdate(IReadOnlyPacket packet)
+    protected RollerObjectUpdate(in PacketReader p)
     {
-        Id = packet.ReadLegacyLong();
-        LocationZ = packet.ReadLegacyFloat();
-        TargetZ = packet.ReadLegacyFloat();
+        Id = p.Read<Id>();
+        LocationZ = p.Read<float>();
+        TargetZ = p.Read<float>();
     }
 
-    public void Compose(IPacket packet) => packet
-        .WriteLegacyLong(Id)
-        .WriteLegacyFloat(LocationZ)
-        .WriteLegacyFloat(TargetZ);
+    public void Compose(in PacketWriter p)
+    {
+        p.Write(Id);
+        p.Write(LocationZ);
+        p.Write(TargetZ);
+    }
 
-    public static RollerObjectUpdate Parse(IReadOnlyPacket packet) => new RollerObjectUpdate(packet);
+    public static RollerObjectUpdate Parse(in PacketReader p) => new(p);
 }

@@ -22,7 +22,7 @@ internal class Room : IRoom, INotifyPropertyChanged
         return true;
     }
 
-    public long Id { get; }
+    public Id Id { get; }
     public string Model { get; set; } = null!;
 
     private RoomData _roomData = null!;
@@ -76,7 +76,7 @@ internal class Room : IRoom, INotifyPropertyChanged
 
     internal ConcurrentDictionary<int, Entity> Entities { get; } = new();
 
-    public Room(long id, RoomData roomData)
+    public Room(Id id, RoomData roomData)
     {
         Id = id;
         _roomData = roomData;
@@ -86,35 +86,35 @@ internal class Room : IRoom, INotifyPropertyChanged
     /// <summary>
     /// Gets whether the floor item with the specified ID exists in the room or not.
     /// </summary>
-    public bool HasFloorItem(long itemId) => FloorItems.ContainsKey(itemId);
+    public bool HasFloorItem(Id itemId) => FloorItems.ContainsKey(itemId);
 
     /// <summary>
     /// Gets whether the wall item with the specified ID exists in the room or not.
     /// </summary>
-    public bool HasWallItem(long itemId) => WallItems.ContainsKey(itemId);
+    public bool HasWallItem(Id itemId) => WallItems.ContainsKey(itemId);
 
     /// <summary>
     /// Attempts to get the furni of the specified type with the specified ID and returns <c>true</c> if successful.
     /// </summary>
-    public bool TryGetFurni(ItemType type, long itemId, [NotNullWhen(true)] out IFurni? furni)
+    public bool TryGetFurni(ItemType type, Id itemId, [NotNullWhen(true)] out IFurni? furni)
         => (furni = GetFurni(type, itemId)) is not null;
 
     /// <summary>
     /// Attempts to get the floor item with the specified ID and returns <c>true</c> if successful.
     /// </summary>
-    public bool TryGetFloorItem(long itemId, [NotNullWhen(true)] out IFloorItem? item)
+    public bool TryGetFloorItem(Id itemId, [NotNullWhen(true)] out IFloorItem? item)
         => (item = GetFloorItem(itemId)) is not null;
 
     /// <summary>
     /// Attempts to get the wall item with the specified ID and returns <c>true</c> if successful.
     /// </summary>
-    public bool TryGetWallItem(long itemId, [NotNullWhen(true)] out IWallItem? item)
+    public bool TryGetWallItem(Id itemId, [NotNullWhen(true)] out IWallItem? item)
         => (item = GetWallItem(itemId)) is not null;
 
     /// <summary>
     /// Gets the furni of the specified type with the specified ID, or <c>null</c> if it does not exist.
     /// </summary>
-    public IFurni? GetFurni(ItemType type, long itemId)
+    public IFurni? GetFurni(ItemType type, Id itemId)
     {
         return type switch
         {
@@ -127,12 +127,12 @@ internal class Room : IRoom, INotifyPropertyChanged
     /// <summary>
     /// Gets the floor item with the specified ID or <c>null</c> if it does not exist.
     /// </summary>
-    public IFloorItem? GetFloorItem(long itemId) => FloorItems.TryGetValue(itemId, out FloorItem? item) ? item : null;
+    public IFloorItem? GetFloorItem(Id itemId) => FloorItems.TryGetValue(itemId, out FloorItem? item) ? item : null;
 
     /// <summary>
     /// Gets the wall item with the specified ID or <c>null</c> if it does not exist.
     /// </summary>
-    public IWallItem? GetWallItem(long itemId) => WallItems.TryGetValue(itemId, out WallItem? item) ? item : null;
+    public IWallItem? GetWallItem(Id itemId) => WallItems.TryGetValue(itemId, out WallItem? item) ? item : null;
     #endregion
 
     #region - Entities -
@@ -157,7 +157,7 @@ internal class Room : IRoom, INotifyPropertyChanged
             .FirstOrDefault(entity => entity.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
     }
 
-    public TEntity? GetEntityById<TEntity>(long id) where TEntity : IEntity
+    public TEntity? GetEntityById<TEntity>(Id id) where TEntity : IEntity
     {
         return Entities
             .Select(x => x.Value)
@@ -167,11 +167,11 @@ internal class Room : IRoom, INotifyPropertyChanged
 
     public IEntity? GetEntity(int index) => Entities.TryGetValue(index, out Entity? entity) ? entity : null;
     public IRoomUser? GetUser(int index) => Entities.TryGetValue(index, out Entity? entity) ? (entity as IRoomUser) : null;
-    public IRoomUser? GetUserById(long id) => Entities.Values.OfType<IRoomUser>().FirstOrDefault(x => x.Id == id);
+    public IRoomUser? GetUserById(Id id) => Entities.Values.OfType<IRoomUser>().FirstOrDefault(x => x.Id == id);
 
     public bool TryGetEntityByIndex(int index, [NotNullWhen(true)] out IEntity? entity) => (entity = GetEntity(index)) is not null;
 
-    public bool TryGetEntityById<TEntity>(long id, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity
+    public bool TryGetEntityById<TEntity>(Id id, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity
     {
         return (entity = GetEntityById<TEntity>(id)) is not null;
     }

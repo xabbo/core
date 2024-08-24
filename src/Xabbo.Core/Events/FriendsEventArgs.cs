@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Xabbo.Core.Events;
 
-public class FriendsEventArgs : EventArgs
+public sealed class FriendsEventArgs(IEnumerable<IFriend> friends)
 {
-    public IReadOnlyList<IFriend> Friends { get; }
-
-    public FriendsEventArgs(IEnumerable<IFriend> friends)
-    {
-        Friends = new List<IFriend>(friends).AsReadOnly();
-    }
+    public IReadOnlyList<IFriend> Friends { get; } = new List<IFriend>(friends).AsReadOnly();
 }

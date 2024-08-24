@@ -1,10 +1,8 @@
-﻿using System;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class RoomData : RoomInfo, IRoomData
+public class RoomData : RoomInfo, IRoomData, IComposer, IParser<RoomData>
 {
     public bool IsEntering { get; set; }
     public bool Forward { get; set; }
@@ -26,48 +24,44 @@ public class RoomData : RoomInfo, IRoomData
         ChatSettings = new ChatSettings();
     }
 
-    protected RoomData(bool isEntering, IReadOnlyPacket packet)
-        : base(packet)
+    protected RoomData(bool isEntering, in PacketReader p) : base(in p)
     {
         IsEntering = isEntering;
 
-        Forward = packet.ReadBool();
-        IsStaffPick = packet.ReadBool();
-        IsGroupMember = packet.ReadBool();
-        IsRoomMuted = packet.ReadBool();
+        Forward = p.Read<bool>();
+        IsStaffPick = p.Read<bool>();
+        IsGroupMember = p.Read<bool>();
+        IsRoomMuted = p.Read<bool>();
 
-        Moderation = ModerationSettings.Parse(packet);
+        Moderation = ModerationSettings.Parse(p);
 
-        CanMute = packet.ReadBool();
-        ChatSettings = ChatSettings.Parse(packet);
+        CanMute = p.Read<bool>();
+        ChatSettings = ChatSettings.Parse(p);
 
-        if (packet.Protocol == ClientType.Unity)
+        if (p.Client == ClientType.Unity)
         {
-            _Int6 = packet.ReadInt();
-            _Int7 = packet.ReadInt();
+            _Int6 = p.Read<int>();
+            _Int7 = p.Read<int>();
         }
     }
 
-    public override void Compose(IPacket packet)
+    public override void Compose(in PacketWriter p)
     {
-        packet.WriteBool(IsEntering);
+        p.Write(IsEntering);
 
-        base.Compose(packet);
+        base.Compose(in p);
 
-        packet.WriteBool(Forward);
-        packet.WriteBool(IsStaffPick);
-        packet.WriteBool(IsGroupMember);
-        packet.WriteBool(IsRoomMuted);
+        p.Write(Forward);
+        p.Write(IsStaffPick);
+        p.Write(IsGroupMember);
+        p.Write(IsRoomMuted);
 
-        Moderation.Compose(packet);
+        p.Write(Moderation);
 
-        packet.WriteBool(CanMute);
+        p.Write(CanMute);
 
-        ChatSettings.Compose(packet);
+        ChatSettings.Compose(p);
     }
 
-    public static new RoomData Parse(IReadOnlyPacket packet)
-    {
-        return new RoomData(packet.ReadBool(), packet);
-    }
+    public static new RoomData Parse(in PacketReader packet) => new(packet.Read<bool>(), in packet);
 }

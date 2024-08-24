@@ -3,12 +3,12 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public interface IInventoryItem : IItem, IComposable
+public interface IInventoryItem : IItem, IComposer
 {
     /// <summary>
     /// Gets the ID of the inventory item.
     /// </summary>
-    long ItemId { get; }
+    Id ItemId { get; }
     /// <summary>
     /// Gets the furni category of the inventory item.
     /// </summary>

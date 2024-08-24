@@ -1,4 +1,5 @@
 using System;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
@@ -25,7 +26,7 @@ public enum WiredMovementType
 /// <summary>
 /// Defines the base parameters of a wired movement.
 /// </summary>
-public abstract class WiredMovement : IComposable
+public abstract class WiredMovement : IComposer, IParser<WiredMovement>
 {
     public WiredMovementType Type { get; }
     public int AnimationTime { get; set; }
@@ -35,19 +36,19 @@ public abstract class WiredMovement : IComposable
         Type = type;
     }
 
-    public virtual void Compose(IPacket packet)
+    public virtual void Compose(in PacketWriter p)
     {
-        packet.WriteInt((int)Type);
+        p.Write((int)Type);
     }
 
-    public static WiredMovement Parse(IReadOnlyPacket packet)
+    public static WiredMovement Parse(in PacketReader p)
     {
-        var type = (WiredMovementType)packet.ReadInt();
+        var type = (WiredMovementType)p.Read<int>();
         return type switch
         {
-            WiredMovementType.User => new UserWiredMovement(packet),
-            WiredMovementType.FloorItem => new FloorItemWiredMovement(packet),
-            WiredMovementType.WallItem => new WallItemWiredMovement(packet),
+            WiredMovementType.User => new UserWiredMovement(in p),
+            WiredMovementType.FloorItem => new FloorItemWiredMovement(in p),
+            WiredMovementType.WallItem => new WallItemWiredMovement(in p),
             _ => throw new Exception($"Unknown wired movement type: {type}"),
         };
     }
@@ -67,38 +68,37 @@ public class UserWiredMovement : WiredMovement
 
     public UserWiredMovement() : base(WiredMovementType.User) { }
 
-    internal UserWiredMovement(IReadOnlyPacket packet) : this()
+    internal UserWiredMovement(in PacketReader p) : this()
     {
-        int srcX = packet.ReadInt();
-        int srcY = packet.ReadInt();
-        int dstX = packet.ReadInt();
-        int dstY = packet.ReadInt();
-        float srcZ = packet.ReadFloatAsString();
-        float dstZ = packet.ReadFloatAsString();
+        int srcX = p.Read<int>();
+        int srcY = p.Read<int>();
+        int dstX = p.Read<int>();
+        int dstY = p.Read<int>();
+        float srcZ = p.Read<float>();
+        float dstZ = p.Read<float>();
         Source = new Tile(srcX, srcY, srcZ);
         Destination = new Tile(dstX, dstY, dstZ);
-        UserIndex = packet.ReadInt();
-        Slide = packet.ReadInt() != 0;
-        AnimationTime = packet.ReadInt();
-        BodyDirection = packet.ReadInt();
-        HeadDirection = packet.ReadInt();
+        UserIndex = p.Read<int>();
+        Slide = p.Read<int>() != 0;
+        AnimationTime = p.Read<int>();
+        BodyDirection = p.Read<int>();
+        HeadDirection = p.Read<int>();
     }
 
-    public override void Compose(IPacket packet)
+    public override void Compose(in PacketWriter p)
     {
-        base.Compose(packet);
-        packet
-            .WriteInt(Source.X)
-            .WriteInt(Source.Y)
-            .WriteInt(Destination.X)
-            .WriteInt(Destination.Y)
-            .WriteFloatAsString(Source.Z)
-            .WriteFloatAsString(Destination.Z)
-            .WriteInt(UserIndex)
-            .WriteInt(Slide ? 1 : 0)
-            .WriteInt(AnimationTime)
-            .WriteInt(BodyDirection)
-            .WriteInt(HeadDirection);
+        base.Compose(in p);
+        p.Write(Source.X);
+        p.Write(Source.Y);
+        p.Write(Destination.X);
+        p.Write(Destination.Y);
+        p.Write(Source.Z);
+        p.Write(Destination.Z);
+        p.Write(UserIndex);
+        p.Write(Slide ? 1 : 0);
+        p.Write(AnimationTime);
+        p.Write(BodyDirection);
+        p.Write(HeadDirection);
     }
 }
 
@@ -111,34 +111,33 @@ public class FloorItemWiredMovement : WiredMovement
 
     public FloorItemWiredMovement() : base(WiredMovementType.FloorItem) { }
 
-    internal FloorItemWiredMovement(IReadOnlyPacket packet) : this()
+    internal FloorItemWiredMovement(in PacketReader p) : this()
     {
-        int srcX = packet.ReadInt();
-        int srcY = packet.ReadInt();
-        int dstX = packet.ReadInt();
-        int dstY = packet.ReadInt();
-        float srcZ = packet.ReadFloatAsString();
-        float dstZ = packet.ReadFloatAsString();
+        int srcX = p.Read<int>();
+        int srcY = p.Read<int>();
+        int dstX = p.Read<int>();
+        int dstY = p.Read<int>();
+        float srcZ = p.Read<float>();
+        float dstZ = p.Read<float>();
         Source = new Tile(srcX, srcY, srcZ);
         Destination = new Tile(dstX, dstY, dstZ);
-        FurniId = packet.ReadLegacyLong();
-        AnimationTime = packet.ReadInt();
-        Rotation = packet.ReadInt();
+        FurniId = p.Read<Id>();
+        AnimationTime = p.Read<int>();
+        Rotation = p.Read<int>();
     }
 
-    public override void Compose(IPacket packet)
+    public override void Compose(in PacketWriter p)
     {
-        base.Compose(packet);
-        packet
-            .WriteInt(Source.X)
-            .WriteInt(Source.Y)
-            .WriteInt(Destination.X)
-            .WriteInt(Destination.Y)
-            .WriteFloatAsString(Source.Z)
-            .WriteFloatAsString(Destination.Z)
-            .WriteLegacyLong(FurniId)
-            .WriteInt(AnimationTime)
-            .WriteInt(Rotation);
+        base.Compose(in p);
+        p.Write(Source.X);
+        p.Write(Source.Y);
+        p.Write(Destination.X);
+        p.Write(Destination.Y);
+        p.Write(Source.Z);
+        p.Write(Destination.Z);
+        p.Write(FurniId);
+        p.Write(AnimationTime);
+        p.Write(Rotation);
     }
 }
 
@@ -150,37 +149,36 @@ public class WallItemWiredMovement : WiredMovement
 
     public WallItemWiredMovement() : base(WiredMovementType.WallItem) { }
 
-    internal WallItemWiredMovement(IReadOnlyPacket packet) : this()
+    internal WallItemWiredMovement(in PacketReader p) : this()
     {
-        ItemId = packet.ReadLegacyLong();
-        var orientation = packet.ReadBool() ? WallOrientation.Right : WallOrientation.Left;
-        int srcWX = packet.ReadInt();
-        int srcWY = packet.ReadInt();
-        int srcLX = packet.ReadInt();
-        int srcLY = packet.ReadInt();
-        int dstWX = packet.ReadInt();
-        int dstWY = packet.ReadInt();
-        int dstLX = packet.ReadInt();
-        int dstLY = packet.ReadInt();
+        ItemId = p.Read<Id>();
+        var orientation = p.Read<bool>() ? WallOrientation.Right : WallOrientation.Left;
+        int srcWX = p.Read<int>();
+        int srcWY = p.Read<int>();
+        int srcLX = p.Read<int>();
+        int srcLY = p.Read<int>();
+        int dstWX = p.Read<int>();
+        int dstWY = p.Read<int>();
+        int dstLX = p.Read<int>();
+        int dstLY = p.Read<int>();
         Source = new WallLocation(srcWX, srcWY, srcLX, srcLY, orientation);
         Destination = new WallLocation(dstWX, dstWY, dstLX, dstLY, orientation);
-        AnimationTime = packet.ReadInt();
+        AnimationTime = p.Read<int>();
     }
 
-    public override void Compose(IPacket packet)
+    public override void Compose(in PacketWriter p)
     {
-        base.Compose(packet);
-        packet
-            .WriteLegacyLong(ItemId)
-            .WriteBool(Destination.Orientation.IsRight)
-            .WriteInt(Source.WX)
-            .WriteInt(Source.WY)
-            .WriteInt(Source.LX)
-            .WriteInt(Source.LY)
-            .WriteInt(Destination.WX)
-            .WriteInt(Destination.WY)
-            .WriteInt(Destination.LX)
-            .WriteInt(Destination.LY)
-            .WriteInt(AnimationTime);
+        base.Compose(p);
+        p.Write(ItemId);
+        p.Write(Destination.Orientation.IsRight);
+        p.Write(Source.WX);
+        p.Write(Source.WY);
+        p.Write(Source.LX);
+        p.Write(Source.LY);
+        p.Write(Destination.WX);
+        p.Write(Destination.WY);
+        p.Write(Destination.LX);
+        p.Write(Destination.LY);
+        p.Write(AnimationTime);
     }
 }

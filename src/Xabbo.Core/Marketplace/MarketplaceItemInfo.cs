@@ -5,9 +5,9 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class MarketplaceItemInfo : IMarketplaceItemInfo
+public sealed class MarketplaceItemInfo : IMarketplaceItemInfo, IComposer, IParser<MarketplaceItemInfo>
 {
-    public long Id => -1;
+    public Id Id => -1;
     public ItemType Type { get; set; }
     public int Kind { get; set; }
 
@@ -18,30 +18,49 @@ public class MarketplaceItemInfo : IMarketplaceItemInfo
 
     public MarketplaceItemInfo()
     {
-        TradeInfo = new List<MarketplaceTradeInfo>();
+        TradeInfo = [];
     }
 
-    protected MarketplaceItemInfo(IReadOnlyPacket packet)
+    private MarketplaceItemInfo(in PacketReader p)
     {
-        Average = packet.ReadInt();
-        Offers = packet.ReadInt();
-        packet.ReadInt();
-        int n = packet.ReadInt();
-        TradeInfo = new List<MarketplaceTradeInfo>();
+        Average = p.Read<int>();
+        Offers = p.Read<int>();
+        p.Read<int>();
+        int n = p.Read<Length>();
+        TradeInfo = [];
         for (int i = 0; i < n; i++)
-            TradeInfo.Add(MarketplaceTradeInfo.Parse(packet));
+            TradeInfo.Add(p.Parse<MarketplaceTradeInfo>());
 
-        int itemType = packet.ReadInt();
+        int itemType = p.Read<int>();
         Type = itemType switch
         {
             1 => ItemType.Floor,
             2 => ItemType.Wall,
             _ => throw new FormatException($"Unknown item type: {itemType}.")
         };
-        Kind = packet.ReadInt();
+        Kind = p.Read<int>();
     }
 
-    public static MarketplaceItemInfo Parse(IReadOnlyPacket packet) => new MarketplaceItemInfo(packet);
+    public static MarketplaceItemInfo Parse(in PacketReader packet) => new(in packet);
 
     public override string ToString() => $"{nameof(MarketplaceItemInfo)}/{Type}:{Kind}";
+
+    public void Compose(in PacketWriter p)
+    {
+        p.Write(Average);
+        p.Write(Offers);
+        p.Write(0); // ?
+
+        p.Write<Length>(TradeInfo.Count);
+        for (int i = 0; i < TradeInfo.Count; i++)
+            p.Write(TradeInfo[i]);
+
+        p.Write(Type switch {
+           ItemType.Floor => 1,
+           ItemType.Wall => 2,
+           _ => throw new Exception($"Cannot write item type: {Type}."),
+        });
+        p.Write(Kind);
+    }
+
 }

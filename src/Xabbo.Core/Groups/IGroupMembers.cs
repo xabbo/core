@@ -5,7 +5,7 @@ namespace Xabbo.Core;
 
 public interface IGroupMembers : IReadOnlyList<IGroupMember>
 {
-    long GroupId { get;}
+    Id GroupId { get;}
     string GroupName { get; }
     long HomeRoomId { get; }
     string BadgeCode { get; }

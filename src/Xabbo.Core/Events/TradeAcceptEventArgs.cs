@@ -1,15 +1,7 @@
-﻿using System;
+﻿namespace Xabbo.Core.Events;
 
-namespace Xabbo.Core.Events;
-
-public class TradeAcceptEventArgs : EventArgs
+public sealed class TradeAcceptEventArgs(IRoomUser user, bool accepted)
+    : RoomUserEventArgs(user)
 {
-    public IRoomUser User { get; }
-    public bool Accepted { get; }
-
-    public TradeAcceptEventArgs(IRoomUser user, bool accepted)
-    {
-        User = user;
-        Accepted = accepted;
-    }
+    public bool Accepted { get; } = accepted;
 }
