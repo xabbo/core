@@ -91,7 +91,7 @@ public sealed partial class InventoryManager : GameStateManager
             {
                 if (!_forceLoadingInventory)
                 {
-                    Ext.Send(Out.RequestFurniInventory);
+                    Interceptor.Send(Out.RequestFurniInventory);
                     _forceLoadingInventory = true;
                 }
 

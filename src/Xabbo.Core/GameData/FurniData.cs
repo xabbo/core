@@ -11,8 +11,9 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
 {
     public static FurniData LoadJson(string json) => new(Json.FurniData.Load(json));
     public static FurniData LoadJsonFile(string path) => LoadJson(File.ReadAllText(path));
+
     public static FurniData LoadXml(Stream stream) => new(Xml.FurniData.Load(stream));
-    public static FurniData LoadXml(string path)
+    public static FurniData LoadXmlFile(string path)
     {
         using Stream stream = File.OpenRead(path);
         return LoadXml(stream);

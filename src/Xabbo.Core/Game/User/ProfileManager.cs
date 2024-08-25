@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Xabbo.Messages;
-
-using Xabbo.Core.Events;
-using Xabbo.Extension;
 using Xabbo.Interceptor;
 using Xabbo.Messages.Flash;
 
+using Xabbo.Core.Events;
+
 namespace Xabbo.Core.Game;
 
-public sealed class ProfileManager : GameStateManager
+[Intercepts]
+public sealed partial class ProfileManager : GameStateManager
 {
     private Task<IUserData> _taskUserData;
     private TaskCompletionSource<IUserData>? _tcsUserData;
@@ -55,8 +54,8 @@ public sealed class ProfileManager : GameStateManager
     #endregion
 
 #pragma warning disable CS8618
-    public ProfileManager(IExtension extension)
-        : base(extension)
+    public ProfileManager(IInterceptor interceptor)
+        : base(interceptor)
     {
         Reset();
     }
@@ -82,27 +81,27 @@ public sealed class ProfileManager : GameStateManager
     /// </summary>
     public Task<IUserData> GetUserDataAsync() => _taskUserData;
 
-    // [InterceptIn(nameof(In.ClientLatencyPingResponse))]
-    private void HandleLatencyResponse(Intercept e)
+    [InterceptIn(nameof(In.LatencyPingResponse))]
+    private void HandleLatencyPingResponse(Intercept e)
     {
         if (e.Packet.Read<int>() == 0) return;
 
         if (UserData is null && !_isLoadingProfile)
         {
             _isLoadingProfile = true;
-            Ext.Send(Out.InfoRetrieve);
+            Interceptor.Send(Out.InfoRetrieve);
         }
 
-        if (Achievements is null) Ext.Send(Out.GetAchievements);
+        if (Achievements is null) Interceptor.Send(Out.GetAchievements);
 
         if (Credits is null && !_isLoadingCredits)
         {
             _isLoadingCredits = true;
-            Ext.Send(Out.GetCreditsInfo);
+            Interceptor.Send(Out.GetCreditsInfo);
         }
     }
 
-    // [InterceptIn(nameof(In.UserObject))]
+    [InterceptIn(nameof(In.UserObject))]
     private void HandleUserObject(Intercept e)
     {
         if (_isLoadingProfile)
@@ -121,8 +120,8 @@ public sealed class ProfileManager : GameStateManager
         OnLoadedUserData();
     }
 
-    // [InterceptIn(nameof(In.UpdateFigure))]
-    private void HandleUpdateFigure(Intercept e)
+    [InterceptIn(nameof(In.FigureUpdate))]
+    private void HandleFigureUpdate(Intercept e)
     {
         if (UserData is null) return;
 
@@ -132,8 +131,8 @@ public sealed class ProfileManager : GameStateManager
         OnUserDataUpdated();
     }
 
-    // [InterceptIn(nameof(In.UpdateAvatar))]
-    private void HandleUpdateAvatar(Intercept e)
+    [InterceptIn(nameof(In.UserUpdate))]
+    private void HandleUserUpdate(Intercept e)
     {
         if (UserData is null) return;
 
@@ -149,14 +148,14 @@ public sealed class ProfileManager : GameStateManager
         }
     }
 
-    // @Update [InterceptIn(nameof(In.?)]
+    // TODO: [InterceptIn(nameof(In.?)]
     private void HandleUserHomeRoom(Intercept e)
     {
         HomeRoom = e.Packet.Read<int>();
     }
 
-    // [InterceptIn(nameof(In.WalletBalance))]
-    private void HandleWalletBalance(Intercept e)
+    [InterceptIn(nameof(In.CreditBalance))]
+    private void HandleCreditBalance(Intercept e)
     {
         if (_isLoadingCredits)
         {
@@ -169,7 +168,7 @@ public sealed class ProfileManager : GameStateManager
         OnCreditsUpdated();
     }
 
-    // [InterceptIn(nameof(In.ActivityPoints))]
+    [InterceptIn(nameof(In.ActivityPoints))]
     private void HandleActivityPoints(Intercept e)
     {
         Points = e.Packet.Parse<ActivityPoints>();
@@ -177,8 +176,8 @@ public sealed class ProfileManager : GameStateManager
         OnLoadedPoints();
     }
 
-    // [InterceptIn(nameof(In.ActivityPointNotification))]
-    private void HandleActivityPointNotification(Intercept e)
+    [InterceptIn(nameof(In.HabboActivityPointNotification))]
+    private void HandleHabboActivityPointNotification(Intercept e)
     {
         int amount = e.Packet.Read<int>();
         int change = e.Packet.Read<int>();
@@ -189,16 +188,16 @@ public sealed class ProfileManager : GameStateManager
         OnPointsUpdated(type, amount, change);
     }
 
-    // [InterceptIn(nameof(In.PossibleUserAchievements))]
-    private void HandlePossibleUserAchievements(Intercept e)
+    [InterceptIn(nameof(In.Achievements))]
+    private void HandleAchievements(Intercept e)
     {
         Achievements = e.Packet.Parse<Achievements>();
 
         OnLoadedAchievements();
     }
 
-    // [InterceptIn(nameof(In.PossibleAchievement))]
-    private void HandlePossibleAchievement(Intercept e)
+    [InterceptIn(nameof(In.Achievement))]
+    private void HandleAchievement(Intercept e)
     {
         Achievement achievement = e.Packet.Parse<Achievement>();
         Achievements?.Update(achievement);

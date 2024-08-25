@@ -2,16 +2,17 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Xabbo.Core.GameData;
 
 public class FigureData
 {
-    public static FigureData LoadXml(Stream stream) => new FigureData(Xml.FigureData.Load(stream));
+    public static FigureData LoadXml(Stream stream) => new(Xml.FigureData.Load(stream));
     public static FigureData LoadXml(string path)
     {
-        using (var stream = File.OpenRead(path))
-            return LoadXml(stream);
+        using var stream = File.OpenRead(path);
+        return LoadXml(stream);
     }
 
     public IReadOnlyList<Palette> Palettes { get; }
@@ -107,7 +108,7 @@ public class FigureData
         public PartSet? GetSet(int id) => Sets.FirstOrDefault(x => x.Id == id);
     }
 
-    public class PartSet 
+    public class PartSet
     {
         public int Id { get; }
         public Gender Gender { get; }

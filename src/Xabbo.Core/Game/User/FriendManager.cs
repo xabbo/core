@@ -6,12 +6,10 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-using Xabbo.Extension;
-
-using Xabbo.Core.Events;
 using Xabbo.Interceptor;
 using Xabbo.Messages.Flash;
-using Xabbo.Messages;
+
+using Xabbo.Core.Events;
 
 namespace Xabbo.Core.Game;
 
@@ -51,14 +49,14 @@ public sealed partial class FriendManager : GameStateManager
     private void OnMessageReceived(Friend friend, string message) => MessageReceived?.Invoke(new FriendMessageEventArgs(friend, message));
     #endregion
 
-    public FriendManager(IExtension extension, ILogger<FriendManager> logger)
-        : base(extension)
+    public FriendManager(IInterceptor interceptor, ILogger<FriendManager> logger)
+        : base(interceptor)
     {
         _logger = logger;
     }
 
-    public FriendManager(IExtension extension)
-        : base(extension)
+    public FriendManager(IInterceptor interceptor)
+        : base(interceptor)
     {
         _logger = NullLogger.Instance;
     }
@@ -78,7 +76,7 @@ public sealed partial class FriendManager : GameStateManager
     /// <summary>
     /// Sends a private message to a user with the specified ID.
     /// </summary>
-    public void SendMessage(Id id, string message) => Ext.Send(Out.PostMessage, id, message); // TODO SendMessage
+    public void SendMessage(Id id, string message) => Interceptor.Send(Out.PostMessage, id, message);
 
     /// <summary>
     /// Sends a private message to the specified friend.
@@ -155,7 +153,7 @@ public sealed partial class FriendManager : GameStateManager
         if (!IsInitialized && !_isForceLoading && e.Sequence > 10)
         {
             _isForceLoading = true;
-            Ext.Send(Out.MessengerInit);
+            Interceptor.Send(Out.MessengerInit);
         }
     }
 

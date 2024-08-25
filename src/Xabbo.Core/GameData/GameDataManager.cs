@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Xabbo.Core.Extensions;
+using Xabbo.Core.Serialization;
 using Xabbo.Core.Web;
 
 namespace Xabbo.Core.GameData;
@@ -122,8 +123,9 @@ public class GameDataManager : IGameDataManager
             if (hashesFile.Exists &&
                 (DateTime.Now - hashesFile.LastWriteTime) < TimeSpan.FromMinutes(15))
             {
-                hashesContainer = JsonSerializer.Deserialize<GameDataHashesContainer>(
-                    await File.ReadAllTextAsync(hashesFile.FullName, cancellationToken)
+                hashesContainer = JsonSerializer.Deserialize(
+                    await File.ReadAllTextAsync(hashesFile.FullName, cancellationToken),
+                    JsonContext.Default.GameDataHashesContainer
                 );
             }
             else
@@ -132,7 +134,7 @@ public class GameDataManager : IGameDataManager
                     $"https://{hotel.WebHost}/gamedata/hashes2",
                     cancellationToken
                 );
-                hashesContainer = JsonSerializer.Deserialize<GameDataHashesContainer>(json);
+                hashesContainer = JsonSerializer.Deserialize(json, JsonContext.Default.GameDataHashesContainer);
 
                 await File.WriteAllTextAsync(hashesFile.FullName, json, cancellationToken);
             }

@@ -2,17 +2,13 @@
 using System.Collections.Generic;
 using System.Text.Json;
 
+using Xabbo.Core.Serialization;
+
 namespace Xabbo.Core.GameData.Json;
 
 public class FurniData
 {
-    private static readonly JsonSerializerOptions _options = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true
-    };
-
-    public static FurniData Load(string json) => JsonSerializer.Deserialize<FurniData>(json, _options)
+    public static FurniData Load(string json) => JsonSerializer.Deserialize(json, JsonContext.Default.FurniData)
         ?? throw new Exception("Failed to deserialize furni data.");
 
     public FurniInfoContainer RoomItemTypes { get; set; } = new();
@@ -20,12 +16,7 @@ public class FurniData
 
     public class FurniInfoContainer
     {
-        public List<FurniInfo> FurniType { get; set; }
-
-        public FurniInfoContainer()
-        {
-            FurniType = new List<FurniInfo>();
-        }
+        public List<FurniInfo> FurniType { get; set; } = [];
     }
 }
 
@@ -59,6 +50,6 @@ public class FurniInfo
 
     public class PartColorContainer
     {
-        public string[] Colors { get; set; } = Array.Empty<string>();
+        public string[] Colors { get; set; } = [];
     }
 }

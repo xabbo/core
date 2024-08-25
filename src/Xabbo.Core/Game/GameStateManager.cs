@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 using Xabbo.Messages;
-using Xabbo.Extension;
+using Xabbo.Interceptor;
 
 namespace Xabbo.Core.Game;
 
@@ -27,20 +27,20 @@ public abstract class GameStateManager : INotifyPropertyChanged, IDisposable
     private bool _disposed;
     private IDisposable? _attachment;
 
-    protected IExtension Ext { get; }
-    protected IMessageDispatcher Dispatcher => Ext.Dispatcher;
+    protected IInterceptor Interceptor { get; }
+    protected IMessageDispatcher Dispatcher => Interceptor.Dispatcher;
 
-    public GameStateManager(IExtension extension)
+    public GameStateManager(IInterceptor interceptor)
     {
-        Ext = extension;
-        Ext.Connected += OnConnected;
-        Ext.Disconnected += OnDisconnected;
+        Interceptor = interceptor;
+        Interceptor.Connected += OnConnected;
+        Interceptor.Disconnected += OnDisconnected;
     }
 
     protected virtual void OnConnected(GameConnectedArgs e)
     {
         if (this is IMessageHandler handler)
-            _attachment = handler.Attach(Ext);
+            _attachment = handler.Attach(Interceptor);
     }
 
     protected virtual void OnDisconnected() { }

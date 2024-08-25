@@ -46,8 +46,7 @@ public sealed class InventoryItem : IInventoryItem, IComposer, IParser<Inventory
 
     }
 
-    protected InventoryItem(in PacketReader p)
-        : this()
+    private InventoryItem(in PacketReader p) : this()
     {
         ItemId = p.Read<Id>();
 

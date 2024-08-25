@@ -6,12 +6,10 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-using Xabbo.Messages;
+using Xabbo.Interceptor;
 using Xabbo.Messages.Flash;
-using Xabbo.Extension;
 
 using Xabbo.Core.Events;
-using Xabbo.Interceptor;
 
 namespace Xabbo.Core.Game;
 
@@ -527,14 +525,14 @@ public sealed partial class RoomManager : GameStateManager
     /// </summary>
     public bool TryGetRoomData(long roomId, [NotNullWhen(true)] out RoomData? data) => _roomDataCache.TryGetValue(roomId, out data);
 
-    public RoomManager(ILogger<RoomManager> logger, IExtension extension)
-        : base(extension)
+    public RoomManager(ILogger<RoomManager> logger, IInterceptor interceptor)
+        : base(interceptor)
     {
         _logger = logger;
     }
 
-    public RoomManager(IExtension extension)
-        : base(extension)
+    public RoomManager(IInterceptor interceptor)
+        : base(interceptor)
     {
         _logger = NullLogger.Instance;
     }
@@ -622,22 +620,22 @@ public sealed partial class RoomManager : GameStateManager
         {
             if (furni.Type == ItemType.Floor)
             {
-                if (Ext.Session.IsUnity)
-                    Ext.Send(In.ObjectRemove, furni.Id, false, -1L, 0);
+                if (Interceptor.Session.IsUnity)
+                    Interceptor.Send(In.ObjectRemove, furni.Id, false, -1L, 0);
                 else
-                    Ext.Send(In.ObjectRemove, furni.Id.ToString(), false, -1, 0);
+                    Interceptor.Send(In.ObjectRemove, furni.Id.ToString(), false, -1, 0);
             }
             else if (furni.Type == ItemType.Wall)
             {
-                if (Ext.Session.IsUnity)
-                    Ext.Send(In.ItemRemove, furni.Id, -1L);
+                if (Interceptor.Session.IsUnity)
+                    Interceptor.Send(In.ItemRemove, furni.Id, -1L);
                 else
-                    Ext.Send(In.ItemRemove, furni.Id.ToString(), -1);
+                    Interceptor.Send(In.ItemRemove, furni.Id.ToString(), -1);
             }
         }
         else
         {
-            Ext.Send(furni.IsFloorItem ? In.ObjectAdd : In.ItemAdd, furni);
+            Interceptor.Send(furni.IsFloorItem ? In.ObjectAdd : In.ItemAdd, furni);
         }
 
         OnFurniVisibilityToggled(furni);
@@ -1641,8 +1639,8 @@ public sealed partial class RoomManager : GameStateManager
         OnWiredMovements(movements);
     }
 
-    [InterceptIn(nameof(In.FigureUpdate))]
-    private void HandleFigureUpdate(Intercept e)
+    [InterceptIn(nameof(In.UserChange))]
+    private void HandleUserChange(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1949,29 +1947,29 @@ public sealed partial class RoomManager : GameStateManager
 
     #region - Furni interaction -
     public void Place(long itemId, int x, int y, int direction)
-        => Ext.Send(Out.PlaceObject, itemId, x, y, direction);
+        => Interceptor.Send(Out.PlaceObject, itemId, x, y, direction);
     public void Place(long itemId, (int X, int Y) location, int direction)
-        => Ext.Send(Out.PlaceObject, itemId, location.X, location.Y, direction);
+        => Interceptor.Send(Out.PlaceObject, itemId, location.X, location.Y, direction);
     public void Place(IInventoryItem item, int x, int y, int direction)
         => Place(item.Id, x, y, direction);
     public void Place(IInventoryItem item, (int X, int Y) location, int direction)
         => Place(item.Id, location, direction);
 
     public void Place(long itemId, WallLocation location)
-        => Ext.Send(Out.PlaceObject, itemId, location.WX, location.WY, location.LX, location.LY);
+        => Interceptor.Send(Out.PlaceObject, itemId, location.WX, location.WY, location.LX, location.LY);
     public void Place(IInventoryItem item, WallLocation location)
         => Place(item.Id, location);
 
     public void Move(long floorItemId, int x, int y, int direction)
-        => Ext.Send(Out.MoveObject, floorItemId, x, y, direction);
+        => Interceptor.Send(Out.MoveObject, floorItemId, x, y, direction);
     public void Move(long floorItemId, (int X, int Y) location, int direction)
-        => Ext.Send(Out.MoveObject, floorItemId, location.X, location.Y, direction);
+        => Interceptor.Send(Out.MoveObject, floorItemId, location.X, location.Y, direction);
     public void Move(IFloorItem item, int x, int y, int direction)
         => Move(item.Id, x, y, direction);
     public void Move(IFloorItem item, (int X, int Y) location, int direction)
         => Move(item.Id, location.X, location.Y, direction);
 
-    public void Move(long wallItemId, WallLocation location) => Ext.Send(
+    public void Move(long wallItemId, WallLocation location) => Interceptor.Send(
         Out.MoveWallItem, wallItemId,
         location.WX, location.WY,
         location.LX, location.LY,
@@ -1984,14 +1982,14 @@ public sealed partial class RoomManager : GameStateManager
     public void Pickup(ItemType type, Id id)
     {
         if (type == ItemType.Floor)
-            Ext.Send(Out.PickupObject, 2, id);
+            Interceptor.Send(Out.PickupObject, 2, id);
         else if (type == ItemType.Wall)
-            Ext.Send(Out.PickupObject, 1, id);
+            Interceptor.Send(Out.PickupObject, 1, id);
     }
 
     public void UpdateStackTile(IFloorItem stackTile, float height) => UpdateStackTile(stackTile.Id, height);
     public void UpdateStackTile(long stackTileId, float height)
-        => Ext.Send(Out.SetCustomStackingHeight, stackTileId, (int)Math.Round(height * 100.0));
+        => Interceptor.Send(Out.SetCustomStackingHeight, stackTileId, (int)Math.Round(height * 100.0));
 
 
     #endregion

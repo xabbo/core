@@ -37,7 +37,7 @@ public sealed class InventoryFragment : IInventoryFragment, ICollection<Inventor
         ));
     }
 
-    protected InventoryFragment(in PacketReader p)
+    private InventoryFragment(in PacketReader p)
     {
         Total = p.Read<int>();
         Index = p.Read<int>();

@@ -3,8 +3,6 @@ using System.IO;
 using System.Text.Json;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text.Json.Serialization;
 using System.Diagnostics.CodeAnalysis;
 
 using Xabbo.Core.Serialization;
@@ -13,19 +11,11 @@ namespace Xabbo.Core.GameData;
 
 public sealed class ProductData : IReadOnlyDictionary<string, ProductInfo>
 {
-    private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true,
-        NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString,
-        Converters = { new StringConverter() }
-    };
-
     public static ProductData LoadJsonFile(string path) => LoadJson(File.ReadAllText(path));
     public static ProductData LoadJson(string json)
     {
         return new ProductData(
-            JsonSerializer.Deserialize<Json.ProductData>(json, _jsonSerializerOptions)
+            JsonSerializer.Deserialize(json, JsonProductContext.Default.ProductData)
             ?? throw new Exception("Failed to deserialize product data.")
         );
     }

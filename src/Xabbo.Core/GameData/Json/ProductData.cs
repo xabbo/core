@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+
+using Xabbo.Core.Serialization;
 
 namespace Xabbo.Core.GameData.Json;
 
 public class ProductData
 {
-    private static readonly JsonSerializerOptions _serializerOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true
-    };
-
-    public static ProductData? Load(string json) => JsonSerializer.Deserialize<ProductData>(json, _serializerOptions);
+    public static ProductData? Load(string json) => JsonSerializer.Deserialize(json, JsonProductContext.Default.ProductData);
 
     [JsonPropertyName("productdata")]
     public ProductInfoContainer Container { get; set; } = new();

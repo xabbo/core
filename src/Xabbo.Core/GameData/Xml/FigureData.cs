@@ -8,18 +8,19 @@ namespace Xabbo.Core.GameData.Xml;
 [XmlRoot("figuredata")]
 public class FigureData
 {
+#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
     private static readonly XmlSerializer _serializer = new(typeof(FigureData));
-
     public static FigureData Load(Stream stream) => (FigureData?)_serializer.Deserialize(stream)
         ?? throw new Exception("Failed to deserialize figure data.");
+#pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
 
     [XmlArray("colors")]
     [XmlArrayItem("palette")]
-    public List<Palette> Palettes { get; set; } = new();
+    public List<Palette> Palettes { get; set; } = [];
 
     [XmlArray("sets")]
     [XmlArrayItem("settype")]
-    public List<PartSetCollection> SetCollections { get; set; } = new();
+    public List<PartSetCollection> SetCollections { get; set; } = [];
 
     public class Palette
     {
@@ -27,7 +28,7 @@ public class FigureData
         public int Id { get; set; }
 
         [XmlElement("color")]
-        public List<Color> Colors { get; set; } = new();
+        public List<Color> Colors { get; set; } = [];
     }
 
     public class Color
@@ -96,7 +97,7 @@ public class FigureData
         public bool IsSellable { get; set; }
 
         [XmlElement("part")]
-        public List<Part> Parts { get; set; } = new();
+        public List<Part> Parts { get; set; } = [];
     }
 
     public class Part
