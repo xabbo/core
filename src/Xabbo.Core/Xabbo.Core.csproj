@@ -46,11 +46,11 @@
   </PropertyGroup>
 
   <ItemGroup Label="References">
-    <PackageReference Include="GitVersion.MsBuild" Version="6.0.2" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
     <ProjectReference Include="$(XabboCommonDir)src\Xabbo.Common\Xabbo.Common.csproj" />
     <ProjectReference Include="$(XabboCommonDir)src\Xabbo.Common.Generator\Xabbo.Common.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="$(XabboMessagesDir)src\Xabbo.Messages\Xabbo.Messages.csproj" />
+    <PackageReference Include="GitVersion.MsBuild" Version="6.0.2" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
   </ItemGroup>
 
 </Project>

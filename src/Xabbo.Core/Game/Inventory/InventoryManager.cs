@@ -8,8 +8,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Extension;
-using Xabbo.Interceptor;
-using Xabbo.Messages;
 using Xabbo.Messages.Flash;
 
 using Xabbo.Core.Events;
@@ -22,9 +20,6 @@ namespace Xabbo.Core.Game;
 [Intercepts]
 public sealed partial class InventoryManager : GameStateManager
 {
-    // TODO: handle in source generator.
-    public override IDisposable Attach(IInterceptor interceptor) => ((IMessageHandler)this).Attach(interceptor);
-
     private readonly ILogger _logger;
 
     private readonly List<InventoryFragment> _fragments = [];
@@ -64,10 +59,8 @@ public sealed partial class InventoryManager : GameStateManager
         _logger = NullLogger.Instance;
     }
 
-    protected override void OnDisconnected(object? sender, EventArgs e)
+    protected override void OnDisconnected()
     {
-        base.OnDisconnected(sender, e);
-
         _inventory = null;
         _forceLoadingInventory = false;
         _currentPacketIndex = 0;

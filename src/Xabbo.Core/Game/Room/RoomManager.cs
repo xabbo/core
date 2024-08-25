@@ -21,8 +21,6 @@ namespace Xabbo.Core.Game;
 [Intercepts]
 public sealed partial class RoomManager : GameStateManager
 {
-    public override IDisposable Attach(IInterceptor interceptor) => ((IMessageHandler)this).Attach(interceptor);
-
     private readonly ILogger _logger;
     private readonly Dictionary<long, RoomData> _roomDataCache = new();
 
@@ -541,12 +539,7 @@ public sealed partial class RoomManager : GameStateManager
         _logger = NullLogger.Instance;
     }
 
-    protected override void OnDisconnected(object? sender, EventArgs e)
-    {
-        base.OnDisconnected(sender, e);
-
-        ResetState();
-    }
+    protected override void OnDisconnected() => ResetState();
 
     private void ResetState()
     {

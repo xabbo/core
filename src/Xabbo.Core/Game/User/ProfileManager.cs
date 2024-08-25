@@ -10,7 +10,7 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Game;
 
-public class ProfileManager : GameStateManager
+public sealed class ProfileManager : GameStateManager
 {
     private Task<IUserData> _taskUserData;
     private TaskCompletionSource<IUserData>? _tcsUserData;
@@ -28,29 +28,29 @@ public class ProfileManager : GameStateManager
 
     #region - Events -
     public event EventHandler? LoadedUserData;
-    protected virtual void OnLoadedUserData() => LoadedUserData?.Invoke(this, EventArgs.Empty);
+    private void OnLoadedUserData() => LoadedUserData?.Invoke(this, EventArgs.Empty);
 
     public event EventHandler? UserDataUpdated;
-    protected virtual void OnUserDataUpdated() => UserDataUpdated?.Invoke(this, EventArgs.Empty);
+    private void OnUserDataUpdated() => UserDataUpdated?.Invoke(this, EventArgs.Empty);
 
     public event EventHandler? HomeRoomUpdated;
-    protected virtual void OnHomeRoomUpdated() => HomeRoomUpdated?.Invoke(this, EventArgs.Empty);
+    private void OnHomeRoomUpdated() => HomeRoomUpdated?.Invoke(this, EventArgs.Empty);
 
     public event EventHandler? LoadedAchievements;
-    protected virtual void OnLoadedAchievements() => LoadedAchievements?.Invoke(this, EventArgs.Empty);
+    private void OnLoadedAchievements() => LoadedAchievements?.Invoke(this, EventArgs.Empty);
 
     public event EventHandler? AchievementUpdated;
-    protected virtual void OnAchievementUpdated(IAchievement achievement)
+    private void OnAchievementUpdated(IAchievement achievement)
         => AchievementUpdated?.Invoke(this, EventArgs.Empty); // TODO AchievementEventArgs
 
     public event EventHandler? CreditsUpdated;
-    protected virtual void OnCreditsUpdated() => CreditsUpdated?.Invoke(this, EventArgs.Empty);
+    private void OnCreditsUpdated() => CreditsUpdated?.Invoke(this, EventArgs.Empty);
 
     public event EventHandler? LoadedPoints;
-    protected virtual void OnLoadedPoints() => LoadedPoints?.Invoke(this, EventArgs.Empty);
+    private void OnLoadedPoints() => LoadedPoints?.Invoke(this, EventArgs.Empty);
 
     public event EventHandler<PointsUpdatedEventArgs>? PointsUpdated;
-    protected virtual void OnPointsUpdated(ActivityPointType type, int amount, int change)
+    private void OnPointsUpdated(ActivityPointType type, int amount, int change)
         => PointsUpdated?.Invoke(this, new PointsUpdatedEventArgs(type, amount, change));
     #endregion
 
@@ -61,19 +61,6 @@ public class ProfileManager : GameStateManager
         Reset();
     }
 #pragma warning restore CS8618
-
-    public override IDisposable Attach(IInterceptor interceptor) => Dispatcher.Register([
-        new(In.LatencyPingResponse, HandleLatencyResponse),
-        new(In.UserObject, HandleUserObject),
-        new(In.FigureUpdate, HandleUpdateFigure), // TODO check this
-        new(In.UserUpdate, HandleUpdateAvatar), // TODO check this
-        // new(In.?, HandleUserHomeRoom),
-        new(In.CreditBalance, HandleWalletBalance),
-        new(In.ActivityPoints, HandleActivityPoints),
-        new(In.HabboActivityPointNotification, HandleActivityPointNotification),
-        new(In.Achievements, HandlePossibleUserAchievements),
-        new(In.Achievement, HandlePossibleAchievement),
-    ]);
 
     private void Reset()
     {
@@ -88,12 +75,7 @@ public class ProfileManager : GameStateManager
         _isLoadingCredits = false;
     }
 
-    protected override void OnDisconnected(object? sender, EventArgs e)
-    {
-        base.OnDisconnected(sender, e);
-
-        Reset();
-    }
+    protected override void OnDisconnected() => Reset();
 
     /// <summary>
     /// Waits for the user data to load, or returns the user's data immediately if it has already loaded.

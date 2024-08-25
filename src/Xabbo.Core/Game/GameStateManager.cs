@@ -5,12 +5,10 @@ using System.Runtime.CompilerServices;
 
 using Xabbo.Messages;
 using Xabbo.Extension;
-using Xabbo.Connection;
-using Xabbo.Interceptor;
 
 namespace Xabbo.Core.Game;
 
-public abstract class GameStateManager : IMessageHandler, INotifyPropertyChanged, IDisposable
+public abstract class GameStateManager : INotifyPropertyChanged, IDisposable
 {
     #region - INotifyPropertyChanged -
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -39,11 +37,13 @@ public abstract class GameStateManager : IMessageHandler, INotifyPropertyChanged
         Ext.Disconnected += OnDisconnected;
     }
 
-    public abstract IDisposable Attach(IInterceptor interceptor);
+    protected virtual void OnConnected(GameConnectedArgs e)
+    {
+        if (this is IMessageHandler handler)
+            _attachment = handler.Attach(Ext);
+    }
 
-    protected virtual void OnConnected(object? sender, GameConnectedArgs e) => _attachment = Attach(Ext);
-
-    protected virtual void OnDisconnected(object? sender, EventArgs e) { }
+    protected virtual void OnDisconnected() { }
 
     protected virtual void Dispose(bool disposing)
     {

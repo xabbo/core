@@ -50,22 +50,7 @@ public sealed class TradeManager(IExtension extension, ProfileManager profileMan
         ITradeOffer ownOffer, ITradeOffer partnerOffer)
         => Completed?.Invoke(this, new TradeCompleteEventArgs(wasTrader, self, partner, ownOffer, partnerOffer));
 
-    public override IDisposable Attach(IInterceptor ix) => ix.Dispatcher.Register([
-        new(In.TradingOpen, HandleTradeOpen),
-        new(In.TradeOpenFailed, HandleTradeOpenFail),
-        new(In.TradingItemList, HandleTradeItems),
-        new(In.TradingAccept, HandleTradeAccept),
-        new(In.TradingConfirmation, HandleTradeConfirmation),
-        new(In.TradingCompleted, HandleTradeCompleted),
-        new(In.TradingClose, HandleTradeClose),
-    ]);
-
-    protected override void OnDisconnected(object? sender, EventArgs e)
-    {
-        base.OnDisconnected(sender, e);
-
-        ResetTrade();
-    }
+    protected override void OnDisconnected() => ResetTrade();
 
     private void ResetTrade()
     {

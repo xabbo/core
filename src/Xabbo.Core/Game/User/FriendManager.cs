@@ -18,8 +18,6 @@ namespace Xabbo.Core.Game;
 [Intercepts]
 public sealed partial class FriendManager : GameStateManager
 {
-    public override IDisposable Attach(IInterceptor interceptor) => ((IMessageHandler)this).Attach(interceptor);
-
     private readonly ILogger _logger;
 
     private readonly ConcurrentDictionary<Id, Friend> _friends = new();
@@ -65,10 +63,8 @@ public sealed partial class FriendManager : GameStateManager
         _logger = NullLogger.Instance;
     }
 
-    protected override void OnDisconnected(object? sender, EventArgs e)
+    protected override void OnDisconnected()
     {
-        base.OnDisconnected(sender, e);
-
         _friends.Clear();
         _nameMap.Clear();
 
