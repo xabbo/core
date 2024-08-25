@@ -900,7 +900,7 @@ public sealed partial class RoomManager : GameStateManager
         _logger.LogTrace("Received room entry tile. (x:{x}, y:{y}, dir: {dir})", x, y, dir);
     }
 
-    [InterceptIn(nameof(In.HeightMap))]
+    [InterceptIn("f:"+nameof(In.HeightMap))]
     private void HandleHeightMap(Intercept e)
     {
         if (!IsLoadingRoom)
