@@ -7,7 +7,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public abstract class Entity(EntityType type, Id id, int index) : IEntity, IComposer, IParser<Entity>, IManyParser<Entity>
+public abstract class Entity(EntityType type, Id id, int index) : IEntity, IComposer, IParser<Entity>
 {
     public bool IsRemoved { get; set; }
     public bool IsHidden { get; set; }
@@ -98,10 +98,4 @@ public abstract class Entity(EntityType type, Id id, int index) : IEntity, IComp
 
         return entity;
     }
-
-    public static IEnumerable<Entity> ParseAll(in PacketReader p) => p.ReadArray<Entity>();
-
-    public static void ComposeAll(in PacketWriter p, IEnumerable<IEntity> entities) => p.Write(entities);
-
-    public static void ComposeAll(in PacketWriter p, params IEntity[] entities) => ComposeAll(in p, (IEnumerable<IEntity>)entities);
 }

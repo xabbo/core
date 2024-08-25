@@ -958,7 +958,7 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        FloorPlan floorPlan = e.Packet.Read<FloorPlan>();
+        FloorPlan floorPlan = e.Packet.Parse<FloorPlan>();
         _currentRoom.FloorPlan = floorPlan;
 
         _logger.LogTrace("Received floor heightmap. (size:{width}x{length})", floorPlan.Width, floorPlan.Length);
@@ -1488,7 +1488,7 @@ public sealed partial class RoomManager : GameStateManager
 
         List<Entity> newEntities = new List<Entity>();
 
-        foreach (Entity entity in e.Packet.ParseAll<Entity>())
+        foreach (Entity entity in e.Packet.ParseArray<Entity>())
         {
             if (_currentRoom.Entities.TryAdd(entity.Index, entity))
             {
