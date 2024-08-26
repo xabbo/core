@@ -24,7 +24,7 @@ public class FloorItem : Furni, IFloorItem, IComposer, IParser<FloorItem>, IMany
                     area = area.Flip();
                 return area;
             }
-            return Extensions.XabboCoreExtensions.GetArea(this);
+            return Extensions.GetArea(this);
         }
     }
     [JsonIgnore] public int X => Location.X;

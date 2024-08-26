@@ -4,22 +4,22 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Threading.Tasks;
+
 using Xabbo.Core.GameData;
 
-namespace Xabbo.Core.Extensions;
+namespace Xabbo.Core;
 
 /// <summary>
 /// Provides convenient extension methods utilizing Xabbo.Core.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
-public static class XabboCoreExtensions
+public static class Extensions
 {
     private static FurniData? _furniData;
     private static ExternalTexts? _texts;
 
-    private static FurniData FurniData => _furniData ?? throw new InvalidOperationException($"{nameof(XabboCoreExtensions)} has not been initialized.");
-    private static ExternalTexts Texts => _texts ?? throw new InvalidOperationException($"{nameof(XabboCoreExtensions)} has not been initialized.");
+    private static FurniData FurniData => _furniData ?? throw new InvalidOperationException($"{nameof(Extensions)} has not been initialized.");
+    private static ExternalTexts Texts => _texts ?? throw new InvalidOperationException($"{nameof(Extensions)} has not been initialized.");
 
     /// <summary>
     /// Gets if Xabbo core extensions have been initialized.
@@ -552,7 +552,7 @@ public static class XabboCoreExtensions
     {
         return items.Where(item => !item.GetLine().Equals(line, StringComparison.OrdinalIgnoreCase));
     }
-    
+
     /// <summary>
     /// Selects items not belonging to any of the specified furni lines.
     /// </summary>
@@ -782,7 +782,7 @@ public static class XabboCoreExtensions
     /// Gets items of the specified kinds.
     /// </summary>
     public static IEnumerable<T> OfKinds<T>(this IEnumerable<T> items, IEnumerable<int> kinds)
-        where T : IFloorItem, IWallItem   
+        where T : IFloorItem, IWallItem
     {
         HashSet<int> set = new(kinds);
         return items.Where(item => set.Contains(item.Kind));

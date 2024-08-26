@@ -7,7 +7,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Xabbo.Core.Extensions;
 using Xabbo.Core.Serialization;
 using Xabbo.Core.Web;
 
@@ -161,7 +160,7 @@ public class GameDataManager : IGameDataManager
             }
 
             await Task.WhenAll(loadTasks);
-            XabboCoreExtensions.Initialize(Furni!, Texts!);
+            Extensions.Initialize(Furni!, Texts!);
 
             Loaded?.Invoke();
             _tcsLoad.TrySetResult();
