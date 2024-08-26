@@ -1,4 +1,5 @@
-﻿using Xabbo.Messages;
+﻿using System;
+using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
@@ -10,6 +11,7 @@ public class TradeItem : ITradeItem, IComposer, IParser<TradeItem>
     public bool IsWallItem => Type == ItemType.Wall;
     public Id Id { get; set; }
     public int Kind { get; set; }
+    public string Identifier { get; set; } = "";
     public FurniCategory Category { get; set; }
     public bool IsGroupable { get; set; }
     public ItemData Data { get; set; } = new LegacyData();
@@ -18,6 +20,8 @@ public class TradeItem : ITradeItem, IComposer, IParser<TradeItem>
     public int CreationMonth { get; set; }
     public int CreationYear { get; set; }
     public long Extra { get; set; }
+
+    public int SlotIndex { get; set; }
 
     bool IInventoryItem.IsRecyclable => true;
     bool IInventoryItem.IsTradeable => true;
@@ -30,6 +34,21 @@ public class TradeItem : ITradeItem, IComposer, IParser<TradeItem>
     public TradeItem() { }
 
     protected TradeItem(in PacketReader p)
+    {
+        switch (p.Client)
+        {
+            case ClientType.Unity or ClientType.Flash:
+                ParseModern(in p);
+                break;
+            case ClientType.Shockwave:
+                ParseOrigins(in p);
+                break;
+            default:
+                throw new UnsupportedClientException(p.Client);
+        }
+    }
+
+    private void ParseModern(in PacketReader p)
     {
         ItemId = p.Read<Id>();
         Type = H.ToItemType(p.Read<string>());
@@ -48,8 +67,39 @@ public class TradeItem : ITradeItem, IComposer, IParser<TradeItem>
             Extra = -1;
     }
 
+    private void ParseOrigins(in PacketReader p)
+    {
+        Kind = -1;
+        ItemId = p.Read<int>();
+        SlotIndex = p.Read<int>();
+        string strItemType = p.Read<string>();
+        Type = strItemType switch
+        {
+            "S" => ItemType.Floor,
+            "I" => ItemType.Wall,
+            _ => throw new Exception($"Invalid item type: {strItemType}"),
+        };
+        Id = p.Read<int>();
+        Identifier = p.Read<string>();
+        if (Type == ItemType.Floor)
+        {
+            p.Read<int>(); // dimX
+            p.Read<int>(); // dimY
+            // colors
+            Data = new LegacyData { Value = p.Read<string>() };
+        }
+        else if (Type == ItemType.Wall)
+        {
+            // props
+            Data = new LegacyData { Value = p.Read<string>() };
+        }
+    }
+
     public void Compose(in PacketWriter p)
     {
+        // TODO: implement Shockwave composer
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
         p.Write(ItemId);
         p.Write(Type.ToShortString());
         p.Write(Id);
@@ -65,7 +115,7 @@ public class TradeItem : ITradeItem, IComposer, IParser<TradeItem>
             p.Write<Id>(Extra);
     }
 
-    public static TradeItem Parse(in PacketReader packet) => new(in packet);
-
     public override string ToString() => $"{nameof(TradeItem)}#{ItemId}/{Type}:{Kind}";
+
+    public static TradeItem Parse(in PacketReader p) => new(in p);
 }

@@ -5,8 +5,9 @@ namespace Xabbo.Core;
 [Flags]
 public enum Gender
 {
-    Male = 0x01,
-    Female = 0x02,
+    None = 0,
+    Male = 1,
+    Female = 2,
     Unisex = Male | Female
 }
 

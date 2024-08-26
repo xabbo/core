@@ -4,8 +4,6 @@ namespace Xabbo.Core;
 
 public sealed class UserSearchResult : IComposer, IParser<UserSearchResult>
 {
-    public static UserSearchResult Parse(in PacketReader packet) => new(in packet);
-
     public Id Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Motto { get; set; } = string.Empty;
@@ -18,17 +16,17 @@ public sealed class UserSearchResult : IComposer, IParser<UserSearchResult>
 
     public UserSearchResult() { }
 
-    private UserSearchResult(in PacketReader packet)
+    private UserSearchResult(in PacketReader p)
     {
-        Id = packet.Read<Id>();
-        Name = packet.Read<string>();
-        Motto = packet.Read<string>();
-        Online = packet.Read<bool>();
-        UnknownBoolA = packet.Read<bool>();
-        UnknownStringA = packet.Read<string>();
-        UnknownLongA = packet.Read<Id>();
-        Figure  = packet.Read<string>();
-        RealName = packet.Read<string>();
+        Id = p.Read<Id>();
+        Name = p.Read<string>();
+        Motto = p.Read<string>();
+        Online = p.Read<bool>();
+        UnknownBoolA = p.Read<bool>();
+        UnknownStringA = p.Read<string>();
+        UnknownLongA = p.Read<Id>();
+        Figure  = p.Read<string>();
+        RealName = p.Read<string>();
     }
 
     public void Compose(in PacketWriter p)
@@ -43,4 +41,6 @@ public sealed class UserSearchResult : IComposer, IParser<UserSearchResult>
         p.Write(Figure);
         p.Write(RealName);
     }
+
+    public static UserSearchResult Parse(in PacketReader p) => new(in p);
 }

@@ -38,6 +38,8 @@ public sealed class PetInfo : IComposer, IParser<PetInfo>
 
     private PetInfo(in PacketReader p) : this()
     {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
         Id = p.Read<Id>();
         Name = p.Read<string>();
         Level = p.Read<int>();
@@ -73,6 +75,8 @@ public sealed class PetInfo : IComposer, IParser<PetInfo>
 
     public void Compose(in PacketWriter p)
     {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
         p.Write(Id);
         p.Write(Name);
         p.Write(Level);
@@ -106,5 +110,5 @@ public sealed class PetInfo : IComposer, IParser<PetInfo>
         p.Write(HasBreedingPermission);
     }
 
-    public static PetInfo Parse(in PacketReader packet) => new(packet);
+    public static PetInfo Parse(in PacketReader p) => new(in p);
 }

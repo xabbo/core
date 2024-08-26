@@ -29,11 +29,23 @@ public sealed class Achievements : IAchievements, IReadOnlyCollection<Achievemen
 
     private Achievements(in PacketReader p) : this()
     {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
         int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
             Update(Achievement.Parse(in p));
 
         DefaultCategory = p.Read<string>();
+    }
+
+    public void Compose(in PacketWriter p)
+    {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
+        p.Write<Length>(Count);
+        foreach (var achievement in _dict.Values)
+            p.Write(achievement);
+        p.Write(DefaultCategory);
     }
 
     public void Update(Achievement achievement)
@@ -43,14 +55,6 @@ public sealed class Achievements : IAchievements, IReadOnlyCollection<Achievemen
             achievement,
             (id, ach) => achievement
         );
-    }
-
-    public void Compose(in PacketWriter p)
-    {
-        p.Write<Length>(Count);
-        foreach (var achievement in _dict.Values)
-            p.Write(achievement);
-        p.Write(DefaultCategory);
     }
 
     public static Achievements Parse(in PacketReader p) => new(in p);

@@ -27,28 +27,25 @@ public class Achievement : IAchievement, IComposer, IParser<Achievement>
 {
     public int Id { get; set; }
     public int Level { get; set; }
-    public string BadgeId { get; set; }
+    public string BadgeId { get; set; } = "";
     public int BaseProgress { get; set; }
     public int MaxProgress { get; set; }
     public int LevelRewardPoints { get; set; }
     public int LevelRewardPointType { get; set; }
     public int CurrentProgress { get; set; }
     public bool IsComplete { get; set; }
-    public string Category { get; set; }
-    public string Subcategory { get; set; }
+    public string Category { get; set; } = "";
+    public string Subcategory { get; set; } = "";
     public int MaxLevel { get; set; }
     public int DisplayMethod { get; set; }
     public short State { get; set; }
 
-    public Achievement()
-    {
-        BadgeId = string.Empty;
-        Category = string.Empty;
-        Subcategory = string.Empty;
-    }
+    public Achievement() { }
 
     protected Achievement(in PacketReader p)
     {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
         Id = p.Read<int>();
         Level = p.Read<int>();
         BadgeId = p.Read<string>();
@@ -67,6 +64,8 @@ public class Achievement : IAchievement, IComposer, IParser<Achievement>
 
     public void Compose(in PacketWriter p)
     {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
         p.Write(Id);
         p.Write(Level);
         p.Write(BadgeId);

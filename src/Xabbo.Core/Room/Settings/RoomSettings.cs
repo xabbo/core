@@ -8,14 +8,14 @@ namespace Xabbo.Core;
 public class RoomSettings : IComposer, IParser<RoomSettings>
 {
     public long Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
+    public string Name { get; set; } = "";
+    public string Description { get; set; } = "";
     public RoomAccess Access { get; set; }
-    public string Password { get; set; } = string.Empty;
+    public string Password { get; set; } = "";
     public int MaxVisitors { get; set; }
     public int UnknownIntA { get; set; }
     public RoomCategory Category { get; set; }
-    public List<string> Tags { get; set; } = new();
+    public List<string> Tags { get; set; }
     public TradePermissions Trading { get; set; }
 
     public bool AllowPets { get; set; }
@@ -25,38 +25,43 @@ public class RoomSettings : IComposer, IParser<RoomSettings>
     public Thickness WallThickness { get; set; }
     public Thickness FloorThickness { get; set; }
 
-    public ModerationSettings Moderation { get; set; } = new();
-    public ChatSettings Chat { get; set; } = new();
+    public ModerationSettings Moderation { get; set; }
+    public ChatSettings Chat { get; set; }
 
     public bool EnlistByFurniContent { get; set; }
 
-    public RoomSettings() { }
-
-    protected RoomSettings(in PacketReader packet) : this()
+    public RoomSettings()
     {
-        Id = packet.Read<Id>();
-        Name = packet.Read<string>();
-        Description = packet.Read<string>();
-        Access = (RoomAccess)packet.Read<int>();
-        Category = (RoomCategory)packet.Read<int>();
-        MaxVisitors = packet.Read<int>(); // maximumVisitors
-        packet.Read<int>(); // maximumVisitorsLimit
+        Tags = [];
+        Moderation = new();
+        Chat = new();
+    }
 
-        int n = packet.Read<Length>();
+    protected RoomSettings(in PacketReader p) : this()
+    {
+        Id = p.Read<Id>();
+        Name = p.Read<string>();
+        Description = p.Read<string>();
+        Access = (RoomAccess)p.Read<int>();
+        Category = (RoomCategory)p.Read<int>();
+        MaxVisitors = p.Read<int>(); // maximumVisitors
+        p.Read<int>(); // maximumVisitorsLimit
+
+        int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
-            Tags.Add(packet.Read<string>());
+            Tags.Add(p.Read<string>());
 
-        Trading = (TradePermissions)packet.Read<int>(); // tradeMode
-        AllowPets = packet.Read<int>() == 1;
-        AllowOthersPetsToEat = packet.Read<int>() == 1; // allowFoodConsume
-        DisableRoomBlocking = packet.Read<int>() == 1; // allowWalkThrough
-        HideWalls = packet.Read<int>() == 1;
-        WallThickness = (Thickness)packet.Read<int>();
-        FloorThickness = (Thickness)packet.Read<int>();
-        Chat = ChatSettings.Parse(packet);
+        Trading = (TradePermissions)p.Read<int>(); // tradeMode
+        AllowPets = p.Read<int>() == 1;
+        AllowOthersPetsToEat = p.Read<int>() == 1; // allowFoodConsume
+        DisableRoomBlocking = p.Read<int>() == 1; // allowWalkThrough
+        HideWalls = p.Read<int>() == 1;
+        WallThickness = (Thickness)p.Read<int>();
+        FloorThickness = (Thickness)p.Read<int>();
+        Chat = ChatSettings.Parse(p);
 
-        EnlistByFurniContent = packet.Read<bool>(); // allowNavigatorDynamicCats
-        Moderation = ModerationSettings.Parse(packet);
+        EnlistByFurniContent = p.Read<bool>(); // allowNavigatorDynamicCats
+        Moderation = ModerationSettings.Parse(p);
     }
 
     /// <summary>
@@ -85,5 +90,5 @@ public class RoomSettings : IComposer, IParser<RoomSettings>
         p.Write(EnlistByFurniContent);
     }
 
-    public static RoomSettings Parse(in PacketReader packet) => new(packet);
+    public static RoomSettings Parse(in PacketReader p) => new(p);
 }

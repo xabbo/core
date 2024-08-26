@@ -6,8 +6,6 @@ namespace Xabbo.Core;
 
 public class NavigatorSearchResultList : List<RoomInfo>, IComposer, IParser<NavigatorSearchResultList>
 {
-    public static NavigatorSearchResultList Parse(in PacketReader packet) => new NavigatorSearchResultList(in packet);
-
     public string Category { get; set; }
     public string Text { get; set; }
     public int ActionAllowed { get; set; }
@@ -43,4 +41,6 @@ public class NavigatorSearchResultList : List<RoomInfo>, IComposer, IParser<Navi
         for (int i = 0; i < Count; i++)
             p.Write(this[i]);
     }
+
+    public static NavigatorSearchResultList Parse(in PacketReader p) => new(in p);
 }

@@ -15,8 +15,18 @@ public sealed class UserMarketplaceOffers : IUserMarketplaceOffers, ICollection<
 
     private UserMarketplaceOffers(in PacketReader p)
     {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
         CreditsWaiting = p.Read<int>();
         _list.AddRange(MarketplaceOffer.ParseAll(in p, false));
+    }
+
+    public void Compose(in PacketWriter p)
+    {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
+        p.Write(CreditsWaiting);
+        p.Write(_list);
     }
 
     public int Count => _list.Count;
@@ -33,11 +43,5 @@ public sealed class UserMarketplaceOffers : IUserMarketplaceOffers, ICollection<
     IEnumerator<IMarketplaceOffer> IEnumerable<IMarketplaceOffer>.GetEnumerator() => GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    public static UserMarketplaceOffers Parse(in PacketReader packet) => new(in packet);
-
-    public void Compose(in PacketWriter p)
-    {
-        p.Write(CreditsWaiting);
-        p.Write(_list);
-    }
+    public static UserMarketplaceOffers Parse(in PacketReader p) => new(in p);
 }

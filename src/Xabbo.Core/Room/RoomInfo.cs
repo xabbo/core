@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Xabbo.Messages;
 
@@ -55,6 +56,21 @@ public class RoomInfo : IRoomInfo, IComposer, IParser<RoomInfo>
 
     protected RoomInfo(in PacketReader p) : this()
     {
+        switch (p.Client)
+        {
+            case ClientType.Unity or ClientType.Flash:
+                ParseModern(in p);
+                break;
+            case ClientType.Shockwave:
+                ParseOrigins(in p);
+                break;
+            default:
+                throw new UnsupportedClientException(p.Client);
+        }
+    }
+
+    private void ParseModern(in PacketReader p)
+    {
         Id = p.Read<Id>();
         Name = p.Read<string>();
         OwnerId = p.Read<Id>();
@@ -68,11 +84,7 @@ public class RoomInfo : IRoomInfo, IComposer, IParser<RoomInfo>
         Ranking = p.Read<int>();
         Category = (RoomCategory)p.Read<int>();
 
-        int n = p.Read<Length>();
-        for (int i = 0; i < n; i++)
-        {
-            Tags.Add(p.Read<string>());
-        }
+        Tags = [..p.ReadArray<string>()];
 
         Flags = (RoomFlags)p.Read<int>();
 
@@ -94,6 +106,24 @@ public class RoomInfo : IRoomInfo, IComposer, IParser<RoomInfo>
             EventDescription = p.Read<string>();
             EventMinutesRemaining = p.Read<int>();
         }
+    }
+
+    private void ParseOrigins(in PacketReader p)
+    {
+        p.Read<bool>(); // canOthersMoveFurni
+        Access = (RoomAccess)p.Read<int>();
+        Id = p.Read<Id>();
+        OwnerId = -1;
+        OwnerName = p.Read<string>();
+        p.Read<string>(); // marker
+        Name = p.Read<string>();
+        Description = p.Read<string>();
+        if (p.Read<bool>())
+            Flags |= RoomFlags.ShowOwnerName;
+        Trading = (TradePermissions)p.Read<int>();
+        p.Read<int>(); // alert
+        MaxUsers = p.Read<int>();
+        p.Read<int>(); // absoluteMaxVisitors ?
     }
 
     public virtual void Compose(in PacketWriter p)
@@ -140,5 +170,5 @@ public class RoomInfo : IRoomInfo, IComposer, IParser<RoomInfo>
         }
     }
 
-    public static RoomInfo Parse(in PacketReader packet) => new(in packet);
+    public static RoomInfo Parse(in PacketReader p) => new(in p);
 }

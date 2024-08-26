@@ -18,19 +18,19 @@ public class VoteResultData : ItemData, IVoteResultData
         Result = data.Result;
     }
 
-    protected override void Initialize(in PacketReader packet)
+    protected override void Initialize(in PacketReader p)
     {
-        Value = packet.Read<string>();
-        Result = packet.Read<int>();
+        Value = p.Read<string>();
+        Result = p.Read<int>();
 
-        base.Initialize(packet);
+        base.Initialize(p);
     }
 
-    protected override void WriteData(in PacketWriter packet)
+    protected override void WriteData(in PacketWriter p)
     {
-        packet.Write(Value);
-        packet.Write(Result);
+        p.Write(Value);
+        p.Write(Result);
 
-        WriteBase(packet);
+        WriteBase(p);
     }
 }

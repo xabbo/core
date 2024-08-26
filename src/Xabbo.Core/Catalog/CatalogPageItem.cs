@@ -21,29 +21,29 @@ public sealed class CatalogPageItem : ICatalogPageItem, IComposer, IParser<Catal
         ProductCode = string.Empty;
     }
 
-    private CatalogPageItem(in PacketReader packet) : this()
+    private CatalogPageItem(in PacketReader p) : this()
     {
-        Position = packet.Read<int>();
-        Name = packet.Read<string>();
-        PromotionalImage = packet.Read<string>();
-        Type = packet.Read<int>();
+        Position = p.Read<int>();
+        Name = p.Read<string>();
+        PromotionalImage = p.Read<string>();
+        Type = p.Read<int>();
 
         switch (Type)
         {
             case 0:
-                Location = packet.Read<string>();
+                Location = p.Read<string>();
                 break;
             case 1:
-                ProductOfferId = packet.Read<int>();
+                ProductOfferId = p.Read<int>();
                 break;
             case 2:
-                ProductCode = packet.Read<string>();
+                ProductCode = p.Read<string>();
                 break;
             default:
                 break;
         }
 
-        SecondsToExpiration = packet.Read<int>();
+        SecondsToExpiration = p.Read<int>();
     }
 
     public void Compose(in PacketWriter p)
@@ -71,5 +71,5 @@ public sealed class CatalogPageItem : ICatalogPageItem, IComposer, IParser<Catal
         p.Write(SecondsToExpiration);
     }
 
-    public static CatalogPageItem Parse(in PacketReader packet) => new(in packet);
+    public static CatalogPageItem Parse(in PacketReader p) => new(in p);
 }

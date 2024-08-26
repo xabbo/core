@@ -11,7 +11,7 @@ public class WallItem : Furni, IWallItem, IComposer, IParser<WallItem>, IManyPar
 {
     public override ItemType Type => ItemType.Wall;
 
-    public string Data { get; set; }
+    public string Data { get; set; } = "";
 
     public override int State => int.TryParse(Data, out int state) ? state : -1;
 
@@ -64,11 +64,26 @@ public class WallItem : Furni, IWallItem, IComposer, IParser<WallItem>, IManyPar
     protected WallItem(in PacketReader p, bool readName)
         : this()
     {
+        switch (p.Client)
+        {
+            case ClientType.Unity or ClientType.Flash:
+                ParseModern(in p, readName);
+                break;
+            case ClientType.Shockwave:
+                ParseOrigins(in p);
+                break;
+            default:
+                throw new UnsupportedClientException(p.Client);
+        }
+    }
+
+    private void ParseModern(in PacketReader p, bool readName)
+    {
         Id = p.Client switch
         {
-            ClientType.Flash => long.Parse(p.Read<string>()),
+            ClientType.Flash => (Id)p.Read<string>(),
             ClientType.Unity => p.Read<long>(),
-            _ => throw new InvalidOperationException("Unknown protocol.")
+            _ => throw new UnsupportedClientException(p.Client)
         };
         Kind = p.Read<int>();
         Location = WallLocation.Parse(p.Read<string>());
@@ -81,10 +96,33 @@ public class WallItem : Furni, IWallItem, IComposer, IParser<WallItem>, IManyPar
             OwnerName = p.Read<string>();
     }
 
+    private void ParseOrigins(in PacketReader p) => ParseOriginsString(p.Read<string>().Trim());
+
+    private void ParseOriginsString(string value)
+    {
+        string[] fields = value.Split('\t');
+        if (fields.Length < 4)
+            throw new Exception($"Invalid number of fields when parsing WallItem: {string.Join(", ", fields)}");
+
+        if (!int.TryParse(fields[0], out int id))
+            throw new Exception($"Invalid ID when parsing WallItem: {fields[0]}.");
+
+        Id = id;
+        Identifier = fields[1];
+        OwnerId = -1;
+        OwnerName = fields[2];
+        Location = WallLocation.Parse(fields[3]);
+        if (fields.Length >= 5)
+            Data = fields[4];
+    }
+
     public override void Compose(in PacketWriter p) => Compose(in p, true);
 
     public override void Compose(in PacketWriter p, bool writeOwnerName = true)
     {
+        if (p.Client == ClientType.Shockwave)
+            throw new NotImplementedException("WallItem.ComposeAll is not implemented for Shockwave");
+
         if (p.Client == ClientType.Flash) p.Write(Id.ToString());
         else if (p.Client == ClientType.Unity) p.Write(Id);
         else throw new InvalidOperationException("Unknown protocol");
@@ -104,31 +142,11 @@ public class WallItem : Furni, IWallItem, IComposer, IParser<WallItem>, IManyPar
 
     public override string ToString() => $"{nameof(WallItem)}#{Id}/{Kind}";
 
-    public static WallItem Parse(in PacketReader p) => Parse(in p, true);
-    public static WallItem Parse(in PacketReader packet, bool readName) => new(in packet, readName);
-
-    public static IEnumerable<WallItem> ParseAll(in PacketReader p)
-    {
-        var ownerDictionary = new Dictionary<long, string>();
-
-        int n = p.Read<Length>();
-        for (int i = 0; i < n; i++)
-            ownerDictionary.Add(p.Read<Id>(), p.Read<string>());
-
-        n = p.Read<Length>();
-        WallItem[] wallItems = new WallItem[n];
-        for (int i = 0; i < n; i++)
-        {
-            var item = wallItems[i] = Parse(p, false);
-            if (ownerDictionary.TryGetValue(item.OwnerId, out string? ownerName))
-                item.OwnerName = ownerName;
-        }
-
-        return wallItems;
-    }
-
     public static void ComposeAll(in PacketWriter p, IEnumerable<IWallItem> items)
     {
+        if (p.Client == ClientType.Shockwave)
+            throw new NotImplementedException("WallItem.ComposeAll is not implemented for Shockwave");
+
         var ownerIds = new HashSet<long>();
         var ownerDictionary = items
             .Where(x => ownerIds.Add(x.OwnerId))
@@ -148,6 +166,37 @@ public class WallItem : Furni, IWallItem, IComposer, IParser<WallItem>, IManyPar
         foreach (var item in items)
             item.Compose(in p, false);
     }
-
     public static void ComposeAll(in PacketWriter p, params WallItem[] items) => ComposeAll(p, (IEnumerable<IWallItem>)items);
+
+    public static WallItem Parse(in PacketReader p) => Parse(in p, true);
+    public static WallItem Parse(in PacketReader p, bool readName) => new(in p, readName);
+    public static IEnumerable<WallItem> ParseAll(in PacketReader p)
+    {
+        if (p.Client == ClientType.Shockwave)
+        {
+            var items = new List<WallItem>();
+            while (p.Available > 0)
+            {
+                items.Add(p.Parse<WallItem>());
+            }
+            return items;
+        }
+
+        var ownerDictionary = new Dictionary<long, string>();
+
+        int n = p.Read<Length>();
+        for (int i = 0; i < n; i++)
+            ownerDictionary.Add(p.Read<Id>(), p.Read<string>());
+
+        n = p.Read<Length>();
+        WallItem[] wallItems = new WallItem[n];
+        for (int i = 0; i < n; i++)
+        {
+            var item = wallItems[i] = Parse(p, false);
+            if (ownerDictionary.TryGetValue(item.OwnerId, out string? ownerName))
+                item.OwnerName = ownerName;
+        }
+
+        return wallItems;
+    }
 }

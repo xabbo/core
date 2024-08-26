@@ -37,5 +37,4 @@ public interface IFloorItem : IFurni, IFloorEntity
     /// Gets the data of the floor item.
     /// </summary>
     IItemData Data { get; }
-    string StaticClass { get; }
 }

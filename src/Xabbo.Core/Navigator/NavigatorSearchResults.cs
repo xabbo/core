@@ -7,8 +7,6 @@ namespace Xabbo.Core;
 
 public sealed class NavigatorSearchResults : List<NavigatorSearchResultList>, IComposer, IParser<NavigatorSearchResults>
 {
-    public static NavigatorSearchResults Parse(in PacketReader packet) => new NavigatorSearchResults(in packet);
-
     public string Category { get; set; }
     public string Filter { get; set; }
 
@@ -75,4 +73,6 @@ public sealed class NavigatorSearchResults : List<NavigatorSearchResultList>, IC
         for (int i = 0; i < Count; i++)
             p.Write(this[i]);
     }
+
+    public static NavigatorSearchResults Parse(in PacketReader p) => new(in p);
 }

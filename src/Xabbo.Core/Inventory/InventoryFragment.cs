@@ -47,16 +47,6 @@ public sealed class InventoryFragment : IInventoryFragment, ICollection<Inventor
             _list.Add(p.Parse<InventoryItem>());
     }
 
-    public void Add(InventoryItem item) => _list.Add(item);
-    public bool Remove(InventoryItem item) => _list.Remove(item);
-    public void Clear() => _list.Clear();
-    public bool Contains(InventoryItem item) => _list.Contains(item);
-    public void CopyTo(InventoryItem[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
-
-    public IEnumerator<InventoryItem> GetEnumerator() => _list.GetEnumerator();
-    IEnumerator<IInventoryItem> IEnumerable<IInventoryItem>.GetEnumerator() => GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
     public void Compose(in PacketWriter p)
     {
         p.Write(Total);
@@ -67,5 +57,15 @@ public sealed class InventoryFragment : IInventoryFragment, ICollection<Inventor
             p.Write(item);
     }
 
-    public static InventoryFragment Parse(in PacketReader packet) => new InventoryFragment(in packet);
+    public void Add(InventoryItem item) => _list.Add(item);
+    public bool Remove(InventoryItem item) => _list.Remove(item);
+    public void Clear() => _list.Clear();
+    public bool Contains(InventoryItem item) => _list.Contains(item);
+    public void CopyTo(InventoryItem[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
+
+    public IEnumerator<InventoryItem> GetEnumerator() => _list.GetEnumerator();
+    IEnumerator<IInventoryItem> IEnumerable<IInventoryItem>.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    public static InventoryFragment Parse(in PacketReader p) => new(in p);
 }

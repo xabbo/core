@@ -34,6 +34,8 @@ public class Bot : Entity, IBot
     public Bot(EntityType type, Id id, int index, in PacketReader p)
         : this(type, id, index)
     {
+        if (p.Client == ClientType.Shockwave) return;
+
         if (type == EntityType.PrivateBot)
         {
             Gender = H.ToGender(p.Read<string>());
@@ -51,6 +53,8 @@ public class Bot : Entity, IBot
     public override void Compose(in PacketWriter p)
     {
         base.Compose(in p);
+
+        if (p.Client == ClientType.Shockwave) return;
 
         if (Type == EntityType.PrivateBot)
         {

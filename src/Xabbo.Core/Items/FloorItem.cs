@@ -12,7 +12,21 @@ public class FloorItem : Furni, IFloorItem, IComposer, IParser<FloorItem>, IMany
     public override ItemType Type => ItemType.Floor;
 
     public Tile Location { get; set; }
-    public Area Area => Extensions.XabboCoreExtensions.GetArea(this);
+    public Point? Dimensions { get; set; }
+    public Area Area
+    {
+        get
+        {
+            if (Dimensions is { } dimensions)
+            {
+                Area area = new((X, Y), dimensions.X, dimensions.Y);
+                if (Direction == 2 || Direction == 6)
+                    area = area.Flip();
+                return area;
+            }
+            return Extensions.XabboCoreExtensions.GetArea(this);
+        }
+    }
     [JsonIgnore] public int X => Location.X;
     [JsonIgnore] public int Y => Location.Y;
     [JsonIgnore] public Point XY => Location.XY;
@@ -21,21 +35,10 @@ public class FloorItem : Furni, IFloorItem, IComposer, IParser<FloorItem>, IMany
     public float Height { get; set; }
     public long Extra { get; set; }
 
-    public ItemData Data { get; set; }
+    public ItemData Data { get; set; } = new EmptyItemData();
     IItemData IFloorItem.Data => Data;
 
     public override int State => double.TryParse(Data.Value, out double state) ? (int)state : -1;
-
-    public string StaticClass { get; set; }
-
-    public FloorItem()
-    {
-        Location = default;
-        Data = new LegacyData();
-        SecondsToExpiration = -1;
-        Usage = FurniUsage.None;
-        StaticClass = string.Empty;
-    }
 
     public FloorItem(IFloorItem item)
     {
@@ -50,10 +53,25 @@ public class FloorItem : Furni, IFloorItem, IComposer, IParser<FloorItem>, IMany
         Usage = item.Usage;
         OwnerId = item.OwnerId;
         OwnerName = item.OwnerName;
-        StaticClass = item.StaticClass;
+        Identifier = item.Identifier;
     }
 
     protected FloorItem(in PacketReader p, bool readName)
+    {
+        switch (p.Client)
+        {
+            case ClientType.Unity or ClientType.Flash:
+                ParseModern(in p, readName);
+                break;
+            case ClientType.Shockwave:
+                ParseOrigins(in p);
+                break;
+            default:
+                throw new UnsupportedClientException(p.Client);
+        }
+    }
+
+    private void ParseModern(in PacketReader p, bool readName)
     {
         Id = p.Read<Id>();
         Kind = p.Read<int>();
@@ -64,8 +82,6 @@ public class FloorItem : Furni, IFloorItem, IComposer, IParser<FloorItem>, IMany
         Location = new Tile(x, y, z);
         Height = p.Read<float>();
         Extra = p.Read<Id>();
-        // - consumable state e.g. cabbage 0: full, 1: partly eaten, 2: mostly eaten
-        // - linked teleport id
 
         Data = p.Parse<ItemData>();
 
@@ -75,20 +91,42 @@ public class FloorItem : Furni, IFloorItem, IComposer, IParser<FloorItem>, IMany
 
         if (Kind < 0)
         {
-            StaticClass = p.Read<string>();
+            Identifier = p.Read<string>();
         }
         else
         {
-            StaticClass = string.Empty;
+            Identifier = string.Empty;
         }
 
         if (readName && p.Available >= 2)
             OwnerName = p.Read<string>();
     }
 
+    private void ParseOrigins(in PacketReader p)
+    {
+        Id = (Id)p.Read<string>();
+        Identifier = p.Read<string>();
+        int x = p.Read<int>();
+        int y = p.Read<int>();
+        Dimensions = new Point(p.Read<int>(), p.Read<int>());
+        Direction = p.Read<int>();
+        float z = p.Read<float>();
+        Location = new Tile(x, y, z);
+        p.Read<string>(); // colors
+        p.Read<string>(); // runtimeData
+        Extra = p.Read<int>();
+        Data = new LegacyData { Value = p.Read<string>() };
+
+        Kind = -1;
+        OwnerId = -1;
+    }
+
     public override void Compose(in PacketWriter p) => Compose(in p, true);
     public override void Compose(in PacketWriter p, bool writeOwnerName)
     {
+        if (p.Client == ClientType.Shockwave)
+            throw new NotImplementedException("FloorItem.Compose is not implemented for Shockwave");
+
         p.Write(Id);
         p.Write(Kind);
         p.Write(Location.X);
@@ -102,7 +140,7 @@ public class FloorItem : Furni, IFloorItem, IComposer, IParser<FloorItem>, IMany
         p.Write((int)Usage);
         p.Write(OwnerId);
 
-        if (Kind < 0) p.Write(StaticClass);
+        if (Kind < 0) p.Write(Identifier);
         if (writeOwnerName) p.Write(OwnerName);
     }
 
@@ -114,6 +152,9 @@ public class FloorItem : Furni, IFloorItem, IComposer, IParser<FloorItem>, IMany
 
     public static IEnumerable<FloorItem> ParseAll(in PacketReader p)
     {
+        if (p.Client == ClientType.Shockwave)
+            return p.ParseArray<FloorItem>();
+
         var ownerDictionary = new Dictionary<long, string>();
 
         int n = p.Read<Length>();
@@ -134,6 +175,9 @@ public class FloorItem : Furni, IFloorItem, IComposer, IParser<FloorItem>, IMany
 
     public static void ComposeAll(in PacketWriter p, IEnumerable<IFloorItem> items)
     {
+        if (p.Client == ClientType.Shockwave)
+            p.Write(items);
+
         var ownerIds = new HashSet<long>();
         var ownerDictionary = items
             .Where(x => ownerIds.Add(x.OwnerId))

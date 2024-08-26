@@ -5,8 +5,6 @@ namespace Xabbo.Core;
 
 public sealed class GroupMember : IGroupMember, IComposer, IParser<GroupMember>
 {
-    public static GroupMember Parse(in PacketReader packet) => new(in packet);
-
     public GroupMemberType Type { get; set; }
     public Id Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -15,21 +13,27 @@ public sealed class GroupMember : IGroupMember, IComposer, IParser<GroupMember>
 
     public GroupMember() { }
 
-    private GroupMember(in PacketReader packet)
+    private GroupMember(in PacketReader p)
     {
-        Type = (GroupMemberType)packet.Read<int>();
-        Id = packet.Read<Id>();
-        Name = packet.Read<string>();
-        Figure = packet.Read<string>();
-        Joined = DateTime.Parse(packet.Read<string>());
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
+        Type = (GroupMemberType)p.Read<int>();
+        Id = p.Read<Id>();
+        Name = p.Read<string>();
+        Figure = p.Read<string>();
+        Joined = DateTime.Parse(p.Read<string>());
     }
 
     public void Compose(in PacketWriter p)
     {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
         p.Write((int)Type);
         p.Write(Id);
         p.Write(Name);
         p.Write(Figure);
         p.Write(Joined);
     }
+
+    public static GroupMember Parse(in PacketReader p) => new(in p);
 }

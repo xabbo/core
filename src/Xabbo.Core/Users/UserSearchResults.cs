@@ -9,8 +9,6 @@ namespace Xabbo.Core;
 
 public class UserSearchResults : IReadOnlyCollection<UserSearchResult>, IComposer, IParser<UserSearchResults>
 {
-    public static UserSearchResults Parse(in PacketReader packet) => new(in packet);
-
     public IReadOnlyList<UserSearchResult> Friends { get; }
     public IReadOnlyList<UserSearchResult> Others { get; }
 
@@ -33,6 +31,12 @@ public class UserSearchResults : IReadOnlyCollection<UserSearchResult>, ICompose
         Others = results.AsReadOnly();
     }
 
+    public void Compose(in PacketWriter p)
+    {
+        p.Write(Friends);
+        p.Write(Others);
+    }
+
     public UserSearchResult? GetResult(string name)
     {
         return this.FirstOrDefault(result =>
@@ -40,9 +44,5 @@ public class UserSearchResults : IReadOnlyCollection<UserSearchResult>, ICompose
         );
     }
 
-    public void Compose(in PacketWriter p)
-    {
-        p.Write(Friends);
-        p.Write(Others);
-    }
+    public static UserSearchResults Parse(in PacketReader p) => new(in p);
 }

@@ -20,6 +20,9 @@ public class Pet(long id, int index) : Entity(EntityType.Pet, id, index), IPet
     internal Pet(long id, int index, in PacketReader p)
         : this(id, index)
     {
+        if (p.Client == ClientType.Shockwave)
+            return;
+
         Breed = p.Read<int>();
         OwnerId = p.Read<Id>();
         OwnerName = p.Read<string>();

@@ -10,6 +10,10 @@ public interface IInventoryItem : IItem, IComposer
     /// </summary>
     Id ItemId { get; }
     /// <summary>
+    /// Gets the identifier of this item (only available on Origins).
+    /// </summary>
+    string Identifier { get; }
+    /// <summary>
     /// Gets the furni category of the inventory item.
     /// </summary>
     FurniCategory Category { get; }

@@ -115,8 +115,15 @@ public class FloorPlan : IFloorPlan, IComposer, IParser<FloorPlan>
 
     public static FloorPlan Parse(in PacketReader p)
     {
-        bool useLegacyScale = p.Read<bool>();
-        int wallHeight = p.Read<int>();
+        bool useLegacyScale = false;
+        int wallHeight = 0;
+
+        if (p.Client != ClientType.Shockwave)
+        {
+            useLegacyScale = p.Read<bool>();
+            wallHeight = p.Read<int>();
+        }
+
         string map = p.Read<string>();
 
         return new FloorPlan(map)

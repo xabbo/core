@@ -10,20 +10,23 @@ public sealed class MarketplaceTradeInfo : IMarketplaceTradeInfo, IComposer, IPa
 
     public MarketplaceTradeInfo() { }
 
-    private MarketplaceTradeInfo(in PacketReader packet)
+    private MarketplaceTradeInfo(in PacketReader p)
     {
-        DayOffset = packet.Read<int>();
-        AverageSalePrice = packet.Read<int>();
-        TradeVolume = packet.Read<int>();
-    }
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-    public static MarketplaceTradeInfo Parse(in PacketReader packet) => new(in packet);
+        DayOffset = p.Read<int>();
+        AverageSalePrice = p.Read<int>();
+        TradeVolume = p.Read<int>();
+    }
 
     public void Compose(in PacketWriter p)
     {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
         p.Write(DayOffset);
         p.Write(AverageSalePrice);
         p.Write(TradeVolume);
     }
 
+    public static MarketplaceTradeInfo Parse(in PacketReader p) => new(in p);
 }

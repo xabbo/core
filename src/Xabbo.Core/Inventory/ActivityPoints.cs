@@ -7,8 +7,6 @@ namespace Xabbo.Core;
 
 public class ActivityPoints : IActivityPoints, IComposer, IParser<ActivityPoints>
 {
-    public static ActivityPoints Parse(in PacketReader packet) => new(in packet);
-
     private readonly Dictionary<ActivityPointType, int> dictionary = [];
 
     public IEnumerable<ActivityPointType> Keys => dictionary.Keys;
@@ -38,11 +36,25 @@ public class ActivityPoints : IActivityPoints, IComposer, IParser<ActivityPoints
 
     protected ActivityPoints(in PacketReader p)
     {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
         int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
         {
             var type = (ActivityPointType)p.Read<int>();
             dictionary[type] = p.Read<int>();
+        }
+    }
+
+    public void Compose(in PacketWriter p)
+    {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
+        p.Write<Length>(Count);
+        foreach (var (type, amount) in this)
+        {
+            p.Write((int)type);
+            p.Write(amount);
         }
     }
 
@@ -52,13 +64,5 @@ public class ActivityPoints : IActivityPoints, IComposer, IParser<ActivityPoints
     public bool TryGetValue(ActivityPointType key, out int value) => dictionary.TryGetValue(key, out value);
     IEnumerator IEnumerable.GetEnumerator() => dictionary.GetEnumerator();
 
-    public void Compose(in PacketWriter p)
-    {
-        p.Write<Length>(Count);
-        foreach (var (type, amount) in this)
-        {
-            p.Write((int)type);
-            p.Write(amount);
-        }
-    }
+    public static ActivityPoints Parse(in PacketReader p) => new(in p);
 }

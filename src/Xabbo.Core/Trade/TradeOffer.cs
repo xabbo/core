@@ -6,9 +6,9 @@ namespace Xabbo.Core;
 
 public sealed class TradeOffer : ITradeOffer, IComposer, IParser<TradeOffer>
 {
-    public static TradeOffer Parse(in PacketReader packet) => new(in packet);
-
     public Id UserId { get; set; }
+    public string? UserName { get; set; }
+    public bool Accepted { get; set; }
     public List<TradeItem> Items { get; set; }
     IReadOnlyList<ITradeItem> ITradeOffer.Items => Items;
     public int FurniCount { get; set; }
@@ -21,23 +21,50 @@ public sealed class TradeOffer : ITradeOffer, IComposer, IParser<TradeOffer>
 
     private TradeOffer(in PacketReader p) : this()
     {
-        UserId = p.Read<Id>();
-        int n = p.Read<Length>();
-        for (int i = 0; i < n; i++)
-            Items.Add(p.Parse<TradeItem>());
-        FurniCount = p.Read<int>();
-        CreditCount = p.Read<int>();
+        UnsupportedClientException.ThrowIfUnknown(p.Client);
+
+        if (p.Client == ClientType.Shockwave)
+        {
+            UserId = -1;
+            UserName = p.Read<string>();
+            Accepted = p.Read<bool>();
+        }
+        else
+        {
+            UserId = p.Read<Id>();
+        }
+
+        Items = [..p.ParseArray<TradeItem>()];
+
+        if (p.Client != ClientType.Shockwave)
+        {
+            FurniCount = p.Read<int>();
+            CreditCount = p.Read<int>();
+        }
     }
 
     public void Compose(in PacketWriter p)
     {
-        p.Write(UserId);
-        p.Write<Length>(Items.Count);
-        foreach (var item in Items)
-            p.Write(item);
-        p.Write(FurniCount);
-        p.Write(CreditCount);
+        UnsupportedClientException.ThrowIfUnknown(p.Client);
+
+        if (p.Client == ClientType.Shockwave)
+        {
+            p.Write(UserName);
+            p.Write(Accepted);
+        }
+        else
+        {
+            p.Write(UserId);
+        }
+
+        p.Write(Items);
+
+        if (p.Client != ClientType.Shockwave)
+        {
+            p.Write(FurniCount);
+            p.Write(CreditCount);
+        }
     }
 
-
+    public static TradeOffer Parse(in PacketReader p) => new(in p);
 }

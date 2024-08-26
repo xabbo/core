@@ -12,19 +12,16 @@ public abstract class Furni : IFurni
     public int Kind { get; set; }
     public Id Id { get; set; }
     public Id OwnerId { get; set; }
-    public string OwnerName { get; set; }
+    public string OwnerName { get; set; } = string.Empty;
 
     public abstract int State { get; }
 
-    public int SecondsToExpiration { get; set; }
-    public FurniUsage Usage { get; set; }
+    public int SecondsToExpiration { get; set; } = -1;
+    public FurniUsage Usage { get; set; } = FurniUsage.None;
+
+    public string Identifier { get; set; } = string.Empty;
 
     public bool IsHidden { get; set; }
-
-    public Furni()
-    {
-        OwnerName = string.Empty;
-    }
 
     public abstract void Compose(in PacketWriter p);
     public abstract void Compose(in PacketWriter p, bool writeOwnerName);

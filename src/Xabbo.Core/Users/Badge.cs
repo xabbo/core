@@ -15,13 +15,13 @@ public sealed class Badge : IComposer, IParser<Badge>
         Code = code;
     }
 
-    private Badge(in PacketReader packet)
+    private Badge(in PacketReader p)
     {
-        Id = packet.Read<int>();
-        Code = packet.Read<string>();
+        Id = p.Read<int>();
+        Code = p.Read<string>();
     }
 
-    public static Badge Parse(in PacketReader packet) => new(packet);
+    public static Badge Parse(in PacketReader p) => new(p);
 
     public void Compose(in PacketWriter p)
     {

@@ -25,7 +25,8 @@ public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<strin
 
     // sit, lay
     public Stances Stance
-    { get
+    {
+        get
         {
             if (fragments.ContainsKey("sit"))
                 return Stances.Sit;
@@ -212,6 +213,7 @@ public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<strin
 
     private EntityStatusUpdate(in PacketReader p)
     {
+        // TODO Shockwave
         Index = p.Read<int>();
         Location = Tile.Parse(p);
         HeadDirection = p.Read<int>();

@@ -6,8 +6,6 @@ namespace Xabbo.Core;
 
 public sealed class GroupMembers : List<GroupMember>, IGroupMembers, IComposer, IParser<GroupMembers>
 {
-    public static GroupMembers Parse(in PacketReader packet) => new(packet);
-
     public Id GroupId { get; set; }
     public string GroupName { get; set; } = string.Empty;
     public long HomeRoomId { get; set; }
@@ -26,6 +24,8 @@ public sealed class GroupMembers : List<GroupMember>, IGroupMembers, IComposer, 
 
     private GroupMembers(in PacketReader p)
     {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
         GroupId = p.Read<Id>();
         GroupName = p.Read<string>();
         HomeRoomId = p.Read<Id>();
@@ -43,6 +43,8 @@ public sealed class GroupMembers : List<GroupMember>, IGroupMembers, IComposer, 
 
     public void Compose(in PacketWriter p)
     {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
         p.Write(GroupId);
         p.Write(GroupName);
         p.Write(HomeRoomId);
@@ -58,5 +60,5 @@ public sealed class GroupMembers : List<GroupMember>, IGroupMembers, IComposer, 
         p.Write(Filter);
     }
 
-
+    public static GroupMembers Parse(in PacketReader p) => new(in p);
 }

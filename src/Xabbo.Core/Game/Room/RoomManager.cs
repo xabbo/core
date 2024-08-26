@@ -25,6 +25,8 @@ public sealed partial class RoomManager : GameStateManager
     private Room? _currentRoom;
     private RoomData? _currentRoomData;
 
+    private bool _gotHeightMap, _gotUsers, _gotObjects, _gotItems;
+
     /// <summary>
     /// Gets the ID of the current room. The <see cref="Room"/> may not be available
     /// even when the current room ID is set (e.g. when in the queue).
@@ -156,9 +158,7 @@ public sealed partial class RoomManager : GameStateManager
         Entered?.Invoke(new RoomEventArgs(room));
     }
 
-    /// <summary>
-    /// Invoked when the room data is updated.
-    /// </summary>
+    /// <summary>Invoked when the room data is updated.</summary>
     public event Action<RoomDataEventArgs>? RoomDataUpdated;
     private void OnRoomDataUpdated(RoomData roomData)
     {
@@ -539,6 +539,44 @@ public sealed partial class RoomManager : GameStateManager
 
     protected override void OnDisconnected() => ResetState();
 
+    private void EnteringRoom(Id id)
+    {
+        CurrentRoomId = id;
+
+        if (_roomDataCache.TryGetValue(id, out RoomData? data))
+        {
+            _currentRoomData = data;
+            _logger.LogTrace("Loaded room data from cache.");
+        }
+        else
+        {
+            _logger.LogTrace("Failed to load room data from cache.");
+        }
+
+        _currentRoom = new Room(id, data!);
+    }
+
+    // Checks the load state and enters the room on Shockwave.
+    private void EnterRoomOnceLoaded()
+    {
+        if (IsInRoom) return;
+
+        if (_currentRoom is not null &&
+            _gotHeightMap && _gotUsers && _gotObjects && _gotItems)
+        {
+            EnterRoom(_currentRoom);
+        }
+    }
+
+    private void EnterRoom(Room room)
+    {
+        IsLoadingRoom = false;
+        IsInRoom = true;
+        Room = room;
+
+        OnEnteredRoom(room);
+    }
+
     private void ResetState()
     {
         _logger.LogTrace("Resetting room state");
@@ -555,6 +593,8 @@ public sealed partial class RoomManager : GameStateManager
         Data = _currentRoomData = null;
 
         CurrentRoomId = -1;
+
+        _gotHeightMap = _gotUsers = _gotObjects = _gotItems = false;
     }
 
     private bool CheckPermission(ModerationPermissions? permissions)
@@ -695,22 +735,14 @@ public sealed partial class RoomManager : GameStateManager
             OnLeftRoom();
         }
 
-        long roomId = e.Packet.Read<Id>();
-        CurrentRoomId = roomId;
+        // Room ID is not available yet on Shockwave.
+        if (Interceptor.Session.Is(ClientType.Shockwave))
+            return;
 
-        if (_roomDataCache.TryGetValue(roomId, out RoomData? data))
-        {
-            _currentRoomData = data;
-            _logger.LogTrace("Loaded room data from cache.");
-        }
-        else
-        {
-            _logger.LogTrace("Failed to load room data from cache.");
-        }
-
-        _currentRoom = new Room(roomId, data!);
+        EnteringRoom(e.Packet.Read<Id>());
     }
 
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomQueueStatus))]
     private void HandleRoomQueueStatus(Intercept e)
     {
@@ -778,8 +810,21 @@ public sealed partial class RoomManager : GameStateManager
             OnLeftRoom();
         }
 
-        string model = e.Packet.Read<string>();
-        long roomId = e.Packet.Read<Id>();
+        string model;
+        Id roomId;
+
+        if (Interceptor.Session.Is(ClientType.Shockwave))
+        {
+            string[] fields = e.Packet.Read<string>().Split();
+            model = fields[0];
+            roomId = int.Parse(fields[1]);
+        }
+        else
+        {
+            model = e.Packet.Read<string>();
+            roomId = e.Packet.Read<Id>();
+        }
+
         CurrentRoomId = roomId;
 
         if (_currentRoom is null ||
@@ -844,14 +889,21 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        long roomId = e.Packet.Read<Id>();
-        if (roomId != _currentRoom.Id)
+        if (!Interceptor.Session.Is(ClientType.Shockwave))
         {
-            _logger.LogWarning($"[{nameof(HandleYouAreController)}] Room ID mismatch!");
-            return;
+            long roomId = e.Packet.Read<Id>();
+            if (roomId != _currentRoom.Id)
+            {
+                _logger.LogWarning($"[{nameof(HandleYouAreController)}] Room ID mismatch!");
+                return;
+            }
+            RightsLevel = e.Packet.Read<int>();
+        }
+        else
+        {
+            RightsLevel = 4;
         }
 
-        RightsLevel = e.Packet.Read<int>();
         OnRightsUpdated();
     }
 
@@ -875,6 +927,7 @@ public sealed partial class RoomManager : GameStateManager
         OnRightsUpdated();
     }
 
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomEntryTile))]
     private void HandleRoomEntryTile(Intercept e)
     {
@@ -900,6 +953,8 @@ public sealed partial class RoomManager : GameStateManager
         _logger.LogTrace("Received room entry tile. (x:{x}, y:{y}, dir: {dir})", x, y, dir);
     }
 
+    // Shockwave does not have a furni heightmap.
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn("f:"+nameof(In.HeightMap))]
     private void HandleHeightMap(Intercept e)
     {
@@ -962,8 +1017,15 @@ public sealed partial class RoomManager : GameStateManager
         _currentRoom.FloorPlan = floorPlan;
 
         _logger.LogTrace("Received floor heightmap. (size:{width}x{length})", floorPlan.Width, floorPlan.Length);
+
+        if (Interceptor.Session.Is(ClientType.Shockwave))
+        {
+            _gotHeightMap = true;
+            EnterRoomOnceLoaded();
+        }
     }
 
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomVisualizationSettings))]
     private void HandleRoomVisualizationSettings(Intercept e)
     {
@@ -979,6 +1041,7 @@ public sealed partial class RoomManager : GameStateManager
         // TODO event
     }
 
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomChatSettings))]
     private void HandleRoomChatSettings(Intercept e)
     {
@@ -992,6 +1055,7 @@ public sealed partial class RoomManager : GameStateManager
         OnRoomDataUpdated(_currentRoom.Data);
     }
 
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomEntryInfo))]
     private void HandleRoomEntryInfo(Intercept e)
     {
@@ -1019,11 +1083,8 @@ public sealed partial class RoomManager : GameStateManager
         }
 
         IsOwner = e.Packet.Read<bool>();
-        IsLoadingRoom = false;
-        IsInRoom = true;
-        Room = _currentRoom;
 
-        OnEnteredRoom(_currentRoom);
+        EnterRoom(_currentRoom);
     }
 
     [InterceptIn(nameof(In.CloseConnection))]
@@ -1042,6 +1103,8 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
+    // TODO: Check how this works on Shockwave
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.ErrorReport))]
     private void HandleErrorReport(Intercept e)
     {
@@ -1087,6 +1150,12 @@ public sealed partial class RoomManager : GameStateManager
         if (newItems.Count > 0)
         {
             OnFloorItemsLoaded(newItems);
+        }
+
+        if (Interceptor.Session.Is(ClientType.Shockwave))
+        {
+            _gotObjects = true;
+            EnterRoomOnceLoaded();
         }
     }
 
@@ -1258,6 +1327,7 @@ public sealed partial class RoomManager : GameStateManager
         OnFloorItemDataUpdated(item, previousData);
     }
 
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.ObjectsDataUpdate))]
     private void HandleObjectsDataUpdate(Intercept e)
     {
@@ -1298,8 +1368,21 @@ public sealed partial class RoomManager : GameStateManager
 
         if (_currentRoom is null) return;
 
-        long itemId = e.Packet.Read<Id>();
-        int diceValue = e.Packet.Read<int>();
+        Id itemId;
+        int diceValue = -1;
+
+        if (Interceptor.Session.Is(ClientType.Shockwave))
+        {
+            string[] fields = e.Packet.Read<string>().Split();
+            itemId = int.Parse(fields[0]);
+            if (fields.Length >= 2)
+                diceValue = int.Parse(fields[1]) % (int)itemId;
+        }
+        else
+        {
+            itemId = e.Packet.Read<Id>();
+            diceValue = e.Packet.Read<int>();
+        }
 
         if (!_currentRoom.FloorItems.TryGetValue(itemId, out FloorItem? item))
         {
@@ -1348,6 +1431,12 @@ public sealed partial class RoomManager : GameStateManager
         if (newItems.Count > 0)
         {
             OnWallItemsLoaded(newItems);
+        }
+
+        if (Interceptor.Session.Is(ClientType.Shockwave))
+        {
+            _gotItems = true;
+            EnterRoomOnceLoaded();
         }
     }
 
@@ -1486,7 +1575,7 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        List<Entity> newEntities = new List<Entity>();
+        List<Entity> newEntities = [];
 
         foreach (Entity entity in e.Packet.ParseArray<Entity>())
         {
@@ -1504,6 +1593,12 @@ public sealed partial class RoomManager : GameStateManager
         if (newEntities.Count > 0)
         {
             OnEntitiesAdded(newEntities);
+        }
+
+        if (IsLoadingRoom && !_gotUsers && Interceptor.Session.Is(ClientType.Shockwave))
+        {
+            _gotUsers = true;
+            EnterRoomOnceLoaded();
         }
     }
 
@@ -1609,6 +1704,7 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.WiredMovements))]
     private void HandleWiredMovements(Intercept e)
     {
@@ -1639,6 +1735,8 @@ public sealed partial class RoomManager : GameStateManager
         OnWiredMovements(movements);
     }
 
+    // TODO: check
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.UserChange))]
     private void HandleUserChange(Intercept e)
     {
@@ -1700,6 +1798,7 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.UserNameChanged))]
     private void HandleUserNameChanged(Intercept e)
     {
@@ -1731,6 +1830,8 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
+    // Shockwave does not have an avatar idle state.
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.Sleep))]
     private void HandleSleep(Intercept e)
     {
@@ -1759,6 +1860,8 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
+    // Shockwave uses a field in the entity's status update.
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.Dance))]
     private void HandleDance(Intercept e)
     {
@@ -1788,6 +1891,8 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
+    // Shockwave uses a field in the entity's status update.
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.Expression))]
     private void HandleExpression(Intercept e)
     {
@@ -1814,6 +1919,8 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
+    // Shockwave uses a field in the entity's status update.
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.CarryObject))]
     private void HandleCarryObject(Intercept e)
     {
@@ -1842,6 +1949,7 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.AvatarEffect))]
     private void HandleAvatarEffect(Intercept e)
     {
@@ -1871,6 +1979,7 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
+    [InterceptsOn(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.UserTyping))]
     private void HandleUserTyping(Intercept e)
     {
@@ -1919,11 +2028,7 @@ public sealed partial class RoomManager : GameStateManager
         if (e.Is(In.Whisper)) chatType = ChatType.Whisper;
         else if (e.Is(In.Chat)) chatType = ChatType.Talk;
         else if (e.Is(In.Shout)) chatType = ChatType.Shout;
-        else
-        {
-            _logger.LogError("Failed to detect chat type from header {header} !", e.Packet.Header);
-            return;
-        }
+        else return;
 
         int index = e.Packet.Read<int>();
         if (!_currentRoom.Entities.TryGetValue(index, out Entity? entity))
@@ -1933,8 +2038,13 @@ public sealed partial class RoomManager : GameStateManager
         }
 
         string message = e.Packet.Read<string>();
-        int expression = e.Packet.Read<int>();
-        int bubbleStyle = e.Packet.Read<int>();
+
+        int expression = 0, bubbleStyle = 0;
+        if (Interceptor.Session.Is(~ClientType.Shockwave))
+        {
+            expression = e.Packet.Read<int>();
+            bubbleStyle = e.Packet.Read<int>();
+        }
 
         // string? int
 
@@ -1990,7 +2100,6 @@ public sealed partial class RoomManager : GameStateManager
     public void UpdateStackTile(IFloorItem stackTile, float height) => UpdateStackTile(stackTile.Id, height);
     public void UpdateStackTile(long stackTileId, float height)
         => Interceptor.Send(Out.SetCustomStackingHeight, stackTileId, (int)Math.Round(height * 100.0));
-
 
     #endregion
 }

@@ -4,8 +4,6 @@ namespace Xabbo.Core;
 
 public sealed class GroupData : IGroupData, IComposer, IParser<GroupData>
 {
-    public static GroupData Parse(in PacketReader packet) => new(in packet);
-
     public Id Id { get; set; }
     public bool IsGuild { get; set; }
     public GroupType Type { get; set; }
@@ -25,31 +23,35 @@ public sealed class GroupData : IGroupData, IComposer, IParser<GroupData>
     public int PendingRequests { get; set; }
     public bool HasForum { get; set; }
 
-    private GroupData(in PacketReader packet)
+    private GroupData(in PacketReader p)
     {
-        Id = packet.Read<Id>();
-        IsGuild = packet.Read<bool>();
-        Type = (GroupType)packet.Read<int>();
-        Name = packet.Read<string>();
-        Description = packet.Read<string>();
-        Badge = packet.Read<string>();
-        HomeRoomId = packet.Read<Id>();
-        HomeRoomName = packet.Read<string>();
-        MemberStatus = (GroupMemberStatus)packet.Read<int>();
-        MemberCount = packet.Read<int>();
-        IsFavourite = packet.Read<bool>();
-        Created = packet.Read<string>();
-        IsOwner = packet.Read<bool>();
-        IsAdmin = packet.Read<bool>();
-        OwnerName = packet.Read<string>();
-        ShowInClient = packet.Read<bool>();
-        CanDecorateHomeRoom = packet.Read<bool>();
-        PendingRequests = packet.Read<int>();
-        HasForum = packet.Read<bool>();
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
+        Id = p.Read<Id>();
+        IsGuild = p.Read<bool>();
+        Type = (GroupType)p.Read<int>();
+        Name = p.Read<string>();
+        Description = p.Read<string>();
+        Badge = p.Read<string>();
+        HomeRoomId = p.Read<Id>();
+        HomeRoomName = p.Read<string>();
+        MemberStatus = (GroupMemberStatus)p.Read<int>();
+        MemberCount = p.Read<int>();
+        IsFavourite = p.Read<bool>();
+        Created = p.Read<string>();
+        IsOwner = p.Read<bool>();
+        IsAdmin = p.Read<bool>();
+        OwnerName = p.Read<string>();
+        ShowInClient = p.Read<bool>();
+        CanDecorateHomeRoom = p.Read<bool>();
+        PendingRequests = p.Read<int>();
+        HasForum = p.Read<bool>();
     }
 
     public void Compose(in PacketWriter p)
     {
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
         p.Write(Id);
         p.Write(IsGuild);
         p.Write((int)Type);
@@ -70,4 +72,6 @@ public sealed class GroupData : IGroupData, IComposer, IParser<GroupData>
         p.Write(PendingRequests);
         p.Write(HasForum);
     }
+
+    public static GroupData Parse(in PacketReader p) => new(in p);
 }

@@ -41,7 +41,7 @@ public static class H
 
     public static Gender ToGender(string gender)
     {
-        return (gender.ToLower()) switch
+        return gender.ToLower() switch
         {
             "m" or "male" => Gender.Male,
             "f" or "female" => Gender.Female,

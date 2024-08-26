@@ -18,7 +18,10 @@ public sealed class Sticky : IComposer, IParser<Sticky>
 
     private Sticky(in PacketReader p)
     {
-        Id = p.Read<Id>();
+        if (p.Client == ClientType.Shockwave)
+            Id = (Id)p.Read<string>();
+        else
+            Id = p.Read<Id>();
         string text = p.Read<string>();
         int spaceIndex = text.IndexOf(' ');
         Color = text[0..6];
@@ -32,11 +35,11 @@ public sealed class Sticky : IComposer, IParser<Sticky>
         }
     }
 
-    public static Sticky Parse(in PacketReader packet) => new(packet);
-
     public void Compose(in PacketWriter p)
     {
         p.Write(Id);
         p.Write($"{Color} {Text}");
     }
+
+    public static Sticky Parse(in PacketReader p) => new(p);
 }

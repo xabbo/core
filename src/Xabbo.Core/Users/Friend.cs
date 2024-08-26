@@ -6,8 +6,6 @@ namespace Xabbo.Core;
 
 public class Friend : IFriend, IComposer, IParser<Friend>
 {
-    public static Friend Parse(in PacketReader packet) => new(packet);
-
     public Id Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public Gender Gender { get; set; }
@@ -25,34 +23,34 @@ public class Friend : IFriend, IComposer, IParser<Friend>
 
     public Friend() { }
 
-    protected Friend(in PacketReader packet)
+    protected Friend(in PacketReader p)
     {
-        Id = packet.Read<Id>();
-        Name = packet.Read<string>();
-        Gender = H.ToGender(packet.Read<int>());
-        IsOnline = packet.Read<bool>();
-        CanFollow = packet.Read<bool>();
-        FigureString = packet.Read<string>();
-        CategoryId = packet.Read<Id>();
-        Motto = packet.Read<string>();
+        Id = p.Read<Id>();
+        Name = p.Read<string>();
+        Gender = H.ToGender(p.Read<int>());
+        IsOnline = p.Read<bool>();
+        CanFollow = p.Read<bool>();
+        FigureString = p.Read<string>();
+        CategoryId = p.Read<Id>();
+        Motto = p.Read<string>();
 
-        if (packet.Client == ClientType.Flash)
+        if (p.Client == ClientType.Flash)
         {
-            RealName = packet.Read<string>();
-            FacebookId = packet.Read<string>();
+            RealName = p.Read<string>();
+            FacebookId = p.Read<string>();
         }
 
-        IsAcceptingOfflineMessages = packet.Read<bool>();
-        IsVipMember = packet.Read<bool>();
-        IsPocketHabboUser = packet.Read<bool>();
+        IsAcceptingOfflineMessages = p.Read<bool>();
+        IsVipMember = p.Read<bool>();
+        IsPocketHabboUser = p.Read<bool>();
 
-        if (packet.Client == ClientType.Unity)
+        if (p.Client == ClientType.Unity)
         {
-            RealName = packet.Read<string>();
-            FacebookId = packet.Read<string>();
+            RealName = p.Read<string>();
+            FacebookId = p.Read<string>();
         }
 
-        Relation = (Relation)packet.Read<short>();
+        Relation = (Relation)p.Read<short>();
     }
 
     public void Compose(in PacketWriter p)
@@ -74,4 +72,6 @@ public class Friend : IFriend, IComposer, IParser<Friend>
     }
 
     public override string ToString() => Name;
+
+    public static Friend Parse(in PacketReader p) => new(in p);
 }

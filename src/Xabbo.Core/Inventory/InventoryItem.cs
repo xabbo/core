@@ -1,4 +1,5 @@
-﻿using Xabbo.Messages;
+﻿using System;
+using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
@@ -8,6 +9,7 @@ public sealed class InventoryItem : IInventoryItem, IComposer, IParser<Inventory
     public ItemType Type { get; set; }
     public Id Id { get; set; }
     public int Kind { get; set; }
+    public string Identifier { get; set; } = "";
     public FurniCategory Category { get; set; }
     public ItemData Data { get; set; }
     IItemData IInventoryItem.Data => Data;
@@ -47,6 +49,21 @@ public sealed class InventoryItem : IInventoryItem, IComposer, IParser<Inventory
     }
 
     private InventoryItem(in PacketReader p) : this()
+    {
+        switch (p.Client)
+        {
+            case ClientType.Unity or ClientType.Flash:
+                ParseModern(in p);
+                break;
+            case ClientType.Shockwave:
+                ParseOrigins(in p);
+                break;
+            default:
+                throw new UnsupportedClientException(p.Client);
+        }
+    }
+
+    private void ParseModern(in PacketReader p)
     {
         ItemId = p.Read<Id>();
 
@@ -98,66 +115,41 @@ public sealed class InventoryItem : IInventoryItem, IComposer, IParser<Inventory
         {
             _String3 = string.Empty;
         }
+    }
 
-        /*if (clientType == ClientType.Flash)
+    private void ParseOrigins(in PacketReader p)
+    {
+        Kind = -1;
+        ItemId = p.Read<int>();
+        SlotId = p.Read<int>().ToString();
+        string strItemType = p.Read<string>();
+        Type = strItemType switch
         {
-            ItemId = packet.Read<int>();
-            Type = H.ToItemType(packet.Read<string>());
-            Id = packet.Read<int>();
-            Kind = packet.Read<int>();
-            Category = (FurniCategory)packet.Read<int>();
-            Data = StuffData.Parse(packet, clientType);
-            _Bool1 = packet.Read<bool>();
-            IsTradeable = packet.Read<bool>();
-            IsGroupable = packet.Read<bool>();
-            IsSellable = packet.Read<bool>();
-            SecondsToExpiration = packet.Read<int>();
-            HasRentPeriodStarted = packet.Read<bool>();
-            RoomId = packet.Read<int>();
-
-            if (Type == ItemType.Floor)
-            {
-                _String2 = packet.Read<string>();
-                Extra = packet.Read<int>();
-            }
+            "S" => ItemType.Floor,
+            "I" => ItemType.Wall,
+            _ => throw new Exception($"Invalid item type: {strItemType}"),
+        };
+        Id = p.Read<int>();
+        Identifier = p.Read<string>();
+        if (Type == ItemType.Floor)
+        {
+            p.Read<int>(); // dimX
+            p.Read<int>(); // dimY
+            // colors
+            Data = new LegacyData { Value = p.Read<string>() };
         }
-        else
+        else if (Type == ItemType.Wall)
         {
-            ItemId = packet.Read<long>();
-            Type = H.ToItemType(packet.Read<short>());
-            Id = packet.Read<long>();
-            Kind = packet.Read<int>();
-            Category = (FurniCategory)packet.Read<int>();
-            Data = StuffData.Parse(packet, clientType);
-            _Bool1 = packet.Read<bool>();
-            IsTradeable = packet.Read<bool>();
-            IsGroupable = packet.Read<bool>();
-            IsSellable = packet.Read<bool>();
-            SecondsToExpiration = packet.Read<int>();
-            HasRentPeriodStarted = packet.Read<bool>();
-            RoomId = packet.Read<long>();
-
-            // - Seems to be consistent
-            _String1 = packet.Read<string>(); // string ""
-            _String2 = packet.Read<string>(); // string "r" / "s"
-            _Int3 = packet.Read<int>(); // int 1187551480
-
-            if (Type == ItemType.Floor)
-            {
-                // 10 bytes ?
-                _String3 = packet.Read<string>();
-                Extra = packet.Read<int>();
-                _Int5 = packet.Read<int>();
-            }
-            else
-            {
-                _String3 = string.Empty;
-            }
-        }*/
+            // props
+            Data = new LegacyData { Value = p.Read<string>() };
+        }
     }
 
     public void Compose(in PacketWriter p)
     {
+        // TODO origins composer
+        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+
         p.Write(ItemId);
 
         if (p.Client == ClientType.Flash)

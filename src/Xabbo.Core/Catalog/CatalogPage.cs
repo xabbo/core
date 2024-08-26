@@ -6,8 +6,6 @@ namespace Xabbo.Core;
 
 public sealed class CatalogPage : ICatalogPage, IComposer, IParser<CatalogPage>
 {
-    public static CatalogPage Parse(in PacketReader packet) => new(in packet);
-
     public int Id { get; set; }
     public string CatalogType { get; set; }
     public string LayoutCode { get; set; }
@@ -33,33 +31,33 @@ public sealed class CatalogPage : ICatalogPage, IComposer, IParser<CatalogPage>
         FrontPageItems = [];
     }
 
-    private CatalogPage(in PacketReader packet)
+    private CatalogPage(in PacketReader p)
     {
-        Id = packet.Read<int>();
-        CatalogType = packet.Read<string>();
-        LayoutCode = packet.Read<string>();
+        Id = p.Read<int>();
+        CatalogType = p.Read<string>();
+        LayoutCode = p.Read<string>();
 
-        Images = [..packet.ReadArray<string>()];
-        Texts = [..packet.ReadArray<string>()];
+        Images = [..p.ReadArray<string>()];
+        Texts = [..p.ReadArray<string>()];
 
         Offers = [];
-        int n = packet.Read<Length>();
+        int n = p.Read<Length>();
         for (int i = 0; i < n; i++)
         {
-            CatalogOffer offer = packet.Parse<CatalogOffer>();
+            CatalogOffer offer = p.Parse<CatalogOffer>();
             offer.Page = this;
             Offers.Add(offer);
         }
 
-        OfferId = packet.Read<int>();
-        AcceptSeasonCurrencyAsCredits = packet.Read<bool>();
+        OfferId = p.Read<int>();
+        AcceptSeasonCurrencyAsCredits = p.Read<bool>();
 
         FrontPageItems = [];
-        if (packet.Available > 0)
+        if (p.Available > 0)
         {
-            n = packet.Read<Length>();
+            n = p.Read<Length>();
             for (int i = 0; i < n; i++)
-                FrontPageItems.Add(packet.Parse<CatalogPageItem>());
+                FrontPageItems.Add(p.Parse<CatalogPageItem>());
         }
     }
 
@@ -75,4 +73,6 @@ public sealed class CatalogPage : ICatalogPage, IComposer, IParser<CatalogPage>
         p.Write(AcceptSeasonCurrencyAsCredits);
         p.Write(FrontPageItems);
     }
+
+    public static CatalogPage Parse(in PacketReader p) => new(in p);
 }
