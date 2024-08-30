@@ -5,7 +5,7 @@ namespace Xabbo.Core;
 internal static class XabboConst
 {
     public const int DefaultTimeout = 10000;
-    public const float DefaultEpsilon = 0.001f;
+    public const float DefaultEpsilon = 0.0015f;
 
     public const string DefaultUserAgent =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0";

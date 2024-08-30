@@ -1,26 +1,37 @@
 ﻿using System;
+using Xunit.Sdk;
 
 namespace Xabbo.Core.Tests;
 
 public class TileTests
 {
-    [Fact]
-    public void Equality()
+    [Theory]
+    [InlineData(-0.002f, false)]
+    [InlineData(-0.0016f, false)]
+    [InlineData(-0.0015f, true)]
+    [InlineData(-0.001f, true)]
+    [InlineData(0, true)]
+    [InlineData(0.001f, true)]
+    [InlineData(0.0015f, true)]
+    [InlineData(0.0016f, false)]
+    [InlineData(0.002f, false)]
+    public void TestDifferenceEquality(float diff, bool shouldEqual)
     {
-        Tile tile = (1, 2, 3.4f);
+        Tile a = (0, 0, 3.5f), b = (0, 0, 3.5f + diff);
+        if (shouldEqual)
+            Assert.Equal(a, b);
+        else
+            Assert.NotEqual(a, b);
+    }
 
-        // Compare X,Y,Z
-        Assert.True(tile == (1, 2, 3.4f));
-        Assert.True((1, 2, 3.4f) == tile);
-
-        // Compare X,Y only
-        Assert.True(tile == (1, 2));
-        Assert.True((1, 2) == tile);
-
-        // Compare Z with epsilon check
-        Assert.True(tile == (1, 2, 3.4001f));
-        Assert.True(tile == (1, 2, 3.401f));
-        Assert.False(tile == (1, 2, 3.41f));
+    [Fact]
+    public void TestEqualityXY()
+    {
+        Tile
+            a = (1, 2, 3),
+            b = (1, 2, 4);
+        Assert.True(a.XY == b);
+        Assert.True(a == b.XY);
     }
 
     [Fact]
