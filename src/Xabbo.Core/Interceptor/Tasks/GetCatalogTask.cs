@@ -24,7 +24,7 @@ public class GetCatalogTask : InterceptorTask<ICatalog>
     {
         try
         {
-            var catalog = e.Packet.Parse<Catalog>();
+            var catalog = e.Packet.Read<Catalog>();
             if (catalog.Type == _type)
             {
                 if (SetResult(catalog))

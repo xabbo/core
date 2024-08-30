@@ -17,6 +17,6 @@ public class GetUserMarketplaceOffersTask : InterceptorTask<IUserMarketplaceOffe
     {
         e.Block();
 
-        SetResult(e.Packet.Parse<UserMarketplaceOffers>());
+        SetResult(e.Packet.Read<UserMarketplaceOffers>());
     }
 }

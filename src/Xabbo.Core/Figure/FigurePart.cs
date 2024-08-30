@@ -6,22 +6,17 @@ using System.Text;
 
 namespace Xabbo.Core;
 
-public class FigurePart
+public class FigurePart(FigurePartType type)
 {
-    public FigurePartType Type { get; }
+    private static readonly char[] _partSeparator = ['-'];
+
+    public FigurePartType Type { get; } = type;
 
     public int Id { get; set; }
 
-    public List<int> Colors { get; }
+    public List<int> Colors { get; } = [];
 
-    public FigurePart(FigurePartType type)
-    {
-        Type = type;
-        Colors = new List<int>();
-    }
-
-    public FigurePart(FigurePartType type, int id)
-        : this(type)
+    public FigurePart(FigurePartType type, int id) : this(type)
     {
         Id = id;
     }
@@ -30,19 +25,19 @@ public class FigurePart
     {
         var sb = new StringBuilder();
         sb.Append(Type.ToShortString());
-        sb.Append("-");
+        sb.Append('-');
         sb.Append(Id);
         foreach (var color in Colors)
         {
-            sb.Append("-");
+            sb.Append('-');
             sb.Append(color);
         }
         return sb.ToString();
     }
 
-    public static FigurePart Parse(string figurePartString)
+    public static FigurePart ParseString(string figurePartString)
     {
-        string[] split = figurePartString.Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] split = figurePartString.Split(_partSeparator, StringSplitOptions.RemoveEmptyEntries);
         if (split.Length < 1) throw new FormatException("Empty figure part");
         if (split.Length < 2) throw new FormatException($"Figure part '{split[0]}' has no ID");
 
@@ -63,11 +58,11 @@ public class FigurePart
         return figurePart;
     }
 
-    public static bool TryParse(string figurePartString, [NotNullWhen(true)] out FigurePart? figurePart)
+    public static bool TryParseString(string figurePartString, [NotNullWhen(true)] out FigurePart? figurePart)
     {
         figurePart = null;
 
-        string[] split = figurePartString.Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] split = figurePartString.Split(_partSeparator, StringSplitOptions.RemoveEmptyEntries);
         if (split.Length < 2)
             return false;
 
@@ -91,19 +86,10 @@ public class FigurePart
 
     public override int GetHashCode()
     {
-        unchecked
-        {
-            int hash = 647;
-
-            hash = (hash * 47) + Type.GetHashCode();
-            hash = (hash * 47) + Id;
-            foreach (var color in Colors)
-            {
-                hash = (hash * 47) + color;
-            }
-
-            return hash;
-        }
+        int hash = (Type, Id).GetHashCode();
+        foreach (var color in Colors)
+            hash = (hash, color).GetHashCode();
+        return hash;
     }
 
     public override bool Equals(object? obj)

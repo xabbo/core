@@ -5,29 +5,29 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class ActivityPoints : IActivityPoints, IComposer, IParser<ActivityPoints>
+public class ActivityPoints : IActivityPoints, IParserComposer<ActivityPoints>
 {
-    private readonly Dictionary<ActivityPointType, int> dictionary = [];
+    private readonly Dictionary<ActivityPointType, int> _dict = [];
 
-    public IEnumerable<ActivityPointType> Keys => dictionary.Keys;
-    public IEnumerable<int> Values => dictionary.Values;
-    public int Count => dictionary.Count;
+    IEnumerable<ActivityPointType> IReadOnlyDictionary<ActivityPointType, int>.Keys => _dict.Keys;
+    IEnumerable<int> IReadOnlyDictionary<ActivityPointType, int>.Values => _dict.Values;
+    public int Count => _dict.Count;
 
     public int this[ActivityPointType key]
     {
         get
         {
-            lock (dictionary)
+            lock (_dict)
             {
-                return dictionary[key];
+                return _dict[key];
             }
         }
 
         set
         {
-            lock (dictionary)
+            lock (_dict)
             {
-                dictionary[key] = value;
+                _dict[key] = value;
             }
         }
     }
@@ -38,31 +38,31 @@ public class ActivityPoints : IActivityPoints, IComposer, IParser<ActivityPoints
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        int n = p.Read<Length>();
+        int n = p.ReadLength();
         for (int i = 0; i < n; i++)
         {
-            var type = (ActivityPointType)p.Read<int>();
-            dictionary[type] = p.Read<int>();
+            var type = (ActivityPointType)p.ReadInt();
+            _dict[type] = p.ReadInt();
         }
     }
 
-    public void Compose(in PacketWriter p)
+    public bool ContainsKey(ActivityPointType key) => _dict.ContainsKey(key);
+    public bool TryGetValue(ActivityPointType key, out int value) => _dict.TryGetValue(key, out value);
+
+    public IEnumerator<KeyValuePair<ActivityPointType, int>> GetEnumerator() => _dict.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => _dict.GetEnumerator();
+
+    void IComposer.Compose(in PacketWriter p)
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        p.Write<Length>(Count);
+        p.WriteLength(Count);
         foreach (var (type, amount) in this)
         {
-            p.Write((int)type);
-            p.Write(amount);
+            p.WriteInt((int)type);
+            p.WriteInt(amount);
         }
     }
 
-    public bool ContainsKey(ActivityPointType key) => dictionary.ContainsKey(key);
-
-    public IEnumerator<KeyValuePair<ActivityPointType, int>> GetEnumerator() => dictionary.GetEnumerator();
-    public bool TryGetValue(ActivityPointType key, out int value) => dictionary.TryGetValue(key, out value);
-    IEnumerator IEnumerable.GetEnumerator() => dictionary.GetEnumerator();
-
-    public static ActivityPoints Parse(in PacketReader p) => new(in p);
+    static ActivityPoints IParser<ActivityPoints>.Parse(in PacketReader p) => new(in p);
 }

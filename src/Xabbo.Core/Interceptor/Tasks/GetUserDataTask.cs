@@ -20,7 +20,7 @@ public class GetUserDataTask : InterceptorTask<IUserData>
     {
         try
         {
-            if (SetResult(e.Packet.Parse<UserData>()))
+            if (SetResult(e.Packet.Read<UserData>()))
                 e.Block();
         }
         catch (Exception ex) { SetException(ex); }

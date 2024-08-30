@@ -1,6 +1,4 @@
-﻿using Xabbo.Messages;
-
-namespace Xabbo.Core;
+﻿namespace Xabbo.Core;
 
 public interface IItem
 {

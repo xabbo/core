@@ -9,9 +9,9 @@ namespace Xabbo.Core;
 
 public class Figure
 {
+    private static readonly char[] ItemSeparator = ['.'];
+    private static readonly Dictionary<int, Gender> GenderMap;
     private const string FIGUREPART_GENDERS_RESOURCE_PATH = "Xabbo.Core.Resources.figure_part_genders";
-
-    private static readonly IReadOnlyDictionary<int, Gender> _genderMap;
 
     static Figure()
     {
@@ -29,7 +29,7 @@ public class Figure
                     Gender gender;
 
                     if (string.IsNullOrWhiteSpace(line)) continue;
-                    string[] split = line.Split(new char[] { '/' });
+                    string[] split = line.Split(['/']);
                     if (split.Length != 2) continue;
                     if (!int.TryParse(split[0], out int partId)) continue;
 
@@ -46,11 +46,11 @@ public class Figure
             }
         }
 
-        _genderMap = dictionary;
+        GenderMap = dictionary;
     }
 
     public static bool TryGetGender(int partId, out Gender gender)
-        => _genderMap.TryGetValue(partId, out gender);
+        => GenderMap.TryGetValue(partId, out gender);
 
     public static bool TryGetGender(Figure figure, out Gender gender)
     {
@@ -68,7 +68,7 @@ public class Figure
 
     public static bool TryGetGender(string figureString, out Gender gender)
     {
-        string[] parts = figureString.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] parts = figureString.Split(ItemSeparator, StringSplitOptions.RemoveEmptyEntries);
         foreach (string part in parts)
         {
             int start = part.IndexOf('-');
@@ -109,6 +109,7 @@ public class Figure
 
     public FigurePart? this[FigurePartType type] => parts.FirstOrDefault(part => part.Type == type);
 
+
     public Figure()
     {
         Parts = parts.AsReadOnly();
@@ -143,13 +144,13 @@ public class Figure
 
     public string GetFigureString() => ToString();
 
-    public static Figure Parse(string figureString)
+    public static Figure ParseString(string figureString)
     {
         var figure = new Figure();
-        var figurePartStrings = figureString.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+        var figurePartStrings = figureString.Split(ItemSeparator, StringSplitOptions.RemoveEmptyEntries);
         foreach (var figurePartString in figurePartStrings)
         {
-            var figurePart = FigurePart.Parse(figurePartString);
+            var figurePart = FigurePart.ParseString(figurePartString);
             if (figure[figurePart.Type] != null)
                 throw new FormatException($"Duplicate figure part type '{figurePart.Type.ToShortString()}'");
             figure.AddPart(figurePart);
@@ -168,7 +169,7 @@ public class Figure
         var figurePartStrings = figureString.Split(new char[] { '.' });
         foreach (var figurePartString in figurePartStrings)
         {
-            if (!FigurePart.TryParse(figurePartString, out var figurePart))
+            if (!FigurePart.TryParseString(figurePartString, out var figurePart))
                 return false;
             if (tempFigure[figurePart.Type] != null)
                 return false;

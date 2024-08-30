@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class CatalogOffer : ICatalogOffer, IComposer, IParser<CatalogOffer>
+public class CatalogOffer : ICatalogOffer, IParserComposer<CatalogOffer>
 {
     public int Id { get; set; }
     public CatalogPage? Page { get; set; }
@@ -31,55 +30,47 @@ public class CatalogOffer : ICatalogOffer, IComposer, IParser<CatalogOffer>
         PreviewImage = string.Empty;
     }
 
-    protected CatalogOffer(in PacketReader p, bool fromCatalog)
+    protected CatalogOffer(in PacketReader p)
     {
-        Id = p.Read<int>();
-        FurniLine = p.Read<string>();
-        IsRentable = p.Read<bool>();
-        PriceInCredits = p.Read<int>();
-        PriceInActivityPoints = p.Read<int>();
-        ActivityPointType = (ActivityPointType)p.Read<int>();
-        PriceInSilver = p.Read<int>();
-        CanPurchaseAsGift = p.Read<bool>();
+        Id = p.ReadInt();
+        FurniLine = p.ReadString();
+        IsRentable = p.ReadBool();
+        PriceInCredits = p.ReadInt();
+        PriceInActivityPoints = p.ReadInt();
+        ActivityPointType = (ActivityPointType)p.ReadInt();
+        PriceInSilver = p.ReadInt();
+        CanPurchaseAsGift = p.ReadBool();
+        Products = [..p.ParseArray<CatalogProduct>()];
+        ClubLevel = p.ReadInt();
+        CanPurchaseMultiple = p.ReadBool();
 
-        int n = p.Read<Length>();
-        for (int i = 0; i < n; i++)
-            Products.Add(p.Parse<CatalogProduct>());
-
-        ClubLevel = p.Read<int>();
-        CanPurchaseMultiple = p.Read<bool>();
-
-        if (fromCatalog)
-        {
-            IsPet = p.Read<bool>();
-            PreviewImage = p.Read<string>();
-        }
+        // if (fromCatalog)
+        // {
+            IsPet = p.ReadBool();
+            PreviewImage = p.ReadString();
+        // }
     }
 
-    public void Compose(in PacketWriter p, bool fromCatalog = true)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(Id);
-        p.Write(FurniLine);
-        p.Write(IsRentable);
-        p.Write(PriceInCredits);
-        p.Write(PriceInActivityPoints);
-        p.Write((int)ActivityPointType);
-        p.Write(PriceInSilver);
-        p.Write(CanPurchaseAsGift);
-        p.Write(Products);
-        p.Write(ClubLevel);
-        p.Write(CanPurchaseMultiple);
+        p.WriteInt(Id);
+        p.WriteString(FurniLine);
+        p.WriteBool(IsRentable);
+        p.WriteInt(PriceInCredits);
+        p.WriteInt(PriceInActivityPoints);
+        p.WriteInt((int)ActivityPointType);
+        p.WriteInt(PriceInSilver);
+        p.WriteBool(CanPurchaseAsGift);
+        p.ComposeArray(Products);
+        p.WriteInt(ClubLevel);
+        p.WriteBool(CanPurchaseMultiple);
 
-        if (fromCatalog)
-        {
-            p.Write(IsPet);
-            p.Write(PreviewImage);
-        }
+        // if (fromCatalog)
+        // {
+            p.WriteBool(IsPet);
+            p.WriteString(PreviewImage);
+        // }
     }
 
-    void IComposer.Compose(in PacketWriter p) => Compose(in p, true);
-
-    public static CatalogOffer Parse(in PacketReader p) => Parse(in p, true);
-    public static CatalogOffer Parse(in PacketReader p, bool fromCatalog = true)
-        => new(in p, fromCatalog);
+    static CatalogOffer IParser<CatalogOffer>.Parse(in PacketReader p) => new(in p);
 }

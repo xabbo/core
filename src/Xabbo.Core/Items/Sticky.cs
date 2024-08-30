@@ -2,7 +2,7 @@
 
 namespace Xabbo.Core;
 
-public sealed class Sticky : IComposer, IParser<Sticky>
+public sealed class Sticky : IParserComposer<Sticky>
 {
     public static readonly StickyColors Colors = new();
 
@@ -19,10 +19,10 @@ public sealed class Sticky : IComposer, IParser<Sticky>
     private Sticky(in PacketReader p)
     {
         if (p.Client == ClientType.Shockwave)
-            Id = (Id)p.Read<string>();
+            Id = (Id)p.ReadString();
         else
-            Id = p.Read<Id>();
-        string text = p.Read<string>();
+            Id = p.ReadId();
+        string text = p.ReadString();
         int spaceIndex = text.IndexOf(' ');
         Color = text[0..6];
         if (spaceIndex == 6)
@@ -35,11 +35,11 @@ public sealed class Sticky : IComposer, IParser<Sticky>
         }
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(Id);
-        p.Write($"{Color} {Text}");
+        p.WriteId(Id);
+        p.WriteString($"{Color} {Text}");
     }
 
-    public static Sticky Parse(in PacketReader p) => new(p);
+    static Sticky IParser<Sticky>.Parse(in PacketReader p) => new(p);
 }

@@ -1,10 +1,8 @@
-﻿using System;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class RollerObjectUpdate : IComposer, IParser<RollerObjectUpdate>
+public class RollerObjectUpdate : IParserComposer<RollerObjectUpdate>
 {
     public long Id { get; set; }
     public float LocationZ { get; set; }
@@ -14,17 +12,17 @@ public class RollerObjectUpdate : IComposer, IParser<RollerObjectUpdate>
 
     protected RollerObjectUpdate(in PacketReader p)
     {
-        Id = p.Read<Id>();
-        LocationZ = p.Read<float>();
-        TargetZ = p.Read<float>();
+        Id = p.ReadId();
+        LocationZ = p.ReadFloat();
+        TargetZ = p.ReadFloat();
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(Id);
-        p.Write(LocationZ);
-        p.Write(TargetZ);
+        p.WriteId(Id);
+        p.WriteFloat(LocationZ);
+        p.WriteFloat(TargetZ);
     }
 
-    public static RollerObjectUpdate Parse(in PacketReader p) => new(p);
+    static RollerObjectUpdate IParser<RollerObjectUpdate>.Parse(in PacketReader p) => new(p);
 }

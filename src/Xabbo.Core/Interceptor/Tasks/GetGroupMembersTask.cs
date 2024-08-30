@@ -26,7 +26,7 @@ public sealed partial class GetGroupMembersTask(
     {
         try
         {
-            var groupMembers = e.Packet.Parse<GroupMembers>();
+            var groupMembers = e.Packet.Read<GroupMembers>();
             if (groupMembers.GroupId == _groupId &&
                 groupMembers.PageIndex == _page &&
                 groupMembers.Filter == _filter &&

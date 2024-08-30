@@ -828,7 +828,7 @@ public static class Extensions
     /// Gets wall items placed at the specified location.
     /// </summary>
     public static IEnumerable<TWallItem> At<TWallItem>(this IEnumerable<TWallItem> items, WallLocation location) where TWallItem : IWallItem
-        => At(items, location.WX, location.WY, location.LX, location.LY, location.Orientation);
+        => At(items, location.Wall.X, location.Wall.Y, location.Offset.X, location.Offset.Y, location.Orientation);
     #endregion
 
     #region - Inventory -

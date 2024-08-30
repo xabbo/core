@@ -1,21 +1,15 @@
 ﻿using System;
-using System.Threading.Tasks;
 
-using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Tasks;
 
-public class GetProfileTask : InterceptorTask<IUserProfile>
+public class GetProfileTask(IInterceptor interceptor, Id userId)
+    : InterceptorTask<IUserProfile>(interceptor)
 {
-    private readonly long _userId;
-
-    public GetProfileTask(IInterceptor interceptor, long userId)
-        : base(interceptor)
-    {
-        _userId = userId;
-    }
+    private readonly Id _userId = userId;
 
     protected override void OnExecute() => Interceptor.Send(Out.GetExtendedProfile, _userId, false);
 
@@ -24,7 +18,7 @@ public class GetProfileTask : InterceptorTask<IUserProfile>
     {
         try
         {
-            var userProfile = e.Packet.Parse<UserProfile>();
+            var userProfile = e.Packet.Read<UserProfile>();
             if (userProfile.Id == _userId)
             {
                 if (SetResult(userProfile))

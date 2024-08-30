@@ -24,7 +24,7 @@ public sealed partial class GetRoomDataTask : InterceptorTask<IRoomData>
     {
         try
         {
-            var roomData = e.Packet.Parse<RoomData>();
+            var roomData = e.Packet.Read<RoomData>();
             if (roomData.Id == _roomId)
             {
                 if (SetResult(roomData))

@@ -1,8 +1,6 @@
-﻿using Xabbo.Messages;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
-public interface IGroupInfo : IComposer
+public interface IGroupInfo
 {
     Id Id { get; }
     string Name { get; }

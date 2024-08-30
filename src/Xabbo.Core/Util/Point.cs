@@ -7,6 +7,8 @@ namespace Xabbo.Core;
 /// </summary>
 public readonly struct Point
 {
+    public static readonly Point Zero = new(0, 0);
+
     public readonly int X;
     public readonly int Y;
 
@@ -29,6 +31,8 @@ public readonly struct Point
     public static bool operator !=(Point a, Point b) => !(a == b);
     public static Point operator +(Point a, Point b) => new(a.X + b.X, a.Y + b.Y);
     public static Point operator -(Point a, Point b) => new(a.X - b.X, a.Y - b.Y);
+
+    public static Point operator -(Point p) => new(-p.X, -p.Y);
 
     public static implicit operator Point((int X, int Y) xy) => new(xy.X, xy.Y);
     public static implicit operator Point(Tile tile) => new(tile.X, tile.Y);

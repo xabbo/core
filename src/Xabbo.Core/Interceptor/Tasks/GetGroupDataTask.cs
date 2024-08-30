@@ -24,7 +24,7 @@ public class GetGroupDataTask : InterceptorTask<IGroupData>
     {
         try
         {
-            var groupData = e.Packet.Parse<GroupData>();
+            var groupData = e.Packet.Read<GroupData>();
             if (groupData.Id == _groupId)
             {
                 if (SetResult(groupData))

@@ -5,7 +5,7 @@ namespace Xabbo.Core;
 public interface IPet : IEntity
 {
     int Breed { get; }
-    long OwnerId { get; }
+    Id OwnerId { get; }
     string OwnerName { get; }
     int RarityLevel { get; }
     bool HasSaddle { get; }

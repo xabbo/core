@@ -1,15 +1,13 @@
 ﻿using System;
 
-using Xabbo.Messages;
 using Xabbo.Extension;
-using Xabbo.Interceptor;
-
-using Xabbo.Core.Events;
 using Xabbo.Messages.Flash;
+using Xabbo.Core.Events;
 
 namespace Xabbo.Core.Game;
 
-public sealed class TradeManager(IExtension extension, ProfileManager profileManager, RoomManager roomManager)
+[Intercepts]
+public sealed partial class TradeManager(IExtension extension, ProfileManager profileManager, RoomManager roomManager)
     : GameStateManager(extension)
 {
     private readonly ProfileManager _profileManager = profileManager;
@@ -68,8 +66,8 @@ public sealed class TradeManager(IExtension extension, ProfileManager profileMan
         PartnerOffer = null;
     }
 
-    // [Receive(nameof(In.TradeOpen))]
-    private void HandleTradeOpen(Intercept e)
+    [InterceptIn(nameof(In.TradingOpen))]
+    private void HandleTradingOpen(Intercept e)
     {
         if (_profileManager.UserData == null)
         {
@@ -108,7 +106,7 @@ public sealed class TradeManager(IExtension extension, ProfileManager profileMan
 
         ResetTrade();
 
-        IsTrader = _profileManager.UserData.Id == traderId;
+        IsTrader = ((IUserData)_profileManager.UserData).Id == traderId;
         Self = IsTrader ? trader : tradee;
         Partner = IsTrader ? tradee : trader;
 
@@ -118,8 +116,8 @@ public sealed class TradeManager(IExtension extension, ProfileManager profileMan
         OnOpened(IsTrader, Partner);
     }
 
-    // [Receive(nameof(In.TradeOpenFail))]
-    private void HandleTradeOpenFail(Intercept e)
+    [InterceptIn(nameof(In.TradeOpenFailed))]
+    private void HandleTradeOpenFailed(Intercept e)
     {
         if (!_roomManager.IsInRoom)
         {
@@ -133,8 +131,8 @@ public sealed class TradeManager(IExtension extension, ProfileManager profileMan
         OnTradeOpenFailed(reason, name);
     }
 
-    // [Receive(nameof(In.TradeItems))]
-    private void HandleTradeItems(Intercept e)
+    [InterceptIn(nameof(In.TradingItemList))]
+    private void HandleTradingItemList(Intercept e)
     {
         if (!_roomManager.IsInRoom)
         {
@@ -150,8 +148,8 @@ public sealed class TradeManager(IExtension extension, ProfileManager profileMan
 
         HasAccepted =
         HasPartnerAccepted = false;
-        OwnOffer = e.Packet.Parse<TradeOffer>();
-        PartnerOffer = e.Packet.Parse<TradeOffer>();
+        OwnOffer = e.Packet.Read<TradeOffer>();
+        PartnerOffer = e.Packet.Read<TradeOffer>();
 
         Debug.Log(
             $"user {OwnOffer.UserId}: " +
@@ -165,8 +163,8 @@ public sealed class TradeManager(IExtension extension, ProfileManager profileMan
         OnUpdated(OwnOffer, PartnerOffer);
     }
 
-    // [Receive(nameof(In.TradeAccept))]
-    private void HandleTradeAccept(Intercept e)
+    [InterceptIn(nameof(In.TradingAccept))]
+    private void HandleTradingAccept(Intercept e)
     {
         if (!_roomManager.IsInRoom)
         {
@@ -204,8 +202,8 @@ public sealed class TradeManager(IExtension extension, ProfileManager profileMan
         OnAccepted(user, accepted);
     }
 
-    // [Receive(nameof(In.TradeConfirmation))]
-    private void HandleTradeConfirmation(Intercept e)
+    [InterceptIn(nameof(In.TradingConfirmation))]
+    private void HandleTradingConfirmation(Intercept e)
     {
         if (!_roomManager.IsInRoom)
         {
@@ -223,8 +221,8 @@ public sealed class TradeManager(IExtension extension, ProfileManager profileMan
         OnWaitingConfirm();
     }
 
-    // [Receive(nameof(In.TradeCompleted))]
-    private void HandleTradeCompleted(Intercept e)
+    [InterceptIn(nameof(In.TradingCompleted))]
+    void HandleTradingCompleted(Intercept e)
     {
         if (!IsTrading) return;
 
@@ -252,8 +250,8 @@ public sealed class TradeManager(IExtension extension, ProfileManager profileMan
         OnCompleted(wasTrader, self, partner, ownOffer, partnerOffer);
     }
 
-    // [Receive(nameof(In.TradeClose))]
-    private void HandleTradeClose(Intercept e)
+    [InterceptIn(nameof(In.TradingClose))]
+    void HandleTradingClose(Intercept e)
     {
         if (!IsTrading) return;
 

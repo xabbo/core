@@ -692,7 +692,7 @@ public sealed partial class RoomManager : GameStateManager
     [InterceptIn(nameof(In.GetGuestRoomResult))]
     private void HandleGetGuestRoomResult(Intercept e)
     {
-        var roomData = e.Packet.Parse<RoomData>();
+        var roomData = e.Packet.Read<RoomData>();
 
         if (!_roomDataCache.ContainsKey(roomData.Id))
         {
@@ -742,7 +742,7 @@ public sealed partial class RoomManager : GameStateManager
         EnteringRoom(e.Packet.Read<Id>());
     }
 
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomQueueStatus))]
     private void HandleRoomQueueStatus(Intercept e)
     {
@@ -927,7 +927,7 @@ public sealed partial class RoomManager : GameStateManager
         OnRightsUpdated();
     }
 
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomEntryTile))]
     private void HandleRoomEntryTile(Intercept e)
     {
@@ -954,7 +954,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     // Shockwave does not have a furni heightmap.
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn("f:"+nameof(In.HeightMap))]
     private void HandleHeightMap(Intercept e)
     {
@@ -970,7 +970,7 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        Heightmap heightmap = e.Packet.Parse<Heightmap>();
+        Heightmap heightmap = e.Packet.Read<Heightmap>();
         _currentRoom.Heightmap = heightmap;
 
         _logger.LogTrace("Received stacking heightmap. (size:{width}x{length})", heightmap.Width, heightmap.Length);
@@ -1013,7 +1013,7 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        FloorPlan floorPlan = e.Packet.Parse<FloorPlan>();
+        FloorPlan floorPlan = e.Packet.Read<FloorPlan>();
         _currentRoom.FloorPlan = floorPlan;
 
         _logger.LogTrace("Received floor heightmap. (size:{width}x{length})", floorPlan.Width, floorPlan.Length);
@@ -1025,7 +1025,7 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomVisualizationSettings))]
     private void HandleRoomVisualizationSettings(Intercept e)
     {
@@ -1041,7 +1041,7 @@ public sealed partial class RoomManager : GameStateManager
         // TODO event
     }
 
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomChatSettings))]
     private void HandleRoomChatSettings(Intercept e)
     {
@@ -1050,12 +1050,12 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        _currentRoom.Data.ChatSettings = e.Packet.Parse<ChatSettings>();
+        _currentRoom.Data.ChatSettings = e.Packet.Read<ChatSettings>();
 
         OnRoomDataUpdated(_currentRoom.Data);
     }
 
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomEntryInfo))]
     private void HandleRoomEntryInfo(Intercept e)
     {
@@ -1104,7 +1104,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     // TODO: Check how this works on Shockwave
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.ErrorReport))]
     private void HandleErrorReport(Intercept e)
     {
@@ -1134,8 +1134,7 @@ public sealed partial class RoomManager : GameStateManager
 
         List<FloorItem> newItems = [];
 
-        FloorItem[] items = e.Packet.ParseAll<FloorItem>();
-        foreach (FloorItem item in items)
+        foreach (FloorItem item in e.Packet.Read<FloorItems>())
         {
             if (_currentRoom.FloorItems.TryAdd(item.Id, item))
             {
@@ -1174,7 +1173,7 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        FloorItem item = e.Packet.Parse<FloorItem>();
+        FloorItem item = e.Packet.Read<FloorItem>();
 
         if (_currentRoom.FloorItems.TryAdd(item.Id, item))
         {
@@ -1240,7 +1239,7 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        var updatedItem = e.Packet.Parse<FloorItem>();
+        var updatedItem = e.Packet.Read<FloorItem>();
 
         if (_currentRoom.FloorItems.TryGetValue(updatedItem.Id, out FloorItem? previousItem))
         {
@@ -1277,7 +1276,7 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        RollerUpdate rollerUpdate = e.Packet.Parse<RollerUpdate>();
+        RollerUpdate rollerUpdate = e.Packet.Read<RollerUpdate>();
         foreach (RollerObjectUpdate objectUpdate in rollerUpdate.ObjectUpdates)
         {
             if (_currentRoom.FloorItems.TryGetValue(objectUpdate.Id, out FloorItem? item))
@@ -1322,12 +1321,12 @@ public sealed partial class RoomManager : GameStateManager
         }
 
         IItemData previousData = item.Data;
-        item.Data = e.Packet.Parse<ItemData>();
+        item.Data = e.Packet.Read<ItemData>();
 
         OnFloorItemDataUpdated(item, previousData);
     }
 
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.ObjectsDataUpdate))]
     private void HandleObjectsDataUpdate(Intercept e)
     {
@@ -1347,7 +1346,7 @@ public sealed partial class RoomManager : GameStateManager
         for (int i = 0; i < n; i++)
         {
             long itemId = e.Packet.Read<Id>();
-            ItemData data = e.Packet.Parse<ItemData>();
+            ItemData data = e.Packet.Read<ItemData>();
             if (!_currentRoom.FloorItems.TryGetValue(itemId, out FloorItem? item))
             {
                 _logger.LogError("[{method}] Failed to find floor item {id} to update.", itemId, nameof(HandleObjectsDataUpdate));
@@ -1415,8 +1414,7 @@ public sealed partial class RoomManager : GameStateManager
 
         List<WallItem> newItems = [];
 
-        WallItem[] items = e.Packet.ParseAll<WallItem>();
-        foreach (var item in items)
+        foreach (var item in e.Packet.Read<WallItems>())
         {
             if (_currentRoom.WallItems.TryAdd(item.Id, item))
             {
@@ -1455,7 +1453,7 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        var item = e.Packet.Parse<WallItem>();
+        var item = e.Packet.Read<WallItem>();
         if (_currentRoom.WallItems.TryAdd(item.Id, item))
         {
             OnWallItemAdded(item);
@@ -1514,7 +1512,7 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        WallItem updatedItem = e.Packet.Parse<WallItem>();
+        WallItem updatedItem = e.Packet.Read<WallItem>();
         WallItem? previousItem = null;
 
         updatedItem = _currentRoom.WallItems.AddOrUpdate(
@@ -1577,7 +1575,7 @@ public sealed partial class RoomManager : GameStateManager
 
         List<Entity> newEntities = [];
 
-        foreach (Entity entity in e.Packet.ParseArray<Entity>())
+        foreach (Entity entity in e.Packet.Read<Entity[]>())
         {
             if (_currentRoom.Entities.TryAdd(entity.Index, entity))
             {
@@ -1654,7 +1652,7 @@ public sealed partial class RoomManager : GameStateManager
         int n = e.Packet.Read<Length>();
         for (int i = 0; i < n; i++)
         {
-            EntityStatusUpdate update = e.Packet.Parse<EntityStatusUpdate>();
+            EntityStatusUpdate update = e.Packet.Read<EntityStatusUpdate>();
             if (!_currentRoom.Entities.TryGetValue(update.Index, out Entity? entity))
             {
                 _logger.LogError("Failed to find entity with index {index} to update", update.Index);
@@ -1685,7 +1683,7 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        RollerUpdate rollerUpdate = e.Packet.Parse<RollerUpdate>();
+        RollerUpdate rollerUpdate = e.Packet.Read<RollerUpdate>();
 
         if (rollerUpdate.Type == RollerUpdateType.MovingEntity ||
             rollerUpdate.Type == RollerUpdateType.StationaryEntity)
@@ -1704,7 +1702,7 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.WiredMovements))]
     private void HandleWiredMovements(Intercept e)
     {
@@ -1714,7 +1712,7 @@ public sealed partial class RoomManager : GameStateManager
         var movements = new WiredMovement[n];
         for (int i = 0; i < n; i++)
         {
-            var movement = movements[i] = e.Packet.Parse<WiredMovement>();
+            var movement = movements[i] = e.Packet.Read<WiredMovement>();
             if (room is null) continue;
             switch (movement) {
                 case UserWiredMovement m:
@@ -1736,7 +1734,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     // TODO: check
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.UserChange))]
     private void HandleUserChange(Intercept e)
     {
@@ -1798,7 +1796,7 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.UserNameChanged))]
     private void HandleUserNameChanged(Intercept e)
     {
@@ -1831,7 +1829,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     // Shockwave does not have an avatar idle state.
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.Sleep))]
     private void HandleSleep(Intercept e)
     {
@@ -1861,7 +1859,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     // Shockwave uses a field in the entity's status update.
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.Dance))]
     private void HandleDance(Intercept e)
     {
@@ -1892,7 +1890,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     // Shockwave uses a field in the entity's status update.
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.Expression))]
     private void HandleExpression(Intercept e)
     {
@@ -1920,7 +1918,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     // Shockwave uses a field in the entity's status update.
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.CarryObject))]
     private void HandleCarryObject(Intercept e)
     {
@@ -1949,7 +1947,7 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.AvatarEffect))]
     private void HandleAvatarEffect(Intercept e)
     {
@@ -1979,7 +1977,7 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    [InterceptsOn(~ClientType.Shockwave)]
+    [Intercepts(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.UserTyping))]
     private void HandleUserTyping(Intercept e)
     {
@@ -2065,8 +2063,8 @@ public sealed partial class RoomManager : GameStateManager
     public void Place(IInventoryItem item, (int X, int Y) location, int direction)
         => Place(item.Id, location, direction);
 
-    public void Place(long itemId, WallLocation location)
-        => Interceptor.Send(Out.PlaceObject, itemId, location.WX, location.WY, location.LX, location.LY);
+    public void Place(Id itemId, WallLocation location)
+        => Interceptor.Send(Out.PlaceObject, itemId, location.Wall.X, location.Wall.Y, location.Offset.X, location.Offset.Y); // Orientation ?
     public void Place(IInventoryItem item, WallLocation location)
         => Place(item.Id, location);
 
@@ -2079,11 +2077,11 @@ public sealed partial class RoomManager : GameStateManager
     public void Move(IFloorItem item, (int X, int Y) location, int direction)
         => Move(item.Id, location.X, location.Y, direction);
 
-    public void Move(long wallItemId, WallLocation location) => Interceptor.Send(
+    public void Move(Id wallItemId, WallLocation loc) => Interceptor.Send(
         Out.MoveWallItem, wallItemId,
-        location.WX, location.WY,
-        location.LX, location.LY,
-        location.Orientation.Value.ToString()
+        loc.Wall.X, loc.Wall.Y,
+        loc.Offset.X, loc.Offset.Y,
+        loc.Orientation.Value.ToString()
     );
     public void Move(IWallItem item, WallLocation location)
         => Move(item.Id, location);

@@ -5,7 +5,7 @@ namespace Xabbo.Core;
 public interface IRoomUser : IEntity
 {
     Gender Gender { get; }
-    long GroupId { get; }
+    Id GroupId { get; }
     int GroupStatus { get; }
     string GroupName { get; }
     string FigureExtra { get; }

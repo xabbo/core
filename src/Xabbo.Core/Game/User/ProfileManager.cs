@@ -110,7 +110,7 @@ public sealed partial class ProfileManager : GameStateManager
             _isLoadingProfile = false;
         }
 
-        UserData = e.Packet.Parse<UserData>();
+        UserData = e.Packet.Read<UserData>();
 
         _taskUserData = Task.FromResult<IUserData>(UserData);
 
@@ -171,7 +171,7 @@ public sealed partial class ProfileManager : GameStateManager
     [InterceptIn(nameof(In.ActivityPoints))]
     private void HandleActivityPoints(Intercept e)
     {
-        Points = e.Packet.Parse<ActivityPoints>();
+        Points = e.Packet.Read<ActivityPoints>();
 
         OnLoadedPoints();
     }
@@ -181,7 +181,7 @@ public sealed partial class ProfileManager : GameStateManager
     {
         int amount = e.Packet.Read<int>();
         int change = e.Packet.Read<int>();
-        ActivityPointType type = (ActivityPointType)e.Packet.Read<int>();
+        var type = (ActivityPointType)e.Packet.Read<int>();
 
         Points[type] = amount;
 
@@ -191,7 +191,7 @@ public sealed partial class ProfileManager : GameStateManager
     [InterceptIn(nameof(In.Achievements))]
     private void HandleAchievements(Intercept e)
     {
-        Achievements = e.Packet.Parse<Achievements>();
+        Achievements = e.Packet.Read<Achievements>();
 
         OnLoadedAchievements();
     }
@@ -199,8 +199,8 @@ public sealed partial class ProfileManager : GameStateManager
     [InterceptIn(nameof(In.Achievement))]
     private void HandleAchievement(Intercept e)
     {
-        Achievement achievement = e.Packet.Parse<Achievement>();
-        Achievements?.Update(achievement);
+        var achievement = e.Packet.Read<Achievement>();
+        Achievements?.Add(achievement);
 
         OnAchievementUpdated(achievement);
     }

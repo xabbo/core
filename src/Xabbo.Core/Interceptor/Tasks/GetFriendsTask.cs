@@ -39,7 +39,7 @@ public class GetFriendsTask : InterceptorTask<List<Friend>>
 
             int n = e.Packet.Read<Length>();
             for (int i = 0; i < n; i++)
-                _friends.Add(e.Packet.Parse<Friend>());
+                _friends.Add(e.Packet.Read<Friend>());
 
             if (_currentIndex == total)
                 SetResult(_friends);

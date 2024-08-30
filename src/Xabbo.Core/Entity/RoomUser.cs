@@ -2,10 +2,10 @@
 
 namespace Xabbo.Core;
 
-public class RoomUser(long id, int index) : Entity(EntityType.User, id, index), IRoomUser
+public class RoomUser(Id id, int index) : Entity(EntityType.User, id, index), IRoomUser
 {
     public Gender Gender { get; set; } = Gender.Unisex;
-    public long GroupId { get; set; } = -1;
+    public Id GroupId { get; set; } = -1;
     public int GroupStatus { get; set; }
     public string GroupName { get; set; } = "";
     public string FigureExtra { get; set; } = "";
@@ -22,13 +22,13 @@ public class RoomUser(long id, int index) : Entity(EntityType.User, id, index), 
         if (p.Client == ClientType.Shockwave)
             return;
 
-        Gender = H.ToGender(p.Read<string>());
-        GroupId = p.Read<Id>();
-        GroupStatus = p.Read<int>();
-        GroupName = p.Read<string>();
-        FigureExtra = p.Read<string>();
-        AchievementScore = p.Read<int>();
-        IsModerator = p.Read<bool>();
+        Gender = H.ToGender(p.ReadString());
+        GroupId = p.ReadId();
+        GroupStatus = p.ReadInt();
+        GroupName = p.ReadString();
+        FigureExtra = p.ReadString();
+        AchievementScore = p.ReadInt();
+        IsModerator = p.ReadBool();
     }
 
     protected override void OnUpdate(EntityStatusUpdate update) { }
@@ -40,12 +40,12 @@ public class RoomUser(long id, int index) : Entity(EntityType.User, id, index), 
         if (p.Client == ClientType.Shockwave)
             return;
 
-        p.Write(Gender.ToShortString().ToLower());
-        p.Write(GroupId);
-        p.Write(GroupStatus);
-        p.Write(GroupName);
-        p.Write(FigureExtra);
-        p.Write(AchievementScore);
-        p.Write(IsModerator);
+        p.WriteString(Gender.ToShortString().ToLower());
+        p.WriteId(GroupId);
+        p.WriteInt(GroupStatus);
+        p.WriteString(GroupName);
+        p.WriteString(FigureExtra);
+        p.WriteInt(AchievementScore);
+        p.WriteBool(IsModerator);
     }
 }

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public sealed class NavigatorSearchResults : List<NavigatorSearchResultList>, IComposer, IParser<NavigatorSearchResults>
+public sealed class NavigatorSearchResults : List<NavigatorSearchResultList>, IParserComposer<NavigatorSearchResults>
 {
     public string Category { get; set; }
     public string Filter { get; set; }
@@ -18,9 +19,9 @@ public sealed class NavigatorSearchResults : List<NavigatorSearchResultList>, IC
 
     private NavigatorSearchResults(in PacketReader p)
     {
-        Category = p.Read<string>();
-        Filter = p.Read<string>();
-        int n = p.Read<Length>();
+        Category = p.ReadString();
+        Filter = p.ReadString();
+        int n = p.ReadLength();
         for (int i = 0; i < n; i++)
             Add(p.Parse<NavigatorSearchResultList>());
     }
@@ -65,14 +66,12 @@ public sealed class NavigatorSearchResults : List<NavigatorSearchResultList>, IC
         roomInfo => roomInfo.Name.Contains(name, StringComparison.OrdinalIgnoreCase)
     );
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(Category);
-        p.Write(Filter);
-        p.Write<Length>(Count);
-        for (int i = 0; i < Count; i++)
-            p.Write(this[i]);
+        p.WriteString(Category);
+        p.WriteString(Filter);
+        p.ComposeArray(this);
     }
 
-    public static NavigatorSearchResults Parse(in PacketReader p) => new(in p);
+    static NavigatorSearchResults IParser<NavigatorSearchResults>.Parse(in PacketReader p) => new(in p);
 }

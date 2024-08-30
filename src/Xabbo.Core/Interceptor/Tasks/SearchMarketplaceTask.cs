@@ -1,29 +1,23 @@
 ﻿using System.Collections.Generic;
 
-using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Tasks;
 
 [Intercepts]
-public partial class SearchMarketplaceTask : InterceptorTask<IEnumerable<IMarketplaceOffer>>
+public sealed partial class SearchMarketplaceTask(
+    IInterceptor interceptor,
+    string? searchText = null,
+    int? from = null, int? to = null,
+    MarketplaceSortOrder sort = MarketplaceSortOrder.HighestPrice
+)
+    : InterceptorTask<ICollection<IMarketplaceOffer>>(interceptor)
 {
-    private readonly string? _searchText;
-    private readonly int? _from, _to;
-    private readonly MarketplaceSortOrder _sort;
-
-    public SearchMarketplaceTask(IInterceptor interceptor,
-        string? searchText = null,
-        int? from = null, int? to = null,
-        MarketplaceSortOrder sort = MarketplaceSortOrder.HighestPrice)
-        : base(interceptor)
-    {
-        _searchText = searchText;
-        _from = from;
-        _to = to;
-        _sort = sort;
-    }
+    private readonly string? _searchText = searchText;
+    private readonly int? _from = from, _to = to;
+    private readonly MarketplaceSortOrder _sort = sort;
 
     protected override void OnExecute() => Interceptor.Send(
         Out.GetMarketplaceOffers,
@@ -33,15 +27,9 @@ public partial class SearchMarketplaceTask : InterceptorTask<IEnumerable<IMarket
     );
 
     [InterceptIn(nameof(In.MarketPlaceOffers))]
-    protected void HandleMarketPlaceOffers(Intercept e)
+    void HandleMarketPlaceOffers(Intercept e)
     {
         e.Block();
-
-        List<IMarketplaceOffer> offers = [];
-        int n = e.Packet.Read<Length>();
-        for (int i = 0; i < n; i++)
-            offers.Add(e.Packet.Parse<MarketplaceOffer>());
-
-        SetResult(offers);
+        SetResult(e.Packet.Read<MarketplaceOffer[]>());
     }
 }

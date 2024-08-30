@@ -7,7 +7,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class UserSearchResults : IReadOnlyCollection<UserSearchResult>, IComposer, IParser<UserSearchResults>
+public class UserSearchResults : IReadOnlyCollection<UserSearchResult>, IParserComposer<UserSearchResults>
 {
     public IReadOnlyList<UserSearchResult> Friends { get; }
     public IReadOnlyList<UserSearchResult> Others { get; }
@@ -18,31 +18,18 @@ public class UserSearchResults : IReadOnlyCollection<UserSearchResult>, ICompose
 
     protected UserSearchResults(in PacketReader p)
     {
-        int n = p.Read<Length>();
-        var results = new List<UserSearchResult>(n);
-        for (int i = 0; i < n; i++)
-            results.Add(p.Parse<UserSearchResult>());
-        Friends = results.AsReadOnly();
-
-        n = p.Read<Length>();
-        results = new List<UserSearchResult>(n);
-        for (int i = 0; i < n; i++)
-            results.Add(p.Parse<UserSearchResult>());
-        Others = results.AsReadOnly();
+        Friends = [..p.ParseArray<UserSearchResult>()];
+        Others = [..p.ParseArray<UserSearchResult>()];
     }
 
-    public void Compose(in PacketWriter p)
+    public UserSearchResult? GetResult(string name) => this.FirstOrDefault(result =>
+        string.Equals(result.Name, name, StringComparison.OrdinalIgnoreCase));
+
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(Friends);
-        p.Write(Others);
+        p.ComposeArray(Friends);
+        p.ComposeArray(Others);
     }
 
-    public UserSearchResult? GetResult(string name)
-    {
-        return this.FirstOrDefault(result =>
-            string.Equals(result.Name, name, StringComparison.OrdinalIgnoreCase)
-        );
-    }
-
-    public static UserSearchResults Parse(in PacketReader p) => new(in p);
+    static UserSearchResults IParser<UserSearchResults>.Parse(in PacketReader p) => new(in p);
 }

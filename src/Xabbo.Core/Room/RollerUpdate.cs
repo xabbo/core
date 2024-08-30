@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class RollerUpdate : IComposer, IParser<RollerUpdate>
+public class RollerUpdate : IParserComposer<RollerUpdate>
 {
     public int LocationX { get; set; }
     public int LocationY { get; set; }
     public int TargetX { get; set; }
     public int TargetY { get; set; }
     public List<RollerObjectUpdate> ObjectUpdates { get; set; }
-    public long RollerId { get; set; }
+    public Id RollerId { get; set; }
     public RollerUpdateType Type { get; set; }
     public int EntityIndex { get; set; }
     public float EntityLocationZ { get; set; }
@@ -20,65 +19,61 @@ public class RollerUpdate : IComposer, IParser<RollerUpdate>
 
     public RollerUpdate()
     {
-        ObjectUpdates = new List<RollerObjectUpdate>();
+        ObjectUpdates = [];
         Type = RollerUpdateType.None;
     }
 
     protected RollerUpdate(in PacketReader p)
-        : this()
     {
-        LocationX = p.Read<int>();
-        LocationY = p.Read<int>();
-        TargetX = p.Read<int>();
-        TargetY = p.Read<int>();
+        LocationX = p.ReadInt();
+        LocationY = p.ReadInt();
+        TargetX = p.ReadInt();
+        TargetY = p.ReadInt();
 
-        int n = p.Read<Length>();
+        int n = p.ReadLength();
         ObjectUpdates = new List<RollerObjectUpdate>(n);
         for (int i = 0; i < n; i++)
             ObjectUpdates.Add(p.Parse<RollerObjectUpdate>());
 
-        RollerId = p.Read<Id>();
+        RollerId = p.ReadId();
 
+        Type = RollerUpdateType.None;
         if (p.Available > 0)
         {
-            Type = (RollerUpdateType)p.Read<int>();
+            Type = (RollerUpdateType)p.ReadInt();
             if (Type == RollerUpdateType.MovingEntity ||
                 Type == RollerUpdateType.StationaryEntity)
             {
                 if (p.Client == ClientType.Unity)
                 {
-                    p.Read<int>();
+                    p.ReadInt();
                 }
-                EntityIndex = p.Read<int>();
-                EntityLocationZ = p.Read<float>();
-                EntityTargetZ = p.Read<float>();
+                EntityIndex = p.ReadInt();
+                EntityLocationZ = p.ReadFloat();
+                EntityTargetZ = p.ReadFloat();
             }
         }
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(LocationX);
-        p.Write(LocationY);
-        p.Write(TargetX);
-        p.Write(TargetY);
+        p.WriteInt(LocationX);
+        p.WriteInt(LocationY);
+        p.WriteInt(TargetX);
+        p.WriteInt(TargetY);
 
-        // TODO remove this
-        // packet.Write<Length>(ObjectUpdates.Count);
-        // foreach (var update in ObjectUpdates)
-        //     packet.Write(update);
-        p.Write(ObjectUpdates);
+        p.ComposeArray(ObjectUpdates);
 
-        p.Write(RollerId);
+        p.WriteId(RollerId);
 
         if (Type != RollerUpdateType.None)
         {
-            p.Write((int)Type);
-            p.Write(EntityIndex);
-            p.Write(EntityLocationZ);
-            p.Write(EntityTargetZ);
+            p.WriteInt((int)Type);
+            p.WriteInt(EntityIndex);
+            p.WriteFloat(EntityLocationZ);
+            p.WriteFloat(EntityTargetZ);
         }
     }
 
-    public static RollerUpdate Parse(in PacketReader p) => new(in p);
+    static RollerUpdate IParser<RollerUpdate>.Parse(in PacketReader p) => new(in p);
 }

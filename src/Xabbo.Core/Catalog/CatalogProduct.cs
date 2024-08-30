@@ -4,7 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public sealed class CatalogProduct : ICatalogProduct, IComposer, IParser<CatalogProduct>
+public sealed class CatalogProduct : ICatalogProduct, IParserComposer<CatalogProduct>
 {
     public ItemType Type { get; set; }
     public int Kind { get; set; }
@@ -27,26 +27,26 @@ public sealed class CatalogProduct : ICatalogProduct, IComposer, IParser<Catalog
     {
         Type = p.Client switch
         {
-            ClientType.Flash => H.ToItemType(p.Read<string>()),
-            ClientType.Unity => H.ToItemType(p.Read<short>()),
+            ClientType.Flash => H.ToItemType(p.ReadString()),
+            ClientType.Unity => H.ToItemType(p.ReadShort()),
             _ => throw new Exception($"Unknown client protocol: {p.Client}.")
         };
 
         if (Type == ItemType.Badge)
         {
-            Variant = p.Read<string>();
+            Variant = p.ReadString();
             Count = 1;
         }
         else
         {
-            Kind = p.Read<int>();
-            Variant = p.Read<string>();
-            Count = p.Read<int>();
-            IsLimited = p.Read<bool>();
+            Kind = p.ReadInt();
+            Variant = p.ReadString();
+            Count = p.ReadInt();
+            IsLimited = p.ReadBool();
             if (IsLimited)
             {
-                LimitedTotal = p.Read<int>();
-                LimitedRemaining = p.Read<int>();
+                LimitedTotal = p.ReadInt();
+                LimitedRemaining = p.ReadInt();
             }
         }
     }
@@ -63,33 +63,33 @@ public sealed class CatalogProduct : ICatalogProduct, IComposer, IParser<Catalog
         }
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         switch (p.Client)
         {
-            case ClientType.Flash: p.Write(Type.ToShortString()); break;
-            case ClientType.Unity: p.Write(Type.GetValue()); break;
+            case ClientType.Flash: p.WriteString(Type.ToShortString()); break;
+            case ClientType.Unity: p.WriteShort(Type.GetValue()); break;
             default: throw new Exception($"Unknown client protocol: {p.Client}.");
         }
 
         if (Type == ItemType.Badge)
         {
-            p.Write(Variant);
+            p.WriteString(Variant);
         }
         else
         {
-            p.Write(Kind);
-            p.Write(Variant);
-            p.Write(Count);
-            p.Write(IsLimited);
+            p.WriteInt(Kind);
+            p.WriteString(Variant);
+            p.WriteInt(Count);
+            p.WriteBool(IsLimited);
 
             if (IsLimited)
             {
-                p.Write(LimitedTotal);
-                p.Write(LimitedRemaining);
+                p.WriteInt(LimitedTotal);
+                p.WriteInt(LimitedRemaining);
             }
         }
     }
 
-    public static CatalogProduct Parse(in PacketReader p) => new(in p);
+    static CatalogProduct IParser<CatalogProduct>.Parse(in PacketReader p) => new(in p);
 }

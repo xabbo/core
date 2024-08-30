@@ -7,7 +7,7 @@ namespace Xabbo.Core;
 /// <summary>
 /// Represents a 3-dimensional location.
 /// </summary>
-public readonly struct Tile(int x, int y, float z) : IComposer, IParser<Tile>
+public readonly struct Tile(int x, int y, float z) : IParserComposer<Tile>
 {
     public readonly int X = x;
     public readonly int Y = y;
@@ -41,14 +41,14 @@ public readonly struct Tile(int x, int y, float z) : IComposer, IParser<Tile>
 
     public readonly void Compose(in PacketWriter p)
     {
-        p.Write(X);
-        p.Write(Y);
-        p.Write((FloatString)Z);
+        p.WriteInt(X);
+        p.WriteInt(Y);
+        p.WriteFloat(Z);
     }
 
-    public static Tile Parse(in PacketReader p) => new(p.Read<int>(), p.Read<int>(), p.Read<FloatString>());
+    static Tile IParser<Tile>.Parse(in PacketReader p) => new(p.ReadInt(), p.ReadInt(), p.ReadFloat());
 
-    public static bool TryParse(string format, out Tile tile)
+    public static bool TryParseString(string format, out Tile tile)
     {
         if (format.StartsWith('(') &&
             format.EndsWith(')'))
@@ -70,9 +70,9 @@ public readonly struct Tile(int x, int y, float z) : IComposer, IParser<Tile>
         return true;
     }
 
-    public static Tile Parse(string format)
+    public static Tile ParseString(string format)
     {
-        if (!TryParse(format, out Tile tile))
+        if (!TryParseString(format, out Tile tile))
             throw new FormatException($"Invalid tile format: \"{format}\".");
 
         return tile;

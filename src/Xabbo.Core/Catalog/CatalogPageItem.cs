@@ -2,7 +2,7 @@
 
 namespace Xabbo.Core;
 
-public sealed class CatalogPageItem : ICatalogPageItem, IComposer, IParser<CatalogPageItem>
+public sealed class CatalogPageItem : ICatalogPageItem, IParserComposer<CatalogPageItem>
 {
     public int Position { get; set; }
     public string Name { get; set; }
@@ -23,53 +23,53 @@ public sealed class CatalogPageItem : ICatalogPageItem, IComposer, IParser<Catal
 
     private CatalogPageItem(in PacketReader p) : this()
     {
-        Position = p.Read<int>();
-        Name = p.Read<string>();
-        PromotionalImage = p.Read<string>();
-        Type = p.Read<int>();
+        Position = p.ReadInt();
+        Name = p.ReadString();
+        PromotionalImage = p.ReadString();
+        Type = p.ReadInt();
 
         switch (Type)
         {
             case 0:
-                Location = p.Read<string>();
+                Location = p.ReadString();
                 break;
             case 1:
-                ProductOfferId = p.Read<int>();
+                ProductOfferId = p.ReadInt();
                 break;
             case 2:
-                ProductCode = p.Read<string>();
+                ProductCode = p.ReadString();
                 break;
             default:
                 break;
         }
 
-        SecondsToExpiration = p.Read<int>();
+        SecondsToExpiration = p.ReadInt();
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(Position);
-        p.Write(Name);
-        p.Write(PromotionalImage);
-        p.Write(Type);
+        p.WriteInt(Position);
+        p.WriteString(Name);
+        p.WriteString(PromotionalImage);
+        p.WriteInt(Type);
 
         switch (Type)
         {
             case 0:
-                p.Write(Location);
+                p.WriteString(Location);
                 break;
             case 1:
-                p.Write(ProductOfferId);
+                p.WriteInt(ProductOfferId);
                 break;
             case 2:
-                p.Write(ProductCode);
+                p.WriteString(ProductCode);
                 break;
             default:
                 break;
         }
 
-        p.Write(SecondsToExpiration);
+        p.WriteInt(SecondsToExpiration);
     }
 
-    public static CatalogPageItem Parse(in PacketReader p) => new(in p);
+    static CatalogPageItem IParser<CatalogPageItem>.Parse(in PacketReader p) => new(in p);
 }

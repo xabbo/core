@@ -27,21 +27,19 @@ public sealed class StringArrayData : ItemData, IStringArrayData, IList<string>
     public StringArrayData(IStringArrayData data)
         : base(data)
     {
-        _list = new List<string>(data);
+        _list = [..data];
     }
 
     protected override void Initialize(in PacketReader p)
     {
-        int n = p.Read<Length>();
-        for (int i = 0; i < n; i++)
-            _list.Add(p.Read<string>());
+        _list.AddRange(p.ReadStringArray());
 
         base.Initialize(in p);
     }
 
     protected override void WriteData(in PacketWriter p)
     {
-        p.Write(_list);
+        p.WriteStringArray(_list);
         WriteBase(in p);
     }
 

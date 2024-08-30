@@ -5,9 +5,12 @@ using Xabbo.Messages;
 namespace Xabbo.Core;
 
 /// <summary>
-/// Represents a wall location.
+///
 /// </summary>
-public readonly struct WallLocation : IComposer
+/// <param name="Wall">The wall coordinates.</param>
+/// <param name="Offset">The location coordinates.</param>
+/// <param name="Orientation">The wall orientation.</param>
+public readonly record struct WallLocation(Point Wall, Point Offset, WallOrientation Orientation) : IParserComposer<WallLocation>
 {
     /// <summary>
     /// Represents a wall location with all coordinates at zero, and the orientation set to the left wall.
@@ -15,163 +18,112 @@ public readonly struct WallLocation : IComposer
     public static readonly WallLocation Zero = new(0, 0, 0, 0, 'l');
 
     /// <summary>
-    /// Gets the wall X coordinate.
-    /// </summary>
-    public readonly int WX;
-    /// <summary>
-    /// Gets the wall Y coordinate.
-    /// </summary>
-    public readonly int WY;
-    /// <summary>
-    /// Gets the location X coordinate.
-    /// </summary>
-    public readonly int LX;
-    /// <summary>
-    /// Gets the location Y coordinate.
-    /// </summary>
-    public readonly int LY;
-    /// <summary>
-    /// Gets the wall orientation.
-    /// </summary>
-    public readonly WallOrientation Orientation;
-
-    /// <summary>
     /// Constructs a new wall location with the specified coordinates and orientation.
     /// </summary>
     public WallLocation(int wx, int wy, int lx, int ly, WallOrientation orientation)
-    {
-        WX = wx;
-        WY = wy;
-        LX = lx;
-        LY = ly;
-        Orientation = orientation;
-    }
+        : this((wx, wy), (lx, ly), orientation)
+    { }
 
     /// <summary>
     /// Offsets the wall coordinates by the specified values
     /// attempting to keep the location fixed in place,
     /// relative to the original wall location.
     /// </summary>
-    /// <param name="wxOffset">The amount to offset wall X by.</param>
-    /// <param name="wyOffset">The amount to offset wall Y by.</param>
+    /// <param name="wallOffset">The amount to offset the wall coordaintes by.</param>
     /// <param name="scale">The scale value of the room as specified in the floor plan.</param>
-    public readonly WallLocation Offset(int wxOffset, int wyOffset, int scale)
+    public readonly WallLocation OffsetWall(Point wallOffset, int scale)
     {
         int halfTileWidth = scale / 2;
 
         return Add(
-            wxOffset,
-            wyOffset,
-            -(wxOffset - wyOffset) * halfTileWidth,
-            -(wxOffset + wyOffset) * halfTileWidth / 2
+            wallOffset,
+            new Point(
+                -(wallOffset.X - wallOffset.Y) * halfTileWidth,
+                -(wallOffset.X + wallOffset.Y) * halfTileWidth / 2
+            )
         );
     }
 
     /// <summary>
-    /// Attempts to adjust all coordinates to a valid location using the room scale,
-    /// and returns the updated wall location. Does not take into account
-    /// the floor plan which affects the offset of the LY coordinate.
+    /// Attempts to adjust all coordinates to a valid location using the room scale, and returns the updated wall location.
+    /// This does not take into account the floor plan, which affects the Location's Y coordinate depending on the wall height and tile location.
     /// </summary>
     /// <param name="scale">The scale value of the room as specified in the floor plan.</param>
     public readonly WallLocation Adjust(int scale)
     {
-        int
-            lx = LX,
-            ly = LY,
-            wx = WX,
-            wy = WY;
+        Point wall = Wall, loc = Offset;
 
         int halfTileWidth = scale / 2;
-        int wallOffset = (lx / halfTileWidth);
-        if (lx < 0) wallOffset -= 1;
+        int wallOffset = loc.X / halfTileWidth;
+        if (loc.X < 0) wallOffset -= 1;
 
         if (Orientation == WallOrientation.Left)
         {
-            wy -= wallOffset;
-            ly += wallOffset * halfTileWidth / 2;
+            wall -= (0, wallOffset);
+            loc += (0, wallOffset * halfTileWidth / 2);
         }
         else
         {
-            wx += wallOffset;
-            ly -= wallOffset * halfTileWidth / 2;
+            wall += (wallOffset, 0);
+            loc -= (0, wallOffset * halfTileWidth / 2);
         }
 
-        lx -= wallOffset * halfTileWidth;
+        loc -= (wallOffset * halfTileWidth, 0);
 
-
-        return new WallLocation(wx, wy, lx, ly, Orientation);
+        return new WallLocation(wall, loc, Orientation);
     }
 
     /// <summary>
     /// Flips the wall orientation between left and right, and returns the new wall location.
     /// </summary>
-    public readonly WallLocation Flip() => new WallLocation(WX, WY, LX, LY, Orientation.IsLeft ? WallOrientation.Right : WallOrientation.Left);
+    public readonly WallLocation Flip() => this with { Orientation = Orientation.Opposite };
 
     /// <summary>
     /// Returns a new wall location with the specified orientation.
     /// </summary>
-    public readonly WallLocation Orient(WallOrientation orientation) => new WallLocation(WX, WY, LX, LY, orientation);
+    public readonly WallLocation Orient(WallOrientation orientation) => this with { Orientation = orientation };
 
     /// <summary>
     /// Adds the specified offset values and returns the new wall location.
     /// </summary>
-    public readonly WallLocation Add(int wx, int wy, int lx, int ly) => new WallLocation(
-        WX + wx, WY + wy,
-        LX + lx, LY + ly,
-        Orientation
-    );
+    public readonly WallLocation Add(Point wall, Point offset) => this with {
+        Wall = Wall + wall,
+        Offset = offset + offset
+    };
 
     /// <summary>
     /// Adds the specified location offset values and returns the new wall location.
     /// </summary>
-    public WallLocation Add(int lxOffset, int lyOffset) => new WallLocation(
-        WX, WY, LX + lxOffset, LY + lyOffset, Orientation
-    );
+    public WallLocation Add(Point offset) => this with { Offset = Offset + offset };
 
-    public readonly override int GetHashCode() => (WX, WY, LX, LY, Orientation.Value).GetHashCode();
+    public readonly override string ToString() => FormatString(Wall.X, Wall.Y, Offset.X, Offset.Y, Orientation);
 
-    public readonly bool Equals(WallLocation other)
-    {
-        return
-            WX == other.WX &&
-            WY == other.WY &&
-            LX == other.LX &&
-            LY == other.LY &&
-            Orientation == other.Orientation;
-    }
-
-    public readonly override bool Equals(object? obj)
-        => obj is WallLocation loc && Equals(loc);
-
-    public readonly override string ToString() => ToString(WX, WY, LX, LY, Orientation);
-
-    public static string ToString(int wx, int wy, int lx, int ly, WallOrientation orientation) => $":w={wx},{wy} l={lx},{ly} {orientation.Value}";
+    public static string FormatString(int wx, int wy, int lx, int ly, WallOrientation orientation) => $":w={wx},{wy} l={lx},{ly} {orientation.Value}";
 
     public readonly void Compose(in PacketWriter p)
     {
         switch (p.Client)
         {
-        case ClientType.Flash or ClientType.Shockwave:
-            p.Write(ToString());
-            break;
-        case ClientType.Unity:
-            p.Write(WX);
-            p.Write(WY);
-            p.Write(LX);
-            p.Write(LY);
-            p.Write(Orientation.Value.ToString());
-            break;
-        default:
-            throw new Exception("Unknown client protocol.");
+            case ClientType.Flash or ClientType.Shockwave:
+                p.WriteString(ToString());
+                break;
+            case ClientType.Unity:
+                p.WriteInt(Wall.X);
+                p.WriteInt(Wall.Y);
+                p.WriteInt(Offset.X);
+                p.WriteInt(Offset.Y);
+                p.WriteString(Orientation);
+                break;
+            default:
+                throw new Exception("Unknown client protocol.");
         }
     }
 
-    public static WallLocation Parse(in PacketReader p) => Parse(p.Read<string>());
+    static WallLocation IParser<WallLocation>.Parse(in PacketReader p) => ParseString(p.ReadString());
 
-    public static WallLocation Parse(string locationString)
+    public static WallLocation ParseString(string locationString)
     {
-        if (locationString is null)
-            throw new ArgumentNullException(nameof(locationString));
+        ArgumentNullException.ThrowIfNull(locationString);
 
         if (TryParse(locationString, out WallLocation wallLocation))
         {
@@ -187,7 +139,7 @@ public readonly struct WallLocation : IComposer
     {
         location = default;
 
-        if (locationString.IndexOf(':') != 0)
+        if (!locationString.StartsWith(':'))
             return false;
 
         string[] parts = locationString.Split(' ');
@@ -223,17 +175,12 @@ public readonly struct WallLocation : IComposer
         return true;
     }
 
-    public static bool operator ==(WallLocation a, WallLocation b) => a.Equals(b);
-    public static bool operator !=(WallLocation a, WallLocation b) => !(a == b);
+    public static WallLocation operator +(WallLocation location, Point offset) => location.Add(offset);
+    public static WallLocation operator +(WallLocation location, (int X, int Y) offset) => location.Add(offset);
+    public static WallLocation operator +(WallLocation location, (Point Wall, Point Offset) offset) => location.Add(offset.Wall, offset.Offset);
 
-    public static WallLocation operator +(WallLocation location, (int X, int Y) offset)
-        => location.Add(offset.X, offset.Y);
-    public static WallLocation operator +(WallLocation location, (int WallX, int WallY, int X, int Y) offset)
-        => location.Add(offset.WallX, offset.WallY, offset.X, offset.Y);
-    public static WallLocation operator -(WallLocation location, (int X, int Y) offset)
-        => location.Add(-offset.X, -offset.Y);
-    public static WallLocation operator -(WallLocation location, (int WallX, int WallY, int X, int Y) offset)
-        => location.Add(-offset.WallX, -offset.WallY, -offset.X, -offset.Y);
+    public static WallLocation operator -(WallLocation location, Point offset) => location.Add(-offset, Point.Zero);
+    public static WallLocation operator -(WallLocation location, (int X, int Y) offset) => location.Add((-offset.X, -offset.Y), Point.Zero);
 
-    public static implicit operator WallLocation(string s) => Parse(s);
+    public static implicit operator WallLocation(string s) => ParseString(s);
 }

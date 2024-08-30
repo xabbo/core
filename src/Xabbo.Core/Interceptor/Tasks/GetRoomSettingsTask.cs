@@ -1,21 +1,15 @@
 ﻿using System;
-using System.Threading.Tasks;
 
-using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Tasks;
 
-public class GetRoomSettingsTask : InterceptorTask<RoomSettings>
+public class GetRoomSettingsTask(IInterceptor interceptor, Id roomId)
+    : InterceptorTask<RoomSettings>(interceptor)
 {
-    private readonly long _roomId;
-
-    public GetRoomSettingsTask(IInterceptor interceptor, long roomId)
-        : base(interceptor)
-    {
-        _roomId = roomId;
-    }
+    private readonly Id _roomId = roomId;
 
     protected override void OnExecute() => Interceptor.Send(Out.GetRoomSettings, _roomId);
 
@@ -24,7 +18,7 @@ public class GetRoomSettingsTask : InterceptorTask<RoomSettings>
     {
         try
         {
-            var roomSettings = e.Packet.Parse<RoomSettings>();
+            var roomSettings = e.Packet.Read<RoomSettings>();
             if (roomSettings.Id == _roomId)
             {
                 if (SetResult(roomSettings))

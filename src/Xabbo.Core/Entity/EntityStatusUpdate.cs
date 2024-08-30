@@ -9,7 +9,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<string, IReadOnlyList<string>>, IComposer, IParser<EntityStatusUpdate>
+public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<string, IReadOnlyList<string>>, IParserComposer<EntityStatusUpdate>
 {
     private readonly Dictionary<string, string[]> fragments = new(StringComparer.OrdinalIgnoreCase);
 
@@ -93,7 +93,7 @@ public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<strin
     // mv
     public Tile? MovingTo
     {
-        get => fragments.TryGetValue("mv", out string[]? args) ? Tile.Parse(args[0]) : (Tile?)null;
+        get => fragments.TryGetValue("mv", out string[]? args) ? Tile.ParseString(args[0]) : (Tile?)null;
         set
         {
             if (value == null)
@@ -214,21 +214,21 @@ public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<strin
     private EntityStatusUpdate(in PacketReader p)
     {
         // TODO Shockwave
-        Index = p.Read<int>();
-        Location = Tile.Parse(p);
-        HeadDirection = p.Read<int>();
-        Direction = p.Read<int>();
+        Index = p.ReadInt();
+        Location = p.Parse<Tile>();
+        HeadDirection = p.ReadInt();
+        Direction = p.ReadInt();
 
-        ParseStatus(p.Read<string>());
+        ParseStatus(p.ReadString());
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(Index);
-        p.Write(Location);
-        p.Write(HeadDirection);
-        p.Write(Direction);
-        p.Write(CompileStatus());
+        p.WriteInt(Index);
+        p.Compose(Location);
+        p.WriteInt(HeadDirection);
+        p.WriteInt(Direction);
+        p.WriteString(CompileStatus());
     }
 
     private void ParseStatus(string status)
@@ -303,5 +303,5 @@ public class EntityStatusUpdate : IEntityStatusUpdate, IReadOnlyDictionary<strin
         return ((IEnumerable<KeyValuePair<string, IReadOnlyCollection<string>>>)this).GetEnumerator();
     }
 
-    public static EntityStatusUpdate Parse(in PacketReader p) => new(in p);
+    static EntityStatusUpdate IParser<EntityStatusUpdate>.Parse(in PacketReader p) => new(in p);
 }

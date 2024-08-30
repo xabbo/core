@@ -8,7 +8,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public abstract class Entity(EntityType type, Id id, int index) : IEntity, IComposer, IParser<Entity>
+public abstract class Entity(EntityType type, Id id, int index) : IEntity, IParserComposer<Entity>
 {
     public bool IsRemoved { get; set; }
     public bool IsHidden { get; set; }
@@ -64,31 +64,31 @@ public abstract class Entity(EntityType type, Id id, int index) : IEntity, IComp
         {
             RoomUser? user = this as RoomUser;
 
-            p.Write(Index);
-            p.Write(Name);
-            p.Write(Figure);
-            p.Write(user?.Gender.ToShortString() ?? "");
-            p.Write(Motto);
-            p.Write(Location);
-            p.Write(user?.FigureExtra ?? "");
-            p.Write(user?.BadgeCode ?? "");
+            p.WriteInt(Index);
+            p.WriteString(Name);
+            p.WriteString(Figure);
+            p.WriteString(user?.Gender.ToShortString() ?? "");
+            p.WriteString(Motto);
+            p.Compose(Location);
+            p.WriteString(user?.FigureExtra ?? "");
+            p.WriteString(user?.BadgeCode ?? "");
         }
         else
         {
-            p.Write(Id);
-            p.Write(Name);
-            p.Write(Motto);
-            p.Write(Figure);
-            p.Write(Index);
-            p.Write(Location);
-            p.Write(Direction);
-            p.Write((int)Type);
+            p.WriteId(Id);
+            p.WriteString(Name);
+            p.WriteString(Motto);
+            p.WriteString(Figure);
+            p.WriteInt(Index);
+            p.Compose(Location);
+            p.WriteInt(Direction);
+            p.WriteInt((int)Type);
         }
     }
 
     public override string ToString() => Name;
 
-    public static Entity Parse(in PacketReader p)
+    static Entity IParser<Entity>.Parse(in PacketReader p)
     {
         Id id;
         string name, motto, figure, gender, poolFigure, badgeCode;
@@ -99,31 +99,31 @@ public abstract class Entity(EntityType type, Id id, int index) : IEntity, IComp
         if (p.Client == ClientType.Shockwave)
         {
             id = -1;
-            index = p.Read<int>();
-            name = p.Read<string>();
-            figure = p.Read<string>();
-            gender = p.Read<string>();
-            motto = p.Read<string>();
+            index = p.ReadInt();
+            name = p.ReadString();
+            figure = p.ReadString();
+            gender = p.ReadString();
+            motto = p.ReadString();
             tile = p.Parse<Tile>();
             dir = 0;
-            poolFigure = p.Read<string>();
-            badgeCode = p.Read<string>();
+            poolFigure = p.ReadString();
+            badgeCode = p.ReadString();
         }
         else
         {
-            id = p.Read<Id>();
-            name = p.Read<string>();
-            motto = p.Read<string>();
-            figure = p.Read<string>();
+            id = p.ReadId();
+            name = p.ReadString();
+            motto = p.ReadString();
+            figure = p.ReadString();
             gender = "";
-            index = p.Read<int>();
+            index = p.ReadInt();
             tile = p.Parse<Tile>();
-            dir = p.Read<int>();
+            dir = p.ReadInt();
             poolFigure = "";
             badgeCode = "";
         }
 
-        type = (EntityType)p.Read<int>();
+        type = (EntityType)p.ReadInt();
         Entity entity = type switch
         {
             EntityType.User => new RoomUser(id, index, in p),

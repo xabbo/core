@@ -30,7 +30,7 @@ public class GetInventoryTask : InterceptorTask<IInventory>
     {
         try
         {
-            InventoryFragment fragment = e.Packet.Parse<InventoryFragment>();
+            InventoryFragment fragment = e.Packet.Read<InventoryFragment>();
 
             if (fragment.Index != _index)
             {

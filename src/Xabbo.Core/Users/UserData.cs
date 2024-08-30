@@ -7,7 +7,7 @@ namespace Xabbo.Core;
 /// <summary>
 /// The user's own data that is sent upon requesting user data.
 /// </summary>
-public sealed class UserData : IUserData, IComposer, IParser<UserData>
+public sealed class UserData : IUserData, IParserComposer<UserData>
 {
     public long Id { get; set; }
     public string Name { get; set; } = "";
@@ -53,30 +53,30 @@ public sealed class UserData : IUserData, IComposer, IParser<UserData>
 
     private void ParseModern(in PacketReader p)
     {
-        Id = p.Read<Id>();
-        Name = p.Read<string>();
-        Figure = p.Read<string>();
-        Gender = H.ToGender(p.Read<string>());
-        Motto = p.Read<string>();
-        RealName = p.Read<string>();
-        DirectMail = p.Read<bool>();
-        TotalRespects = p.Read<int>();
-        RespectsLeft = p.Read<int>();
-        ScratchesLeft = p.Read<int>();
-        StreamPublishingAllowed = p.Read<bool>();
-        LastAccessDate = p.Read<string>();
-        IsNameChangeable = p.Read<bool>();
-        IsSafetyLocked = p.Read<bool>();
+        Id = p.ReadId();
+        Name = p.ReadString();
+        Figure = p.ReadString();
+        Gender = H.ToGender(p.ReadString());
+        Motto = p.ReadString();
+        RealName = p.ReadString();
+        DirectMail = p.ReadBool();
+        TotalRespects = p.ReadInt();
+        RespectsLeft = p.ReadInt();
+        ScratchesLeft = p.ReadInt();
+        StreamPublishingAllowed = p.ReadBool();
+        LastAccessDate = p.ReadString();
+        IsNameChangeable = p.ReadBool();
+        IsSafetyLocked = p.ReadBool();
 
         if (p.Available > 0)
         {
-            _Bool5 = p.Read<bool>();
+            _Bool5 = p.ReadBool();
         }
     }
 
     private void ParseOrigins(in PacketReader p)
     {
-        string[] lines = p.Read<string>().Split('\r');
+        string[] lines = p.ReadString().Split('\r');
         foreach (string line in lines)
         {
             string[] fields = line.Split('=', 2);
@@ -125,26 +125,26 @@ public sealed class UserData : IUserData, IComposer, IParser<UserData>
         }
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        p.Write(Id);
-        p.Write(Name);
-        p.Write(Figure);
-        p.Write(Gender.ToShortString());
-        p.Write(Motto);
-        p.Write(RealName);
-        p.Write(DirectMail);
-        p.Write(TotalRespects);
-        p.Write(RespectsLeft);
-        p.Write(ScratchesLeft);
-        p.Write(StreamPublishingAllowed);
-        p.Write(LastAccessDate);
-        p.Write(IsNameChangeable);
-        p.Write(IsSafetyLocked);
-        p.Write(_Bool5);
+        p.WriteId(Id);
+        p.WriteString(Name);
+        p.WriteString(Figure);
+        p.WriteString(Gender.ToShortString());
+        p.WriteString(Motto);
+        p.WriteString(RealName);
+        p.WriteBool(DirectMail);
+        p.WriteInt(TotalRespects);
+        p.WriteInt(RespectsLeft);
+        p.WriteInt(ScratchesLeft);
+        p.WriteBool(StreamPublishingAllowed);
+        p.WriteString(LastAccessDate);
+        p.WriteBool(IsNameChangeable);
+        p.WriteBool(IsSafetyLocked);
+        p.WriteBool(_Bool5);
     }
 
-    public static UserData Parse(in PacketReader p) => new(in p);
+    static UserData IParser<UserData>.Parse(in PacketReader p) => new(in p);
 }

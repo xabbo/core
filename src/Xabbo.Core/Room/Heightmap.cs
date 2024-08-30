@@ -7,7 +7,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class Heightmap : IHeightmap, IEnumerable<HeightmapTile>, IComposer, IParser<Heightmap>
+public class Heightmap : IHeightmap, IEnumerable<HeightmapTile>, IParserComposer<Heightmap>
 {
     private readonly List<HeightmapTile> _tiles;
 
@@ -38,14 +38,14 @@ public class Heightmap : IHeightmap, IEnumerable<HeightmapTile>, IComposer, IPar
 
     private Heightmap(in PacketReader p)
     {
-        Width = p.Read<int>();
-        int n = p.Read<Length>();
+        Width = p.ReadInt();
+        int n = p.ReadLength();
         Length = n / Width;
 
         _tiles = [];
         for (int i = 0; i < n; i++)
         {
-            short value = p.Read<short>();
+            short value = p.ReadShort();
             _tiles.Add(new HeightmapTile(i % Width, i / Width, value));
         }
     }
@@ -55,13 +55,13 @@ public class Heightmap : IHeightmap, IEnumerable<HeightmapTile>, IComposer, IPar
     IEnumerator<IHeightmapTile> IEnumerable<IHeightmapTile>.GetEnumerator() => _tiles.Cast<IHeightmapTile>().GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(Width);
-        p.Write<Length>(Width * Length);
+        p.WriteInt(Width);
+        p.WriteLength(Width * Length);
         foreach (HeightmapTile tile in _tiles)
-            p.Write(tile);
+            p.Compose(tile);
     }
 
-    public static Heightmap Parse(in PacketReader p) => new(in p);
+    static Heightmap IParser<Heightmap>.Parse(in PacketReader p) => new(in p);
 }

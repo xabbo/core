@@ -5,7 +5,7 @@ namespace Xabbo.Core;
 /// <summary>
 /// Represents a wall orientation.
 /// </summary>
-public readonly struct WallOrientation
+public readonly record struct WallOrientation
 {
     /// <summary>
     /// Represents a left wall orientation.
@@ -37,22 +37,22 @@ public readonly struct WallOrientation
         Value = value;
     }
 
+    public WallOrientation Opposite => IsLeft ? Right : Left;
+
     public override string ToString() => Value.ToString();
 
     /// <summary>
     /// Gets the wall orientation by the specified character. Must be <c>l</c> or <c>r</c>.
     /// </summary>
     /// <exception cref="ArgumentException">The specified character is not a valid wall orientation.</exception>
-    public static WallOrientation FromChar(char c)
+    public static WallOrientation FromChar(char c) => c switch
     {
-        return c switch
-        {
-            'l' or 'L' => Left,
-            'r' or 'R' => Right,
-            _ => throw new ArgumentException($"Invalid wall orientation '{c}'. Must be 'l' or 'r'."),
-        };
-    }
+        'l' => Left,
+        'r' => Right,
+        _ => throw new ArgumentException($"Invalid wall orientation '{c}'. Must be 'l' or 'r'."),
+    };
 
     public static implicit operator WallOrientation(char c) => FromChar(c);
     public static implicit operator char(WallOrientation orientation) => orientation.Value;
+    public static implicit operator string(WallOrientation orientation) => orientation.ToString();
 }

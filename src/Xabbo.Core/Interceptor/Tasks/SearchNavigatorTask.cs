@@ -26,7 +26,7 @@ public class SearchNavigatorTask : InterceptorTask<NavigatorSearchResults>
     {
         try
         {
-            var results = e.Packet.Parse<NavigatorSearchResults>();
+            var results = e.Packet.Read<NavigatorSearchResults>();
             if (results.Category == _category &&
                 results.Filter == _filter)
             {

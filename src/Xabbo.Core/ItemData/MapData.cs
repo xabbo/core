@@ -36,20 +36,20 @@ public sealed class MapData : ItemData, IMapData, IDictionary<string, string>
 
     protected override void Initialize(in PacketReader p)
     {
-        int n = p.Read<Length>();
+        int n = p.ReadLength();
         for (int i = 0; i < n; i++)
-            _map.Add(p.Read<string>(), p.Read<string>());
+            _map.Add(p.ReadString(), p.ReadString());
 
         base.Initialize(in p);
     }
 
     protected override void WriteData(in PacketWriter p)
     {
-        p.Write<Length>(_map.Count);
+        p.WriteLength(_map.Count);
         foreach (var item in _map)
         {
-            p.Write(item.Key);
-            p.Write(item.Value);
+            p.WriteString(item.Key);
+            p.WriteString(item.Value);
         }
 
         WriteBase(in p);

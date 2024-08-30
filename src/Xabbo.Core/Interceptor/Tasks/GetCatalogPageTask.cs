@@ -31,7 +31,7 @@ public sealed partial class GetCatalogPageTask : InterceptorTask<ICatalogPage>
     {
         try
         {
-            var catalogPage = e.Packet.Parse<CatalogPage>();
+            var catalogPage = e.Packet.Read<CatalogPage>();
             if (catalogPage.Id == _pageId &&
                 catalogPage.CatalogType == _catalogType)
             {

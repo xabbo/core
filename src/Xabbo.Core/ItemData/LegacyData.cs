@@ -1,6 +1,4 @@
-﻿using System;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
@@ -19,13 +17,13 @@ public class LegacyData : ItemData, ILegacyData
 
     protected override void Initialize(in PacketReader p)
     {
-        Value = p.Read<string>();
+        Value = p.ReadString();
         base.Initialize(p);
     }
 
     protected override void WriteData(in PacketWriter p)
     {
-        p.Write(Value);
+        p.WriteString(Value);
         WriteBase(p);
     }
 }

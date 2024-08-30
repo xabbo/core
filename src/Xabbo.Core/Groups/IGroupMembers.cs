@@ -7,7 +7,7 @@ public interface IGroupMembers : IReadOnlyList<IGroupMember>
 {
     Id GroupId { get;}
     string GroupName { get; }
-    long HomeRoomId { get; }
+    Id HomeRoomId { get; }
     string BadgeCode { get; }
     int TotalEntries { get; }
     bool IsAllowedToManage { get; }

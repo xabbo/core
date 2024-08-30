@@ -6,7 +6,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class CatalogPageNode : ICatalogPageNode, IParser<CatalogPageNode>, IComposer
+public class CatalogPageNode : ICatalogPageNode, IParserComposer<CatalogPageNode>
 {
     public Catalog? Catalog { get; set; }
     ICatalog? ICatalogPageNode.Catalog => Catalog;
@@ -18,9 +18,9 @@ public class CatalogPageNode : ICatalogPageNode, IParser<CatalogPageNode>, IComp
     public int Id { get; set; }
     public string Name { get; set; }
     public string Title { get; set; }
-    public List<int> OfferIds { get; set; } = new List<int>();
+    public List<int> OfferIds { get; set; }
     IReadOnlyList<int> ICatalogPageNode.OfferIds => OfferIds;
-    public List<CatalogPageNode> Children { get; set; } = new List<CatalogPageNode>();
+    public List<CatalogPageNode> Children { get; set; }
     IReadOnlyList<ICatalogPageNode> ICatalogPageNode.Children => Children;
 
     public CatalogPageNode()
@@ -37,21 +37,22 @@ public class CatalogPageNode : ICatalogPageNode, IParser<CatalogPageNode>, IComp
     {
         Parent = parent;
 
-        IsVisible = p.Read<bool>();
-        Icon = p.Read<int>();
-        Id = p.Read<int>();
-        Name = p.Read<string>();
-        Title = p.Read<string>();
+        IsVisible = p.ReadBool();
+        Icon = p.ReadInt();
+        Id = p.ReadInt();
+        Name = p.ReadString();
+        Title = p.ReadString();
 
-        int n = p.Read<Length>();
+        int n = p.ReadLength();
+        OfferIds = new List<int>(n);
         for (int i = 0; i < n; i++)
-            OfferIds.Add(p.Read<int>());
+            OfferIds.Add(p.ReadInt());
 
-        n = p.Read<Length>();
+        n = p.ReadLength();
+        Children = new List<CatalogPageNode>(n);
         for (int i = 0; i < n; i++)
             Children.Add(new CatalogPageNode(in p, catalog, this));
     }
-
 
     public IEnumerable<CatalogPageNode> EnumerateDescendantsAndSelf()
     {
@@ -80,16 +81,16 @@ public class CatalogPageNode : ICatalogPageNode, IParser<CatalogPageNode>, IComp
     }
     ICatalogPageNode? ICatalogPageNode.FindNode(string? title, string? name, int? id) => FindNode(title, name, id);
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(IsVisible);
-        p.Write(Icon);
-        p.Write(Id);
-        p.Write(Name);
-        p.Write(Title);
-        p.Write(OfferIds);
-        p.Write(Children);
+        p.WriteBool(IsVisible);
+        p.WriteInt(Icon);
+        p.WriteInt(Id);
+        p.WriteString(Name);
+        p.WriteString(Title);
+        p.WriteIntArray(OfferIds);
+        p.ComposeArray(Children);
     }
 
-    public static CatalogPageNode Parse(in PacketReader p) => new(in p);
+    static CatalogPageNode IParser<CatalogPageNode>.Parse(in PacketReader p) => new(in p);
 }

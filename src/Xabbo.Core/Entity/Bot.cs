@@ -19,11 +19,8 @@ public class Bot : Entity, IBot
     public Bot(EntityType type, Id id, int index)
         : base(type, id, index)
     {
-        if (type != EntityType.PublicBot &&
-            type != EntityType.PrivateBot)
-        {
+        if (type is not (EntityType.PublicBot or EntityType.PrivateBot))
             throw new ArgumentException($"Invalid entity type for Bot: {type}");
-        }
 
         Gender = Gender.Unisex;
         OwnerId = -1;
@@ -38,15 +35,10 @@ public class Bot : Entity, IBot
 
         if (type == EntityType.PrivateBot)
         {
-            Gender = H.ToGender(p.Read<string>());
-            OwnerId = p.Read<Id>();
-            OwnerName = p.Read<string>();
-
-            int n = p.Read<Length>();
-            for (int i = 0; i < n; i++)
-            {
-                Skills.Add(p.Read<short>());
-            }
+            Gender = H.ToGender(p.ReadString());
+            OwnerId = p.ReadId();
+            OwnerName = p.ReadString();
+            Skills = [..p.ReadShortArray()];
         }
     }
 
@@ -58,10 +50,10 @@ public class Bot : Entity, IBot
 
         if (Type == EntityType.PrivateBot)
         {
-            p.Write(Gender.ToShortString().ToLower());
-            p.Write(OwnerId);
-            p.Write(OwnerName);
-            p.Write(Skills);
+            p.WriteString(Gender.ToShortString().ToLower());
+            p.WriteId(OwnerId);
+            p.WriteString(OwnerName);
+            p.WriteShortArray(Skills);
         }
     }
 }

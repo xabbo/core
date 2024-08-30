@@ -6,9 +6,9 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public sealed class InventoryFragment : IInventoryFragment, ICollection<InventoryItem>, IComposer, IParser<InventoryFragment>
+public sealed class InventoryFragment : IInventoryFragment, ICollection<InventoryItem>, IParserComposer<InventoryFragment>
 {
-    private readonly List<InventoryItem> _list = [];
+    private readonly List<InventoryItem> _list;
 
     public int Total { get; set; }
     public int Index { get; set; }
@@ -28,33 +28,28 @@ public sealed class InventoryFragment : IInventoryFragment, ICollection<Inventor
     public IEnumerable<InventoryItem> WallItems => this.Where<InventoryItem>(item => item.IsWallItem);
     IEnumerable<IInventoryItem> IInventoryFragment.WallItems => WallItems;
 
-    public InventoryFragment() { }
+    public InventoryFragment()
+    {
+        _list = [];
+    }
 
     public InventoryFragment(IEnumerable<IInventoryItem> items)
     {
-        _list.AddRange(items.Select(
-            item => item is InventoryItem inventoryItem ? inventoryItem : new InventoryItem(item)
-        ));
+        _list = [..items.Select(it => it is InventoryItem item ? item : new InventoryItem(it))];
     }
 
     private InventoryFragment(in PacketReader p)
     {
-        Total = p.Read<int>();
-        Index = p.Read<int>();
-
-        int n = p.Read<Length>();
-        for (int i = 0; i < n; i++)
-            _list.Add(p.Parse<InventoryItem>());
+        Total = p.ReadInt();
+        Index = p.ReadInt();
+        _list = [..p.ParseArray<InventoryItem>()];
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(Total);
-        p.Write(Index);
-
-        p.Write<Length>((short)_list.Count);
-        foreach (InventoryItem item in _list)
-            p.Write(item);
+        p.WriteInt(Total);
+        p.WriteInt(Index);
+        p.ComposeArray(_list);
     }
 
     public void Add(InventoryItem item) => _list.Add(item);
@@ -67,5 +62,5 @@ public sealed class InventoryFragment : IInventoryFragment, ICollection<Inventor
     IEnumerator<IInventoryItem> IEnumerable<IInventoryItem>.GetEnumerator() => GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    public static InventoryFragment Parse(in PacketReader p) => new(in p);
+    static InventoryFragment IParser<InventoryFragment>.Parse(in PacketReader p) => new(in p);
 }

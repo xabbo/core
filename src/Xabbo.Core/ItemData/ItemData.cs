@@ -4,7 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public abstract class ItemData : IItemData, IComposer, IParser<ItemData>
+public abstract class ItemData : IItemData, IParserComposer<ItemData>
 {
     public ItemDataType Type { get; }
 
@@ -37,14 +37,14 @@ public abstract class ItemData : IItemData, IComposer, IParser<ItemData>
     {
         if (Flags.HasFlag(ItemDataFlags.IsLimitedRare))
         {
-            UniqueSerialNumber = p.Read<int>();
-            UniqueSeriesSize = p.Read<int>();
+            UniqueSerialNumber = p.ReadInt();
+            UniqueSeriesSize = p.ReadInt();
         }
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(((int)Type & 0xFF) | ((int)Flags << 8));
+        p.WriteInt(((int)Type & 0xFF) | ((int)Flags << 8));
         WriteData(in p);
     }
 
@@ -52,8 +52,8 @@ public abstract class ItemData : IItemData, IComposer, IParser<ItemData>
     {
         if (Flags.HasFlag(ItemDataFlags.IsLimitedRare))
         {
-            p.Write(UniqueSerialNumber);
-            p.Write(UniqueSeriesSize);
+            p.WriteInt(UniqueSerialNumber);
+            p.WriteInt(UniqueSeriesSize);
         }
     }
 
@@ -75,9 +75,9 @@ public abstract class ItemData : IItemData, IComposer, IParser<ItemData>
         };
     }
 
-    public static ItemData Parse(in PacketReader p)
+    static ItemData IParser<ItemData>.Parse(in PacketReader p)
     {
-        int value = p.Read<int>();
+        int value = p.ReadInt();
         var type = (ItemDataType)(value & 0xFF);
 
         ItemData data = type switch

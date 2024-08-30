@@ -126,7 +126,7 @@ public sealed partial class InventoryManager : GameStateManager
     {
         if (_forceLoadingInventory) e.Block();
 
-        InventoryFragment fragment = e.Packet.Parse<InventoryFragment>();
+        InventoryFragment fragment = e.Packet.Read<InventoryFragment>();
 
         if (fragment.Index == 0)
         {
@@ -182,7 +182,7 @@ public sealed partial class InventoryManager : GameStateManager
     {
         if (_inventory is null) return;
 
-        InventoryItem item = e.Packet.Parse<InventoryItem>();
+        InventoryItem item = e.Packet.Read<InventoryItem>();
         _inventory.AddOrUpdate(item, out bool added);
 
         if (added)

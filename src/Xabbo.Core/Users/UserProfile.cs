@@ -8,9 +8,9 @@ namespace Xabbo.Core;
 /// <summary>
 /// The user's information that is sent upon requesting their profile.
 /// </summary>
-public sealed class UserProfile : IUserProfile, IComposer, IParser<UserProfile>
+public sealed class UserProfile : IUserProfile, IParserComposer<UserProfile>
 {
-    public long Id { get; set; }
+    public Id Id { get; set; }
     public string Name { get; set; } = "";
     public string Figure { get; set; } = "";
     public string Motto { get; set; } = "";
@@ -36,55 +36,49 @@ public sealed class UserProfile : IUserProfile, IComposer, IParser<UserProfile>
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        Id = p.Read<int>();
-        Name = p.Read<string>();
-        Figure = p.Read<string>();
-        Motto = p.Read<string>();
-        Created = p.Read<string>();
-        ActivityPoints = p.Read<int>();
-        Friends = p.Read<int>();
-        IsFriend = p.Read<bool>();
-        IsFriendRequestSent = p.Read<bool>();
-        IsOnline = p.Read<bool>();
-
-        int n = p.Read<int>();
-        for (int i = 0; i < n; i++)
-        {
-            Groups.Add(GroupInfo.Parse(p));
-        }
-
-        LastLogin = TimeSpan.FromSeconds(p.Read<int>());
-        DisplayInClient = p.Read<bool>();
+        Id = p.ReadInt();
+        Name = p.ReadString();
+        Figure = p.ReadString();
+        Motto = p.ReadString();
+        Created = p.ReadString();
+        ActivityPoints = p.ReadInt();
+        Friends = p.ReadInt();
+        IsFriend = p.ReadBool();
+        IsFriendRequestSent = p.ReadBool();
+        IsOnline = p.ReadBool();
+        Groups = [..p.ParseArray<GroupInfo>()];
+        LastLogin = TimeSpan.FromSeconds(p.ReadInt());
+        DisplayInClient = p.ReadBool();
 
         if (p.Available > 0)
         {
-            p.Read<bool>();
-            Level = p.Read<int>();
-            p.Read<int>();
-            StarGems = p.Read<int>();
-            p.Read<bool>();
-            p.Read<bool>();
+            p.ReadBool();
+            Level = p.ReadInt();
+            p.ReadInt();
+            StarGems = p.ReadInt();
+            p.ReadBool();
+            p.ReadBool();
         }
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        p.Write(Id);
-        p.Write(Name);
-        p.Write(Figure);
-        p.Write(Motto);
-        p.Write(Created);
-        p.Write(ActivityPoints);
-        p.Write(Friends);
-        p.Write(IsFriend);
-        p.Write(IsFriendRequestSent);
-        p.Write(IsOnline);
-        p.Write(Groups);
-        p.Write((int)LastLogin.TotalSeconds);
-        p.Write(DisplayInClient);
+        p.WriteId(Id);
+        p.WriteString(Name);
+        p.WriteString(Figure);
+        p.WriteString(Motto);
+        p.WriteString(Created);
+        p.WriteInt(ActivityPoints);
+        p.WriteInt(Friends);
+        p.WriteBool(IsFriend);
+        p.WriteBool(IsFriendRequestSent);
+        p.WriteBool(IsOnline);
+        p.ComposeArray(Groups);
+        p.WriteInt((int)LastLogin.TotalSeconds);
+        p.WriteBool(DisplayInClient);
     }
 
-    public static UserProfile Parse(in PacketReader p) => new(in p);
+    static UserProfile IParser<UserProfile>.Parse(in PacketReader p) => new(in p);
 }

@@ -5,7 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public sealed class UserMarketplaceOffers : IUserMarketplaceOffers, ICollection<MarketplaceOffer>, IComposer, IParser<UserMarketplaceOffers>
+public sealed class UserMarketplaceOffers : IUserMarketplaceOffers, ICollection<MarketplaceOffer>, IParserComposer<UserMarketplaceOffers>
 {
     private readonly List<MarketplaceOffer> _list = [];
 
@@ -17,16 +17,16 @@ public sealed class UserMarketplaceOffers : IUserMarketplaceOffers, ICollection<
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        CreditsWaiting = p.Read<int>();
+        CreditsWaiting = p.ReadInt();
         _list.AddRange(MarketplaceOffer.ParseAll(in p, false));
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        p.Write(CreditsWaiting);
-        p.Write(_list);
+        p.WriteInt(CreditsWaiting);
+        p.ComposeArray(_list);
     }
 
     public int Count => _list.Count;
@@ -43,5 +43,5 @@ public sealed class UserMarketplaceOffers : IUserMarketplaceOffers, ICollection<
     IEnumerator<IMarketplaceOffer> IEnumerable<IMarketplaceOffer>.GetEnumerator() => GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    public static UserMarketplaceOffers Parse(in PacketReader p) => new(in p);
+    static UserMarketplaceOffers IParser<UserMarketplaceOffers>.Parse(in PacketReader p) => new(in p);
 }

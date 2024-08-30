@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-using Xabbo.Messages;
+﻿using System.Collections.Generic;
 
 namespace Xabbo.Core;
 
-public interface IInventoryFragment : IReadOnlyCollection<IInventoryItem>, IComposer
+public interface IInventoryFragment : IReadOnlyCollection<IInventoryItem>
 {
     /// <summary>
     /// Gets the total number of fragments.

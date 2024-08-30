@@ -5,14 +5,15 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public sealed class MarketplaceOffer : IMarketplaceOffer, IComposer, IParser<MarketplaceOffer>
+public sealed class MarketplaceOffer : IMarketplaceOffer, IParserComposer<MarketplaceOffer>
 {
     public Id Id => -1;
     public Id OfferId { get; set; }
     public MarketplaceOfferStatus Status { get; set; }
     public ItemType Type { get; set; }
     public int Kind { get; set; }
-    public IItemData Data { get; set; }
+    public ItemData Data { get; set; }
+    IItemData IMarketplaceOffer.Data => Data;
     public int Price { get; set; }
     public int TimeRemaining { get; set; }
     public int Average { get; set; }
@@ -27,96 +28,97 @@ public sealed class MarketplaceOffer : IMarketplaceOffer, IComposer, IParser<Mar
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        OfferId = p.Read<Id>();
-        Status = (MarketplaceOfferStatus)p.Read<int>();
+        OfferId = p.ReadId();
+        Status = (MarketplaceOfferStatus)p.ReadInt();
 
-        int itemType = p.Read<int>();
+        int itemType = p.ReadInt();
         switch (itemType)
         {
             case 1:
                 Type = ItemType.Floor;
-                Kind = p.Read<int>();
-                Data = ItemData.Parse(p);
+                Kind = p.ReadInt();
+                Data = p.Parse<ItemData>();
                 break;
             case 2:
                 Type = ItemType.Wall;
-                Kind = p.Read<int>();
-                Data = new LegacyData() { Value = p.Read<string>() };
+                Kind = p.ReadInt();
+                Data = new LegacyData() { Value = p.ReadString() };
                 break;
             case 3:
                 Type = ItemType.Floor;
-                Kind = p.Read<int>();
+                Kind = p.ReadInt();
                 Data = new LegacyData()
                 {
                     Flags = ItemDataFlags.IsLimitedRare,
-                    UniqueSerialNumber = p.Read<int>(),
-                    UniqueSeriesSize = p.Read<int>()
+                    UniqueSerialNumber = p.ReadInt(),
+                    UniqueSeriesSize = p.ReadInt()
                 };
                 break;
             default: throw new Exception($"Unknown MarketplaceItem type: {itemType}");
         }
 
-        Price = p.Read<int>();
-        TimeRemaining = p.Read<int>();
-        Average = p.Read<int>();
+        Price = p.ReadInt();
+        TimeRemaining = p.ReadInt();
+        Average = p.ReadInt();
         if (hasOfferCount)
-            Offers = p.Read<int>();
+            Offers = p.ReadInt();
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
         if (Data == null)
             throw new Exception("Data cannot be null");
 
-        p.Write(Id);
-        p.Write((int)Status);
+        p.WriteId(Id);
+        p.WriteInt((int)Status);
 
         if (Type == ItemType.Floor)
         {
             if (Data.Flags.HasFlag(ItemDataFlags.IsLimitedRare))
             {
-                p.Write(3);
-                p.Write(Kind);
-                p.Write(Data.UniqueSerialNumber);
-                p.Write(Data.UniqueSeriesSize);
+                p.WriteInt(3);
+                p.WriteInt(Kind);
+                p.WriteInt(Data.UniqueSerialNumber);
+                p.WriteInt(Data.UniqueSeriesSize);
             }
             else
             {
-                p.Write(1);
-                p.Write(Kind);
-                p.Write(Data);
+                p.WriteInt(1);
+                p.WriteInt(Kind);
+                p.Compose(Data);
             }
         }
         else if (Type == ItemType.Wall)
         {
-            p.Write(2);
-            p.Write(Kind);
-            p.Write(Data.Value);
+            p.WriteInt(2);
+            p.WriteInt(Kind);
+            p.WriteString(Data.Value);
         }
         else
         {
             throw new Exception($"Invalid MarketplaceItem type: {Type}");
         }
 
-        p.Write(Price);
-        p.Write(TimeRemaining);
-        p.Write(Average);
+        p.WriteInt(Price);
+        p.WriteInt(TimeRemaining);
+        p.WriteInt(Average);
 
         if (Offers > 0)
-            p.Write(Offers);
+            p.WriteInt(Offers);
     }
 
     public override string ToString() => $"{nameof(MarketplaceOffer)}#{Id}/{Type}:{Kind}";
 
-    public static MarketplaceOffer Parse(in PacketReader p) => Parse(in p, true);
+    static MarketplaceOffer IParser<MarketplaceOffer>.Parse(in PacketReader p) => Parse(in p, true);
+
     public static MarketplaceOffer Parse(in PacketReader p, bool hasOfferCount) => new(in p, hasOfferCount);
     public static IEnumerable<MarketplaceOffer> ParseAll(in PacketReader p, bool hasOfferCount = true)
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        int n = p.Read<Length>();
+        int n = p.ReadLength();
         var offers = new MarketplaceOffer[n];
         for (int i = 0; i < n; i++)
             offers[i] = Parse(in p, hasOfferCount);

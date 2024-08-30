@@ -19,7 +19,7 @@ public sealed partial class GetPetInfoTask(IInterceptor interceptor, Id petId)
     {
         try
         {
-            var petInfo = e.Packet.Parse<PetInfo>();
+            var petInfo = e.Packet.Read<PetInfo>();
             if (petInfo.Id == _petId)
             {
                 if (SetResult(petInfo))

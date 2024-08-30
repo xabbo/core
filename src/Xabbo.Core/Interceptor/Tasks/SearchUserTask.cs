@@ -19,7 +19,7 @@ public partial class SearchUserTask(IInterceptor interceptor, string searchName)
     {
         try
         {
-            if (SetResult(e.Packet.Parse<UserSearchResults>()))
+            if (SetResult(e.Packet.Read<UserSearchResults>()))
                 e.Block();
         }
         catch (Exception ex) { SetException(ex); }

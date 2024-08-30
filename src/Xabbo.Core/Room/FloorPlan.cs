@@ -6,8 +6,10 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class FloorPlan : IFloorPlan, IComposer, IParser<FloorPlan>
+public class FloorPlan : IFloorPlan, IParserComposer<FloorPlan>
 {
+    private static readonly char[] _newlineChars = ['\r', '\n'];
+
     public string? OriginalString { get; private set; }
 
     public bool UseLegacyScale { get; set; }
@@ -16,7 +18,7 @@ public class FloorPlan : IFloorPlan, IComposer, IParser<FloorPlan>
     public int Width { get; set; }
     public int Length { get; set; }
 
-    private int[] _tiles;
+    private readonly int[] _tiles;
     public IReadOnlyList<int> Tiles => _tiles;
 
     public int this[int x, int y]
@@ -106,25 +108,25 @@ public class FloorPlan : IFloorPlan, IComposer, IParser<FloorPlan>
         return sb.ToString();
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(UseLegacyScale);
-        p.Write(WallHeight);
-        p.Write(ToString());
+        p.WriteBool(UseLegacyScale);
+        p.WriteInt(WallHeight);
+        p.WriteString(ToString());
     }
 
-    public static FloorPlan Parse(in PacketReader p)
+    static FloorPlan IParser<FloorPlan>.Parse(in PacketReader p)
     {
         bool useLegacyScale = false;
         int wallHeight = 0;
 
         if (p.Client != ClientType.Shockwave)
         {
-            useLegacyScale = p.Read<bool>();
-            wallHeight = p.Read<int>();
+            useLegacyScale = p.ReadBool();
+            wallHeight = p.ReadInt();
         }
 
-        string map = p.Read<string>();
+        string map = p.ReadString();
 
         return new FloorPlan(map)
         {
@@ -133,11 +135,11 @@ public class FloorPlan : IFloorPlan, IComposer, IParser<FloorPlan>
         };
     }
 
-    public static FloorPlan Parse(string map) => new(map);
+    public static FloorPlan ParseString(string map) => new(map);
 
     private static int[] ParseString(string map, out int width, out int length)
     {
-        string[] lines = map.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] lines = map.Split(_newlineChars, StringSplitOptions.RemoveEmptyEntries);
         length = lines.Length;
         width = 0;
         for (int i = 0; i < length; i++)

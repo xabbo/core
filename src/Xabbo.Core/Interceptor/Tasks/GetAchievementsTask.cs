@@ -17,7 +17,7 @@ public sealed partial class GetAchievementsTask(IInterceptor interceptor)
     {
         try
         {
-            if (SetResult(e.Packet.Parse<Achievements>()))
+            if (SetResult(e.Packet.Read<Achievements>()))
                 e.Block();
         }
         catch (Exception ex) { SetException(ex); }

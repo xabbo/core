@@ -5,15 +5,15 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core;
 
-public class RoomSettings : IComposer, IParser<RoomSettings>
+public class RoomSettings : IParserComposer<RoomSettings>
 {
-    public long Id { get; set; }
+    public Id Id { get; set; }
     public string Name { get; set; } = "";
     public string Description { get; set; } = "";
     public RoomAccess Access { get; set; }
     public string Password { get; set; } = "";
     public int MaxVisitors { get; set; }
-    public int UnknownIntA { get; set; }
+    public int AbsoluteMaxVisitors { get; set; }
     public RoomCategory Category { get; set; }
     public List<string> Tags { get; set; }
     public TradePermissions Trading { get; set; }
@@ -39,56 +39,54 @@ public class RoomSettings : IComposer, IParser<RoomSettings>
 
     protected RoomSettings(in PacketReader p) : this()
     {
-        Id = p.Read<Id>();
-        Name = p.Read<string>();
-        Description = p.Read<string>();
-        Access = (RoomAccess)p.Read<int>();
-        Category = (RoomCategory)p.Read<int>();
-        MaxVisitors = p.Read<int>(); // maximumVisitors
-        p.Read<int>(); // maximumVisitorsLimit
+        Id = p.ReadId();
+        Name = p.ReadString();
+        Description = p.ReadString();
+        Access = (RoomAccess)p.ReadInt();
+        Category = (RoomCategory)p.ReadInt();
+        MaxVisitors = p.ReadInt(); // maximumVisitors
+        AbsoluteMaxVisitors = p.ReadInt(); // maximumVisitorsLimit
 
-        int n = p.Read<Length>();
-        for (int i = 0; i < n; i++)
-            Tags.Add(p.Read<string>());
+        Tags = [..p.ReadStringArray()];
 
-        Trading = (TradePermissions)p.Read<int>(); // tradeMode
-        AllowPets = p.Read<int>() == 1;
-        AllowOthersPetsToEat = p.Read<int>() == 1; // allowFoodConsume
-        DisableRoomBlocking = p.Read<int>() == 1; // allowWalkThrough
-        HideWalls = p.Read<int>() == 1;
-        WallThickness = (Thickness)p.Read<int>();
-        FloorThickness = (Thickness)p.Read<int>();
-        Chat = ChatSettings.Parse(p);
+        Trading = (TradePermissions)p.ReadInt(); // tradeMode
+        AllowPets = p.ReadInt() == 1;
+        AllowOthersPetsToEat = p.ReadInt() == 1; // allowFoodConsume
+        DisableRoomBlocking = p.ReadInt() == 1; // allowWalkThrough
+        HideWalls = p.ReadInt() == 1;
+        WallThickness = (Thickness)p.ReadInt();
+        FloorThickness = (Thickness)p.ReadInt();
+        Chat = p.Parse<ChatSettings>();
 
-        EnlistByFurniContent = p.Read<bool>(); // allowNavigatorDynamicCats
-        Moderation = ModerationSettings.Parse(p);
+        EnlistByFurniContent = p.ReadBool(); // allowNavigatorDynamicCats
+        Moderation = p.Parse<ModerationSettings>();
     }
 
     /// <summary>
     /// Writes the values of this <see cref="RoomSettings"/> to the specified packet
     /// to be sent to the server with <see cref="Out.SaveRoomSettings"/>.
     /// </summary>
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(Id);
-        p.Write(Name ?? string.Empty);
-        p.Write(Description ?? string.Empty);
-        p.Write((int)Access);
-        p.Write(Password ?? string.Empty);
-        p.Write(MaxVisitors);
-        p.Write((int)Category);
-        p.Write(Tags);
-        p.Write((int)Trading);
-        p.Write(AllowPets);
-        p.Write(AllowOthersPetsToEat);
-        p.Write(DisableRoomBlocking);
-        p.Write(HideWalls);
-        p.Write((int)WallThickness);
-        p.Write((int)FloorThickness);
-        p.Write(Moderation);
-        p.Write(Chat);
-        p.Write(EnlistByFurniContent);
+        p.WriteId(Id);
+        p.WriteString(Name ?? string.Empty);
+        p.WriteString(Description ?? string.Empty);
+        p.WriteInt((int)Access);
+        p.WriteString(Password ?? string.Empty);
+        p.WriteInt(MaxVisitors);
+        p.WriteInt((int)Category);
+        p.WriteStringArray(Tags);
+        p.WriteInt((int)Trading);
+        p.WriteBool(AllowPets);
+        p.WriteBool(AllowOthersPetsToEat);
+        p.WriteBool(DisableRoomBlocking);
+        p.WriteBool(HideWalls);
+        p.WriteInt((int)WallThickness);
+        p.WriteInt((int)FloorThickness);
+        p.Compose(Moderation);
+        p.Compose(Chat);
+        p.WriteBool(EnlistByFurniContent);
     }
 
-    public static RoomSettings Parse(in PacketReader p) => new(p);
+    static RoomSettings IParser<RoomSettings>.Parse(in PacketReader p) => new(p);
 }

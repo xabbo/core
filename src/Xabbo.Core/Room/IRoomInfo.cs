@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-using Xabbo.Messages;
+﻿using System.Collections.Generic;
 
 namespace Xabbo.Core;
 
-public interface IRoomInfo : IComposer
+public interface IRoomInfo
 {
     Id Id { get; }
     string Name { get; }

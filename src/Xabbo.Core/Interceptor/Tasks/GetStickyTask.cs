@@ -18,7 +18,7 @@ public partial class GetStickyTask(IInterceptor interceptor, Id stickyId) : Inte
     {
         try
         {
-            var sticky = e.Packet.Parse<Sticky>();
+            var sticky = e.Packet.Read<Sticky>();
             if (sticky.Id == _stickyId)
             {
                 if (SetResult(sticky))

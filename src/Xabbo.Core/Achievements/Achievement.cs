@@ -23,7 +23,7 @@ namespace Xabbo.Core;
     firstLevelAchieved = level > 1 || finalLevel
  */
 
-public class Achievement : IAchievement, IComposer, IParser<Achievement>
+public class Achievement : IAchievement, IParserComposer<Achievement>
 {
     public int Id { get; set; }
     public int Level { get; set; }
@@ -46,41 +46,41 @@ public class Achievement : IAchievement, IComposer, IParser<Achievement>
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        Id = p.Read<int>();
-        Level = p.Read<int>();
-        BadgeId = p.Read<string>();
-        BaseProgress = p.Read<int>();
-        MaxProgress = p.Read<int>();
-        LevelRewardPoints = p.Read<int>();
-        LevelRewardPointType = p.Read<int>();
-        CurrentProgress = p.Read<int>();
-        IsComplete = p.Read<bool>();
-        Category = p.Read<string>();
-        Subcategory = p.Read<string>();
-        MaxLevel = p.Read<int>();
-        DisplayMethod = p.Read<int>();
-        State = p.Read<short>();
+        Id = p.ReadInt();
+        Level = p.ReadInt();
+        BadgeId = p.ReadString();
+        BaseProgress = p.ReadInt();
+        MaxProgress = p.ReadInt();
+        LevelRewardPoints = p.ReadInt();
+        LevelRewardPointType = p.ReadInt();
+        CurrentProgress = p.ReadInt();
+        IsComplete = p.ReadBool();
+        Category = p.ReadString();
+        Subcategory = p.ReadString();
+        MaxLevel = p.ReadInt();
+        DisplayMethod = p.ReadInt();
+        State = p.ReadShort();
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        p.Write(Id);
-        p.Write(Level);
-        p.Write(BadgeId);
-        p.Write(BaseProgress);
-        p.Write(MaxProgress);
-        p.Write(LevelRewardPoints);
-        p.Write(LevelRewardPointType);
-        p.Write(CurrentProgress);
-        p.Write(IsComplete);
-        p.Write(Category);
-        p.Write(Subcategory);
-        p.Write(MaxLevel);
-        p.Write(DisplayMethod);
-        p.Write(State);
+        p.WriteInt(Id);
+        p.WriteInt(Level);
+        p.WriteString(BadgeId);
+        p.WriteInt(BaseProgress);
+        p.WriteInt(MaxProgress);
+        p.WriteInt(LevelRewardPoints);
+        p.WriteInt(LevelRewardPointType);
+        p.WriteInt(CurrentProgress);
+        p.WriteBool(IsComplete);
+        p.WriteString(Category);
+        p.WriteString(Subcategory);
+        p.WriteInt(MaxLevel);
+        p.WriteInt(DisplayMethod);
+        p.WriteShort(State);
     }
 
-    public static Achievement Parse(in PacketReader p) => new(in p);
+    static Achievement IParser<Achievement>.Parse(in PacketReader p) => new(in p);
 }

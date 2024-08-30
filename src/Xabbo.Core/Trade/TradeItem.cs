@@ -3,7 +3,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class TradeItem : ITradeItem, IComposer, IParser<TradeItem>
+public class TradeItem : ITradeItem, IParserComposer<TradeItem>
 {
     public Id ItemId { get; set; }
     public ItemType Type { get; set; }
@@ -29,7 +29,7 @@ public class TradeItem : ITradeItem, IComposer, IParser<TradeItem>
     string IInventoryItem.SlotId => string.Empty;
     int IInventoryItem.SecondsToExpiration => -1;
     bool IInventoryItem.HasRentPeriodStarted => false;
-    long IInventoryItem.RoomId => -1;
+    Id IInventoryItem.RoomId => -1;
 
     public TradeItem() { }
 
@@ -50,19 +50,19 @@ public class TradeItem : ITradeItem, IComposer, IParser<TradeItem>
 
     private void ParseModern(in PacketReader p)
     {
-        ItemId = p.Read<Id>();
-        Type = H.ToItemType(p.Read<string>());
-        Id = p.Read<Id>();
-        Kind = p.Read<int>();
-        Category = (FurniCategory)p.Read<int>();
-        IsGroupable = p.Read<bool>();
-        Data = ItemData.Parse(p);
-        CreationDay = p.Read<int>();
-        CreationMonth = p.Read<int>();
-        CreationYear = p.Read<int>();
+        ItemId = p.ReadId();
+        Type = H.ToItemType(p.ReadString());
+        Id = p.ReadId();
+        Kind = p.ReadInt();
+        Category = (FurniCategory)p.ReadInt();
+        IsGroupable = p.ReadBool();
+        Data = p.Parse<ItemData>();
+        CreationDay = p.ReadInt();
+        CreationMonth = p.ReadInt();
+        CreationYear = p.ReadInt();
 
         if (Type == ItemType.Floor)
-            Extra = p.Read<Id>();
+            Extra = p.ReadId();
         else
             Extra = -1;
     }
@@ -70,52 +70,52 @@ public class TradeItem : ITradeItem, IComposer, IParser<TradeItem>
     private void ParseOrigins(in PacketReader p)
     {
         Kind = -1;
-        ItemId = p.Read<int>();
-        SlotIndex = p.Read<int>();
-        string strItemType = p.Read<string>();
+        ItemId = p.ReadInt();
+        SlotIndex = p.ReadInt();
+        string strItemType = p.ReadString();
         Type = strItemType switch
         {
             "S" => ItemType.Floor,
             "I" => ItemType.Wall,
             _ => throw new Exception($"Invalid item type: {strItemType}"),
         };
-        Id = p.Read<int>();
-        Identifier = p.Read<string>();
+        Id = p.ReadInt();
+        Identifier = p.ReadString();
         if (Type == ItemType.Floor)
         {
-            p.Read<int>(); // dimX
-            p.Read<int>(); // dimY
+            p.ReadInt(); // dimX
+            p.ReadInt(); // dimY
             // colors
-            Data = new LegacyData { Value = p.Read<string>() };
+            Data = new LegacyData { Value = p.ReadString() };
         }
         else if (Type == ItemType.Wall)
         {
             // props
-            Data = new LegacyData { Value = p.Read<string>() };
+            Data = new LegacyData { Value = p.ReadString() };
         }
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         // TODO: implement Shockwave composer
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        p.Write(ItemId);
-        p.Write(Type.ToShortString());
-        p.Write(Id);
-        p.Write(Kind);
-        p.Write((int)Category);
-        p.Write(IsGroupable);
-        p.Write(Data);
-        p.Write(CreationDay);
-        p.Write(CreationMonth);
-        p.Write(CreationYear);
+        p.WriteId(ItemId);
+        p.WriteString(Type.ToShortString());
+        p.WriteId(Id);
+        p.WriteInt(Kind);
+        p.WriteInt((int)Category);
+        p.WriteBool(IsGroupable);
+        p.Compose(Data);
+        p.WriteInt(CreationDay);
+        p.WriteInt(CreationMonth);
+        p.WriteInt(CreationYear);
 
         if (Type == ItemType.Floor)
-            p.Write<Id>(Extra);
+            p.WriteId(Extra);
     }
 
     public override string ToString() => $"{nameof(TradeItem)}#{ItemId}/{Type}:{Kind}";
 
-    public static TradeItem Parse(in PacketReader p) => new(in p);
+    static TradeItem IParser<TradeItem>.Parse(in PacketReader p) => new(in p);
 }

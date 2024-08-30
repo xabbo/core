@@ -4,7 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public sealed class CatalogPage : ICatalogPage, IComposer, IParser<CatalogPage>
+public sealed class CatalogPage : ICatalogPage, IParserComposer<CatalogPage>
 {
     public int Id { get; set; }
     public string CatalogType { get; set; }
@@ -33,46 +33,35 @@ public sealed class CatalogPage : ICatalogPage, IComposer, IParser<CatalogPage>
 
     private CatalogPage(in PacketReader p)
     {
-        Id = p.Read<int>();
-        CatalogType = p.Read<string>();
-        LayoutCode = p.Read<string>();
+        Id = p.ReadInt();
+        CatalogType = p.ReadString();
+        LayoutCode = p.ReadString();
 
-        Images = [..p.ReadArray<string>()];
-        Texts = [..p.ReadArray<string>()];
+        Images = [..p.ReadStringArray()];
+        Texts = [..p.ReadStringArray()];
 
-        Offers = [];
-        int n = p.Read<Length>();
-        for (int i = 0; i < n; i++)
-        {
-            CatalogOffer offer = p.Parse<CatalogOffer>();
+        Offers = [..p.ParseArray<CatalogOffer>()];
+        foreach (var offer in Offers)
             offer.Page = this;
-            Offers.Add(offer);
-        }
 
-        OfferId = p.Read<int>();
-        AcceptSeasonCurrencyAsCredits = p.Read<bool>();
+        OfferId = p.ReadInt();
+        AcceptSeasonCurrencyAsCredits = p.ReadBool();
 
-        FrontPageItems = [];
-        if (p.Available > 0)
-        {
-            n = p.Read<Length>();
-            for (int i = 0; i < n; i++)
-                FrontPageItems.Add(p.Parse<CatalogPageItem>());
-        }
+        FrontPageItems = p.Available > 0 ? [..p.ParseArray<CatalogPageItem>()] : [];
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(Id);
-        p.Write(CatalogType);
-        p.Write(LayoutCode);
-        p.Write(Images);
-        p.Write(Texts);
-        p.Write(Offers);
-        p.Write(OfferId);
-        p.Write(AcceptSeasonCurrencyAsCredits);
-        p.Write(FrontPageItems);
+        p.WriteId(Id);
+        p.WriteString(CatalogType);
+        p.WriteString(LayoutCode);
+        p.WriteStringArray(Images);
+        p.WriteStringArray(Texts);
+        p.ComposeArray(Offers);
+        p.WriteInt(OfferId);
+        p.WriteBool(AcceptSeasonCurrencyAsCredits);
+        p.ComposeArray(FrontPageItems);
     }
 
-    public static CatalogPage Parse(in PacketReader p) => new(in p);
+    static CatalogPage IParser<CatalogPage>.Parse(in PacketReader p) => new(in p);
 }

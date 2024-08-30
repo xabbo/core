@@ -27,7 +27,7 @@ public sealed partial class GetMarketplaceInfoTask(IInterceptor interceptor, Ite
     [InterceptIn(nameof(In.MarketplaceItemStats))]
     private void HandleMarketplaceItemStats(Intercept e)
     {
-        MarketplaceItemInfo info = e.Packet.Parse<MarketplaceItemInfo>();
+        MarketplaceItemInfo info = e.Packet.Read<MarketplaceItemInfo>();
 
         if (info.Type == _type && info.Kind == _kind)
         {

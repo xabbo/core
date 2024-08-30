@@ -20,18 +20,18 @@ public class CrackableFurniData : ItemData, ICrackableFurniData
 
     protected override void Initialize(in PacketReader p)
     {
-        Value = p.Read<string>();
-        Hits = p.Read<int>();
-        Target = p.Read<int>();
+        Value = p.ReadString();
+        Hits = p.ReadInt();
+        Target = p.ReadInt();
 
         base.Initialize(p);
     }
 
     protected override void WriteData(in PacketWriter p)
     {
-        p.Write(Value);
-        p.Write(Hits);
-        p.Write(Target);
+        p.WriteString(Value);
+        p.WriteInt(Hits);
+        p.WriteInt(Target);
 
         WriteBase(p);
     }

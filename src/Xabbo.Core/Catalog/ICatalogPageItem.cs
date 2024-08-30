@@ -1,10 +1,6 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-using Xabbo.Messages;
-
-namespace Xabbo.Core;
-
-public interface ICatalogPageItem : IComposer
+public interface ICatalogPageItem
 {
     int Position { get; }
     int Type { get; }

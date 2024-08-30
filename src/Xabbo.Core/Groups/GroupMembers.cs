@@ -4,11 +4,11 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public sealed class GroupMembers : List<GroupMember>, IGroupMembers, IComposer, IParser<GroupMembers>
+public sealed class GroupMembers : List<GroupMember>, IGroupMembers, IParserComposer<GroupMembers>
 {
     public Id GroupId { get; set; }
     public string GroupName { get; set; } = string.Empty;
-    public long HomeRoomId { get; set; }
+    public Id HomeRoomId { get; set; }
     public string BadgeCode { get; set; } = string.Empty;
     public int TotalEntries { get; set; }
     public bool IsAllowedToManage { get; set; }
@@ -26,39 +26,37 @@ public sealed class GroupMembers : List<GroupMember>, IGroupMembers, IComposer, 
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        GroupId = p.Read<Id>();
-        GroupName = p.Read<string>();
-        HomeRoomId = p.Read<Id>();
-        BadgeCode = p.Read<string>();
-        TotalEntries = p.Read<int>();
-        int n = p.Read<Length>();
+        GroupId = p.ReadId();
+        GroupName = p.ReadString();
+        HomeRoomId = p.ReadId();
+        BadgeCode = p.ReadString();
+        TotalEntries = p.ReadInt();
+        int n = p.ReadLength();
         for (int i = 0; i < n; i++)
             Add(p.Parse<GroupMember>());
-        IsAllowedToManage = p.Read<bool>();
-        PageSize = p.Read<int>();
-        PageIndex = p.Read<int>();
-        SearchType = (GroupMemberSearchType)p.Read<int>();
-        Filter = p.Read<string>();
+        IsAllowedToManage = p.ReadBool();
+        PageSize = p.ReadInt();
+        PageIndex = p.ReadInt();
+        SearchType = (GroupMemberSearchType)p.ReadInt();
+        Filter = p.ReadString();
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        p.Write(GroupId);
-        p.Write(GroupName);
-        p.Write(HomeRoomId);
-        p.Write(BadgeCode);
-        p.Write(TotalEntries);
-        p.Write<Length>(Count);
-        foreach (var member in this)
-            p.Write(member);
-        p.Write(IsAllowedToManage);
-        p.Write(PageSize);
-        p.Write(PageIndex);
-        p.Write(SearchType);
-        p.Write(Filter);
+        p.WriteId(GroupId);
+        p.WriteString(GroupName);
+        p.WriteId(HomeRoomId);
+        p.WriteString(BadgeCode);
+        p.WriteInt(TotalEntries);
+        p.ComposeArray<GroupMember>(this);
+        p.WriteBool(IsAllowedToManage);
+        p.WriteInt(PageSize);
+        p.WriteInt(PageIndex);
+        p.WriteInt((int)SearchType);
+        p.WriteString(Filter);
     }
 
-    public static GroupMembers Parse(in PacketReader p) => new(in p);
+    static GroupMembers IParser<GroupMembers>.Parse(in PacketReader p) => new(in p);
 }

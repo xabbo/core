@@ -41,9 +41,4 @@ public interface IFurni : IItem, IComposer
     /// Gets whether the furni is hidden client-side or not by the <see cref="RoomManager"/>.
     /// </summary>
     bool IsHidden { get; }
-
-    /// <summary>
-    /// Composes this furniture to the packet and specifies whether to write the owner's name.
-    /// </summary>
-    void Compose(in PacketWriter p, bool writeOwnerName);
 }

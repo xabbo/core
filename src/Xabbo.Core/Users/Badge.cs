@@ -2,7 +2,7 @@
 
 namespace Xabbo.Core;
 
-public sealed class Badge : IComposer, IParser<Badge>
+public sealed class Badge : IParserComposer<Badge>
 {
     public int Id { get; set; }
     public string Code { get; set; } = string.Empty;
@@ -17,16 +17,15 @@ public sealed class Badge : IComposer, IParser<Badge>
 
     private Badge(in PacketReader p)
     {
-        Id = p.Read<int>();
-        Code = p.Read<string>();
+        Id = p.ReadInt();
+        Code = p.ReadString();
     }
 
-    public static Badge Parse(in PacketReader p) => new(p);
-
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(Id);
-        p.Write(Code);
+        p.WriteInt(Id);
+        p.WriteString(Code);
     }
 
+    static Badge IParser<Badge>.Parse(in PacketReader p) => new(p);
 }

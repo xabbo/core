@@ -183,7 +183,7 @@ public sealed partial class FriendManager : GameStateManager
 
         int n = e.Packet.Read<Length>();
         for (int i = 0; i < n; i++)
-            _loadList.Add(e.Packet.Parse<Friend>());
+            _loadList.Add(e.Packet.Read<Friend>());
 
         if (_currentFragment == total)
         {
@@ -222,12 +222,12 @@ public sealed partial class FriendManager : GameStateManager
             }
             else if (updateType == 0) // updated
             {
-                Friend friend = e.Packet.Parse<Friend>();
+                Friend friend = e.Packet.Read<Friend>();
                 UpdateFriend(friend);
             }
             else if (updateType == 1) // added
             {
-                Friend friend = e.Packet.Parse<Friend>();
+                Friend friend = e.Packet.Read<Friend>();
                 AddFriend(friend);
             }
         }
@@ -236,7 +236,7 @@ public sealed partial class FriendManager : GameStateManager
     [InterceptIn(nameof(In.NewConsole))]
     private void HandleNewConsole(Intercept e)
     {
-        long id = e.Packet.Read<long>();
+        Id id = e.Packet.Read<Id>();
         if (!_friends.TryGetValue(id, out Friend? friend))
         {
             Debug.Log($"failed to get friend {friend} from id map");

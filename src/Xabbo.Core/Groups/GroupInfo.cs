@@ -1,10 +1,8 @@
-﻿using System;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public sealed class GroupInfo : IGroupInfo
+public sealed class GroupInfo : IGroupInfo, IParserComposer<GroupInfo>
 {
     public Id Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -21,29 +19,29 @@ public sealed class GroupInfo : IGroupInfo
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        Id = p.Read<Id>();
-        Name = p.Read<string>();
-        BadgeCode = p.Read<string>();
-        PrimaryColor = p.Read<string>();
-        SecondaryColor = p.Read<string>();
-        IsFavorite = p.Read<bool>();
-        OwnerId = p.Read<Id>();
-        HasForum = p.Read<bool>();
+        Id = p.ReadId();
+        Name = p.ReadString();
+        BadgeCode = p.ReadString();
+        PrimaryColor = p.ReadString();
+        SecondaryColor = p.ReadString();
+        IsFavorite = p.ReadBool();
+        OwnerId = p.ReadId();
+        HasForum = p.ReadBool();
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        p.Write(Id);
-        p.Write(Name);
-        p.Write(BadgeCode);
-        p.Write(PrimaryColor);
-        p.Write(SecondaryColor);
-        p.Write(IsFavorite);
-        p.Write(OwnerId);
-        p.Write(HasForum);
+        p.WriteId(Id);
+        p.WriteString(Name);
+        p.WriteString(BadgeCode);
+        p.WriteString(PrimaryColor);
+        p.WriteString(SecondaryColor);
+        p.WriteBool(IsFavorite);
+        p.WriteId(OwnerId);
+        p.WriteBool(HasForum);
     }
 
-    public static GroupInfo Parse(in PacketReader p) => new(in p);
+    static GroupInfo IParser<GroupInfo>.Parse(in PacketReader p) => new(in p);
 }

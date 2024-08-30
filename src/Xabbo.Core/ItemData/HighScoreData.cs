@@ -40,65 +40,52 @@ public class HighScoreData : ItemData, IHighScoreData, IList<HighScoreData.HighS
 
     protected override void Initialize(in PacketReader p)
     {
-        Value = p.Read<string>();
-        ScoreType = p.Read<int>();
-        ClearType = p.Read<int>();
-
-        int n = p.Read<Length>();
-        for (int i = 0; i < n; i++)
-        {
-            var highScore = new HighScore
-            {
-                Value = p.Read<int>()
-            };
-
-            int k = p.Read<Length>();
-            for (int j = 0; j < k; j++)
-            {
-                highScore.Names.Add(p.Read<string>());
-            }
-
-            Add(highScore);
-        }
+        Value = p.ReadString();
+        ScoreType = p.ReadInt();
+        ClearType = p.ReadInt();
+        _list.AddRange(p.ParseArray<HighScore>());
 
         // No base call.
     }
 
-    public class HighScore : IHighScore
+    public class HighScore : IHighScore, IParserComposer<HighScore>
     {
         public int Value { get; set; }
-        public List<string> Names { get; set; } = [];
+        public List<string> Names { get; set; }
         IReadOnlyList<string> IHighScore.Names => Names;
 
-        public HighScore() { }
+        public HighScore()
+        {
+            Names = [];
+        }
+
         public HighScore(IHighScore highScore)
         {
             Value = highScore.Value;
-            Names = new List<string>(highScore.Names);
+            Names = [..highScore.Names];
         }
 
-        public void Compose(in PacketWriter p)
+        private HighScore(in PacketReader p)
         {
-            p.Write(Value);
-
-            p.Write<Length>(Names?.Count ?? 0);
-            if (Names != null)
-            {
-                foreach (string name in Names)
-                    p.Write(name);
-            }
+            Value = p.ReadInt();
+            Names = [..p.ReadStringArray()];
         }
+
+        void IComposer.Compose(in PacketWriter p)
+        {
+            p.WriteInt(Value);
+            p.WriteStringArray(Names);
+        }
+
+        static HighScore IParser<HighScore>.Parse(in PacketReader p) => new(in p);
     }
 
     protected override void WriteData(in PacketWriter p)
     {
-        p.Write(Value);
-        p.Write(ScoreType);
-        p.Write(ClearType);
-
-        p.Write<Length>(Count);
-        foreach (var highScore in this)
-            p.Write(highScore);
+        p.WriteString(Value);
+        p.WriteInt(ScoreType);
+        p.WriteInt(ClearType);
+        p.ComposeArray<HighScore>(this);
     }
 
     public int IndexOf(HighScore item) => _list.IndexOf(item);

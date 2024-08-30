@@ -4,7 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class NavigatorSearchResultList : List<RoomInfo>, IComposer, IParser<NavigatorSearchResultList>
+public class NavigatorSearchResultList : List<RoomInfo>, IParserComposer<NavigatorSearchResultList>
 {
     public string Category { get; set; }
     public string Text { get; set; }
@@ -20,27 +20,23 @@ public class NavigatorSearchResultList : List<RoomInfo>, IComposer, IParser<Navi
 
     protected NavigatorSearchResultList(in PacketReader p)
     {
-        Category = p.Read<string>();
-        Text = p.Read<string>();
-        ActionAllowed = p.Read<int>();
-        ForceClosed = p.Read<bool>();
-        ViewMode = p.Read<int>();
-        int n = p.Read<Length>();
-        for (int i = 0; i < n; i++)
-            Add(p.Parse<RoomInfo>());
+        Category = p.ReadString();
+        Text = p.ReadString();
+        ActionAllowed = p.ReadInt();
+        ForceClosed = p.ReadBool();
+        ViewMode = p.ReadInt();
+        AddRange(p.ParseArray<RoomInfo>());
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        p.Write(Category);
-        p.Write(Text);
-        p.Write(ActionAllowed);
-        p.Write(ForceClosed);
-        p.Write(ViewMode);
-        p.Write<Length>(Count);
-        for (int i = 0; i < Count; i++)
-            p.Write(this[i]);
+        p.WriteString(Category);
+        p.WriteString(Text);
+        p.WriteInt(ActionAllowed);
+        p.WriteBool(ForceClosed);
+        p.WriteInt(ViewMode);
+        p.ComposeArray(this);
     }
 
-    public static NavigatorSearchResultList Parse(in PacketReader p) => new(in p);
+    static NavigatorSearchResultList IParser<NavigatorSearchResultList>.Parse(in PacketReader p) => new(in p);
 }

@@ -23,6 +23,6 @@ public abstract class Furni : IFurni
 
     public bool IsHidden { get; set; }
 
-    public abstract void Compose(in PacketWriter p);
-    public abstract void Compose(in PacketWriter p, bool writeOwnerName);
+    void IComposer.Compose(in PacketWriter p) => Compose(in p);
+    protected abstract void Compose(in PacketWriter p);
 }

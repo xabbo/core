@@ -2,10 +2,10 @@
 
 namespace Xabbo.Core;
 
-public class Pet(long id, int index) : Entity(EntityType.Pet, id, index), IPet
+public class Pet(Id id, int index) : Entity(EntityType.Pet, id, index), IPet
 {
     public int Breed { get; set; }
-    public long OwnerId { get; set; } = -1;
+    public Id OwnerId { get; set; } = -1;
     public string OwnerName { get; set; } = "(unknown)";
     public int RarityLevel { get; set; }
     public bool HasSaddle { get; set; }
@@ -23,34 +23,34 @@ public class Pet(long id, int index) : Entity(EntityType.Pet, id, index), IPet
         if (p.Client == ClientType.Shockwave)
             return;
 
-        Breed = p.Read<int>();
-        OwnerId = p.Read<Id>();
-        OwnerName = p.Read<string>();
-        RarityLevel = p.Read<int>();
-        HasSaddle = p.Read<bool>();
-        IsRiding = p.Read<bool>();
-        CanBreed = p.Read<bool>();
-        CanHarvest = p.Read<bool>();
-        CanRevive = p.Read<bool>();
-        HasBreedingPermission = p.Read<bool>();
-        Level = p.Read<int>();
-        Posture = p.Read<string>();
+        Breed = p.ReadInt();
+        OwnerId = p.ReadId();
+        OwnerName = p.ReadString();
+        RarityLevel = p.ReadInt();
+        HasSaddle = p.ReadBool();
+        IsRiding = p.ReadBool();
+        CanBreed = p.ReadBool();
+        CanHarvest = p.ReadBool();
+        CanRevive = p.ReadBool();
+        HasBreedingPermission = p.ReadBool();
+        Level = p.ReadInt();
+        Posture = p.ReadString();
     }
 
     public override void Compose(in PacketWriter p)
     {
         base.Compose(in p);
 
-        p.Write(Breed);
-        p.Write(OwnerId);
-        p.Write(RarityLevel);
-        p.Write(HasSaddle);
-        p.Write(IsRiding);
-        p.Write(CanBreed);
-        p.Write(CanHarvest);
-        p.Write(CanRevive);
-        p.Write(HasBreedingPermission);
-        p.Write(Level);
-        p.Write(Posture);
+        p.WriteInt(Breed);
+        p.WriteId(OwnerId);
+        p.WriteInt(RarityLevel);
+        p.WriteBool(HasSaddle);
+        p.WriteBool(IsRiding);
+        p.WriteBool(CanBreed);
+        p.WriteBool(CanHarvest);
+        p.WriteBool(CanRevive);
+        p.WriteBool(HasBreedingPermission);
+        p.WriteInt(Level);
+        p.WriteString(Posture);
     }
 }

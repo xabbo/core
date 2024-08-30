@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Xabbo.Messages;
-
 namespace Xabbo.Core;
 
-public interface IUserProfile : IComposer
+public interface IUserProfile
 {
-    long Id { get; }
+    Id Id { get; }
     string Name { get; }
     string Figure { get; }
     string Motto { get; }

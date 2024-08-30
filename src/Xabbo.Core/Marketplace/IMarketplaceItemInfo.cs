@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Xabbo.Core;
 
@@ -9,10 +8,12 @@ public interface IMarketplaceItemInfo : IItem
     /// Gets the average sale price in the last week.
     /// </summary>
     int Average { get; }
+
     /// <summary>
     /// Gets the number of currently open offers.
     /// </summary>
     int Offers { get; }
+
     /// <summary>
     /// Gets the trading history information.
     /// </summary>

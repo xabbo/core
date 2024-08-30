@@ -25,24 +25,18 @@ public class IntArrayData : ItemData, IIntArrayData, IList<int>
 
     public IntArrayData(IIntArrayData data) : base(data)
     {
-        _list = new List<int>(data);
+        _list = [..data];
     }
 
     protected override void Initialize(in PacketReader p)
     {
-        int n = p.Read<Length>();
-        for (int i = 0; i < n; i++)
-            _list.Add(p.Read<int>());
-
+        _list.AddRange(p.ReadIntArray());
         base.Initialize(in p);
     }
 
     protected override void WriteData(in PacketWriter p)
     {
-        p.Write<Length>(Count);
-        foreach (int value in this)
-            p.Write(value);
-
+        p.WriteIntArray(this);
         WriteBase(p);
     }
 

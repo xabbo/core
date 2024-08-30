@@ -7,7 +7,7 @@ namespace Xabbo.Core;
 /// <summary>
 /// Represents a tile in the heightmap.
 /// </summary>
-public interface IHeightmapTile : IComposer
+public interface IHeightmapTile
 {
     /// <summary>
     /// Gets the X coordinate of this tile.

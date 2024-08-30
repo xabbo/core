@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
-using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Tasks;
 
@@ -22,9 +21,7 @@ public sealed partial class GetBadgesTask(IInterceptor interceptor)
     {
         try
         {
-            var packet = e.Packet;
-            int total = packet.Read<int>();
-            int index = packet.Read<int>();
+            var (total, index) = e.Packet.Read<int, int>();
 
             if (index != _currentIndex) return;
             if (_totalExpected == -1) _totalExpected = total;
@@ -33,10 +30,7 @@ public sealed partial class GetBadgesTask(IInterceptor interceptor)
 
             e.Block();
 
-            int n = packet.Read<int>();
-            for (int i = 0; i < n; i++)
-                _badges.Add(packet.Parse<Badge>());
-
+            _badges.AddRange(e.Packet.Read<Badge[]>());
             if (_currentIndex == _totalExpected)
                 SetResult(_badges);
         }

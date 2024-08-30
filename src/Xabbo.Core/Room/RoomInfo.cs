@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class RoomInfo : IRoomInfo, IComposer, IParser<RoomInfo>
+public class RoomInfo : IRoomInfo, IParserComposer<RoomInfo>
 {
     public Id Id { get; set; }
     public string Name { get; set; }
@@ -71,104 +71,100 @@ public class RoomInfo : IRoomInfo, IComposer, IParser<RoomInfo>
 
     private void ParseModern(in PacketReader p)
     {
-        Id = p.Read<Id>();
-        Name = p.Read<string>();
-        OwnerId = p.Read<Id>();
-        OwnerName = p.Read<string>();
-        Access = (RoomAccess)p.Read<int>();
-        Users = p.Read<int>();
-        MaxUsers = p.Read<int>();
-        Description = p.Read<string>();
-        Trading = (TradePermissions)p.Read<int>();
-        Score = p.Read<int>();
-        Ranking = p.Read<int>();
-        Category = (RoomCategory)p.Read<int>();
+        Id = p.ReadId();
+        Name = p.ReadString();
+        OwnerId = p.ReadId();
+        OwnerName = p.ReadString();
+        Access = (RoomAccess)p.ReadInt();
+        Users = p.ReadInt();
+        MaxUsers = p.ReadInt();
+        Description = p.ReadString();
+        Trading = (TradePermissions)p.ReadInt();
+        Score = p.ReadInt();
+        Ranking = p.ReadInt();
+        Category = (RoomCategory)p.ReadInt();
 
-        Tags = [..p.ReadArray<string>()];
+        Tags = [..p.ReadStringArray()];
 
-        Flags = (RoomFlags)p.Read<int>();
+        Flags = (RoomFlags)p.ReadInt();
 
         if (Flags.HasFlag(RoomFlags.HasOfficialRoomPic))
         {
-            OfficialRoomPicRef = p.Read<string>();
+            OfficialRoomPicRef = p.ReadString();
         }
 
         if (Flags.HasFlag(RoomFlags.IsGroupHomeRoom))
         {
-            GroupId = p.Read<Id>();
-            GroupName = p.Read<string>();
-            GroupBadge = p.Read<string>();
+            GroupId = p.ReadId();
+            GroupName = p.ReadString();
+            GroupBadge = p.ReadString();
         }
 
         if (Flags.HasFlag(RoomFlags.HasEvent))
         {
-            EventName = p.Read<string>();
-            EventDescription = p.Read<string>();
-            EventMinutesRemaining = p.Read<int>();
+            EventName = p.ReadString();
+            EventDescription = p.ReadString();
+            EventMinutesRemaining = p.ReadInt();
         }
     }
 
     private void ParseOrigins(in PacketReader p)
     {
-        p.Read<bool>(); // canOthersMoveFurni
-        Access = (RoomAccess)p.Read<int>();
-        Id = p.Read<Id>();
+        p.ReadBool(); // canOthersMoveFurni
+        Access = (RoomAccess)p.ReadInt();
+        Id = p.ReadId();
         OwnerId = -1;
-        OwnerName = p.Read<string>();
-        p.Read<string>(); // marker
-        Name = p.Read<string>();
-        Description = p.Read<string>();
-        if (p.Read<bool>())
+        OwnerName = p.ReadString();
+        p.ReadString(); // marker
+        Name = p.ReadString();
+        Description = p.ReadString();
+        if (p.ReadBool())
             Flags |= RoomFlags.ShowOwnerName;
-        Trading = (TradePermissions)p.Read<int>();
-        p.Read<int>(); // alert
-        MaxUsers = p.Read<int>();
-        p.Read<int>(); // absoluteMaxVisitors ?
+        Trading = (TradePermissions)p.ReadInt();
+        p.ReadInt(); // alert
+        MaxUsers = p.ReadInt();
+        p.ReadInt(); // absoluteMaxVisitors ?
     }
 
-    public virtual void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p) => Compose(in p);
+    protected virtual void Compose(in PacketWriter p)
     {
-        p.Write(Id);
-        p.Write(Name);
+        p.WriteId(Id);
+        p.WriteString(Name);
 
-        p.Write(OwnerId);
-        p.Write(OwnerName);
-        p.Write((int)Access);
-        p.Write(Users);
-        p.Write(MaxUsers);
-        p.Write(Description);
-        p.Write((int)Trading);
-        p.Write(Score);
-        p.Write(Ranking);
-        p.Write((int)Category);
+        p.WriteId(OwnerId);
+        p.WriteString(OwnerName);
+        p.WriteInt((int)Access);
+        p.WriteInt(Users);
+        p.WriteInt(MaxUsers);
+        p.WriteString(Description);
+        p.WriteInt((int)Trading);
+        p.WriteInt(Score);
+        p.WriteInt(Ranking);
+        p.WriteInt((int)Category);
 
-        p.Write<Length>(Tags.Count);
+        p.WriteLength(Tags.Count);
         foreach (string tag in Tags)
-        {
-            p.Write(tag);
-        }
+            p.WriteString(tag);
 
-        p.Write((int)Flags);
-
+        p.WriteInt((int)Flags);
         if (Flags.HasFlag(RoomFlags.HasOfficialRoomPic))
-        {
-            p.Write(OfficialRoomPicRef);
-        }
+            p.WriteString(OfficialRoomPicRef);
 
         if (Flags.HasFlag(RoomFlags.IsGroupHomeRoom))
         {
-            p.Write(GroupId);
-            p.Write(GroupName);
-            p.Write(GroupBadge);
+            p.WriteId(GroupId);
+            p.WriteString(GroupName);
+            p.WriteString(GroupBadge);
         }
 
         if (Flags.HasFlag(RoomFlags.HasEvent))
         {
-            p.Write(EventName);
-            p.Write(EventDescription);
-            p.Write(EventMinutesRemaining);
+            p.WriteString(EventName);
+            p.WriteString(EventDescription);
+            p.WriteInt(EventMinutesRemaining);
         }
     }
 
-    public static RoomInfo Parse(in PacketReader p) => new(in p);
+    static RoomInfo IParser<RoomInfo>.Parse(in PacketReader p) => new(in p);
 }

@@ -4,7 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public sealed class TradeOffer : ITradeOffer, IComposer, IParser<TradeOffer>
+public sealed class TradeOffer : ITradeOffer, IParserComposer<TradeOffer>
 {
     public Id UserId { get; set; }
     public string? UserName { get; set; }
@@ -21,50 +21,46 @@ public sealed class TradeOffer : ITradeOffer, IComposer, IParser<TradeOffer>
 
     private TradeOffer(in PacketReader p) : this()
     {
-        UnsupportedClientException.ThrowIfUnknown(p.Client);
-
         if (p.Client == ClientType.Shockwave)
         {
             UserId = -1;
-            UserName = p.Read<string>();
-            Accepted = p.Read<bool>();
+            UserName = p.ReadString();
+            Accepted = p.ReadBool();
         }
         else
         {
-            UserId = p.Read<Id>();
+            UserId = p.ReadId();
         }
 
         Items = [..p.ParseArray<TradeItem>()];
 
         if (p.Client != ClientType.Shockwave)
         {
-            FurniCount = p.Read<int>();
-            CreditCount = p.Read<int>();
+            FurniCount = p.ReadInt();
+            CreditCount = p.ReadInt();
         }
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
-        UnsupportedClientException.ThrowIfUnknown(p.Client);
-
         if (p.Client == ClientType.Shockwave)
         {
-            p.Write(UserName);
-            p.Write(Accepted);
+            p.WriteString(UserName ?? "");
+            p.WriteBool(Accepted);
         }
         else
         {
-            p.Write(UserId);
+            p.WriteId(UserId);
         }
 
-        p.Write(Items);
+        p.ComposeArray(Items);
 
         if (p.Client != ClientType.Shockwave)
         {
-            p.Write(FurniCount);
-            p.Write(CreditCount);
+            p.WriteInt(FurniCount);
+            p.WriteInt(CreditCount);
         }
     }
 
-    public static TradeOffer Parse(in PacketReader p) => new(in p);
+    static TradeOffer IParser<TradeOffer>.Parse(in PacketReader p) => new(in p);
 }

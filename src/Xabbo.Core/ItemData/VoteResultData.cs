@@ -1,6 +1,4 @@
-﻿using System;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
@@ -20,17 +18,17 @@ public class VoteResultData : ItemData, IVoteResultData
 
     protected override void Initialize(in PacketReader p)
     {
-        Value = p.Read<string>();
-        Result = p.Read<int>();
+        Value = p.ReadString();
+        Result = p.ReadInt();
 
-        base.Initialize(p);
+        base.Initialize(in p);
     }
 
     protected override void WriteData(in PacketWriter p)
     {
-        p.Write(Value);
-        p.Write(Result);
+        p.WriteString(Value);
+        p.WriteInt(Result);
 
-        WriteBase(p);
+        WriteBase(in p);
     }
 }

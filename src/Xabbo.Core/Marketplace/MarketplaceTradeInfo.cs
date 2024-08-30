@@ -2,7 +2,7 @@
 
 namespace Xabbo.Core;
 
-public sealed class MarketplaceTradeInfo : IMarketplaceTradeInfo, IComposer, IParser<MarketplaceTradeInfo>
+public sealed class MarketplaceTradeInfo : IMarketplaceTradeInfo, IParserComposer<MarketplaceTradeInfo>
 {
     public int DayOffset { get; set; }
     public int AverageSalePrice { get; set; }
@@ -14,19 +14,19 @@ public sealed class MarketplaceTradeInfo : IMarketplaceTradeInfo, IComposer, IPa
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        DayOffset = p.Read<int>();
-        AverageSalePrice = p.Read<int>();
-        TradeVolume = p.Read<int>();
+        DayOffset = p.ReadInt();
+        AverageSalePrice = p.ReadInt();
+        TradeVolume = p.ReadInt();
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        p.Write(DayOffset);
-        p.Write(AverageSalePrice);
-        p.Write(TradeVolume);
+        p.WriteInt(DayOffset);
+        p.WriteInt(AverageSalePrice);
+        p.WriteInt(TradeVolume);
     }
 
-    public static MarketplaceTradeInfo Parse(in PacketReader p) => new(in p);
+    static MarketplaceTradeInfo IParser<MarketplaceTradeInfo>.Parse(in PacketReader p) => new(in p);
 }

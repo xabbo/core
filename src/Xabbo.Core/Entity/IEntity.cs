@@ -7,7 +7,7 @@ namespace Xabbo.Core;
 /// <summary>
 /// Represents a living entity in a room.
 /// </summary>
-public interface IEntity : IFloorEntity, IComposer
+public interface IEntity : IFloorEntity
 {
     /// <summary>
     /// Gets if the entity has been removed from the room.

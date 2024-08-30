@@ -2,7 +2,7 @@
 
 namespace Xabbo.Core;
 
-public class RoomData : RoomInfo, IRoomData, IComposer, IParser<RoomData>
+public class RoomData : RoomInfo, IRoomData, IParserComposer<RoomData>
 {
     public bool IsEntering { get; set; }
     public bool Forward { get; set; }
@@ -31,46 +31,46 @@ public class RoomData : RoomInfo, IRoomData, IComposer, IParser<RoomData>
 
         IsEntering = isEntering;
 
-        Forward = p.Read<bool>();
-        IsStaffPick = p.Read<bool>();
-        IsGroupMember = p.Read<bool>();
-        IsRoomMuted = p.Read<bool>();
+        Forward = p.ReadBool();
+        IsStaffPick = p.ReadBool();
+        IsGroupMember = p.ReadBool();
+        IsRoomMuted = p.ReadBool();
 
-        Moderation = ModerationSettings.Parse(p);
+        Moderation = p.Parse<ModerationSettings>();
 
-        CanMute = p.Read<bool>();
-        ChatSettings = ChatSettings.Parse(p);
+        CanMute = p.ReadBool();
+        ChatSettings = p.Parse<ChatSettings>();
 
         if (p.Client == ClientType.Unity)
         {
-            _Int6 = p.Read<int>();
-            _Int7 = p.Read<int>();
+            _Int6 = p.ReadInt();
+            _Int7 = p.ReadInt();
         }
     }
 
-    public override void Compose(in PacketWriter p)
+    protected override void Compose(in PacketWriter p)
     {
-        p.Write(IsEntering);
+        p.WriteBool(IsEntering);
 
         base.Compose(in p);
 
-        p.Write(Forward);
-        p.Write(IsStaffPick);
-        p.Write(IsGroupMember);
-        p.Write(IsRoomMuted);
+        p.WriteBool(Forward);
+        p.WriteBool(IsStaffPick);
+        p.WriteBool(IsGroupMember);
+        p.WriteBool(IsRoomMuted);
 
-        p.Write(Moderation);
+        p.Compose(Moderation);
 
-        p.Write(CanMute);
+        p.WriteBool(CanMute);
 
-        ChatSettings.Compose(p);
+        p.Compose(ChatSettings);
     }
 
-    public static new RoomData Parse(in PacketReader p)
+    static RoomData IParser<RoomData>.Parse(in PacketReader p)
     {
         bool isEntering = false;
         if (p.Client != ClientType.Shockwave)
-            isEntering = p.Read<bool>();
+            isEntering = p.ReadBool();
         return new(isEntering, in p);
     }
 }
