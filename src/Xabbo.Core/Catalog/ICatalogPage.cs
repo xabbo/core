@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-using Xabbo.Messages;
+﻿using System.Collections.Generic;
 
 namespace Xabbo.Core;
 
-public interface ICatalogPage : IComposer
+public interface ICatalogPage
 {
     int Id { get; }
     string CatalogType { get; }

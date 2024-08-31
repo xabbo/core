@@ -1,10 +1,6 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-using Xabbo.Messages;
-
-namespace Xabbo.Core;
-
-public interface ICatalogProduct : IItem, IComposer
+public interface ICatalogProduct : IItem
 {
     string Variant { get; }
     int Count { get; }

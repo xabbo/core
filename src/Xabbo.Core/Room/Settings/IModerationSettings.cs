@@ -1,8 +1,6 @@
-﻿using Xabbo.Messages;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
-public interface IModerationSettings : IComposer
+public interface IModerationSettings
 {
     ModerationPermissions WhoCanMute { get; }
     ModerationPermissions WhoCanKick { get; }

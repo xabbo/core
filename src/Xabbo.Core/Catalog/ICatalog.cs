@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Xabbo.Messages;
-
 namespace Xabbo.Core;
 
-public interface ICatalog : IEnumerable<ICatalogPageNode>, IComposer
+public interface ICatalog : IEnumerable<ICatalogPageNode>
 {
     /// <summary>
     /// Gets the root <see cref="ICatalogPageNode"/>.

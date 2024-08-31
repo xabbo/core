@@ -1,13 +1,9 @@
-﻿using System;
-
-using Xabbo.Messages;
-
-namespace Xabbo.Core;
+﻿namespace Xabbo.Core;
 
 /// <summary>
 /// The current user's information that is sent upon requesting user data.
 /// </summary>
-public interface IUserData : IComposer
+public interface IUserData
 {
     long Id { get; }
     string Name { get; }

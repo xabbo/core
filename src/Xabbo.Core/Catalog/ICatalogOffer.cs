@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 
-using Xabbo.Messages;
-
 namespace Xabbo.Core;
 
-public interface ICatalogOffer : IComposer
+public interface ICatalogOffer
 {
     ICatalogPage? Page { get; }
 

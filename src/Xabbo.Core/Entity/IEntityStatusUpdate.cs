@@ -1,10 +1,6 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-using Xabbo.Messages;
-
-namespace Xabbo.Core;
-
-public interface IEntityStatusUpdate : IComposer
+public interface IEntityStatusUpdate
 {
     int Index { get; }
     Tile Location { get; }

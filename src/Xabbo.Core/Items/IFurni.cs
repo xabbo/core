@@ -1,13 +1,11 @@
-﻿using Xabbo.Messages;
-
-using Xabbo.Core.Game;
+﻿using Xabbo.Core.Game;
 
 namespace Xabbo.Core;
 
 /// <summary>
 /// Represents a room furniture.
 /// </summary>
-public interface IFurni : IItem, IComposer
+public interface IFurni : IItem
 {
     /// <summary>
     /// Gets the owner of the furni's ID.
