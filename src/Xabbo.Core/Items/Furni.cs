@@ -2,7 +2,7 @@
 
 namespace Xabbo.Core;
 
-public abstract class Furni : IFurni
+public abstract class Furni : IFurni, IComposer
 {
     public abstract ItemType Type { get; }
 
