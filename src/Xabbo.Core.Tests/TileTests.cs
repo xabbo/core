@@ -1,7 +1,4 @@
-﻿using System;
-using Xunit.Sdk;
-
-namespace Xabbo.Core.Tests;
+﻿namespace Xabbo.Core.Tests;
 
 public class TileTests
 {
