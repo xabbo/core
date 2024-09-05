@@ -33,7 +33,7 @@ public record ChatMsg(ChatType Type, string Message, int BubbleStyle = 0, string
             nameof(Out.Whisper) => ChatType.Whisper,
             _ => throw new Exception("Unknown chat header."),
         };
-        string message = "";
+        string message = p.ReadString();
         string recipient = "";
         int bubbleStyle = 0;
         if (chatType == ChatType.Whisper)
