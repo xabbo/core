@@ -7,7 +7,16 @@ namespace Xabbo.Core.Messages.Outgoing;
 
 public record ChatMsg(ChatType Type, string Message, int BubbleStyle = 0, string Recipient = "") : IMessage<ChatMsg>
 {
-    static Identifier IMessage<ChatMsg>.Identifier => throw new System.NotImplementedException();
+    static Identifier[] IMessage<ChatMsg>.Identifiers { get; } = [Out.Chat, Out.Shout, Out.Whisper];
+    static Identifier IMessage<ChatMsg>.Identifier => default;
+
+    Identifier IMessage<ChatMsg>.GetIdentifier(ClientType _) => Type switch
+    {
+        ChatType.Talk => Out.Chat,
+        ChatType.Shout => Out.Shout,
+        ChatType.Whisper => Out.Whisper,
+        _ => throw new NotSupportedException($"Unknown chat type: {Type}.")
+    };
 
     public ChatType Type { get; } = Type;
 
