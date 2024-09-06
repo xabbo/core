@@ -3,7 +3,7 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
-public record TalkMsg(string Message, int BubbleStyle = 0)
+public sealed record TalkMsg(string Message, int BubbleStyle = 0)
     : ChatMsg(ChatType.Talk, Message, BubbleStyle), IMessage<TalkMsg>
 {
     static Identifier IMessage<TalkMsg>.Identifier => Out.Chat;

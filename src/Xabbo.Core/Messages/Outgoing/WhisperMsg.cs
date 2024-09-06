@@ -3,7 +3,7 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
-public record WhisperMsg(string Recipient, string Message, int BubbleStyle = 0)
+public sealed record WhisperMsg(string Recipient, string Message, int BubbleStyle = 0)
     : ChatMsg(ChatType.Whisper, Message, BubbleStyle, Recipient), IMessage<WhisperMsg>
 {
     static Identifier IMessage<WhisperMsg>.Identifier => Out.Whisper;
