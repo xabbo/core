@@ -15,16 +15,15 @@ public sealed record WalkMsg(int X, int Y) : IMessage<WalkMsg>
 
     void IComposer.Compose(in PacketWriter p)
     {
-        switch (p.Client)
+        if (p.Client is ClientType.Shockwave)
         {
-        case not ClientType.Shockwave:
-            p.WriteInt(X);
-            p.WriteInt(Y);
-            break;
-        case ClientType.Shockwave:
             p.WriteB64((B64)X);
             p.WriteB64((B64)Y);
-            break;
+        }
+        else
+        {
+            p.WriteInt(X);
+            p.WriteInt(Y);
         }
     }
 }

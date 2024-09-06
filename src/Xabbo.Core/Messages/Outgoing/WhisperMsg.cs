@@ -20,7 +20,7 @@ public sealed record WhisperMsg(string Recipient, string Message, int BubbleStyl
             recipient = message[..index];
             message = message[(index+1)..];
         }
-        int bubbleStyle = p.Client is not ClientType.Shockwave ? p.ReadInt() : 0;
+        int bubbleStyle = p.Client is ClientType.Shockwave ? 0 : p.ReadInt();
         return new(recipient, message, bubbleStyle);
     }
 }

@@ -12,6 +12,6 @@ public sealed record ShoutMsg(string Message, int BubbleStyle = 0)
 
     static ShoutMsg IParser<ShoutMsg>.Parse(in PacketReader p) => new(
         p.ReadString(),
-        p.Client is not ClientType.Shockwave ? p.ReadInt() : 0
+        p.Client is ClientType.Shockwave ? 0 : p.ReadInt()
     );
 }
