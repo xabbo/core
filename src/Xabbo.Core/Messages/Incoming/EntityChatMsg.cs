@@ -127,7 +127,7 @@ public sealed record EntityTalkMsg : EntityChatMsgBase, IMessage<EntityTalkMsg>
 
 public sealed record EntityShoutMsg : EntityChatMsgBase, IMessage<EntityShoutMsg>
 {
-    static Identifier IMessage<EntityShoutMsg>.Identifier => In.Chat;
+    static Identifier IMessage<EntityShoutMsg>.Identifier => In.Shout;
     public new ChatType Type { get; } = ChatType.Shout;
 
     public EntityShoutMsg()
@@ -152,7 +152,7 @@ public sealed record EntityShoutMsg : EntityChatMsgBase, IMessage<EntityShoutMsg
 
 public sealed record EntityWhisperMsg : EntityChatMsgBase, IMessage<EntityWhisperMsg>
 {
-    static Identifier IMessage<EntityWhisperMsg>.Identifier => In.Chat;
+    static Identifier IMessage<EntityWhisperMsg>.Identifier => In.Whisper;
     public new ChatType Type { get; } = ChatType.Whisper;
 
     public EntityWhisperMsg()
