@@ -47,7 +47,14 @@ public record ChatMsg(ChatType Type, string Message, int BubbleStyle = 0, string
         }
         if (p.Client is ClientType.Unity or ClientType.Flash)
             bubbleStyle = p.ReadInt();
-        return new ChatMsg(chatType, message, bubbleStyle, recipient);
+
+        return chatType switch
+        {
+            ChatType.Talk => new TalkMsg(message, bubbleStyle),
+            ChatType.Shout => new ShoutMsg(message, bubbleStyle),
+            ChatType.Whisper => new WhisperMsg(recipient, message, bubbleStyle),
+            _ => throw new Exception("Unknown chat type"),
+        };
     }
 
     public void Compose(in PacketWriter p)
