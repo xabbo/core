@@ -38,6 +38,9 @@ public class FloorItem : Furni, IFloorItem, IParserComposer<FloorItem>
 
     public override int State => double.TryParse(Data.Value, out double state) ? (int)state : -1;
 
+    public string Colors { get; set; } = "";
+    public string RuntimeData { get; set; } = "";
+
     public FloorItem(IFloorItem item)
     {
         Id = item.Id;
@@ -107,8 +110,8 @@ public class FloorItem : Furni, IFloorItem, IParserComposer<FloorItem>
         Direction = p.ReadInt();
         float z = p.ReadFloat();
         Location = new Tile(x, y, z);
-        p.ReadString(); // colors
-        p.ReadString(); // runtimeData
+        Colors = p.ReadString(); // colors
+        RuntimeData = p.ReadString(); // runtimeData
         Extra = p.ReadInt();
         Data = new LegacyData { Value = p.ReadString() };
 

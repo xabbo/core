@@ -37,4 +37,18 @@ public interface IFloorItem : IFurni, IFloorEntity
     /// Gets the data of the floor item.
     /// </summary>
     IItemData Data { get; }
+
+    /// <summary>
+    /// Gets the floor item colors.
+    /// <para/>
+    /// Only available on Shockwave.
+    /// </summary>
+    string Colors { get; }
+
+    /// <summary>
+    /// Gets the floor item runtime data.
+    /// <para/>
+    /// Only available on Shockwave.
+    /// </summary>
+    string RuntimeData { get; }
 }
