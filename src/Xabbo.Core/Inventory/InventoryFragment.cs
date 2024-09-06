@@ -35,14 +35,14 @@ public sealed class InventoryFragment : IInventoryFragment, ICollection<Inventor
 
     public InventoryFragment(IEnumerable<IInventoryItem> items)
     {
-        _list = [..items.Select(it => it is InventoryItem item ? item : new InventoryItem(it))];
+        _list = [.. items.Select(it => it is InventoryItem item ? item : new InventoryItem(it))];
     }
 
     private InventoryFragment(in PacketReader p)
     {
         Total = p.ReadInt();
         Index = p.ReadInt();
-        _list = [..p.ParseArray<InventoryItem>()];
+        _list = [.. p.ParseArray<InventoryItem>()];
     }
 
     void IComposer.Compose(in PacketWriter p)

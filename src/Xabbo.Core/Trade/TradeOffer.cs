@@ -32,7 +32,7 @@ public sealed class TradeOffer : ITradeOffer, IParserComposer<TradeOffer>
             UserId = p.ReadId();
         }
 
-        Items = [..p.ParseArray<TradeItem>()];
+        Items = [.. p.ParseArray<TradeItem>()];
 
         if (p.Client != ClientType.Shockwave)
         {

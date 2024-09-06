@@ -18,8 +18,8 @@ public class UserSearchResults : IReadOnlyCollection<UserSearchResult>, IParserC
 
     protected UserSearchResults(in PacketReader p)
     {
-        Friends = [..p.ParseArray<UserSearchResult>()];
-        Others = [..p.ParseArray<UserSearchResult>()];
+        Friends = [.. p.ParseArray<UserSearchResult>()];
+        Others = [.. p.ParseArray<UserSearchResult>()];
     }
 
     public UserSearchResult? GetResult(string name) => this.FirstOrDefault(result =>

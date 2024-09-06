@@ -62,13 +62,13 @@ public class HighScoreData : ItemData, IHighScoreData, IList<HighScoreData.HighS
         public HighScore(IHighScore highScore)
         {
             Value = highScore.Value;
-            Names = [..highScore.Names];
+            Names = [.. highScore.Names];
         }
 
         private HighScore(in PacketReader p)
         {
             Value = p.ReadInt();
-            Names = [..p.ReadStringArray()];
+            Names = [.. p.ReadStringArray()];
         }
 
         void IComposer.Compose(in PacketWriter p)

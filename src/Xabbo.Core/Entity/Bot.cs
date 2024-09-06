@@ -38,7 +38,7 @@ public class Bot : Entity, IBot
             Gender = H.ToGender(p.ReadString());
             OwnerId = p.ReadId();
             OwnerName = p.ReadString();
-            Skills = [..p.ReadShortArray()];
+            Skills = [.. p.ReadShortArray()];
         }
     }
 

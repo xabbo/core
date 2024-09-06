@@ -15,7 +15,7 @@ public sealed record WhisperMsg(string Recipient, string Message, int BubbleStyl
         if (index >= 0)
         {
             recipient = message[..index];
-            message = message[(index+1)..];
+            message = message[(index + 1)..];
         }
         int bubbleStyle = p.Client is ClientType.Shockwave ? 0 : p.ReadInt();
         return new(recipient, message, bubbleStyle);

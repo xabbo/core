@@ -7,7 +7,7 @@ public class PhotoInfo
 {
     [JsonPropertyName("t")]
     public ulong Time { get; set; }
-    
+
     [JsonPropertyName("id")]
     public string Id { get; set; }
 

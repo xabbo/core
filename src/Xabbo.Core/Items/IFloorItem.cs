@@ -32,7 +32,7 @@ public interface IFloorItem : IFurni, IFloorEntity
     /// This may be the consumed state (of perishable items like cabbages),
     /// or if this is a teleporter, the linked teleporter ID.
     /// </summary>
-    long Extra { get;  }
+    long Extra { get; }
     /// <summary>
     /// Gets the data of the floor item.
     /// </summary>

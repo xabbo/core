@@ -6,7 +6,7 @@ public class ChatSettings : IChatSettings, IParserComposer<ChatSettings>
 {
     public ChatFlow Flow { get; set; }
     public ChatBubbleWidth BubbleWidth { get; set; }
-    public ChatScrollSpeed ScrollSpeed { get;  set; }
+    public ChatScrollSpeed ScrollSpeed { get; set; }
     public int TalkHearingDistance { get; set; }
     public ChatFloodProtection FloodProtection { get; set; }
 

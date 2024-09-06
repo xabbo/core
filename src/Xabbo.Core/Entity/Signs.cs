@@ -18,7 +18,7 @@ public enum Signs
     Ten = 10,
     Heart = 11,
     Skull = 12,
-    Exclamation  = 13,
+    Exclamation = 13,
     SoccerBall = 14,
     Smile = 15,
     RedCard = 16,

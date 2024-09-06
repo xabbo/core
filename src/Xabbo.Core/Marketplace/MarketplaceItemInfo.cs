@@ -29,7 +29,7 @@ public sealed class MarketplaceItemInfo : IMarketplaceItemInfo, IParserComposer<
         Average = p.ReadInt();
         Offers = p.ReadInt();
         HistorySizeInDays = p.ReadInt();
-        TradeInfo = [..p.ParseArray<MarketplaceTradeInfo>()];
+        TradeInfo = [.. p.ParseArray<MarketplaceTradeInfo>()];
 
         int itemType = p.ReadInt();
         Type = itemType switch
@@ -51,10 +51,11 @@ public sealed class MarketplaceItemInfo : IMarketplaceItemInfo, IParserComposer<
 
         p.ComposeArray(TradeInfo);
 
-        p.WriteInt(Type switch {
-           ItemType.Floor => 1,
-           ItemType.Wall => 2,
-           _ => throw new Exception($"Cannot write item type: {Type}."),
+        p.WriteInt(Type switch
+        {
+            ItemType.Floor => 1,
+            ItemType.Wall => 2,
+            _ => throw new Exception($"Cannot write item type: {Type}."),
         });
         p.WriteInt(Kind);
     }

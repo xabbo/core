@@ -84,7 +84,7 @@ public class RoomInfo : IRoomInfo, IParserComposer<RoomInfo>
         Ranking = p.ReadInt();
         Category = (RoomCategory)p.ReadInt();
 
-        Tags = [..p.ReadStringArray()];
+        Tags = [.. p.ReadStringArray()];
 
         Flags = (RoomFlags)p.ReadInt();
 

@@ -14,7 +14,7 @@ public enum RoomCategory
     Trading = 14,
     Agencies = 16,
     RolePlaying = 17
-    
+
 }
 
 public static partial class XabboEnumExtensions

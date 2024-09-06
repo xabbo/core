@@ -25,7 +25,7 @@ public sealed class UserSearchResult : IParserComposer<UserSearchResult>
         UnknownBoolA = p.ReadBool();
         UnknownStringA = p.ReadString();
         UnknownLongA = p.ReadId();
-        Figure  = p.ReadString();
+        Figure = p.ReadString();
         RealName = p.ReadString();
     }
 

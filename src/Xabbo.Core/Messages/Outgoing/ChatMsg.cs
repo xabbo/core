@@ -40,7 +40,7 @@ public sealed record ChatMsg(ChatType Type, string Message, int BubbleStyle = 0,
             if (index >= 0)
             {
                 recipient = message[..index];
-                message = message[(index+1)..];
+                message = message[(index + 1)..];
             }
         }
         if (p.Client is ClientType.Unity or ClientType.Flash)

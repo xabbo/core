@@ -20,7 +20,8 @@ public sealed record PlaceFloorItemMsg(
 
     static bool IMessage<PlaceFloorItemMsg>.Match(in PacketReader p)
     {
-        string content = p.Client switch {
+        string content = p.Client switch
+        {
             not ClientType.Shockwave => p.ReadString(),
             ClientType.Shockwave => p.Content,
         };

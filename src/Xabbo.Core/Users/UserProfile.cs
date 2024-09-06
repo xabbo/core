@@ -46,7 +46,7 @@ public sealed class UserProfile : IUserProfile, IParserComposer<UserProfile>
         IsFriend = p.ReadBool();
         IsFriendRequestSent = p.ReadBool();
         IsOnline = p.ReadBool();
-        Groups = [..p.ParseArray<GroupInfo>()];
+        Groups = [.. p.ParseArray<GroupInfo>()];
         LastLogin = TimeSpan.FromSeconds(p.ReadInt());
         DisplayInClient = p.ReadBool();
 

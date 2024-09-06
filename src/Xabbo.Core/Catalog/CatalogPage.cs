@@ -37,17 +37,17 @@ public sealed class CatalogPage : ICatalogPage, IParserComposer<CatalogPage>
         CatalogType = p.ReadString();
         LayoutCode = p.ReadString();
 
-        Images = [..p.ReadStringArray()];
-        Texts = [..p.ReadStringArray()];
+        Images = [.. p.ReadStringArray()];
+        Texts = [.. p.ReadStringArray()];
 
-        Offers = [..p.ParseArray<CatalogOffer>()];
+        Offers = [.. p.ParseArray<CatalogOffer>()];
         foreach (var offer in Offers)
             offer.Page = this;
 
         OfferId = p.ReadInt();
         AcceptSeasonCurrencyAsCredits = p.ReadBool();
 
-        FrontPageItems = p.Available > 0 ? [..p.ParseArray<CatalogPageItem>()] : [];
+        FrontPageItems = p.Available > 0 ? [.. p.ParseArray<CatalogPageItem>()] : [];
     }
 
     void IComposer.Compose(in PacketWriter p)

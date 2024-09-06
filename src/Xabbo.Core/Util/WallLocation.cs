@@ -86,7 +86,8 @@ public readonly record struct WallLocation(Point Wall, Point Offset, WallOrienta
     /// <summary>
     /// Adds the specified offset values and returns the new wall location.
     /// </summary>
-    public readonly WallLocation Add(Point wall, Point offset) => this with {
+    public readonly WallLocation Add(Point wall, Point offset) => this with
+    {
         Wall = Wall + wall,
         Offset = offset + offset
     };

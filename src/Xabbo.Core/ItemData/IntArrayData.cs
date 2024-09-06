@@ -25,7 +25,7 @@ public class IntArrayData : ItemData, IIntArrayData, IList<int>
 
     public IntArrayData(IIntArrayData data) : base(data)
     {
-        _list = [..data];
+        _list = [.. data];
     }
 
     protected override void Initialize(in PacketReader p)

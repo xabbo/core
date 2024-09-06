@@ -30,7 +30,7 @@ public sealed record PlaceWallItemMsg(Id ItemId, WallLocation Location) : IMessa
         if (i < 0)
             throw new Exception("No separator in PlaceWallItemMsg.");
 
-        return new PlaceWallItemMsg((Id)content[..i], (WallLocation)content[(i+1)..]);
+        return new PlaceWallItemMsg((Id)content[..i], (WallLocation)content[(i + 1)..]);
     }
 
     void IComposer.Compose(in PacketWriter p)

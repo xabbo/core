@@ -47,7 +47,7 @@ public class RoomSettings : IParserComposer<RoomSettings>
         MaxVisitors = p.ReadInt(); // maximumVisitors
         AbsoluteMaxVisitors = p.ReadInt(); // maximumVisitorsLimit
 
-        Tags = [..p.ReadStringArray()];
+        Tags = [.. p.ReadStringArray()];
 
         Trading = (TradePermissions)p.ReadInt(); // tradeMode
         AllowPets = p.ReadInt() == 1;

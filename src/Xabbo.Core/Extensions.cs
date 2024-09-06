@@ -419,7 +419,7 @@ public static class Extensions
     /// Selects items of any of the specified variants.
     /// </summary>
     public static IEnumerable<T> OfVariant<T>(this IEnumerable<T> items, IEnumerable<string> variants)
-        where T :IItem
+        where T : IItem
     {
         HashSet<string> set = new(variants, StringComparer.OrdinalIgnoreCase);
         return items.Where(item =>
@@ -1021,7 +1021,8 @@ public static class Extensions
     public static IEnumerable<TFloorEntity> InsideAny<TFloorEntity>(this IEnumerable<TFloorEntity> entities, AreaSet areas)
         where TFloorEntity : IFloorEntity
     {
-        return entities.Where(x => {
+        return entities.Where(x =>
+        {
             Area a = x.Area;
             return areas.Any(area => area.Contains(a));
         });
@@ -1033,7 +1034,8 @@ public static class Extensions
     public static IEnumerable<TFloorEntity> InsideAll<TFloorEntity>(this IEnumerable<TFloorEntity> entities, AreaSet areas)
         where TFloorEntity : IFloorEntity
     {
-        return entities.Where(x => {
+        return entities.Where(x =>
+        {
             Area a = x.Area;
             return areas.All(area => area.Contains(a));
         });

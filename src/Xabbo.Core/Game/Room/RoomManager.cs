@@ -955,7 +955,7 @@ public sealed partial class RoomManager : GameStateManager
 
     // Shockwave does not have a furni heightmap.
     [Intercepts(~ClientType.Shockwave)]
-    [InterceptIn("f:"+nameof(In.HeightMap))]
+    [InterceptIn("f:" + nameof(In.HeightMap))]
     private void HandleHeightMap(Intercept e)
     {
         if (!IsLoadingRoom)
@@ -1117,7 +1117,7 @@ public sealed partial class RoomManager : GameStateManager
     #endregion
 
     #region - Floor item handlers -
-    [InterceptIn("f:"+nameof(In.Objects))]
+    [InterceptIn("f:" + nameof(In.Objects))]
     private void HandleActiveObjects(Intercept e)
     {
         if (!IsLoadingRoom)
@@ -1714,7 +1714,8 @@ public sealed partial class RoomManager : GameStateManager
         {
             var movement = movements[i] = e.Packet.Read<WiredMovement>();
             if (room is null) continue;
-            switch (movement) {
+            switch (movement)
+            {
                 case UserWiredMovement m:
                     if (room.Entities.TryGetValue(m.UserIndex, out Entity? entity))
                         entity.Location = m.Destination;

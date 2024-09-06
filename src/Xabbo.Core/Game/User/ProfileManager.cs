@@ -21,7 +21,8 @@ public sealed partial class ProfileManager : GameStateManager
     public Achievements? Achievements { get; private set; }
 
     public int? AchievementScore { get; private set; }
-    public int? Credits { get; private set; } public ActivityPoints Points { get; private set; }
+    public int? Credits { get; private set; }
+    public ActivityPoints Points { get; private set; }
     public int? Diamonds => Points.TryGetValue(ActivityPointType.Diamond, out int value) ? (int?)value : null;
     public int? Duckets => Points.TryGetValue(ActivityPointType.Ducket, out int value) ? (int?)value : null;
 

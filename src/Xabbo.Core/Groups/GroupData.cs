@@ -14,7 +14,8 @@ public sealed class GroupData : IGroupData, IParserComposer<GroupData>
     public string HomeRoomName { get; set; }
     public GroupMemberStatus MemberStatus { get; set; }
     public int MemberCount { get; set; }
-    public bool IsFavourite { get; set; } public string Created { get; set; }
+    public bool IsFavourite { get; set; }
+    public string Created { get; set; }
     public bool IsOwner { get; set; }
     public bool IsAdmin { get; set; }
     public string OwnerName { get; set; }

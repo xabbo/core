@@ -27,7 +27,7 @@ public sealed class StringArrayData : ItemData, IStringArrayData, IList<string>
     public StringArrayData(IStringArrayData data)
         : base(data)
     {
-        _list = [..data];
+        _list = [.. data];
     }
 
     protected override void Initialize(in PacketReader p)

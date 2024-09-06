@@ -60,7 +60,7 @@ public sealed class PetInfo : IParserComposer<PetInfo>
         Breed = p.ReadInt();
         HasFreeSaddle = p.ReadBool();
         IsRiding = p.ReadBool();
-        SkillThresholds = [..p.ReadIntArray()];
+        SkillThresholds = [.. p.ReadIntArray()];
         AccessRights = p.ReadInt();
         CanBreed = p.ReadBool();
         CanHarvest = p.ReadBool();

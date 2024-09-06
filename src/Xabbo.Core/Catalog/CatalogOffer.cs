@@ -40,14 +40,14 @@ public class CatalogOffer : ICatalogOffer, IParserComposer<CatalogOffer>
         ActivityPointType = (ActivityPointType)p.ReadInt();
         PriceInSilver = p.ReadInt();
         CanPurchaseAsGift = p.ReadBool();
-        Products = [..p.ParseArray<CatalogProduct>()];
+        Products = [.. p.ParseArray<CatalogProduct>()];
         ClubLevel = p.ReadInt();
         CanPurchaseMultiple = p.ReadBool();
 
         // if (fromCatalog)
         // {
-            IsPet = p.ReadBool();
-            PreviewImage = p.ReadString();
+        IsPet = p.ReadBool();
+        PreviewImage = p.ReadString();
         // }
     }
 
@@ -67,8 +67,8 @@ public class CatalogOffer : ICatalogOffer, IParserComposer<CatalogOffer>
 
         // if (fromCatalog)
         // {
-            p.WriteBool(IsPet);
-            p.WriteString(PreviewImage);
+        p.WriteBool(IsPet);
+        p.WriteString(PreviewImage);
         // }
     }
 
