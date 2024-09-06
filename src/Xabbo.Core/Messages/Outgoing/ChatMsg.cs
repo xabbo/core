@@ -57,7 +57,7 @@ public record ChatMsg(ChatType Type, string Message, int BubbleStyle = 0, string
         };
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         p.WriteString(Type == ChatType.Whisper ? $"{Recipient} {Message}" : Message);
         if (p.Client is not ClientType.Shockwave)
