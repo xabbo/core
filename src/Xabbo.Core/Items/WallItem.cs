@@ -81,7 +81,7 @@ public class WallItem : Furni, IWallItem, IParserComposer<WallItem>
         OwnerId = p.ReadId();
     }
 
-    private void ParseOrigins(in PacketReader p) => ParseOriginsString(p.ReadString().Trim());
+    private void ParseOrigins(in PacketReader p) => ParseOriginsString(p.Content);
 
     private void ParseOriginsString(string value)
     {
