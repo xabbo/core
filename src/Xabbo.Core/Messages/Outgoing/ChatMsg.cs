@@ -5,7 +5,7 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
-public record ChatMsg(ChatType Type, string Message, int BubbleStyle = 0, string Recipient = "") : IMessage<ChatMsg>
+public sealed record ChatMsg(ChatType Type, string Message, int BubbleStyle = 0, string Recipient = "") : IMessage<ChatMsg>
 {
     static Identifier[] IMessage<ChatMsg>.Identifiers { get; } = [Out.Chat, Out.Shout, Out.Whisper];
     static Identifier IMessage<ChatMsg>.Identifier => default;
@@ -46,13 +46,7 @@ public record ChatMsg(ChatType Type, string Message, int BubbleStyle = 0, string
         if (p.Client is ClientType.Unity or ClientType.Flash)
             bubbleStyle = p.ReadInt();
 
-        return chatType switch
-        {
-            ChatType.Talk => new TalkMsg(message, bubbleStyle),
-            ChatType.Shout => new ShoutMsg(message, bubbleStyle),
-            ChatType.Whisper => new WhisperMsg(recipient, message, bubbleStyle),
-            _ => throw new Exception("Unknown chat type"),
-        };
+        return new ChatMsg(chatType, message, bubbleStyle, recipient);
     }
 
     void IComposer.Compose(in PacketWriter p)
