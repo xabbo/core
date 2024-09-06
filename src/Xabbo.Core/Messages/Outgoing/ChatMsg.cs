@@ -18,8 +18,6 @@ public record ChatMsg(ChatType Type, string Message, int BubbleStyle = 0, string
         _ => throw new NotSupportedException($"Unknown chat type: {Type}.")
     };
 
-    public ChatType Type { get; } = Type;
-
     static ChatMsg IParser<ChatMsg>.Parse(in PacketReader p)
     {
         if (p.Context is null)

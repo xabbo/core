@@ -8,6 +8,8 @@ public sealed record WhisperMsg(string Recipient, string Message, int BubbleStyl
 {
     static Identifier IMessage<WhisperMsg>.Identifier => Out.Whisper;
 
+    public new ChatType Type => base.Type;
+
     static WhisperMsg IParser<WhisperMsg>.Parse(in PacketReader p)
     {
         string message = p.ReadString();

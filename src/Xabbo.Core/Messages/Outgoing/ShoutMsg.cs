@@ -8,6 +8,8 @@ public sealed record ShoutMsg(string Message, int BubbleStyle = 0)
 {
     static Identifier IMessage<ShoutMsg>.Identifier => Out.Shout;
 
+    public new ChatType Type => base.Type;
+
     static ShoutMsg IParser<ShoutMsg>.Parse(in PacketReader p) => new(
         p.ReadString(),
         p.Client is not ClientType.Shockwave ? p.ReadInt() : 0
