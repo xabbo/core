@@ -131,7 +131,7 @@ public readonly record struct WallLocation(Point Wall, Point Offset, WallOrienta
         }
         else
         {
-            throw new FormatException("Wall location string is of an invalid format.");
+            throw new FormatException($"Invalid wall location format: '{locationString}'.");
         }
     }
 
