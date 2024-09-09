@@ -10,6 +10,7 @@ using Xabbo.Interceptor;
 using Xabbo.Messages.Flash;
 
 using Xabbo.Core.Events;
+using Xabbo.Core.Messages.Incoming;
 
 namespace Xabbo.Core.Game;
 
@@ -1134,7 +1135,7 @@ public sealed partial class RoomManager : GameStateManager
 
         List<FloorItem> newItems = [];
 
-        foreach (FloorItem item in e.Packet.Read<FloorItems>())
+        foreach (FloorItem item in e.Packet.Read<FloorItemsMsg>())
         {
             if (_currentRoom.FloorItems.TryAdd(item.Id, item))
             {
@@ -1414,7 +1415,7 @@ public sealed partial class RoomManager : GameStateManager
 
         List<WallItem> newItems = [];
 
-        foreach (var item in e.Packet.Read<WallItems>())
+        foreach (var item in e.Packet.Read<WallItemsMsg>())
         {
             if (_currentRoom.WallItems.TryAdd(item.Id, item))
             {

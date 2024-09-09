@@ -57,9 +57,6 @@ public class WallItem : Furni, IWallItem, IParserComposer<WallItem>
             case ClientType.Unity or ClientType.Flash:
                 ParseModern(in p);
                 break;
-            case ClientType.Shockwave:
-                ParseOrigins(in p);
-                break;
             default:
                 throw new UnsupportedClientException(p.Client);
         }
@@ -81,34 +78,17 @@ public class WallItem : Furni, IWallItem, IParserComposer<WallItem>
         OwnerId = p.ReadId();
     }
 
-    private void ParseOrigins(in PacketReader p) => ParseOriginsString(p.Content);
-
-    private void ParseOriginsString(string value)
-    {
-        string[] fields = value.Split('\t');
-        if (fields.Length < 4)
-            throw new Exception($"Invalid number of fields when parsing WallItem: {string.Join(", ", fields)}");
-
-        if (!int.TryParse(fields[0], out int id))
-            throw new Exception($"Invalid ID when parsing WallItem: {fields[0]}.");
-
-        Id = id;
-        Identifier = fields[1];
-        OwnerId = -1;
-        OwnerName = fields[2];
-        Location = WallLocation.ParseString(fields[3]);
-        if (fields.Length >= 5)
-            Data = fields[4];
-    }
-
     protected override void Compose(in PacketWriter p)
     {
-        if (p.Client == ClientType.Shockwave)
-            throw new UnsupportedClientException(p.Client);
+        if (p.Client is ClientType.Shockwave)
+        {
+            p.Content = ToOriginsString();
+            return;
+        }
 
-        if (p.Client == ClientType.Flash) p.WriteString(Id.ToString());
-        else if (p.Client == ClientType.Unity) p.WriteId(Id);
-        else throw new InvalidOperationException("Unknown protocol");
+        if (p.Client is ClientType.Flash) p.WriteString(Id.ToString());
+        else if (p.Client is ClientType.Unity) p.WriteId(Id);
+        else throw new UnsupportedClientException(p.Client);
 
         p.WriteInt(Kind);
         p.WriteString(Location.ToString());
@@ -120,5 +100,41 @@ public class WallItem : Furni, IWallItem, IParserComposer<WallItem>
 
     public override string ToString() => $"{nameof(WallItem)}#{Id}/{Kind}";
 
-    static WallItem IParser<WallItem>.Parse(in PacketReader p) => new(in p);
+    public string ToOriginsString()
+    {
+        string s = string.Join('\t', Id, Identifier, OwnerName, Location);
+        if (!string.IsNullOrWhiteSpace(Data))
+            s += "\t" + Data;
+        return s;
+    }
+
+    static WallItem IParser<WallItem>.Parse(in PacketReader p)
+    {
+        if (p.Client is ClientType.Shockwave)
+            return ParseOriginsString(p.Content);
+        else
+            return new(in p);
+    }
+
+    public static WallItem ParseOriginsString(string value)
+    {
+        string[] fields = value.Split('\t');
+        if (fields.Length is < 4 or > 5)
+            throw new Exception($"Invalid number of fields when parsing WallItem: {string.Join(", ", fields)}");
+
+        if (!int.TryParse(fields[0], out int id))
+            throw new Exception($"Invalid ID when parsing WallItem: {fields[0]}.");
+
+        WallItem wallItem = new() {
+            Id = id,
+            Identifier = fields[1],
+            OwnerId = -1,
+            OwnerName = fields[2],
+            Location = WallLocation.ParseString(fields[3])
+        };
+        if (fields.Length >= 5)
+            wallItem.Data = fields[4];
+
+        return wallItem;
+    }
 }

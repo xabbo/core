@@ -2,20 +2,23 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 
-namespace Xabbo.Core;
+namespace Xabbo.Core.Messages.Incoming;
 
-public sealed class FloorItems : List<FloorItem>, IParserComposer<FloorItems>
+public sealed class FloorItemsMsg : List<FloorItem>, IMessage<FloorItemsMsg>
 {
-    public FloorItems() { }
-    public FloorItems(int capacity) : base(capacity) { }
+    public FloorItemsMsg() { }
+    public FloorItemsMsg(int capacity) : base(capacity) { }
 
-    static FloorItems IParser<FloorItems>.Parse(in PacketReader p)
+    public static Identifier Identifier => In.Objects;
+
+    static FloorItemsMsg IParser<FloorItemsMsg>.Parse(in PacketReader p)
     {
         int n;
         var ownerDictionary = new Dictionary<long, string>();
 
-        if (p.Client != ClientType.Shockwave)
+        if (p.Client is not ClientType.Shockwave)
         {
             n = p.ReadLength();
             for (int i = 0; i < n; i++)
@@ -23,7 +26,7 @@ public sealed class FloorItems : List<FloorItem>, IParserComposer<FloorItems>
         }
 
         n = p.ReadLength();
-        var items = new FloorItems(n);
+        var items = new FloorItemsMsg(n);
         for (int i = 0; i < n; i++)
         {
             var item = p.Parse<FloorItem>();
@@ -37,7 +40,7 @@ public sealed class FloorItems : List<FloorItem>, IParserComposer<FloorItems>
 
     void IComposer.Compose(in PacketWriter p)
     {
-        if (p.Client != ClientType.Shockwave)
+        if (p.Client is not ClientType.Shockwave)
         {
             var ownerIds = new HashSet<long>();
             var ownerDictionary = this
