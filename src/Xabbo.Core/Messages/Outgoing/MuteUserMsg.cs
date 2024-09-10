@@ -3,7 +3,7 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
-public sealed record MuteUserMsg(Id UserId, Id RoomId, int Minutes) : IMessage<MuteUserMsg>
+public sealed record MuteUserMsg(Id Id, Id RoomId, int Minutes) : IMessage<MuteUserMsg>
 {
     static bool IMessage<MuteUserMsg>.UseTargetedIdentifiers => true;
     static Identifier IMessage<MuteUserMsg>.Identifier => Out.MuteUser;
@@ -17,7 +17,7 @@ public sealed record MuteUserMsg(Id UserId, Id RoomId, int Minutes) : IMessage<M
     void IComposer.Compose(in PacketWriter p)
     {
         UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
-        p.WriteId(UserId);
+        p.WriteId(Id);
         p.WriteId(RoomId);
         p.WriteInt(Minutes);
     }
