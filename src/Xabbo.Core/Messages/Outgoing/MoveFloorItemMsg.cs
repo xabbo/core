@@ -18,7 +18,7 @@ public sealed record MoveFloorItemMsg(Id Id, int X, int Y, int Direction) : IMes
 
         if (p.Client == ClientType.Shockwave)
         {
-            string[] fields = p.Content.Split();
+            string[] fields = p.ReadContent().Split();
             if (fields.Length != ExpectedFieldCount)
                 throw new Exception($"Unexpected field count when parsing MoveFloorItemMsg: {fields.Length}. Expected: {ExpectedFieldCount}.");
             if (!Id.TryParse(fields[0], out id))
@@ -45,7 +45,7 @@ public sealed record MoveFloorItemMsg(Id Id, int X, int Y, int Direction) : IMes
     {
         if (p.Client == ClientType.Shockwave)
         {
-            p.Content = $"{Id} {X} {Y} {Direction}";
+            p.WriteContent($"{Id} {X} {Y} {Direction}");
         }
         else
         {

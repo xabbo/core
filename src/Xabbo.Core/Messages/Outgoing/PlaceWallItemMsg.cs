@@ -22,7 +22,7 @@ public sealed record PlaceWallItemMsg(Id ItemId, WallLocation Location) : IMessa
         string content = p.Client switch
         {
             ClientType.Flash => p.ReadString(),
-            ClientType.Shockwave => p.Content,
+            ClientType.Shockwave => p.ReadContent(),
             _ => throw new UnsupportedClientException(p.Client),
         };
 
@@ -41,7 +41,7 @@ public sealed record PlaceWallItemMsg(Id ItemId, WallLocation Location) : IMessa
                 p.WriteString($"{ItemId} {Location}");
                 break;
             case ClientType.Shockwave:
-                p.Content = $"{ItemId} {Location}";
+                p.WriteContent($"{ItemId} {Location}");
                 break;
             default:
                 throw new UnsupportedClientException(p.Client);

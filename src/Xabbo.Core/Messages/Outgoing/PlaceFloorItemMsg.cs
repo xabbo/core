@@ -23,7 +23,7 @@ public sealed record PlaceFloorItemMsg(
         string content = p.Client switch
         {
             not ClientType.Shockwave => p.ReadString(),
-            ClientType.Shockwave => p.Content,
+            ClientType.Shockwave => p.ReadContent(),
         };
         int index = content.IndexOf(' ');
         if (index < 0 || (index + 1) >= content.Length) return false;
@@ -35,7 +35,7 @@ public sealed record PlaceFloorItemMsg(
         string content = p.Client switch
         {
             not ClientType.Shockwave => p.ReadString(),
-            ClientType.Shockwave => p.Content,
+            ClientType.Shockwave => p.ReadContent(),
         };
 
         string[] fields = content.Split();
@@ -72,7 +72,7 @@ public sealed record PlaceFloorItemMsg(
                 p.WriteString($"{ItemId} {X} {Y} {Direction}");
                 break;
             case ClientType.Shockwave:
-                p.Content = $"{ItemId} {X} {Y} {SizeX} {SizeY} {Direction}";
+                p.WriteContent($"{ItemId} {X} {Y} {SizeX} {SizeY} {Direction}");
                 break;
             default:
                 throw new UnsupportedClientException(p.Client);

@@ -30,7 +30,7 @@ public record PickupItemMsg(ItemType Type, Id Id) : IMessage<PickupItemMsg>
                 id = p.ReadId();
                 break;
             case ClientType.Shockwave:
-                string[] fields = p.Content.Split();
+                string[] fields = p.ReadContent().Split();
                 if (fields.Length != ExpectedFieldCount)
                     throw new Exception($"Unexpected field count when parsing PickupItemMsg: {fields.Length}. Expected: {ExpectedFieldCount}.");
                 if (fields[0] != ExpectedField0)
@@ -64,7 +64,7 @@ public record PickupItemMsg(ItemType Type, Id Id) : IMessage<PickupItemMsg>
                 ItemType.Floor => "stuff",
                 _ => throw new Exception("Unknown item type when composing PickupItemMsg.")
             };
-            p.Content = $"new {type} {Id}";
+            p.WriteContent($"new {type} {Id}");
         }
         else
         {

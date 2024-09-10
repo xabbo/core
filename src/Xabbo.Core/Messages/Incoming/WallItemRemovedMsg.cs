@@ -19,7 +19,7 @@ public sealed record WallItemRemovedMsg(Id Id) : IMessage<WallItemRemovedMsg>
                 id = p.ReadId();
                 break;
             case ClientType.Flash or ClientType.Shockwave:
-                string strId = p.Client is ClientType.Flash ? p.ReadString() : p.Content;
+                string strId = p.Client is ClientType.Flash ? p.ReadString() : p.ReadContent();
                 if (!Id.TryParse(strId, out id))
                     throw new FormatException($"Failed to parse Id in WallItemRemovedMsg: '{strId}'.");
                 break;
@@ -40,7 +40,7 @@ public sealed record WallItemRemovedMsg(Id Id) : IMessage<WallItemRemovedMsg>
                 p.WriteString(Id.ToString());
                 break;
             case ClientType.Shockwave:
-                p.Content = Id.ToString();
+                p.WriteContent(Id.ToString());
                 break;
             default:
                 throw new UnsupportedClientException(p.Client);

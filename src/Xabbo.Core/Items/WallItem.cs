@@ -82,7 +82,7 @@ public class WallItem : Furni, IWallItem, IParserComposer<WallItem>
     {
         if (p.Client is ClientType.Shockwave)
         {
-            p.Content = ToOriginsString();
+            p.WriteContent(ToOriginsString());
             return;
         }
 
@@ -111,7 +111,7 @@ public class WallItem : Furni, IWallItem, IParserComposer<WallItem>
     static WallItem IParser<WallItem>.Parse(in PacketReader p)
     {
         if (p.Client is ClientType.Shockwave)
-            return ParseOriginsString(p.Content);
+            return ParseOriginsString(p.ReadContent());
         else
             return new(in p);
     }

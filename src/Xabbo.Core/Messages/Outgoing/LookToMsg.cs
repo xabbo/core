@@ -13,7 +13,7 @@ public sealed record LookToMsg(int X, int Y) : IMessage<LookToMsg>
         int x, y;
         if (p.Client is ClientType.Shockwave)
         {
-            string[] fields = p.Content.Split(' ');
+            string[] fields = p.ReadContent().Split(' ');
             if (fields.Length != 2)
                 throw new Exception($"Unexpected field count when parsing LookToMsg: {fields.Length}.");
             if (!int.TryParse(fields[0], out x))
@@ -34,7 +34,7 @@ public sealed record LookToMsg(int X, int Y) : IMessage<LookToMsg>
     {
         if (p.Client is ClientType.Shockwave)
         {
-            p.Content = $"{X} {Y}";
+            p.WriteContent($"{X} {Y}");
         }
         else
         {
