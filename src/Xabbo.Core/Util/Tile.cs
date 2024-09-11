@@ -15,9 +15,9 @@ public readonly struct Tile(int x, int y, float z) : IParserComposer<Tile>
 
     public Point XY => new(X, Y);
 
-    public Tile(int x, int y)
-        : this(x, y, 0)
-    { }
+    public Tile(Point xy, float z) : this(xy.X, xy.Y, z) { }
+    public Tile(Point xy) : this(xy.X, xy.Y) { }
+    public Tile(int x, int y) : this(x, y, 0) { }
 
     public readonly override int GetHashCode() => (X, Y, Z).GetHashCode();
 

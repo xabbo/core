@@ -1,31 +1,34 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
 /// <summary>
 /// Represents a 2-dimensional location.
 /// </summary>
-public readonly struct Point
+/// <remarks>
+/// Creates a new point with the specified coordinates.
+/// </remarks>
+public readonly struct Point(int x, int y) : IParserComposer<Point>
 {
     public static readonly Point Zero = new(0, 0);
 
-    public readonly int X;
-    public readonly int Y;
-
-    /// <summary>
-    /// Creates a new point with the specified coordinates.
-    /// </summary>
-    public Point(int x, int y)
-    {
-        X = x;
-        Y = y;
-    }
+    public readonly int X = x;
+    public readonly int Y = y;
 
     public override string ToString() => $"({X}, {Y})";
 
     public override int GetHashCode() => (X, Y).GetHashCode();
     public override bool Equals([NotNullWhen(true)] object? obj) => obj is Point p && Equals(p);
     public bool Equals(Point p) => X == p.X && Y == p.Y;
+
+    static Point IParser<Point>.Parse(in PacketReader p) => new(p.ReadInt(), p.ReadInt());
+
+    void IComposer.Compose(in PacketWriter p)
+    {
+        p.WriteInt(X);
+        p.WriteInt(Y);
+    }
 
     public static bool operator ==(Point a, Point b) => (a.X == b.X && a.Y == b.Y);
     public static bool operator !=(Point a, Point b) => !(a == b);
