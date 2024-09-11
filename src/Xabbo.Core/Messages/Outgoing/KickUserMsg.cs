@@ -15,6 +15,8 @@ public sealed record KickUserMsg(Id? Id = null, string? Name = null) : IMessage<
         not ClientType.Shockwave => new KickUserMsg { Id = p.ReadId() }
     };
 
+    public KickUserMsg(IUser user) : this(user.Id, user.Name) { }
+
     void IComposer.Compose(in PacketWriter p)
     {
         if (p.Client is ClientType.Shockwave)

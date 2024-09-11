@@ -7,6 +7,9 @@ namespace Xabbo.Core.Messages.Outgoing;
 
 public sealed record BanUserMsg(Id? Id = null, Id? RoomId = null, string? Name = null, BanDuration Duration = BanDuration.Permanent) : IMessage<BanUserMsg>
 {
+    public BanUserMsg(IUser user, Id roomId, BanDuration duration = BanDuration.Permanent)
+        : this(user.Id, roomId, user.Name, duration) { }
+
     static Identifier IMessage<BanUserMsg>.Identifier => Out.BanUserWithDuration;
 
     static BanUserMsg IParser<BanUserMsg>.Parse(in PacketReader p)

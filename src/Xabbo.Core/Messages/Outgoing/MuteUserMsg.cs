@@ -8,6 +8,8 @@ public sealed record MuteUserMsg(Id Id, Id RoomId, int Minutes) : IMessage<MuteU
     static bool IMessage<MuteUserMsg>.UseTargetedIdentifiers => true;
     static Identifier IMessage<MuteUserMsg>.Identifier => Out.MuteUser;
 
+    public MuteUserMsg(IUser user, Id roomId, int minutes) : this(user.Id, roomId, minutes) { }
+
     static MuteUserMsg IParser<MuteUserMsg>.Parse(in PacketReader p)
     {
         UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
