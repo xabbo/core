@@ -1568,7 +1568,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     [Intercept]
-    void HandlerUserUpdate(AvatarsUpdatedMsg updates)
+    void HandlerUserUpdate(AvatarUpdatesMsg updates)
     {
         if (!IsInRoom)
         {
