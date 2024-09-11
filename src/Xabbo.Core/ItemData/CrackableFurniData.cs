@@ -20,6 +20,8 @@ public class CrackableFurniData : ItemData, ICrackableFurniData
 
     protected override void Initialize(in PacketReader p)
     {
+        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
+
         Value = p.ReadString();
         Hits = p.ReadInt();
         Target = p.ReadInt();
@@ -29,6 +31,8 @@ public class CrackableFurniData : ItemData, ICrackableFurniData
 
     protected override void WriteData(in PacketWriter p)
     {
+        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
+
         p.WriteString(Value);
         p.WriteInt(Hits);
         p.WriteInt(Target);

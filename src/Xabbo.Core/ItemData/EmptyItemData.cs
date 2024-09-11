@@ -1,6 +1,4 @@
-﻿using System;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
@@ -14,5 +12,13 @@ public class EmptyItemData : ItemData, IEmptyItemData
         : this()
     { }
 
-    protected override void WriteData(in PacketWriter packet) { }
+    protected override void Initialize(in PacketReader p)
+    {
+        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
+    }
+
+    protected override void WriteData(in PacketWriter p)
+    {
+        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
+    }
 }

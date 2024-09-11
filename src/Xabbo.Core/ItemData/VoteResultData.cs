@@ -18,6 +18,8 @@ public class VoteResultData : ItemData, IVoteResultData
 
     protected override void Initialize(in PacketReader p)
     {
+        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
+
         Value = p.ReadString();
         Result = p.ReadInt();
 
@@ -26,6 +28,8 @@ public class VoteResultData : ItemData, IVoteResultData
 
     protected override void WriteData(in PacketWriter p)
     {
+        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
+
         p.WriteString(Value);
         p.WriteInt(Result);
 

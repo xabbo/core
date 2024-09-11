@@ -7,7 +7,10 @@ namespace Xabbo.Core.Messages.Incoming;
 
 /// <param name="Id">The floor item ID.</param>
 /// <param name="Item">The floor item instance. Only available on Shockwave.</param>
-public sealed record FloorItemRemovedMsg(Id Id, FloorItem? Item = null) : IMessage<FloorItemRemovedMsg>
+/// <param name="Expired">Whether the item expired or not.</param>
+/// <param name="PickerId">The ID of the user who picked up the item.</param>
+/// <param name="Delay">The delay in milliseconds after which the item will be removed by the client.</param>
+public sealed record FloorItemRemovedMsg(Id Id, FloorItem? Item = null, bool Expired = false, Id PickerId = default, int Delay = 0) : IMessage<FloorItemRemovedMsg>
 {
     static Identifier IMessage<FloorItemRemovedMsg>.Identifier => In.ObjectRemove;
 
@@ -15,15 +18,26 @@ public sealed record FloorItemRemovedMsg(Id Id, FloorItem? Item = null) : IMessa
     {
         Id id;
         FloorItem? item = null;
+        bool expired = false;
+        Id pickerId = 0;
+        int delay = 0;
+
         switch (p.Client)
         {
-            case ClientType.Unity:
-                id = p.ReadId();
-                break;
-            case ClientType.Flash:
-                string strId = p.ReadString();
-                if (!Id.TryParse(strId, out id))
-                    throw new FormatException($"Failed to parse Id in FloorItemRemovedMsg: '{strId}'.");
+            case ClientType.Unity or ClientType.Flash:
+                if (p.Client is ClientType.Unity)
+                {
+                    id = p.ReadId();
+                }
+                else
+                {
+                    string strId = p.ReadString();
+                    if (!Id.TryParse(strId, out id))
+                        throw new FormatException($"Failed to parse {nameof(Id)} in {nameof(FloorItemRemovedMsg)}: '{strId}'.");
+                }
+                expired = p.ReadBool();
+                pickerId = p.ReadId();
+                delay = p.ReadInt();
                 break;
             case ClientType.Shockwave:
                 item = p.Parse<FloorItem>();
@@ -32,6 +46,7 @@ public sealed record FloorItemRemovedMsg(Id Id, FloorItem? Item = null) : IMessa
             default:
                 throw new UnsupportedClientException(p.Client);
         }
+
         return new(id, item);
     }
 
@@ -39,11 +54,14 @@ public sealed record FloorItemRemovedMsg(Id Id, FloorItem? Item = null) : IMessa
     {
         switch (p.Client)
         {
-            case ClientType.Unity:
-                p.WriteId(Id);
-                break;
-            case ClientType.Flash:
-                p.WriteString(Id.ToString());
+            case ClientType.Unity or ClientType.Flash:
+                if (p.Client is ClientType.Unity)
+                    p.WriteId(Id);
+                else
+                    p.WriteString(Id.ToString());
+                p.WriteBool(Expired);
+                p.WriteId(PickerId);
+                p.WriteInt(Delay);
                 break;
             case ClientType.Shockwave:
                 // Shockwave sends the entire structure, but the client only cares about the ID.

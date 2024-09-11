@@ -30,12 +30,16 @@ public class IntArrayData : ItemData, IIntArrayData, IList<int>
 
     protected override void Initialize(in PacketReader p)
     {
+        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
+
         _list.AddRange(p.ReadIntArray());
         base.Initialize(in p);
     }
 
     protected override void WriteData(in PacketWriter p)
     {
+        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
+
         p.WriteIntArray(this);
         WriteBase(p);
     }

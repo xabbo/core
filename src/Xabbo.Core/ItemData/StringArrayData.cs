@@ -32,6 +32,8 @@ public sealed class StringArrayData : ItemData, IStringArrayData, IList<string>
 
     protected override void Initialize(in PacketReader p)
     {
+        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
+
         _list.AddRange(p.ReadStringArray());
 
         base.Initialize(in p);
@@ -39,6 +41,8 @@ public sealed class StringArrayData : ItemData, IStringArrayData, IList<string>
 
     protected override void WriteData(in PacketWriter p)
     {
+        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
+
         p.WriteStringArray(_list);
         WriteBase(in p);
     }

@@ -17,7 +17,20 @@ public abstract class ItemData : IItemData, IParserComposer<ItemData>
 
     public string Value { get; set; }
 
-    public int State => int.TryParse(Value, out int state) ? state : -1;
+    public int State
+    {
+        get
+        {
+            return Value switch
+            {
+                // Compatibility for Shockwave
+                // C/O = Closed/Open (Gate)
+                "C", "FALSE" => 0,
+                "O", "TRUE" => 1,
+                _ => int.TryParse(Value, out int state) ? state : -1;
+            };
+        }
+    }
 
     protected ItemData(ItemDataType type)
     {
@@ -35,7 +48,8 @@ public abstract class ItemData : IItemData, IParserComposer<ItemData>
 
     protected virtual void Initialize(in PacketReader p)
     {
-        if (Flags.HasFlag(ItemDataFlags.IsLimitedRare))
+        if (p.Client is not ClientType.Shockwave &&
+            Flags.HasFlag(ItemDataFlags.IsLimitedRare))
         {
             UniqueSerialNumber = p.ReadInt();
             UniqueSeriesSize = p.ReadInt();
@@ -44,13 +58,15 @@ public abstract class ItemData : IItemData, IParserComposer<ItemData>
 
     void IComposer.Compose(in PacketWriter p)
     {
-        p.WriteInt(((int)Type & 0xFF) | ((int)Flags << 8));
+        if (p.Client is not ClientType.Shockwave)
+            p.WriteInt(((int)Type & 0xFF) | ((int)Flags << 8));
         WriteData(in p);
     }
 
     protected void WriteBase(in PacketWriter p)
     {
-        if (Flags.HasFlag(ItemDataFlags.IsLimitedRare))
+        if (p.Client is not ClientType.Shockwave &&
+            Flags.HasFlag(ItemDataFlags.IsLimitedRare))
         {
             p.WriteInt(UniqueSerialNumber);
             p.WriteInt(UniqueSeriesSize);
@@ -77,8 +93,15 @@ public abstract class ItemData : IItemData, IParserComposer<ItemData>
 
     static ItemData IParser<ItemData>.Parse(in PacketReader p)
     {
-        int value = p.ReadInt();
-        var type = (ItemDataType)(value & 0xFF);
+        ItemDataType type = ItemDataType.Legacy;
+        ItemDataFlags flags = ItemDataFlags.None;
+
+        if (p.Client is not ClientType.Shockwave)
+        {
+            int value = p.ReadInt();
+            type = (ItemDataType)(value & 0xFF);
+            flags = (ItemDataFlags)(value >> 8);
+        }
 
         ItemData data = type switch
         {
@@ -93,7 +116,7 @@ public abstract class ItemData : IItemData, IParserComposer<ItemData>
             _ => throw new Exception($"Unknown ItemData type: {type}"),
         };
 
-        data.Flags = (ItemDataFlags)(value >> 8);
+        data.Flags = flags;
         data.Initialize(in p);
 
         return data;

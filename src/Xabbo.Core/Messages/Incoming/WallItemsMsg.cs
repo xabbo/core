@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
-public sealed class WallItemsMsg : List<WallItem>, IParserComposer<WallItemsMsg>
+public sealed class WallItemsMsg : List<WallItem>, IMessage<WallItemsMsg>
 {
     public WallItemsMsg() { }
     public WallItemsMsg(int capacity) : base(capacity) { }
     public WallItemsMsg(IEnumerable<WallItem> items) : base(items) { }
+
+    static Identifier IMessage<WallItemsMsg>.Identifier => In.Items;
 
     static WallItemsMsg IParser<WallItemsMsg>.Parse(in PacketReader p)
     {

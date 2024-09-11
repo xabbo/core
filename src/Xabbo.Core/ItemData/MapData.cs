@@ -36,6 +36,8 @@ public sealed class MapData : ItemData, IMapData, IDictionary<string, string>
 
     protected override void Initialize(in PacketReader p)
     {
+        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
+
         int n = p.ReadLength();
         for (int i = 0; i < n; i++)
             _map.Add(p.ReadString(), p.ReadString());
@@ -45,6 +47,8 @@ public sealed class MapData : ItemData, IMapData, IDictionary<string, string>
 
     protected override void WriteData(in PacketWriter p)
     {
+        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
+
         p.WriteLength(_map.Count);
         foreach (var item in _map)
         {
