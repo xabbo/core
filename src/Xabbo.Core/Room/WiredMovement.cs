@@ -32,11 +32,17 @@ public abstract class WiredMovement(WiredMovementType type) : IParserComposer<Wi
     public WiredMovementType Type { get; } = type;
     public int AnimationTime { get; set; }
 
-    void IComposer.Compose(in PacketWriter p) => Compose(in p);
+    void IComposer.Compose(in PacketWriter p)
+    {
+        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
+        Compose(in p);
+    }
     protected virtual void Compose(in PacketWriter p) => p.WriteInt((int)Type);
 
     static WiredMovement IParser<WiredMovement>.Parse(in PacketReader p)
     {
+        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
+
         var type = (WiredMovementType)p.ReadInt();
         return type switch
         {
