@@ -253,7 +253,7 @@ public sealed partial class RoomManager : GameStateManager
     /// Invoked when a floor item slides due to a roller or wired update.
     /// </summary>
     public event Action<FloorItemSlideEventArgs>? FloorItemSlide;
-    private void OnFloorItemSlide(IFloorItem item, Tile previousTile, long rollerId)
+    private void OnFloorItemSlide(IFloorItem item, Tile previousTile, Id rollerId)
     {
         _logger.LogTrace(
             "Floor item slide. (id:{id}, rollerId:{rollerId}, {from} -> {to})",
@@ -433,7 +433,7 @@ public sealed partial class RoomManager : GameStateManager
     /// Invoked when an entity's dance updates.
     /// </summary>
     public event Action<EntityDanceEventArgs>? EntityDance;
-    private void OnEntityDance(IEntity entity, int previousDance)
+    private void OnEntityDance(IEntity entity, Dances previousDance)
     {
         _logger.LogTrace(
             "Entity dance. ({entityName} [{entityId}:{entityIndex}], {previousDance} -> {dance})",
@@ -1118,8 +1118,8 @@ public sealed partial class RoomManager : GameStateManager
     #endregion
 
     #region - Floor item handlers -
-    [InterceptIn("f:" + nameof(In.Objects))]
-    private void HandleActiveObjects(Intercept e)
+    [Intercept]
+    void HandleFloorItems(FloorItemsMsg items)
     {
         if (!IsLoadingRoom)
         {
@@ -1135,7 +1135,7 @@ public sealed partial class RoomManager : GameStateManager
 
         List<FloorItem> newItems = [];
 
-        foreach (FloorItem item in e.Packet.Read<FloorItemsMsg>())
+        foreach (FloorItem item in items)
         {
             if (_currentRoom.FloorItems.TryAdd(item.Id, item))
             {
@@ -1159,198 +1159,185 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(In.ObjectAdd))]
-    private void HandleObjectAdd(Intercept e)
+    [Intercept]
+    void HandleFloorItemAdded(FloorItemAddedMsg added)
     {
         if (!IsInRoom)
         {
-            _logger.LogDebug($"[{nameof(HandleObjectAdd)}] Not in room.");
+            _logger.LogDebug($"[{nameof(HandleFloorItemAdded)}] Not in room.");
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning($"[{nameof(HandleObjectAdd)}] Current room is null.");
+            _logger.LogWarning($"[{nameof(HandleFloorItemAdded)}] Current room is null.");
             return;
         }
 
-        FloorItem item = e.Packet.Read<FloorItem>();
-
-        if (_currentRoom.FloorItems.TryAdd(item.Id, item))
+        if (_currentRoom.FloorItems.TryAdd(added.Item.Id, added.Item))
         {
-            OnFloorItemAdded(item);
+            OnFloorItemAdded(added.Item);
         }
         else
         {
-            _logger.LogError($"[{nameof(HandleObjectAdd)}] Failed to add floor item {{itemId}}.", item.Id);
+            _logger.LogError($"[{nameof(HandleFloorItemAdded)}] Failed to add floor item {{itemId}}.", added.Item.Id);
         }
     }
 
-    [InterceptIn(nameof(In.ObjectRemove))]
-    private void HandleObjectRemove(Intercept e)
+    [Intercept]
+    void HandleFloorItemRemoved(FloorItemRemovedMsg removed)
     {
-        /*
-            long id
-            bool isExpired
-            long pickerId
-            int delay
-        */
-
         if (!IsInRoom)
         {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleObjectRemove));
+            _logger.LogDebug("[{method}] Not in room.", nameof(HandleFloorItemRemoved));
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleObjectRemove));
+            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleFloorItemRemoved));
             return;
         }
 
-        long id = e.Packet.Client switch
-        {
-            ClientType.Flash => long.Parse(e.Packet.Read<string>()),
-            ClientType.Unity => e.Packet.Read<long>(),
-            _ => throw new InvalidOperationException("Unknown protocol type")
-        };
-
-        if (_currentRoom.FloorItems.TryRemove(id, out FloorItem? item))
+        if (_currentRoom.FloorItems.TryRemove(removed.Id, out FloorItem? item))
         {
             OnFloorItemRemoved(item);
         }
         else
         {
-            _logger.LogError("[{method}] Failed to remove item {id} from the dictionary", nameof(HandleObjectRemove), id);
+            _logger.LogError("[{method}] Failed to remove item {id} from the dictionary", nameof(HandleFloorItemRemoved), removed.Id);
         }
     }
 
-    [InterceptIn(nameof(In.ObjectUpdate))]
-    private void HandleObjectUpdate(Intercept e)
+    [Intercept]
+    void HandleFloorItemUpdated(FloorItemUpdatedMsg updated)
     {
         if (!IsInRoom)
         {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleObjectUpdate));
+            _logger.LogDebug("[{method}] Not in room.", nameof(HandleFloorItemUpdated));
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleObjectUpdate));
+            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleFloorItemUpdated));
             return;
         }
 
-        var updatedItem = e.Packet.Read<FloorItem>();
-
-        if (_currentRoom.FloorItems.TryGetValue(updatedItem.Id, out FloorItem? previousItem))
+        if (_currentRoom.FloorItems.TryGetValue(updated.Item.Id, out FloorItem? previousItem))
         {
-            updatedItem.OwnerName = previousItem.OwnerName;
-            updatedItem.IsHidden = previousItem.IsHidden;
+            updated.Item.OwnerName = previousItem.OwnerName;
+            updated.Item.IsHidden = previousItem.IsHidden;
 
-            if (_currentRoom.FloorItems.TryUpdate(updatedItem.Id, updatedItem, previousItem))
+            if (_currentRoom.FloorItems.TryUpdate(updated.Item.Id, updated.Item, previousItem))
             {
-                OnFloorItemUpdated(previousItem, updatedItem);
+                OnFloorItemUpdated(previousItem, updated.Item);
             }
             else
             {
-                _logger.LogError("[{method}] Failed to update floor item {itemId}", nameof(HandleObjectUpdate), updatedItem.Id);
+                _logger.LogError("[{method}] Failed to update floor item {itemId}", nameof(HandleFloorItemUpdated), updated.Item.Id);
             }
         }
         else
         {
-            _logger.LogError("[{method}] Failed to find floor item {itemId} to update", nameof(HandleObjectUpdate), updatedItem.Id);
+            _logger.LogError("[{method}] Failed to find floor item {itemId} to update", nameof(HandleFloorItemUpdated), updated.Item.Id);
         }
     }
 
-    [InterceptIn(nameof(In.SlideObjectBundle))]
-    private void HandleSlideObjectBundleObject(Intercept e)
+    [Intercept]
+    void HandleSlideObjectBundle(SlideObjectBundleMsg msg)
     {
         if (!IsInRoom)
         {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleSlideObjectBundleObject));
+            _logger.LogDebug("[{method}] Not in room.", nameof(HandleSlideObjectBundle));
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleSlideObjectBundleObject));
+            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleSlideObjectBundle));
             return;
         }
 
-        RollerUpdate rollerUpdate = e.Packet.Read<RollerUpdate>();
-        foreach (RollerObjectUpdate objectUpdate in rollerUpdate.ObjectUpdates)
+        var update = msg.Bundle;
+        foreach (SlideObject objectUpdate in update.SlideObjects)
         {
             if (_currentRoom.FloorItems.TryGetValue(objectUpdate.Id, out FloorItem? item))
             {
                 Tile previousTile = item.Location;
-                item.Location = new Tile(rollerUpdate.TargetX, rollerUpdate.TargetY, objectUpdate.TargetZ);
-                OnFloorItemSlide(item, previousTile, rollerUpdate.RollerId);
+                item.Location = new Tile(update.To, objectUpdate.ToZ);
+                OnFloorItemSlide(item, previousTile, update.RollerId);
             }
             else
             {
-                _logger.LogError("[{method}] Failed to find floor item {itemId} to update.", nameof(HandleSlideObjectBundleObject), objectUpdate.Id);
+                _logger.LogError("[{method}] Failed to find floor item {itemId} to update.", nameof(HandleSlideObjectBundle), objectUpdate.Id);
+            }
+        }
+
+        if (update.Entity is not null &&
+            update.Type is SlideType.WalkingEntity or SlideType.StandingEntity)
+        {
+            if (_currentRoom.Entities.TryGetValue(update.Entity.Index, out Entity? entity))
+            {
+                var previousTile = entity.Location;
+                entity.Location = new Tile(update.To, update.Entity.ToZ);
+
+                OnEntitySlide(entity, previousTile);
+            }
+            else
+            {
+                _logger.LogError("Failed to find entity with index {index} to update.", update.Entity.Index);
             }
         }
     }
 
-    [InterceptIn(nameof(In.ObjectDataUpdate))]
-    private void HandleObjectDataUpdate(Intercept e)
+    [Intercept]
+    void HandleFloorItemDataUpdated(FloorItemDataUpdatedMsg update)
     {
         if (!IsInRoom)
         {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleObjectDataUpdate));
+            _logger.LogDebug("[{method}] Not in room.", nameof(HandleFloorItemDataUpdated));
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleObjectDataUpdate));
+            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleFloorItemDataUpdated));
             return;
         }
 
-        long id = e.Packet.Client switch
+        if (!_currentRoom.FloorItems.TryGetValue(update.Id, out FloorItem? item))
         {
-            ClientType.Flash => long.Parse(e.Packet.Read<string>()),
-            ClientType.Unity => e.Packet.Read<long>(),
-            _ => throw new InvalidOperationException("Unknown protocol.")
-        };
-
-        if (!_currentRoom.FloorItems.TryGetValue(id, out FloorItem? item))
-        {
-            _logger.LogError("[{method}] Unable to find floor item {id} to update.", nameof(HandleObjectDataUpdate), id);
+            _logger.LogError("[{method}] Unable to find floor item {id} to update.", nameof(HandleFloorItemDataUpdated), update.Id);
             return;
         }
 
         IItemData previousData = item.Data;
-        item.Data = e.Packet.Read<ItemData>();
+        item.Data = update.Data;
 
         OnFloorItemDataUpdated(item, previousData);
     }
 
-    [Intercept(~ClientType.Shockwave)]
-    [InterceptIn(nameof(In.ObjectsDataUpdate))]
-    private void HandleObjectsDataUpdate(Intercept e)
+    [Intercept]
+    void HandleFloorItemsDataUpdated(FloorItemsDataUpdatedMsg msg)
     {
         if (!IsInRoom)
         {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleObjectsDataUpdate));
+            _logger.LogDebug("[{method}] Not in room.", nameof(HandleFloorItemsDataUpdated));
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleObjectsDataUpdate));
+            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleFloorItemsDataUpdated));
             return;
         }
 
-        int n = e.Packet.Read<Length>();
-        for (int i = 0; i < n; i++)
+        foreach (var (id, data) in msg.Updates)
         {
-            long itemId = e.Packet.Read<Id>();
-            ItemData data = e.Packet.Read<ItemData>();
-            if (!_currentRoom.FloorItems.TryGetValue(itemId, out FloorItem? item))
+            if (!_currentRoom.FloorItems.TryGetValue(id, out FloorItem? item))
             {
-                _logger.LogError("[{method}] Failed to find floor item {id} to update.", itemId, nameof(HandleObjectsDataUpdate));
+                _logger.LogError("[{method}] Failed to find floor item {id} to update.", id, nameof(HandleFloorItemsDataUpdated));
                 continue;
             }
 
@@ -1361,45 +1348,27 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(In.DiceValue))]
-    private void HandleDiceValue(Intercept e)
+    [Intercept]
+    void HandleDiceValue(DiceValueMsg dice)
     {
-        if (!IsInRoom) return;
+        if (!IsInRoom || _currentRoom is null) return;
 
-        if (_currentRoom is null) return;
-
-        Id itemId;
-        int diceValue = -1;
-
-        if (Interceptor.Session.Is(ClientType.Shockwave))
+        if (!_currentRoom.FloorItems.TryGetValue(dice.Id, out FloorItem? item))
         {
-            string[] fields = e.Packet.Read<string>().Split();
-            itemId = int.Parse(fields[0]);
-            if (fields.Length >= 2)
-                diceValue = int.Parse(fields[1]) % (int)itemId;
-        }
-        else
-        {
-            itemId = e.Packet.Read<Id>();
-            diceValue = e.Packet.Read<int>();
-        }
-
-        if (!_currentRoom.FloorItems.TryGetValue(itemId, out FloorItem? item))
-        {
-            _logger.LogError("[{method}] Failed to find floor item {id} to update.", nameof(HandleDiceValue), itemId);
+            _logger.LogError("[{method}] Failed to find floor item {id} to update.", nameof(HandleDiceValue), dice.Id);
             return;
         }
 
         int previousValue = item.Data.State;
-        item.Data.Value = $"{diceValue}";
+        item.Data.Value = $"{dice.Value}";
 
-        OnDiceUpdated(item, previousValue, diceValue);
+        OnDiceUpdated(item, previousValue, dice.Value);
     }
     #endregion
 
     #region - Wall item handlers -
-    [InterceptIn(nameof(In.Items))]
-    private void HandleItems(Intercept e)
+    [Intercept]
+    void HandleItems(WallItemsMsg items)
     {
         if (!IsLoadingRoom)
         {
@@ -1415,7 +1384,7 @@ public sealed partial class RoomManager : GameStateManager
 
         List<WallItem> newItems = [];
 
-        foreach (var item in e.Packet.Read<WallItemsMsg>())
+        foreach (var item in items)
         {
             if (_currentRoom.WallItems.TryAdd(item.Id, item))
             {
@@ -1439,8 +1408,8 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(In.ItemAdd))]
-    private void HandleItemAdd(Intercept e)
+    [Intercept]
+    void HandleItemAdd(WallItemAddedMsg added)
     {
         if (!IsInRoom)
         {
@@ -1454,19 +1423,18 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        var item = e.Packet.Read<WallItem>();
-        if (_currentRoom.WallItems.TryAdd(item.Id, item))
+        if (_currentRoom.WallItems.TryAdd(added.Item.Id, added.Item))
         {
-            OnWallItemAdded(item);
+            OnWallItemAdded(added.Item);
         }
         else
         {
-            _logger.LogError("Failed to add wall item {itemId}.", item.Id);
+            _logger.LogError("Failed to add wall item {itemId}.", added.Item.Id);
         }
     }
 
-    [InterceptIn(nameof(In.ItemRemove))]
-    private void HandleItemRemove(Intercept e)
+    [Intercept]
+    void HandleItemUpdate(WallItemUpdatedMsg updated)
     {
         if (!IsInRoom)
         {
@@ -1480,40 +1448,7 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        long id = e.Packet.Client switch
-        {
-            ClientType.Flash => long.Parse(e.Packet.Read<string>()),
-            ClientType.Unity => e.Packet.Read<long>(),
-            _ => throw new InvalidOperationException("Unknown protocol")
-        };
-        // long pickerId
-
-        if (_currentRoom.WallItems.TryRemove(id, out WallItem? item))
-        {
-            OnWallItemRemoved(item);
-        }
-        else
-        {
-            Debug.Log($"failed to remove item {id} from the dictionary");
-        }
-    }
-
-    [InterceptIn(nameof(In.ItemUpdate))]
-    private void HandleItemUpdate(Intercept e)
-    {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
-
-        if (_currentRoom is null)
-        {
-            _logger.LogWarning("Current room is null.");
-            return;
-        }
-
-        WallItem updatedItem = e.Packet.Read<WallItem>();
+        WallItem updatedItem = updated.Item;
         WallItem? previousItem = null;
 
         updatedItem = _currentRoom.WallItems.AddOrUpdate(
@@ -1536,31 +1471,37 @@ public sealed partial class RoomManager : GameStateManager
         {
             OnWallItemUpdated(previousItem, updatedItem);
         }
+    }
 
-        /*if (wallItems.TryGetValue(updatedItem.Id, out WallItem previousItem))
+    [Intercept]
+    void HandleItemRemove(WallItemRemovedMsg removed)
+    {
+        if (!IsInRoom)
         {
-            updatedItem.OwnerName = previousItem.OwnerName;
-            updatedItem.IsHidden = previousItem.IsHidden;
+            _logger.LogDebug("Not in room.");
+            return;
+        }
 
-            if (wallItems.TryUpdate(updatedItem.Id, updatedItem, previousItem))
-            {
-                OnWallItemUpdated(previousItem, updatedItem);
-            }
-            else
-            {
-                DebugUtil.Log($"failed to update wall item {updatedItem.Id}");
-            }
+        if (_currentRoom is null)
+        {
+            _logger.LogWarning("Current room is null.");
+            return;
+        }
+
+        if (_currentRoom.WallItems.TryRemove(removed.Id, out WallItem? item))
+        {
+            OnWallItemRemoved(item);
         }
         else
         {
-            DebugUtil.Log($"failed to find wall item {updatedItem.Id} to update");
-        }*/
+            Debug.Log($"failed to remove item {removed.Id} from the dictionary");
+        }
     }
     #endregion
 
     #region - Entity handlers -
-    [InterceptIn(nameof(In.Users))]
-    private void HandleUsers(Intercept e)
+    [Intercept]
+    void HandleEntitiesAdded(EntitiesAddedMsg entities)
     {
         if (!IsLoadingRoom && !IsInRoom)
         {
@@ -1576,7 +1517,7 @@ public sealed partial class RoomManager : GameStateManager
 
         List<Entity> newEntities = [];
 
-        foreach (Entity entity in e.Packet.Read<Entity[]>())
+        foreach (Entity entity in entities)
         {
             if (_currentRoom.Entities.TryAdd(entity.Index, entity))
             {
@@ -1601,8 +1542,8 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(In.UserRemove))]
-    private void HandleUserRemove(Intercept e)
+    [Intercept]
+    void HandleEntityRemoved(EntityRemovedMsg removed)
     {
         if (!IsInRoom)
         {
@@ -1616,25 +1557,18 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.Client switch
-        {
-            ClientType.Flash => int.Parse(e.Packet.Read<string>()),
-            ClientType.Unity => e.Packet.Read<int>(),
-            _ => throw new InvalidOperationException("Unknown protocol")
-        };
-
-        if (_currentRoom.Entities.TryRemove(index, out Entity? entity))
+        if (_currentRoom.Entities.TryRemove(removed.Index, out Entity? entity))
         {
             OnEntityRemoved(entity);
         }
         else
         {
-            _logger.LogError("Failed to remove entity with index {index}", index);
+            _logger.LogError("Failed to remove entity with index {index}", removed.Index);
         }
     }
 
-    [InterceptIn(nameof(In.UserUpdate))]
-    private void HandlerUserUpdate(Intercept e)
+    [Intercept]
+    void HandlerUserUpdate(EntitiesUpdatedMsg updates)
     {
         if (!IsInRoom)
         {
@@ -1650,10 +1584,8 @@ public sealed partial class RoomManager : GameStateManager
 
         var updatedEntities = new List<IEntity>();
 
-        int n = e.Packet.Read<Length>();
-        for (int i = 0; i < n; i++)
+        foreach (var update in updates)
         {
-            EntityStatusUpdate update = e.Packet.Read<EntityStatusUpdate>();
             if (!_currentRoom.Entities.TryGetValue(update.Index, out Entity? entity))
             {
                 _logger.LogError("Failed to find entity with index {index} to update", update.Index);
@@ -1669,8 +1601,8 @@ public sealed partial class RoomManager : GameStateManager
         OnEntitiesUpdated(updatedEntities);
     }
 
-    [InterceptIn(nameof(In.SlideObjectBundle))]
-    private void HandleSlideObjectBundleEntity(Intercept e)
+    [Intercept]
+    void HandleWiredMovements(WiredMovementsMsg movements)
     {
         if (!IsInRoom)
         {
@@ -1684,49 +1616,20 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        RollerUpdate rollerUpdate = e.Packet.Read<RollerUpdate>();
-
-        if (rollerUpdate.Type == RollerUpdateType.MovingEntity ||
-            rollerUpdate.Type == RollerUpdateType.StationaryEntity)
+        foreach (var movement in movements)
         {
-            if (_currentRoom.Entities.TryGetValue(rollerUpdate.EntityIndex, out Entity? entity))
-            {
-                var previousTile = entity.Location;
-                entity.Location = new Tile(rollerUpdate.TargetX, rollerUpdate.TargetY, rollerUpdate.EntityTargetZ);
-
-                OnEntitySlide(entity, previousTile);
-            }
-            else
-            {
-                _logger.LogError("Failed to find entity with index {index} to update.", rollerUpdate.EntityIndex);
-            }
-        }
-    }
-
-    [Intercept(~ClientType.Shockwave)]
-    [InterceptIn(nameof(In.WiredMovements))]
-    private void HandleWiredMovements(Intercept e)
-    {
-        var room = _currentRoom;
-
-        int n = e.Packet.Read<int>();
-        var movements = new WiredMovement[n];
-        for (int i = 0; i < n; i++)
-        {
-            var movement = movements[i] = e.Packet.Read<WiredMovement>();
-            if (room is null) continue;
             switch (movement)
             {
                 case UserWiredMovement m:
-                    if (room.Entities.TryGetValue(m.UserIndex, out Entity? entity))
+                    if (_currentRoom.Entities.TryGetValue(m.UserIndex, out Entity? entity))
                         entity.Location = m.Destination;
                     break;
                 case FloorItemWiredMovement m:
-                    if (room.FloorItems.TryGetValue(m.FurniId, out FloorItem? item))
+                    if (_currentRoom.FloorItems.TryGetValue(m.FurniId, out FloorItem? item))
                         item.Location = m.Destination;
                     break;
                 case WallItemWiredMovement m:
-                    if (room.WallItems.TryGetValue(m.ItemId, out WallItem? wallItem))
+                    if (_currentRoom.WallItems.TryGetValue(m.ItemId, out WallItem? wallItem))
                         wallItem.Location = m.Destination;
                     break;
             }
@@ -1738,7 +1641,7 @@ public sealed partial class RoomManager : GameStateManager
     // TODO: check
     [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.UserChange))]
-    private void HandleUserChange(Intercept e)
+    void HandleUserChange(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1800,7 +1703,7 @@ public sealed partial class RoomManager : GameStateManager
 
     [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.UserNameChanged))]
-    private void HandleUserNameChanged(Intercept e)
+    void HandleUserNameChanged(Intercept e)
     {
         if (!IsInRoom)
         {
@@ -1830,10 +1733,8 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    // Shockwave does not have an avatar idle state.
-    [Intercept(~ClientType.Shockwave)]
-    [InterceptIn(nameof(In.Sleep))]
-    private void HandleSleep(Intercept e)
+    [Intercept]
+    void HandleEntityIdle(EntityIdleMsg msg)
     {
         if (!IsInRoom)
         {
@@ -1847,23 +1748,20 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.Read<int>();
-        if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+        if (_currentRoom.Entities.TryGetValue(msg.Index, out Entity? entity))
         {
             bool wasIdle = entity.IsIdle;
-            entity.IsIdle = e.Packet.Read<bool>();
+            entity.IsIdle = msg.Idle;
             OnEntityIdle(entity, wasIdle);
         }
         else
         {
-            _logger.LogError("Failed to find entity with index {index} to update.", index);
+            _logger.LogError("Failed to find entity with index {index} to update.", msg.Index);
         }
     }
 
-    // Shockwave uses a field in the entity's status update.
-    [Intercept(~ClientType.Shockwave)]
-    [InterceptIn(nameof(In.Dance))]
-    private void HandleDance(Intercept e)
+    [Intercept]
+    void HandleDance(EntityDanceMsg msg)
     {
         if (!IsInRoom)
         {
@@ -1877,24 +1775,21 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.Read<int>();
-        if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+        if (_currentRoom.Entities.TryGetValue(msg.Index, out Entity? entity))
         {
-            int previousDance = entity.Dance;
-            entity.Dance = e.Packet.Read<int>();
+            Dances previousDance = entity.Dance;
+            entity.Dance = msg.Dance;
             OnEntityDance(entity, previousDance);
         }
         else
         {
-            _logger.LogError("Failed to find entity with index {index} to update.", index);
+            _logger.LogError("Failed to find entity with index {index} to update.", msg.Index);
             return;
         }
     }
 
-    // Shockwave uses a field in the entity's status update.
-    [Intercept(~ClientType.Shockwave)]
-    [InterceptIn(nameof(In.Expression))]
-    private void HandleExpression(Intercept e)
+    [Intercept]
+    void HandleExpression(EntityActionMsg msg)
     {
         if (!IsInRoom)
         {
@@ -1908,21 +1803,18 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.Read<int>();
-        if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+        if (_currentRoom.Entities.TryGetValue(msg.Index, out Entity? entity))
         {
-            OnEntityAction(entity, (Actions)e.Packet.Read<int>());
+            OnEntityAction(entity, msg.Action);
         }
         else
         {
-            _logger.LogError("Failed to find entity with index {index} to update.", index);
+            _logger.LogError("Failed to find entity with index {index} to update.", msg.Index);
         }
     }
 
-    // Shockwave uses a field in the entity's status update.
-    [Intercept(~ClientType.Shockwave)]
-    [InterceptIn(nameof(In.CarryObject))]
-    private void HandleCarryObject(Intercept e)
+    [Intercept]
+    void HandleCarryObject(EntityHandItemMsg msg)
     {
         if (!IsInRoom)
         {
@@ -1936,22 +1828,20 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.Read<int>();
-        if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+        if (_currentRoom.Entities.TryGetValue(msg.Index, out Entity? entity))
         {
             int previousItem = entity.HandItem;
-            entity.HandItem = e.Packet.Read<int>();
+            entity.HandItem = msg.Item;
             OnEntityHandItem(entity, previousItem);
         }
         else
         {
-            _logger.LogError("Failed to find entity with index {index} to update.", index);
+            _logger.LogError("Failed to find entity with index {index} to update.", msg.Index);
         }
     }
 
-    [Intercept(~ClientType.Shockwave)]
-    [InterceptIn(nameof(In.AvatarEffect))]
-    private void HandleAvatarEffect(Intercept e)
+    [Intercept]
+    void HandleAvatarEffect(EntityEffectMsg msg)
     {
         if (!IsInRoom)
         {
@@ -1965,23 +1855,20 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.Read<int>();
-        // + int delay
-        if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+        if (_currentRoom.Entities.TryGetValue(msg.Index, out Entity? entity))
         {
             int previousEffect = entity.Effect;
-            entity.Effect = e.Packet.Read<int>();
+            entity.Effect = msg.Effect;
             OnEntityEffect(entity, previousEffect);
         }
         else
         {
-            _logger.LogError("Failed to find entity with index {index} to update.", index);
+            _logger.LogError("Failed to find entity with index {index} to update.", msg.Index);
         }
     }
 
-    [Intercept(~ClientType.Shockwave)]
-    [InterceptIn(nameof(In.UserTyping))]
-    private void HandleUserTyping(Intercept e)
+    [Intercept]
+    void HandleUserTyping(EntityTypingMsg msg)
     {
         if (!IsInRoom)
         {
@@ -1995,21 +1882,20 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        int index = e.Packet.Read<int>();
-        if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+        if (_currentRoom.Entities.TryGetValue(msg.Index, out Entity? entity))
         {
             bool wasTyping = entity.IsTyping;
-            entity.IsTyping = e.Packet.Read<int>() != 0;
+            entity.IsTyping = msg.Typing;
             OnEntityTyping(entity, wasTyping);
         }
         else
         {
-            _logger.LogError("Failed to find entity with index {index} to update.", index);
+            _logger.LogError("Failed to find entity with index {index} to update.", msg.Index);
         }
     }
 
-    [InterceptIn(nameof(In.Whisper), nameof(In.Chat), nameof(In.Shout))]
-    private void HandleChat(Intercept e)
+    [Intercept]
+    void HandleChat(Intercept<EntityChatMsg> e)
     {
         if (!IsInRoom)
         {
@@ -2023,32 +1909,15 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        ChatType chatType;
+        var chat = e.Msg;
 
-        if (e.Is(In.Whisper)) chatType = ChatType.Whisper;
-        else if (e.Is(In.Chat)) chatType = ChatType.Talk;
-        else if (e.Is(In.Shout)) chatType = ChatType.Shout;
-        else return;
-
-        int index = e.Packet.Read<int>();
-        if (!_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+        if (!_currentRoom.Entities.TryGetValue(chat.Index, out Entity? entity))
         {
-            _logger.LogError("Failed to find entity with index {index}.", index);
+            _logger.LogError("Failed to find entity with index {index}.", chat.Index);
             return;
         }
 
-        string message = e.Packet.Read<string>();
-
-        int expression = 0, bubbleStyle = 0;
-        if (Interceptor.Session.Is(~ClientType.Shockwave))
-        {
-            expression = e.Packet.Read<int>();
-            bubbleStyle = e.Packet.Read<int>();
-        }
-
-        // string? int
-
-        EntityChatEventArgs chatEventArgs = new(entity, chatType, message, bubbleStyle);
+        EntityChatEventArgs chatEventArgs = new(entity, chat.Type, chat.Message, chat.Style);
         OnEntityChat(chatEventArgs);
 
         if (chatEventArgs.IsBlocked || entity.IsHidden) e.Block();
