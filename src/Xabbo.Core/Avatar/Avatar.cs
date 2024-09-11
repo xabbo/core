@@ -59,7 +59,7 @@ public abstract class Avatar(AvatarType type, Id id, int index) : IAvatar, IPars
     {
         if (p.Client == ClientType.Shockwave)
         {
-            RoomUser? user = this as RoomUser;
+            User? user = this as User;
 
             p.WriteInt(Index);
             p.WriteString(Name);
@@ -123,14 +123,14 @@ public abstract class Avatar(AvatarType type, Id id, int index) : IAvatar, IPars
         type = (AvatarType)p.ReadInt();
         Avatar avatar = type switch
         {
-            AvatarType.User => new RoomUser(id, index, in p),
+            AvatarType.User => new User(id, index, in p),
             AvatarType.Pet => new Pet(id, index, in p),
             AvatarType.PublicBot or AvatarType.PrivateBot => new Bot(type, id, index, in p),
             _ => throw new Exception($"Unknown avatar type: {type}"),
         };
 
         if (p.Client == ClientType.Shockwave &&
-            avatar is RoomUser user)
+            avatar is User user)
         {
             user.Gender = gender switch
             {

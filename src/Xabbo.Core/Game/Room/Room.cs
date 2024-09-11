@@ -166,8 +166,8 @@ internal class Room : IRoom, INotifyPropertyChanged
     }
 
     public IAvatar? GetAvatar(int index) => Avatars.TryGetValue(index, out Avatar? avatar) ? avatar : null;
-    public IRoomUser? GetUser(int index) => Avatars.TryGetValue(index, out Avatar? avatar) ? (avatar as IRoomUser) : null;
-    public IRoomUser? GetUserById(Id id) => Avatars.Values.OfType<IRoomUser>().FirstOrDefault(x => x.Id == id);
+    public IUser? GetUser(int index) => Avatars.TryGetValue(index, out Avatar? avatar) ? (avatar as IUser) : null;
+    public IUser? GetUserById(Id id) => Avatars.Values.OfType<IUser>().FirstOrDefault(x => x.Id == id);
 
     public bool TryGetAvatarByIndex(int index, [NotNullWhen(true)] out IAvatar? avatar) => (avatar = GetAvatar(index)) is not null;
 

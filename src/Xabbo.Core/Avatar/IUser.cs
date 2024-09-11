@@ -1,8 +1,6 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
-public interface IRoomUser : IAvatar
+public interface IUser : IAvatar
 {
     Gender Gender { get; }
     Id GroupId { get; }

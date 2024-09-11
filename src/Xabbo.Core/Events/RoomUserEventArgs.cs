@@ -1,7 +1,7 @@
 namespace Xabbo.Core.Events;
 
-public class RoomUserEventArgs(IRoomUser user)
+public class RoomUserEventArgs(IUser user)
     : AvatarEventArgs(user)
 {
-    public IRoomUser User { get; } = user;
+    public IUser User { get; } = user;
 }

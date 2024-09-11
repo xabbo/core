@@ -16,8 +16,8 @@ public sealed partial class TradeManager(IExtension extension, ProfileManager pr
     public bool IsTrading { get; private set; }
     public bool IsTrader { get; private set; }
     public bool IsCompleted { get; private set; }
-    public IRoomUser? Self { get; private set; }
-    public IRoomUser? Partner { get; private set; }
+    public IUser? Self { get; private set; }
+    public IUser? Partner { get; private set; }
     public ITradeOffer? OwnOffer { get; private set; }
     public ITradeOffer? PartnerOffer { get; private set; }
 
@@ -33,18 +33,18 @@ public sealed partial class TradeManager(IExtension extension, ProfileManager pr
     public event EventHandler<TradeStopEventArgs>? Closed;
     public event EventHandler<TradeCompleteEventArgs>? Completed;
 
-    private void OnOpened(bool isTrader, IRoomUser partner)
+    private void OnOpened(bool isTrader, IUser partner)
         => Opened?.Invoke(this, new TradeStartEventArgs(isTrader, partner));
     private void OnTradeOpenFailed(int reason, string name)
         => OpenFailed?.Invoke(this, new TradeStartFailEventArgs(reason, name));
     private void OnUpdated(ITradeOffer ownOffer, ITradeOffer partnerOffer)
         => Updated?.Invoke(this, new TradeOfferEventArgs(ownOffer, partnerOffer));
-    private void OnAccepted(IRoomUser user, bool accepted)
+    private void OnAccepted(IUser user, bool accepted)
         => Accepted?.Invoke(this, new TradeAcceptEventArgs(user, accepted));
     private void OnWaitingConfirm() => WaitingConfirm?.Invoke(this, EventArgs.Empty);
-    private void OnClosed(IRoomUser user, int reason)
+    private void OnClosed(IUser user, int reason)
         => Closed?.Invoke(this, new TradeStopEventArgs(user, reason));
-    private void OnCompleted(bool wasTrader, IRoomUser self, IRoomUser partner,
+    private void OnCompleted(bool wasTrader, IUser self, IUser partner,
         ITradeOffer ownOffer, ITradeOffer partnerOffer)
         => Completed?.Invoke(this, new TradeCompleteEventArgs(wasTrader, self, partner, ownOffer, partnerOffer));
 
@@ -92,13 +92,13 @@ public sealed partial class TradeManager(IExtension extension, ProfileManager pr
         int tradeeId = e.Packet.Read<int>();
         int tradeeCanTrade = e.Packet.Read<int>();
 
-        if (!_roomManager.Room.TryGetAvatarById(traderId, out IRoomUser? trader))
+        if (!_roomManager.Room.TryGetAvatarById(traderId, out IUser? trader))
         {
             Debug.Log($"failed to find user with id {traderId}");
             return;
         }
 
-        if (!_roomManager.Room.TryGetAvatarById(tradeeId, out IRoomUser? tradee))
+        if (!_roomManager.Room.TryGetAvatarById(tradeeId, out IUser? tradee))
         {
             Debug.Log($"failed to find user with id {tradeeId}");
             return;
@@ -178,7 +178,7 @@ public sealed partial class TradeManager(IExtension extension, ProfileManager pr
             return;
         }
 
-        IRoomUser user;
+        IUser user;
         int userId = e.Packet.Read<int>();
         bool accepted = e.Packet.Read<int>() == 1;
 
@@ -233,8 +233,8 @@ public sealed partial class TradeManager(IExtension extension, ProfileManager pr
         }
 
         bool wasTrader = IsTrader;
-        IRoomUser? self = Self;
-        IRoomUser? partner = Partner;
+        IUser? self = Self;
+        IUser? partner = Partner;
         ITradeOffer? ownOffer = OwnOffer;
         ITradeOffer? partnerOffer = PartnerOffer;
 
@@ -258,7 +258,7 @@ public sealed partial class TradeManager(IExtension extension, ProfileManager pr
         int userId = e.Packet.Read<int>();
         int reason = e.Packet.Read<int>();
 
-        IRoomUser? user = null;
+        IUser? user = null;
         if (userId == Self?.Id) user = Self;
         else if (userId == Partner?.Id) user = Partner;
 

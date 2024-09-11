@@ -30,7 +30,7 @@ public sealed class AvatarDataUpdatedEventArgs : AvatarEventArgs
         {
             currentGender = bot.Gender;
         }
-        else if (avatar is IRoomUser user)
+        else if (avatar is IUser user)
         {
             currentGender = user.Gender;
             currentAchievementScore = user.AchievementScore;

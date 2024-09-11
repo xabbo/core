@@ -1671,7 +1671,7 @@ public sealed partial class RoomManager : GameStateManager
             avatar.Figure = updatedFigure;
             avatar.Motto = updatedMotto;
 
-            if (avatar is RoomUser user)
+            if (avatar is User user)
             {
                 previousGender = user.Gender;
                 user.Gender = updatedGender;

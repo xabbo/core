@@ -2,7 +2,7 @@
 
 namespace Xabbo.Core;
 
-public class RoomUser(Id id, int index) : Avatar(AvatarType.User, id, index), IRoomUser
+public class User(Id id, int index) : Avatar(AvatarType.User, id, index), IUser
 {
     public Gender Gender { get; set; } = Gender.Unisex;
     public Id GroupId { get; set; } = -1;
@@ -16,7 +16,7 @@ public class RoomUser(Id id, int index) : Avatar(AvatarType.User, id, index), IR
     public int RightsLevel => CurrentUpdate?.ControlLevel ?? 0;
     public bool HasRights => RightsLevel > 0;
 
-    internal RoomUser(long id, int index, in PacketReader p)
+    internal User(long id, int index, in PacketReader p)
         : this(id, index)
     {
         if (p.Client == ClientType.Shockwave)

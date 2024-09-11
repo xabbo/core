@@ -1,6 +1,6 @@
 ﻿namespace Xabbo.Core.Events;
 
-public sealed class TradeStartEventArgs(bool isTrader, IRoomUser partner)
+public sealed class TradeStartEventArgs(bool isTrader, IUser partner)
 {
     /// <summary>
     /// Gets if the user was the one who initiated the trade.
@@ -10,5 +10,5 @@ public sealed class TradeStartEventArgs(bool isTrader, IRoomUser partner)
     /// <summary>
     /// Gets the partner of the trade.
     /// </summary>
-    public IRoomUser Partner { get; } = partner;
+    public IUser Partner { get; } = partner;
 }

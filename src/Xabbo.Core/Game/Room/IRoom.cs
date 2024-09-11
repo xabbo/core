@@ -224,7 +224,7 @@ public interface IRoom
     /// <summary>
     /// Gets the users in this room.
     /// </summary>
-    IEnumerable<IRoomUser> Users => Avatars.OfType<IRoomUser>();
+    IEnumerable<IUser> Users => Avatars.OfType<IUser>();
     /// <summary>
     /// Gets the pets in this room.
     /// </summary>
@@ -251,9 +251,9 @@ public interface IRoom
     bool TryGetAvatarById<TAvatar>(Id id, [NotNullWhen(true)] out TAvatar? avatar) where TAvatar : IAvatar;
     bool TryGetAvatarByName<TAvatar>(string name, [NotNullWhen(true)] out TAvatar? avatar) where TAvatar : IAvatar;
 
-    bool TryGetUserByIndex(int index, [NotNullWhen(true)] out IRoomUser? user) => TryGetAvatarByIndex(index, out user);
-    bool TryGetUserById(Id id, [NotNullWhen(true)] out IRoomUser? user) => TryGetAvatarById(id, out user);
-    bool TryGetUserByName(string name, [NotNullWhen(true)] out IRoomUser? user) => TryGetAvatarByName(name, out user);
+    bool TryGetUserByIndex(int index, [NotNullWhen(true)] out IUser? user) => TryGetAvatarByIndex(index, out user);
+    bool TryGetUserById(Id id, [NotNullWhen(true)] out IUser? user) => TryGetAvatarById(id, out user);
+    bool TryGetUserByName(string name, [NotNullWhen(true)] out IUser? user) => TryGetAvatarByName(name, out user);
 
     bool TryGetPetByIndex(int index, [NotNullWhen(true)] out IPet? pet) => TryGetAvatarByIndex(index, out pet);
     bool TryGetPetById(Id id, [NotNullWhen(true)] out IPet? pet) => TryGetAvatarById(id, out pet);
