@@ -7,7 +7,7 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Tasks;
 
-[Intercepts]
+[Intercept]
 public sealed partial class GetBadgesTask(IInterceptor interceptor)
     : InterceptorTask<List<Badge>>(interceptor)
 {

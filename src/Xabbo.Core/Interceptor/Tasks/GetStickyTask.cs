@@ -6,7 +6,7 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Tasks;
 
-[Intercepts]
+[Intercept]
 public partial class GetStickyTask(IInterceptor interceptor, Id stickyId) : InterceptorTask<Sticky>(interceptor)
 {
     private readonly Id _stickyId = stickyId;

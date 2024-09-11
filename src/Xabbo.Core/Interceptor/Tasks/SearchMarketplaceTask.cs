@@ -6,7 +6,7 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Tasks;
 
-[Intercepts]
+[Intercept]
 public sealed partial class SearchMarketplaceTask(
     IInterceptor interceptor,
     string? searchText = null,

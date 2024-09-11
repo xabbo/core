@@ -6,7 +6,7 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Tasks;
 
-[Intercepts]
+[Intercept]
 public partial class SearchUserTask(IInterceptor interceptor, string searchName)
     : InterceptorTask<UserSearchResults>(interceptor)
 {

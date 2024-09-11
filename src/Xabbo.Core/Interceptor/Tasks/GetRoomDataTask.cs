@@ -6,7 +6,7 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Tasks;
 
-[Intercepts]
+[Intercept]
 public sealed partial class GetRoomDataTask : InterceptorTask<IRoomData>
 {
     private readonly long _roomId;

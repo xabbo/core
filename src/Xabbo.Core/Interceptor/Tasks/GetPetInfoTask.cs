@@ -6,7 +6,7 @@ using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks;
 
-[Intercepts]
+[Intercept]
 public sealed partial class GetPetInfoTask(IInterceptor interceptor, Id petId)
     : InterceptorTask<PetInfo>(interceptor)
 {

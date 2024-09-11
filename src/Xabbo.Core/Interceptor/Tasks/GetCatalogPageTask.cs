@@ -9,7 +9,7 @@ namespace Xabbo.Core.Tasks;
 /// <summary>
 /// Gets a catalog page by its ID.
 /// </summary>
-[Intercepts]
+[Intercept]
 public sealed partial class GetCatalogPageTask : InterceptorTask<ICatalogPage>
 {
     private readonly int _pageId;

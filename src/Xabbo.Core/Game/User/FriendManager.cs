@@ -13,7 +13,7 @@ using Xabbo.Core.Events;
 
 namespace Xabbo.Core.Game;
 
-[Intercepts]
+[Intercept]
 public sealed partial class FriendManager : GameStateManager
 {
     private readonly ILogger _logger;

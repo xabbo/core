@@ -7,7 +7,7 @@ using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks;
 
-[Intercepts]
+[Intercept]
 public sealed partial class GetRightsListTask(IInterceptor interceptor, long roomId)
     : InterceptorTask<List<(long Id, string Name)>>(interceptor)
 {

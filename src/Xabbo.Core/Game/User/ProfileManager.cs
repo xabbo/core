@@ -8,7 +8,7 @@ using Xabbo.Core.Events;
 
 namespace Xabbo.Core.Game;
 
-[Intercepts]
+[Intercept]
 public sealed partial class ProfileManager : GameStateManager
 {
     private Task<IUserData> _taskUserData;

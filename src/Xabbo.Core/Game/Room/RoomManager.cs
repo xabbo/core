@@ -17,7 +17,7 @@ namespace Xabbo.Core.Game;
 /// <summary>
 /// Manages information about the current room, the user's permissions in the room, its furni, entities and chat.
 /// </summary>
-[Intercepts]
+[Intercept]
 public sealed partial class RoomManager : GameStateManager
 {
     private readonly ILogger _logger;
@@ -743,7 +743,7 @@ public sealed partial class RoomManager : GameStateManager
         EnteringRoom(e.Packet.Read<Id>());
     }
 
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomQueueStatus))]
     private void HandleRoomQueueStatus(Intercept e)
     {
@@ -928,7 +928,7 @@ public sealed partial class RoomManager : GameStateManager
         OnRightsUpdated();
     }
 
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomEntryTile))]
     private void HandleRoomEntryTile(Intercept e)
     {
@@ -955,7 +955,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     // Shockwave does not have a furni heightmap.
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn("f:" + nameof(In.HeightMap))]
     private void HandleHeightMap(Intercept e)
     {
@@ -1026,7 +1026,7 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomVisualizationSettings))]
     private void HandleRoomVisualizationSettings(Intercept e)
     {
@@ -1042,7 +1042,7 @@ public sealed partial class RoomManager : GameStateManager
         // TODO event
     }
 
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomChatSettings))]
     private void HandleRoomChatSettings(Intercept e)
     {
@@ -1056,7 +1056,7 @@ public sealed partial class RoomManager : GameStateManager
         OnRoomDataUpdated(_currentRoom.Data);
     }
 
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomEntryInfo))]
     private void HandleRoomEntryInfo(Intercept e)
     {
@@ -1105,7 +1105,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     // TODO: Check how this works on Shockwave
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.ErrorReport))]
     private void HandleErrorReport(Intercept e)
     {
@@ -1327,7 +1327,7 @@ public sealed partial class RoomManager : GameStateManager
         OnFloorItemDataUpdated(item, previousData);
     }
 
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.ObjectsDataUpdate))]
     private void HandleObjectsDataUpdate(Intercept e)
     {
@@ -1703,7 +1703,7 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.WiredMovements))]
     private void HandleWiredMovements(Intercept e)
     {
@@ -1736,7 +1736,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     // TODO: check
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.UserChange))]
     private void HandleUserChange(Intercept e)
     {
@@ -1798,7 +1798,7 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.UserNameChanged))]
     private void HandleUserNameChanged(Intercept e)
     {
@@ -1831,7 +1831,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     // Shockwave does not have an avatar idle state.
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.Sleep))]
     private void HandleSleep(Intercept e)
     {
@@ -1861,7 +1861,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     // Shockwave uses a field in the entity's status update.
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.Dance))]
     private void HandleDance(Intercept e)
     {
@@ -1892,7 +1892,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     // Shockwave uses a field in the entity's status update.
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.Expression))]
     private void HandleExpression(Intercept e)
     {
@@ -1920,7 +1920,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     // Shockwave uses a field in the entity's status update.
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.CarryObject))]
     private void HandleCarryObject(Intercept e)
     {
@@ -1949,7 +1949,7 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.AvatarEffect))]
     private void HandleAvatarEffect(Intercept e)
     {
@@ -1979,7 +1979,7 @@ public sealed partial class RoomManager : GameStateManager
         }
     }
 
-    [Intercepts(~ClientType.Shockwave)]
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.UserTyping))]
     private void HandleUserTyping(Intercept e)
     {

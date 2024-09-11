@@ -6,7 +6,7 @@ using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks;
 
-[Intercepts]
+[Intercept]
 public sealed partial class GetGroupMembersTask(
     IInterceptor interceptor, Id groupId, int page, string filter, GroupMemberSearchType searchType
 )

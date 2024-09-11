@@ -6,7 +6,7 @@ using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks;
 
-[Intercepts]
+[Intercept]
 public sealed partial class GetMarketplaceInfoTask(IInterceptor interceptor, ItemType type, int kind)
     : InterceptorTask<IMarketplaceItemInfo>(interceptor)
 {
