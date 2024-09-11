@@ -25,9 +25,9 @@ public abstract class ItemData : IItemData, IParserComposer<ItemData>
             {
                 // Compatibility for Shockwave
                 // C/O = Closed/Open (Gate)
-                "C", "FALSE" => 0,
-                "O", "TRUE" => 1,
-                _ => int.TryParse(Value, out int state) ? state : -1;
+                "C" or "FALSE" => 0,
+                "O" or "TRUE" => 1,
+                _ => int.TryParse(Value, out int state) ? state : -1
             };
         }
     }
