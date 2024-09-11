@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 
 using Xabbo.Messages;
@@ -31,7 +28,7 @@ public abstract class Entity(EntityType type, Id id, int index) : IEntity, IPars
     public Area Area => new(Location.XY, 1, 1);
 
     // States
-    public int Dance { get; set; }
+    public Dances Dance { get; set; }
     public bool IsIdle { get; set; }
     public bool IsTyping { get; set; }
     public int HandItem { get; set; }

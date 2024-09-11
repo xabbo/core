@@ -72,7 +72,7 @@ public interface IEntity : IFloorEntity
     /// <summary>
     /// Gets the current dance of the entity.
     /// </summary>
-    int Dance { get; }
+    Dances Dance { get; }
 
     /// <summary>
     /// Gets if the entity is idle or not.

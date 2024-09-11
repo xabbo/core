@@ -1,7 +1,7 @@
 ﻿namespace Xabbo.Core.Events;
 
-public sealed class EntityDanceEventArgs(IEntity entity, int previousDance)
+public sealed class EntityDanceEventArgs(IEntity entity, Dances previousDance)
     : EntityEventArgs(entity)
 {
-    public int PreviousDance { get; } = previousDance;
+    public Dances PreviousDance { get; } = previousDance;
 }
