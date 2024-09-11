@@ -931,15 +931,15 @@ public static class Extensions
     }
     #endregion
 
-    #region - Entities -
+    #region - Avatars -
     /// <summary>
-    /// Gets room entities at the specified X, Y, Z location and/or direction.
+    /// Gets room avatars at the specified X, Y, Z location and/or direction.
     /// </summary>
-    public static IEnumerable<T> At<T>(this IEnumerable<T> entities,
+    public static IEnumerable<T> At<T>(this IEnumerable<T> avatars,
         int? x = null, int? y = null, float? z = null, int? dir = null,
         float epsilon = XabboConst.DefaultEpsilon) where T : IFloorEntity
     {
-        foreach (var e in entities)
+        foreach (var e in avatars)
         {
             if (x.HasValue && e.Location.X != x) continue;
             if (y.HasValue && e.Location.Y != y) continue;
@@ -950,13 +950,13 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Gets room entities not a the specified X, Y, Z location and/or direction.
+    /// Gets room avatars not a the specified X, Y, Z location and/or direction.
     /// </summary>
-    public static IEnumerable<T> NotAt<T>(this IEnumerable<T> entities,
+    public static IEnumerable<T> NotAt<T>(this IEnumerable<T> avatars,
         int? x = null, int? y = null, float? z = null, int? dir = null,
         float epsilon = XabboConst.DefaultEpsilon) where T : IFloorEntity
     {
-        foreach (var e in entities)
+        foreach (var e in avatars)
         {
             if (x.HasValue && e.Location.X == x) continue;
             if (y.HasValue && e.Location.Y == y) continue;
@@ -967,61 +967,61 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Gets entities at the specified X, Y location and optionally direction.
+    /// Gets avatars at the specified X, Y location and optionally direction.
     /// </summary>
-    public static IEnumerable<TFloorEntity> At<TFloorEntity>(this IEnumerable<TFloorEntity> entities,
-        Point location, int? dir = null) where TFloorEntity : IFloorEntity
+    public static IEnumerable<TFloorAvatar> At<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars,
+        Point location, int? dir = null) where TFloorAvatar : IFloorEntity
     {
-        return At(entities, location.X, location.Y, dir: dir);
+        return At(avatars, location.X, location.Y, dir: dir);
     }
 
     /// <summary>
-    /// Gets entities not at the specified X, Y location and optionally direction.
+    /// Gets avatars not at the specified X, Y location and optionally direction.
     /// </summary>
-    public static IEnumerable<TFloorEntity> NotAt<TFloorEntity>(this IEnumerable<TFloorEntity> entities,
-        Point location, int? dir = null) where TFloorEntity : IFloorEntity
+    public static IEnumerable<TFloorAvatar> NotAt<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars,
+        Point location, int? dir = null) where TFloorAvatar : IFloorEntity
     {
-        return NotAt(entities, location.X, location.Y, dir: dir);
+        return NotAt(avatars, location.X, location.Y, dir: dir);
     }
 
     /// <summary>
-    /// Gets entities at the specified X, Y, Z location and optionally direction.
+    /// Gets avatars at the specified X, Y, Z location and optionally direction.
     /// </summary>
-    public static IEnumerable<TFloorEntity> At<TFloorEntity>(this IEnumerable<TFloorEntity> entities,
+    public static IEnumerable<TFloorAvatar> At<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars,
         Tile location, int? dir = null,
-        float epsilon = XabboConst.DefaultEpsilon) where TFloorEntity : IFloorEntity
+        float epsilon = XabboConst.DefaultEpsilon) where TFloorAvatar : IFloorEntity
     {
-        return At(entities, location.X, location.Y, location.Z, dir, epsilon);
+        return At(avatars, location.X, location.Y, location.Z, dir, epsilon);
     }
 
     /// <summary>
-    /// Gets entities not at the specified X, Y, Z location and optionally direction.
+    /// Gets avatars not at the specified X, Y, Z location and optionally direction.
     /// </summary>
-    public static IEnumerable<TFloorEntity> NotAt<TFloorEntity>(this IEnumerable<TFloorEntity> entities,
+    public static IEnumerable<TFloorAvatar> NotAt<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars,
         Tile location, int? dir = null,
-        float epsilon = XabboConst.DefaultEpsilon) where TFloorEntity : IFloorEntity
+        float epsilon = XabboConst.DefaultEpsilon) where TFloorAvatar : IFloorEntity
     {
-        return NotAt(entities, location.X, location.Y, location.Z, dir, epsilon);
+        return NotAt(avatars, location.X, location.Y, location.Z, dir, epsilon);
     }
 
     /// <summary>
     /// Gets floor entities contained inside the specified area.
-    /// Entities partially intersecting the area will not be included.
+    /// Avatars partially intersecting the area will not be included.
     /// To include these, use <see cref="Intersecting{TFloorItem}(IEnumerable{TFloorItem}, Area)" />.
     /// </summary>
-    public static IEnumerable<TFloorEntity> Inside<TFloorEntity>(this IEnumerable<TFloorEntity> entities, Area area)
-        where TFloorEntity : IFloorEntity
+    public static IEnumerable<TFloorAvatar> Inside<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars, Area area)
+        where TFloorAvatar : IFloorEntity
     {
-        return entities.Where(x => area.Contains(x.Area));
+        return avatars.Where(x => area.Contains(x.Area));
     }
 
     /// <summary>
     /// Gets floor entities contained inside any of the areas in the specified set.
     /// </summary>
-    public static IEnumerable<TFloorEntity> InsideAny<TFloorEntity>(this IEnumerable<TFloorEntity> entities, AreaSet areas)
-        where TFloorEntity : IFloorEntity
+    public static IEnumerable<TFloorAvatar> InsideAny<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars, AreaSet areas)
+        where TFloorAvatar : IFloorEntity
     {
-        return entities.Where(x =>
+        return avatars.Where(x =>
         {
             Area a = x.Area;
             return areas.Any(area => area.Contains(a));
@@ -1031,10 +1031,10 @@ public static class Extensions
     /// <summary>
     /// Gets floor entities contained inside all of the areas in the specified set.
     /// </summary>
-    public static IEnumerable<TFloorEntity> InsideAll<TFloorEntity>(this IEnumerable<TFloorEntity> entities, AreaSet areas)
-        where TFloorEntity : IFloorEntity
+    public static IEnumerable<TFloorAvatar> InsideAll<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars, AreaSet areas)
+        where TFloorAvatar : IFloorEntity
     {
-        return entities.Where(x =>
+        return avatars.Where(x =>
         {
             Area a = x.Area;
             return areas.All(area => area.Contains(a));
@@ -1044,19 +1044,19 @@ public static class Extensions
     /// <summary>
     /// Gets floor entities outside the specified area.
     /// </summary>
-    public static IEnumerable<TFloorEntity> Outside<TFloorEntity>(this IEnumerable<TFloorEntity> entities, Area area)
-        where TFloorEntity : IFloorEntity
+    public static IEnumerable<TFloorAvatar> Outside<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars, Area area)
+        where TFloorAvatar : IFloorEntity
     {
-        return entities.Where(x => !area.Contains(x.Area));
+        return avatars.Where(x => !area.Contains(x.Area));
     }
 
     /// <summary>
     /// Gets floor entities outside the specified areas.
     /// </summary>
-    public static IEnumerable<TFloorEntity> Outside<TFloorEntity>(this IEnumerable<TFloorEntity> entities, AreaSet areas)
-        where TFloorEntity : IFloorEntity
+    public static IEnumerable<TFloorAvatar> Outside<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars, AreaSet areas)
+        where TFloorAvatar : IFloorEntity
     {
-        return entities.Where(x => !areas.Contains(x.Area));
+        return avatars.Where(x => !areas.Contains(x.Area));
     }
     #endregion
 }

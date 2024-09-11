@@ -15,7 +15,7 @@ using Xabbo.Core.Messages.Incoming;
 namespace Xabbo.Core.Game;
 
 /// <summary>
-/// Manages information about the current room, the user's permissions in the room, its furni, entities and chat.
+/// Manages information about the current room, the user's permissions in the room, its furni, avatars and chat.
 /// </summary>
 [Intercept]
 public sealed partial class RoomManager : GameStateManager
@@ -333,191 +333,191 @@ public sealed partial class RoomManager : GameStateManager
     }
     #endregion
 
-    #region - Entity events -
+    #region - Avatar events -
     /// <summary>
-    /// Invoked when an entity has been added to the room.
+    /// Invoked when an avatar has been added to the room.
     /// </summary>
-    public event Action<EntityEventArgs>? EntityAdded;
-    private void OnEntityAdded(IEntity entity)
+    public event Action<AvatarEventArgs>? AvatarAdded;
+    private void OnAvatarAdded(IAvatar avatar)
     {
-        EntityAdded?.Invoke(new EntityEventArgs(entity));
+        AvatarAdded?.Invoke(new AvatarEventArgs(avatar));
     }
 
     /// <summary>
-    /// Invoked when entities have been added to the room.
+    /// Invoked when avatars have been added to the room.
     /// </summary>
-    public event Action<EntitiesEventArgs>? EntitiesAdded;
-    private void OnEntitiesAdded(IEnumerable<IEntity> entities)
+    public event Action<AvatarsEventArgs>? AvatarsAdded;
+    private void OnAvatarsAdded(IEnumerable<IAvatar> avatars)
     {
-        _logger.LogTrace("Entities added. ({n})", entities.Count());
-        EntitiesAdded?.Invoke(new EntitiesEventArgs(entities));
+        _logger.LogTrace("Avatars added. ({n})", avatars.Count());
+        AvatarsAdded?.Invoke(new AvatarsEventArgs(avatars));
     }
 
     /// <summary>
-    /// Invoked when an entity in the room is updated.
+    /// Invoked when an avatar in the room is updated.
     /// </summary>
-    public event Action<EntityEventArgs>? EntityUpdated;
-    private void OnEntityUpdated(IEntity entity)
+    public event Action<AvatarEventArgs>? AvatarUpdated;
+    private void OnAvatarUpdated(IAvatar avatar)
     {
-        EntityUpdated?.Invoke(new EntityEventArgs(entity));
+        AvatarUpdated?.Invoke(new AvatarEventArgs(avatar));
     }
 
     /// <summary>
-    /// Invoked when entities in the room are updated.
+    /// Invoked when avatars in the room are updated.
     /// </summary>
-    public event Action<EntitiesEventArgs>? EntitiesUpdated;
-    private void OnEntitiesUpdated(IEnumerable<IEntity> entities)
+    public event Action<AvatarsEventArgs>? AvatarsUpdated;
+    private void OnAvatarsUpdated(IEnumerable<IAvatar> avatars)
     {
-        _logger.LogTrace("Entities updated. ({n})", entities.Count());
-        EntitiesUpdated?.Invoke(new EntitiesEventArgs(entities));
+        _logger.LogTrace("Avatars updated. ({n})", avatars.Count());
+        AvatarsUpdated?.Invoke(new AvatarsEventArgs(avatars));
     }
 
     /// <summary>
-    /// Invoked when an entity slides along a roller.
+    /// Invoked when an avatar slides along a roller.
     /// </summary>
-    public event Action<EntitySlideEventArgs>? EntitySlide;
-    private void OnEntitySlide(IEntity entity, Tile previousTile)
+    public event Action<AvatarSlideEventArgs>? AvatarSlide;
+    private void OnAvatarSlide(IAvatar avatar, Tile previousTile)
     {
         _logger.LogTrace(
-            "Entity slide. ({entityName} [{entityId}:{entityIndex}], {from} -> {to})",
-            entity.Name, entity.Id, entity.Index, previousTile, entity.Location
+            "Avatar slide. ({avatarName} [{avatarId}:{avatarIndex}], {from} -> {to})",
+            avatar.Name, avatar.Id, avatar.Index, previousTile, avatar.Location
         );
-        EntitySlide?.Invoke(new EntitySlideEventArgs(entity, previousTile));
+        AvatarSlide?.Invoke(new AvatarSlideEventArgs(avatar, previousTile));
     }
 
     /// <summary>
-    /// Invoked when an entity's figure, gender, motto or achievement score is updated.
+    /// Invoked when an avatar's figure, gender, motto or achievement score is updated.
     /// </summary>
-    public event Action<EntityDataUpdatedEventArgs>? EntityDataUpdated;
-    private void OnEntityDataUpdated(IEntity entity,
+    public event Action<AvatarDataUpdatedEventArgs>? AvatarDataUpdated;
+    private void OnAvatarDataUpdated(IAvatar avatar,
         string previousFigure, Gender previousGender,
         string previousMotto, int previousAchievementScore)
     {
         _logger.LogTrace(
-            "Entity data updated. ({name} [{id}:{index}])",
-            entity.Name, entity.Id, entity.Index
+            "Avatar data updated. ({name} [{id}:{index}])",
+            avatar.Name, avatar.Id, avatar.Index
         );
-        EntityDataUpdated?.Invoke(new EntityDataUpdatedEventArgs(
-            entity, previousFigure, previousGender,
+        AvatarDataUpdated?.Invoke(new AvatarDataUpdatedEventArgs(
+            avatar, previousFigure, previousGender,
             previousMotto, previousAchievementScore
         ));
     }
 
     /// <summary>
-    /// Invoked when an entity's name changes.
+    /// Invoked when an avatar's name changes.
     /// </summary>
-    public event Action<EntityNameChangedEventArgs>? EntityNameChanged;
-    private void OnEntityNameChanged(IEntity entity, string previousName)
+    public event Action<AvatarNameChangedEventArgs>? AvatarNameChanged;
+    private void OnAvatarNameChanged(IAvatar avatar, string previousName)
     {
         _logger.LogTrace(
-            "Entity name changed. ({previousName} -> {entityName} [{entityId}:{entityIndex}])",
-            previousName, entity.Name, entity.Id, entity.Index
+            "Avatar name changed. ({previousName} -> {avatarName} [{avatarId}:{avatarIndex}])",
+            previousName, avatar.Name, avatar.Id, avatar.Index
         );
-        EntityNameChanged?.Invoke(new EntityNameChangedEventArgs(entity, previousName));
+        AvatarNameChanged?.Invoke(new AvatarNameChangedEventArgs(avatar, previousName));
     }
 
     /// <summary>
-    /// Invoked when an entity's idle status updates.
+    /// Invoked when an avatar's idle status updates.
     /// </summary>
-    public event Action<EntityIdleEventArgs>? EntityIdle;
-    private void OnEntityIdle(IEntity entity, bool wasIdle)
+    public event Action<AvatarIdleEventArgs>? AvatarIdle;
+    private void OnAvatarIdle(IAvatar avatar, bool wasIdle)
     {
         _logger.LogTrace(
-            "Entity idle. ({entityName} [{entityId}:{entityIndex}], {wasIdle} -> {isIdle})",
-            entity.Name, entity.Id, entity.Index, wasIdle, entity.IsIdle
+            "Avatar idle. ({avatarName} [{avatarId}:{avatarIndex}], {wasIdle} -> {isIdle})",
+            avatar.Name, avatar.Id, avatar.Index, wasIdle, avatar.IsIdle
         );
-        EntityIdle?.Invoke(new EntityIdleEventArgs(entity, wasIdle));
+        AvatarIdle?.Invoke(new AvatarIdleEventArgs(avatar, wasIdle));
     }
 
     /// <summary>
-    /// Invoked when an entity's dance updates.
+    /// Invoked when an avatar's dance updates.
     /// </summary>
-    public event Action<EntityDanceEventArgs>? EntityDance;
-    private void OnEntityDance(IEntity entity, Dances previousDance)
+    public event Action<AvatarDanceEventArgs>? AvatarDance;
+    private void OnAvatarDance(IAvatar avatar, Dances previousDance)
     {
         _logger.LogTrace(
-            "Entity dance. ({entityName} [{entityId}:{entityIndex}], {previousDance} -> {dance})",
-            entity.Name, entity.Id, entity.Index, previousDance, entity.Dance
+            "Avatar dance. ({avatarName} [{avatarId}:{avatarIndex}], {previousDance} -> {dance})",
+            avatar.Name, avatar.Id, avatar.Index, previousDance, avatar.Dance
         );
-        EntityDance?.Invoke(new EntityDanceEventArgs(entity, previousDance));
+        AvatarDance?.Invoke(new AvatarDanceEventArgs(avatar, previousDance));
     }
 
     /// <summary>
-    /// Invoked when an entity's hand item updates.
+    /// Invoked when an avatar's hand item updates.
     /// </summary>
-    public event Action<EntityHandItemEventArgs>? EntityHandItem;
-    private void OnEntityHandItem(IEntity entity, int previousItem)
+    public event Action<AvatarHandItemEventArgs>? AvatarHandItem;
+    private void OnAvatarHandItem(IAvatar avatar, int previousItem)
     {
         _logger.LogTrace(
-            "Entity hand item. ({entityName} [{entityId}:{entityIndex}], {previousItemId} -> {itemId})",
-            entity.Name, entity.Id, entity.Index, previousItem, entity.HandItem
+            "Avatar hand item. ({avatarName} [{avatarId}:{avatarIndex}], {previousItemId} -> {itemId})",
+            avatar.Name, avatar.Id, avatar.Index, previousItem, avatar.HandItem
         );
-        EntityHandItem?.Invoke(new EntityHandItemEventArgs(entity, previousItem));
+        AvatarHandItem?.Invoke(new AvatarHandItemEventArgs(avatar, previousItem));
     }
 
     /// <summary>
-    /// Invoked when an entity's effect updates.
+    /// Invoked when an avatar's effect updates.
     /// </summary>
-    public event Action<EntityEffectEventArgs>? EntityEffect;
-    private void OnEntityEffect(IEntity entity, int previousEffect)
+    public event Action<AvatarEffectEventArgs>? AvatarEffect;
+    private void OnAvatarEffect(IAvatar avatar, int previousEffect)
     {
         _logger.LogTrace(
-            "Entity effect. ({entityName} [{entityId}:{entityIndex}], {previousEffect} -> {effect})",
-            entity.Name, entity.Id, entity.Index, previousEffect, entity.Effect
+            "Avatar effect. ({avatarName} [{avatarId}:{avatarIndex}], {previousEffect} -> {effect})",
+            avatar.Name, avatar.Id, avatar.Index, previousEffect, avatar.Effect
         );
-        EntityEffect?.Invoke(new EntityEffectEventArgs(entity, previousEffect));
+        AvatarEffect?.Invoke(new AvatarEffectEventArgs(avatar, previousEffect));
     }
 
     /// <summary>
-    /// Invoked when an entity performs an action.
+    /// Invoked when an avatar performs an action.
     /// </summary>
-    public event Action<EntityActionEventArgs>? EntityAction;
-    private void OnEntityAction(IEntity entity, Actions action)
+    public event Action<AvatarActionEventArgs>? AvatarAction;
+    private void OnAvatarAction(IAvatar avatar, Actions action)
     {
         _logger.LogTrace(
-            "Entity action. ({entityName} [{entityId}:{entityIndex}], action:{action})",
-            entity.Name, entity.Id, entity.Index, action
+            "Avatar action. ({avatarName} [{avatarId}:{avatarIndex}], action:{action})",
+            avatar.Name, avatar.Id, avatar.Index, action
         );
-        EntityAction?.Invoke(new EntityActionEventArgs(entity, action));
+        AvatarAction?.Invoke(new AvatarActionEventArgs(avatar, action));
     }
 
     /// <summary>
-    /// Invoked when an entity's typing status updates.
+    /// Invoked when an avatar's typing status updates.
     /// </summary>
-    public event Action<EntityTypingEventArgs>? EntityTyping;
-    private void OnEntityTyping(IEntity entity, bool wasTyping)
+    public event Action<AvatarTypingEventArgs>? AvatarTyping;
+    private void OnAvatarTyping(IAvatar avatar, bool wasTyping)
     {
         _logger.LogTrace(
-            "Entity typing. ({entityName} [{entityId}:{entityIndex}], {wasTyping} -> {isTyping})",
-            entity.Name, entity.Id, entity.Index, wasTyping, entity.IsTyping
+            "Avatar typing. ({avatarName} [{avatarId}:{avatarIndex}], {wasTyping} -> {isTyping})",
+            avatar.Name, avatar.Id, avatar.Index, wasTyping, avatar.IsTyping
         );
-        EntityTyping?.Invoke(new EntityTypingEventArgs(entity, wasTyping));
+        AvatarTyping?.Invoke(new AvatarTypingEventArgs(avatar, wasTyping));
     }
 
     /// <summary>
-    /// Invoked when an entity is removed from the room.
+    /// Invoked when an avatar is removed from the room.
     /// </summary>
-    public event Action<EntityEventArgs>? EntityRemoved;
-    private void OnEntityRemoved(IEntity entity)
+    public event Action<AvatarEventArgs>? AvatarRemoved;
+    private void OnAvatarRemoved(IAvatar avatar)
     {
         _logger.LogTrace(
-            "Entity removed. ({entityName} [{entityId}:{entityIndex}])",
-            entity.Name, entity.Id, entity.Index
+            "Avatar removed. ({avatarName} [{avatarId}:{avatarIndex}])",
+            avatar.Name, avatar.Id, avatar.Index
         );
-        EntityRemoved?.Invoke(new EntityEventArgs(entity));
+        AvatarRemoved?.Invoke(new AvatarEventArgs(avatar));
     }
 
     /// <summary>
-    /// Invoked when an entity in the room talks.
+    /// Invoked when an avatar in the room talks.
     /// </summary>
-    public event Action<EntityChatEventArgs>? EntityChat;
-    private void OnEntityChat(EntityChatEventArgs e)
+    public event Action<AvatarChatEventArgs>? AvatarChat;
+    private void OnAvatarChat(AvatarChatEventArgs e)
     {
         _logger.LogTrace(
-            "{type}:{bubble} {entity} {message}",
-            e.ChatType, e.BubbleStyle, e.Entity, e.Message
+            "{type}:{bubble} {avatar} {message}",
+            e.ChatType, e.BubbleStyle, e.Avatar, e.Message
         );
-        EntityChat?.Invoke(e);
+        AvatarChat?.Invoke(e);
     }
     #endregion
 
@@ -1274,19 +1274,19 @@ public sealed partial class RoomManager : GameStateManager
             }
         }
 
-        if (update.Entity is not null &&
-            update.Type is SlideType.WalkingEntity or SlideType.StandingEntity)
+        if (update.Avatar is not null &&
+            update.Type is SlideType.WalkingAvatar or SlideType.StandingAvatar)
         {
-            if (_currentRoom.Entities.TryGetValue(update.Entity.Index, out Entity? entity))
+            if (_currentRoom.Avatars.TryGetValue(update.Avatar.Index, out Avatar? avatar))
             {
-                var previousTile = entity.Location;
-                entity.Location = new Tile(update.To, update.Entity.ToZ);
+                var previousTile = avatar.Location;
+                avatar.Location = new Tile(update.To, update.Avatar.ToZ);
 
-                OnEntitySlide(entity, previousTile);
+                OnAvatarSlide(avatar, previousTile);
             }
             else
             {
-                _logger.LogError("Failed to find entity with index {index} to update.", update.Entity.Index);
+                _logger.LogError("Failed to find avatar with index {index} to update.", update.Avatar.Index);
             }
         }
     }
@@ -1499,9 +1499,9 @@ public sealed partial class RoomManager : GameStateManager
     }
     #endregion
 
-    #region - Entity handlers -
+    #region - Avatar handlers -
     [Intercept]
-    void HandleEntitiesAdded(EntitiesAddedMsg entities)
+    void HandleAvatarsAdded(AvatarsAddedMsg avatars)
     {
         if (!IsLoadingRoom && !IsInRoom)
         {
@@ -1515,24 +1515,24 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        List<Entity> newEntities = [];
+        List<Avatar> newAvatars = [];
 
-        foreach (Entity entity in entities)
+        foreach (Avatar avatar in avatars)
         {
-            if (_currentRoom.Entities.TryAdd(entity.Index, entity))
+            if (_currentRoom.Avatars.TryAdd(avatar.Index, avatar))
             {
-                newEntities.Add(entity);
-                OnEntityAdded(entity);
+                newAvatars.Add(avatar);
+                OnAvatarAdded(avatar);
             }
             else
             {
-                _logger.LogError("Failed to add entity {index} {name} (id:{id})", entity.Index, entity.Name, entity.Id);
+                _logger.LogError("Failed to add avatar {index} {name} (id:{id})", avatar.Index, avatar.Name, avatar.Id);
             }
         }
 
-        if (newEntities.Count > 0)
+        if (newAvatars.Count > 0)
         {
-            OnEntitiesAdded(newEntities);
+            OnAvatarsAdded(newAvatars);
         }
 
         if (IsLoadingRoom && !_gotUsers && Interceptor.Session.Is(ClientType.Shockwave))
@@ -1543,7 +1543,7 @@ public sealed partial class RoomManager : GameStateManager
     }
 
     [Intercept]
-    void HandleEntityRemoved(EntityRemovedMsg removed)
+    void HandleAvatarRemoved(AvatarRemovedMsg removed)
     {
         if (!IsInRoom)
         {
@@ -1557,18 +1557,18 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        if (_currentRoom.Entities.TryRemove(removed.Index, out Entity? entity))
+        if (_currentRoom.Avatars.TryRemove(removed.Index, out Avatar? avatar))
         {
-            OnEntityRemoved(entity);
+            OnAvatarRemoved(avatar);
         }
         else
         {
-            _logger.LogError("Failed to remove entity with index {index}", removed.Index);
+            _logger.LogError("Failed to remove avatar with index {index}", removed.Index);
         }
     }
 
     [Intercept]
-    void HandlerUserUpdate(EntitiesUpdatedMsg updates)
+    void HandlerUserUpdate(AvatarsUpdatedMsg updates)
     {
         if (!IsInRoom)
         {
@@ -1582,23 +1582,23 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        var updatedEntities = new List<IEntity>();
+        var updatedAvatars = new List<IAvatar>();
 
         foreach (var update in updates)
         {
-            if (!_currentRoom.Entities.TryGetValue(update.Index, out Entity? entity))
+            if (!_currentRoom.Avatars.TryGetValue(update.Index, out Avatar? avatar))
             {
-                _logger.LogError("Failed to find entity with index {index} to update", update.Index);
+                _logger.LogError("Failed to find avatar with index {index} to update", update.Index);
                 continue;
             }
 
-            entity.Update(update);
-            updatedEntities.Add(entity);
+            avatar.Update(update);
+            updatedAvatars.Add(avatar);
 
-            OnEntityUpdated(entity);
+            OnAvatarUpdated(avatar);
         }
 
-        OnEntitiesUpdated(updatedEntities);
+        OnAvatarsUpdated(updatedAvatars);
     }
 
     [Intercept]
@@ -1621,8 +1621,8 @@ public sealed partial class RoomManager : GameStateManager
             switch (movement)
             {
                 case UserWiredMovement m:
-                    if (_currentRoom.Entities.TryGetValue(m.UserIndex, out Entity? entity))
-                        entity.Location = m.Destination;
+                    if (_currentRoom.Avatars.TryGetValue(m.UserIndex, out Avatar? avatar))
+                        avatar.Location = m.Destination;
                     break;
                 case FloorItemWiredMovement m:
                     if (_currentRoom.FloorItems.TryGetValue(m.FurniId, out FloorItem? item))
@@ -1656,11 +1656,11 @@ public sealed partial class RoomManager : GameStateManager
         }
 
         int index = e.Packet.Read<int>();
-        if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+        if (_currentRoom.Avatars.TryGetValue(index, out Avatar? avatar))
         {
-            string previousFigure = entity.Figure;
+            string previousFigure = avatar.Figure;
             Gender previousGender;
-            string previousMotto = entity.Motto;
+            string previousMotto = avatar.Motto;
             int previousAchievementScore = 0;
 
             string updatedFigure = e.Packet.Read<string>();
@@ -1668,17 +1668,17 @@ public sealed partial class RoomManager : GameStateManager
             string updatedMotto = e.Packet.Read<string>();
             int updatedAchievementScore = e.Packet.Read<int>();
 
-            entity.Figure = updatedFigure;
-            entity.Motto = updatedMotto;
+            avatar.Figure = updatedFigure;
+            avatar.Motto = updatedMotto;
 
-            if (entity is RoomUser user)
+            if (avatar is RoomUser user)
             {
                 previousGender = user.Gender;
                 user.Gender = updatedGender;
                 previousAchievementScore = user.AchievementScore;
                 user.AchievementScore = updatedAchievementScore;
             }
-            else if (entity is Bot bot)
+            else if (avatar is Bot bot)
             {
                 previousGender = bot.Gender;
                 bot.Gender = updatedGender;
@@ -1690,14 +1690,14 @@ public sealed partial class RoomManager : GameStateManager
                 previousAchievementScore = updatedAchievementScore;
             }
 
-            OnEntityDataUpdated(entity,
+            OnAvatarDataUpdated(avatar,
                 previousFigure, previousGender,
                 previousMotto, previousAchievementScore
             );
         }
         else
         {
-            _logger.LogError("Failed to find entity with index {index} to update.", index);
+            _logger.LogError("Failed to find avatar with index {index} to update.", index);
         }
     }
 
@@ -1721,20 +1721,20 @@ public sealed partial class RoomManager : GameStateManager
         int index = e.Packet.Read<int>();
         string newName = e.Packet.Read<string>();
 
-        if (_currentRoom.Entities.TryGetValue(index, out Entity? entity))
+        if (_currentRoom.Avatars.TryGetValue(index, out Avatar? avatar))
         {
-            string previousName = entity.Name;
-            entity.Name = newName;
-            OnEntityNameChanged(entity, previousName);
+            string previousName = avatar.Name;
+            avatar.Name = newName;
+            OnAvatarNameChanged(avatar, previousName);
         }
         else
         {
-            _logger.LogError("Failed to find entity with index {index} to update.", index);
+            _logger.LogError("Failed to find avatar with index {index} to update.", index);
         }
     }
 
     [Intercept]
-    void HandleEntityIdle(EntityIdleMsg msg)
+    void HandleAvatarIdle(AvatarIdleMsg msg)
     {
         if (!IsInRoom)
         {
@@ -1748,20 +1748,20 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        if (_currentRoom.Entities.TryGetValue(msg.Index, out Entity? entity))
+        if (_currentRoom.Avatars.TryGetValue(msg.Index, out Avatar? avatar))
         {
-            bool wasIdle = entity.IsIdle;
-            entity.IsIdle = msg.Idle;
-            OnEntityIdle(entity, wasIdle);
+            bool wasIdle = avatar.IsIdle;
+            avatar.IsIdle = msg.Idle;
+            OnAvatarIdle(avatar, wasIdle);
         }
         else
         {
-            _logger.LogError("Failed to find entity with index {index} to update.", msg.Index);
+            _logger.LogError("Failed to find avatar with index {index} to update.", msg.Index);
         }
     }
 
     [Intercept]
-    void HandleDance(EntityDanceMsg msg)
+    void HandleDance(AvatarDanceMsg msg)
     {
         if (!IsInRoom)
         {
@@ -1775,21 +1775,21 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        if (_currentRoom.Entities.TryGetValue(msg.Index, out Entity? entity))
+        if (_currentRoom.Avatars.TryGetValue(msg.Index, out Avatar? avatar))
         {
-            Dances previousDance = entity.Dance;
-            entity.Dance = msg.Dance;
-            OnEntityDance(entity, previousDance);
+            Dances previousDance = avatar.Dance;
+            avatar.Dance = msg.Dance;
+            OnAvatarDance(avatar, previousDance);
         }
         else
         {
-            _logger.LogError("Failed to find entity with index {index} to update.", msg.Index);
+            _logger.LogError("Failed to find avatar with index {index} to update.", msg.Index);
             return;
         }
     }
 
     [Intercept]
-    void HandleExpression(EntityActionMsg msg)
+    void HandleExpression(AvatarActionMsg msg)
     {
         if (!IsInRoom)
         {
@@ -1803,18 +1803,18 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        if (_currentRoom.Entities.TryGetValue(msg.Index, out Entity? entity))
+        if (_currentRoom.Avatars.TryGetValue(msg.Index, out Avatar? avatar))
         {
-            OnEntityAction(entity, msg.Action);
+            OnAvatarAction(avatar, msg.Action);
         }
         else
         {
-            _logger.LogError("Failed to find entity with index {index} to update.", msg.Index);
+            _logger.LogError("Failed to find avatar with index {index} to update.", msg.Index);
         }
     }
 
     [Intercept]
-    void HandleCarryObject(EntityHandItemMsg msg)
+    void HandleCarryObject(AvatarHandItemMsg msg)
     {
         if (!IsInRoom)
         {
@@ -1828,20 +1828,20 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        if (_currentRoom.Entities.TryGetValue(msg.Index, out Entity? entity))
+        if (_currentRoom.Avatars.TryGetValue(msg.Index, out Avatar? avatar))
         {
-            int previousItem = entity.HandItem;
-            entity.HandItem = msg.Item;
-            OnEntityHandItem(entity, previousItem);
+            int previousItem = avatar.HandItem;
+            avatar.HandItem = msg.Item;
+            OnAvatarHandItem(avatar, previousItem);
         }
         else
         {
-            _logger.LogError("Failed to find entity with index {index} to update.", msg.Index);
+            _logger.LogError("Failed to find avatar with index {index} to update.", msg.Index);
         }
     }
 
     [Intercept]
-    void HandleAvatarEffect(EntityEffectMsg msg)
+    void HandleAvatarEffect(AvatarEffectMsg msg)
     {
         if (!IsInRoom)
         {
@@ -1855,20 +1855,20 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        if (_currentRoom.Entities.TryGetValue(msg.Index, out Entity? entity))
+        if (_currentRoom.Avatars.TryGetValue(msg.Index, out Avatar? avatar))
         {
-            int previousEffect = entity.Effect;
-            entity.Effect = msg.Effect;
-            OnEntityEffect(entity, previousEffect);
+            int previousEffect = avatar.Effect;
+            avatar.Effect = msg.Effect;
+            OnAvatarEffect(avatar, previousEffect);
         }
         else
         {
-            _logger.LogError("Failed to find entity with index {index} to update.", msg.Index);
+            _logger.LogError("Failed to find avatar with index {index} to update.", msg.Index);
         }
     }
 
     [Intercept]
-    void HandleUserTyping(EntityTypingMsg msg)
+    void HandleUserTyping(AvatarTypingMsg msg)
     {
         if (!IsInRoom)
         {
@@ -1882,20 +1882,20 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        if (_currentRoom.Entities.TryGetValue(msg.Index, out Entity? entity))
+        if (_currentRoom.Avatars.TryGetValue(msg.Index, out Avatar? avatar))
         {
-            bool wasTyping = entity.IsTyping;
-            entity.IsTyping = msg.Typing;
-            OnEntityTyping(entity, wasTyping);
+            bool wasTyping = avatar.IsTyping;
+            avatar.IsTyping = msg.Typing;
+            OnAvatarTyping(avatar, wasTyping);
         }
         else
         {
-            _logger.LogError("Failed to find entity with index {index} to update.", msg.Index);
+            _logger.LogError("Failed to find avatar with index {index} to update.", msg.Index);
         }
     }
 
     [Intercept]
-    void HandleChat(Intercept<EntityChatMsg> e)
+    void HandleChat(Intercept<AvatarChatMsg> e)
     {
         if (!IsInRoom)
         {
@@ -1911,16 +1911,16 @@ public sealed partial class RoomManager : GameStateManager
 
         var chat = e.Msg;
 
-        if (!_currentRoom.Entities.TryGetValue(chat.Index, out Entity? entity))
+        if (!_currentRoom.Avatars.TryGetValue(chat.Index, out Avatar? avatar))
         {
-            _logger.LogError("Failed to find entity with index {index}.", chat.Index);
+            _logger.LogError("Failed to find avatar with index {index}.", chat.Index);
             return;
         }
 
-        EntityChatEventArgs chatEventArgs = new(entity, chat.Type, chat.Message, chat.Style);
-        OnEntityChat(chatEventArgs);
+        AvatarChatEventArgs chatEventArgs = new(avatar, chat.Type, chat.Message, chat.Style);
+        OnAvatarChat(chatEventArgs);
 
-        if (chatEventArgs.IsBlocked || entity.IsHidden) e.Block();
+        if (chatEventArgs.IsBlocked || avatar.IsHidden) e.Block();
     }
     #endregion
 

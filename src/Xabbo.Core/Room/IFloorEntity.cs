@@ -1,7 +1,7 @@
 ﻿namespace Xabbo.Core;
 
 /// <summary>
-/// Represents an entity with an X, Y, Z location and direction in a room.
+/// Represents an entity that occupies an area in a room.
 /// </summary>
 public interface IFloorEntity
 {
@@ -16,7 +16,7 @@ public interface IFloorEntity
     int Direction { get; }
 
     /// <summary>
-    /// Gets the area occupied by this floor entity.
+    /// Gets the area occupied by this entity.
     /// </summary>
     Area Area { get; }
 }

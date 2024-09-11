@@ -216,51 +216,51 @@ public interface IRoom
     IWallItem? GetWallItem(Id id);
     #endregion
 
-    #region - Entities -
+    #region - Avatars -
     /// <summary>
-    /// Gets the entities in this room.
+    /// Gets the avatars in this room.
     /// </summary>
-    IEnumerable<IEntity> Entities { get; }
+    IEnumerable<IAvatar> Avatars { get; }
     /// <summary>
     /// Gets the users in this room.
     /// </summary>
-    IEnumerable<IRoomUser> Users => Entities.OfType<IRoomUser>();
+    IEnumerable<IRoomUser> Users => Avatars.OfType<IRoomUser>();
     /// <summary>
     /// Gets the pets in this room.
     /// </summary>
-    IEnumerable<IPet> Pets => Entities.OfType<IPet>();
+    IEnumerable<IPet> Pets => Avatars.OfType<IPet>();
     /// <summary>
     /// Gets the bots in this room.
     /// </summary>
-    IEnumerable<IBot> Bots => Entities.OfType<IBot>();
+    IEnumerable<IBot> Bots => Avatars.OfType<IBot>();
 
     /// <summary>
-    /// Gets the entity with the specified index if it exists.
+    /// Gets the avatar with the specified index if it exists.
     /// </summary>
-    TEntity? GetEntity<TEntity>(int index) where TEntity : IEntity;
+    TAvatar? GetAvatar<TAvatar>(int index) where TAvatar : IAvatar;
     /// <summary>
-    /// Gets the entity with the specified name if it exists.
+    /// Gets the avatar with the specified name if it exists.
     /// </summary>
-    TEntity? GetEntity<TEntity>(string name) where TEntity : IEntity;
+    TAvatar? GetAvatar<TAvatar>(string name) where TAvatar : IAvatar;
     /// <summary>
-    /// Gets the entity with the specified ID if it exists.
+    /// Gets the avatar with the specified ID if it exists.
     /// </summary>
-    TEntity? GetEntityById<TEntity>(Id id) where TEntity : IEntity;
+    TAvatar? GetAvatarById<TAvatar>(Id id) where TAvatar : IAvatar;
 
-    bool TryGetEntityByIndex<TEntity>(int index, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity;
-    bool TryGetEntityById<TEntity>(Id id, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity;
-    bool TryGetEntityByName<TEntity>(string name, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity;
+    bool TryGetAvatarByIndex<TAvatar>(int index, [NotNullWhen(true)] out TAvatar? avatar) where TAvatar : IAvatar;
+    bool TryGetAvatarById<TAvatar>(Id id, [NotNullWhen(true)] out TAvatar? avatar) where TAvatar : IAvatar;
+    bool TryGetAvatarByName<TAvatar>(string name, [NotNullWhen(true)] out TAvatar? avatar) where TAvatar : IAvatar;
 
-    bool TryGetUserByIndex(int index, [NotNullWhen(true)] out IRoomUser? user) => TryGetEntityByIndex(index, out user);
-    bool TryGetUserById(Id id, [NotNullWhen(true)] out IRoomUser? user) => TryGetEntityById(id, out user);
-    bool TryGetUserByName(string name, [NotNullWhen(true)] out IRoomUser? user) => TryGetEntityByName(name, out user);
+    bool TryGetUserByIndex(int index, [NotNullWhen(true)] out IRoomUser? user) => TryGetAvatarByIndex(index, out user);
+    bool TryGetUserById(Id id, [NotNullWhen(true)] out IRoomUser? user) => TryGetAvatarById(id, out user);
+    bool TryGetUserByName(string name, [NotNullWhen(true)] out IRoomUser? user) => TryGetAvatarByName(name, out user);
 
-    bool TryGetPetByIndex(int index, [NotNullWhen(true)] out IPet? pet) => TryGetEntityByIndex(index, out pet);
-    bool TryGetPetById(Id id, [NotNullWhen(true)] out IPet? pet) => TryGetEntityById(id, out pet);
-    bool TryGetPetByName(string name, [NotNullWhen(true)] out IPet? pet) => TryGetEntityByName(name, out pet);
+    bool TryGetPetByIndex(int index, [NotNullWhen(true)] out IPet? pet) => TryGetAvatarByIndex(index, out pet);
+    bool TryGetPetById(Id id, [NotNullWhen(true)] out IPet? pet) => TryGetAvatarById(id, out pet);
+    bool TryGetPetByName(string name, [NotNullWhen(true)] out IPet? pet) => TryGetAvatarByName(name, out pet);
 
-    bool TryGetBotByIndex(int index, [NotNullWhen(true)] out IBot? bot) => TryGetEntityByIndex(index, out bot);
-    bool TryGetBotById(Id id, [NotNullWhen(true)] out IBot? bot) => TryGetEntityById(id, out bot);
-    bool TryGetBotByName(string name, [NotNullWhen(true)] out IBot? bot) => TryGetEntityByName(name, out bot);
+    bool TryGetBotByIndex(int index, [NotNullWhen(true)] out IBot? bot) => TryGetAvatarByIndex(index, out bot);
+    bool TryGetBotById(Id id, [NotNullWhen(true)] out IBot? bot) => TryGetAvatarById(id, out bot);
+    bool TryGetBotByName(string name, [NotNullWhen(true)] out IBot? bot) => TryGetAvatarByName(name, out bot);
     #endregion
 }

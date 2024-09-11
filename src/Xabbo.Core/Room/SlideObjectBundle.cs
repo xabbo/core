@@ -11,7 +11,7 @@ public sealed class SlideObjectBundle : IParserComposer<SlideObjectBundle>
     public List<SlideObject> SlideObjects { get; set; }
     public Id RollerId { get; set; }
     public SlideType Type { get; set; }
-    public SlideEntity? Entity { get; set; }
+    public SlideAvatar? Avatar { get; set; }
 
     public SlideObjectBundle()
     {
@@ -32,12 +32,12 @@ public sealed class SlideObjectBundle : IParserComposer<SlideObjectBundle>
         if (p.Available > 0)
         {
             Type = (SlideType)p.ReadInt();
-            if (Type == SlideType.WalkingEntity ||
-                Type == SlideType.StandingEntity)
+            if (Type == SlideType.WalkingAvatar ||
+                Type == SlideType.StandingAvatar)
             {
                 if (p.Client is ClientType.Unity)
                     p.ReadInt(); // ?
-                Entity = p.Parse<SlideEntity>();
+                Avatar = p.Parse<SlideAvatar>();
             }
         }
     }
@@ -54,10 +54,10 @@ public sealed class SlideObjectBundle : IParserComposer<SlideObjectBundle>
         if (Type is not SlideType.None)
         {
             p.WriteInt((int)Type);
-            if (Entity is not null &&
-                Type is SlideType.WalkingEntity or SlideType.StandingEntity)
+            if (Avatar is not null &&
+                Type is SlideType.WalkingAvatar or SlideType.StandingAvatar)
             {
-                p.Compose(Entity);
+                p.Compose(Avatar);
             }
         }
     }

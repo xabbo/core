@@ -69,12 +69,12 @@ internal class Room : IRoom, INotifyPropertyChanged
 
     IEnumerable<IFloorItem> IRoom.FloorItems => FloorItems.Select(x => x.Value);
     IEnumerable<IWallItem> IRoom.WallItems => WallItems.Select(x => x.Value);
-    IEnumerable<IEntity> IRoom.Entities => Entities.Select(x => x.Value);
+    IEnumerable<IAvatar> IRoom.Avatars => Avatars.Select(x => x.Value);
 
     internal ConcurrentDictionary<long, FloorItem> FloorItems { get; } = new();
     internal ConcurrentDictionary<long, WallItem> WallItems { get; } = new();
 
-    internal ConcurrentDictionary<int, Entity> Entities { get; } = new();
+    internal ConcurrentDictionary<int, Avatar> Avatars { get; } = new();
 
     public Room(Id id, RoomData roomData)
     {
@@ -135,13 +135,13 @@ internal class Room : IRoom, INotifyPropertyChanged
     public IWallItem? GetWallItem(Id itemId) => WallItems.TryGetValue(itemId, out WallItem? item) ? item : null;
     #endregion
 
-    #region - Entities -
-    public TEntity? GetEntity<TEntity>(int index) where TEntity : IEntity
+    #region - Avatars -
+    public TAvatar? GetAvatar<TAvatar>(int index) where TAvatar : IAvatar
     {
-        if (Entities.TryGetValue(index, out Entity? entity) &&
-            entity is TEntity typedEntity)
+        if (Avatars.TryGetValue(index, out Avatar? avatar) &&
+            avatar is TAvatar typedAvatar)
         {
-            return typedEntity;
+            return typedAvatar;
         }
         else
         {
@@ -149,50 +149,50 @@ internal class Room : IRoom, INotifyPropertyChanged
         }
     }
 
-    public TEntity? GetEntity<TEntity>(string name) where TEntity : IEntity
+    public TAvatar? GetAvatar<TAvatar>(string name) where TAvatar : IAvatar
     {
-        return Entities
+        return Avatars
             .Select(x => x.Value)
-            .OfType<TEntity>()
-            .FirstOrDefault(entity => entity.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            .OfType<TAvatar>()
+            .FirstOrDefault(avatar => avatar.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
     }
 
-    public TEntity? GetEntityById<TEntity>(Id id) where TEntity : IEntity
+    public TAvatar? GetAvatarById<TAvatar>(Id id) where TAvatar : IAvatar
     {
-        return Entities
+        return Avatars
             .Select(x => x.Value)
-            .OfType<TEntity>()
-            .FirstOrDefault(entity => entity.Id == id);
+            .OfType<TAvatar>()
+            .FirstOrDefault(avatar => avatar.Id == id);
     }
 
-    public IEntity? GetEntity(int index) => Entities.TryGetValue(index, out Entity? entity) ? entity : null;
-    public IRoomUser? GetUser(int index) => Entities.TryGetValue(index, out Entity? entity) ? (entity as IRoomUser) : null;
-    public IRoomUser? GetUserById(Id id) => Entities.Values.OfType<IRoomUser>().FirstOrDefault(x => x.Id == id);
+    public IAvatar? GetAvatar(int index) => Avatars.TryGetValue(index, out Avatar? avatar) ? avatar : null;
+    public IRoomUser? GetUser(int index) => Avatars.TryGetValue(index, out Avatar? avatar) ? (avatar as IRoomUser) : null;
+    public IRoomUser? GetUserById(Id id) => Avatars.Values.OfType<IRoomUser>().FirstOrDefault(x => x.Id == id);
 
-    public bool TryGetEntityByIndex(int index, [NotNullWhen(true)] out IEntity? entity) => (entity = GetEntity(index)) is not null;
+    public bool TryGetAvatarByIndex(int index, [NotNullWhen(true)] out IAvatar? avatar) => (avatar = GetAvatar(index)) is not null;
 
-    public bool TryGetEntityById<TEntity>(Id id, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity
+    public bool TryGetAvatarById<TAvatar>(Id id, [NotNullWhen(true)] out TAvatar? avatar) where TAvatar : IAvatar
     {
-        return (entity = GetEntityById<TEntity>(id)) is not null;
+        return (avatar = GetAvatarById<TAvatar>(id)) is not null;
     }
 
-    public bool TryGetEntityByName<TEntity>(string name, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity
+    public bool TryGetAvatarByName<TAvatar>(string name, [NotNullWhen(true)] out TAvatar? avatar) where TAvatar : IAvatar
     {
-        return (entity = GetEntity<TEntity>(name)) is not null;
+        return (avatar = GetAvatar<TAvatar>(name)) is not null;
     }
 
-    public bool TryGetEntityByIndex<TEntity>(int index, [NotNullWhen(true)] out TEntity? entity) where TEntity : IEntity
+    public bool TryGetAvatarByIndex<TAvatar>(int index, [NotNullWhen(true)] out TAvatar? avatar) where TAvatar : IAvatar
     {
-        if (Entities.TryGetValue(index, out Entity? e))
+        if (Avatars.TryGetValue(index, out Avatar? e))
         {
-            if (e is TEntity)
+            if (e is TAvatar)
             {
-                entity = (TEntity)(IEntity)e;
+                avatar = (TAvatar)(IAvatar)e;
                 return true;
             }
         }
 
-        entity = default;
+        avatar = default;
         return false;
     }
     #endregion

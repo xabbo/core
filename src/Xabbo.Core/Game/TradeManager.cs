@@ -92,13 +92,13 @@ public sealed partial class TradeManager(IExtension extension, ProfileManager pr
         int tradeeId = e.Packet.Read<int>();
         int tradeeCanTrade = e.Packet.Read<int>();
 
-        if (!_roomManager.Room.TryGetEntityById(traderId, out IRoomUser? trader))
+        if (!_roomManager.Room.TryGetAvatarById(traderId, out IRoomUser? trader))
         {
             Debug.Log($"failed to find user with id {traderId}");
             return;
         }
 
-        if (!_roomManager.Room.TryGetEntityById(tradeeId, out IRoomUser? tradee))
+        if (!_roomManager.Room.TryGetAvatarById(tradeeId, out IRoomUser? tradee))
         {
             Debug.Log($"failed to find user with id {tradeeId}");
             return;
