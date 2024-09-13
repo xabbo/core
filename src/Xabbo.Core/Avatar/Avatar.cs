@@ -64,11 +64,12 @@ public abstract class Avatar(AvatarType type, Id id, int index) : IAvatar, IPars
             p.WriteInt(Index);
             p.WriteString(Name);
             p.WriteString(Figure);
-            p.WriteString(user?.Gender.ToClientString() ?? "");
+            p.WriteString(user?.Gender.ToClientString().ToLower() ?? "m");
             p.WriteString(Motto);
             p.Compose(Location);
             p.WriteString(user?.FigureExtra ?? "");
             p.WriteString(user?.BadgeCode ?? "");
+            p.WriteInt((int)Type);
         }
         else
         {

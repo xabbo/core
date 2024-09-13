@@ -19,7 +19,7 @@ public class User(Id id, int index) : Avatar(AvatarType.User, id, index), IUser
     internal User(long id, int index, in PacketReader p)
         : this(id, index)
     {
-        if (p.Client == ClientType.Shockwave)
+        if (p.Client is ClientType.Shockwave)
             return;
 
         Gender = H.ToGender(p.ReadString());
@@ -37,7 +37,7 @@ public class User(Id id, int index) : Avatar(AvatarType.User, id, index), IUser
     {
         base.Compose(in p);
 
-        if (p.Client == ClientType.Shockwave)
+        if (p.Client is ClientType.Shockwave)
             return;
 
         p.WriteString(Gender.ToClientString().ToLower());
