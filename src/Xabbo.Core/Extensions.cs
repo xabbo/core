@@ -191,9 +191,36 @@ public static class Extensions
     public static FurniInfo GetInfo(this IItem item) => FurniData.GetInfo(item);
 
     /// <summary>
+    /// Gets the furni info of this item.
+    /// </summary>
+    public static bool TryGetInfo(this IItem item, [NotNullWhen(true)] out FurniInfo? info) => FurniData.TryGetInfo(item, out info);
+
+    /// <summary>
     /// Gets the identifier of this item.
     /// </summary>
     public static string GetIdentifier(this IItem item) => GetInfo(item).Identifier;
+
+    /// <summary>
+    /// Gets the identifier of this item.
+    /// </summary>
+    public static bool TryGetIdentifier(this IItem item, [NotNullWhen(true)] out string? identifier)
+    {
+        if (item.Identifier is not null)
+        {
+            identifier = item.Identifier;
+            return true;
+        }
+        else if (TryGetInfo(item, out FurniInfo? info))
+        {
+            identifier = info.Identifier;
+            return true;
+        }
+        else
+        {
+            identifier = null;
+            return false;
+        }
+    }
 
     /// <summary>
     /// Gets the descriptor of this item.
