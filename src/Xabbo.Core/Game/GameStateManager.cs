@@ -61,7 +61,7 @@ public abstract class GameStateManager : INotifyPropertyChanged, IDisposable
         }
         else
         {
-            if (e.Session.Client.Type is not ClientType.Shockwave)
+            if (e.Session.Client.Type is ClientType.Shockwave)
             {
                 _pingIntercept = Interceptor.Intercept(In.Ping, HandlePing);
             }
