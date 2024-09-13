@@ -205,7 +205,13 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
     /// <summary>
     /// Gets the information of the specified item.
     /// </summary>
-    public bool TryGetInfo(IItem item, [NotNullWhen(true)] out FurniInfo? info) => TryGetInfo(item.Type, item.Kind, out info);
+    public bool TryGetInfo(IItem item, [NotNullWhen(true)] out FurniInfo? info)
+    {
+        if (item.Identifier is not null)
+            return _identifierMap.TryGetValue(item.Identifier, out info);
+        else
+            return TryGetInfo(item.Type, item.Kind, out info);
+    }
 
     /// <summary>
     /// Gets the information of the furni with the specified identifier.
@@ -307,7 +313,7 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
             }
         }
 
-        return new ItemDescriptor(item.Type, item.Kind, variant);
+        return new ItemDescriptor(item.Type, item.Kind, item.Identifier, variant);
     }
 
     public StackDescriptor GetStackDescriptor(IInventoryItem item)
@@ -323,7 +329,7 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
             variant = item.Data.Value;
         }
 
-        return new StackDescriptor(item.Type, item.Kind, variant, item.IsTradeable, item.IsGroupable);
+        return new StackDescriptor(item.Type, item.Kind, item.Identifier, variant, item.IsTradeable, item.IsGroupable);
     }
 
     /// <summary>
