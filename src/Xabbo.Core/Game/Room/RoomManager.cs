@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -816,7 +816,7 @@ public sealed partial class RoomManager : GameStateManager
 
         if (Interceptor.Session.Is(ClientType.Shockwave))
         {
-            string[] fields = e.Packet.Read<string>().Split();
+            string[] fields = e.Packet.ReadContent().Split();
             model = fields[0];
             roomId = int.Parse(fields[1]);
         }
@@ -865,8 +865,19 @@ public sealed partial class RoomManager : GameStateManager
             return;
         }
 
-        string key = e.Packet.Read<string>();
-        string value = e.Packet.Read<string>();
+        string key, value;
+        if (Interceptor.Session.Client.Type is ClientType.Shockwave)
+        {
+            string[] fields = e.Packet.ReadContent().Split('/');
+            if (fields.Length != 2)
+                return;
+            (key, value) = (fields[0], fields[1]);
+        }
+        else
+        {
+            (key, value) = e.Packet.Read<string, string>();
+        }
+
         switch (key)
         {
             case "floor": _currentRoom.Floor = value; break;
