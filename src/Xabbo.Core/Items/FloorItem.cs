@@ -121,23 +121,37 @@ public class FloorItem : Furni, IFloorItem, IParserComposer<FloorItem>
 
     protected override void Compose(in PacketWriter p)
     {
-        if (p.Client == ClientType.Shockwave)
-            throw new NotImplementedException("FloorItem.Compose is not implemented for Shockwave");
+        if (p.Client is ClientType.Shockwave)
+        {
+            p.WriteString(Id.ToString());
+            p.WriteString(Identifier);
+            p.WriteInt(X);
+            p.WriteInt(Y);
+            p.Compose(Dimensions ?? default);
+            p.WriteInt(Direction);
+            p.WriteFloat((float)Z);
+            p.WriteString(Colors);
+            p.WriteString(RuntimeData);
+            p.WriteInt((int)Extra);
+            p.WriteString(Data.Value);
+        }
+        else
+        {
+            p.WriteId(Id);
+            p.WriteInt(Kind);
+            p.WriteInt(Location.X);
+            p.WriteInt(Location.Y);
+            p.WriteInt(Direction);
+            p.WriteFloat(Location.Z);
+            p.WriteFloat(Height);
+            p.WriteId(Extra);
+            p.Compose(Data);
+            p.WriteInt(SecondsToExpiration);
+            p.WriteInt((int)Usage);
+            p.WriteId(OwnerId);
 
-        p.WriteId(Id);
-        p.WriteInt(Kind);
-        p.WriteInt(Location.X);
-        p.WriteInt(Location.Y);
-        p.WriteInt(Direction);
-        p.WriteFloat(Location.Z);
-        p.WriteFloat(Height);
-        p.WriteId(Extra);
-        p.Compose(Data);
-        p.WriteInt(SecondsToExpiration);
-        p.WriteInt((int)Usage);
-        p.WriteId(OwnerId);
-
-        if (Kind < 0) p.WriteString(Identifier);
+            if (Kind < 0) p.WriteString(Identifier);
+        }
     }
 
     public override string ToString() => $"{nameof(FloorItem)}#{Id}/{Kind}";
