@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Collections.Immutable;
 
 namespace Xabbo.Core.GameData;
 
@@ -75,6 +76,66 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
         _wallItemMap = WallItems.ToDictionary(wallItem => wallItem.Kind);
     }
 
+    internal FurniData(ExternalTexts texts)
+    {
+        Dictionary<string, FurniInfo> infos = [];
+
+        foreach (var (key, value) in texts)
+        {
+            ItemType type = ItemType.None;
+            string? identifier = "";
+            string? name = null;
+            string? desc = null;
+
+            if (key.StartsWith("furni_"))
+            {
+                type = ItemType.Floor;
+                if (key.EndsWith("_name"))
+                {
+                    identifier = key[6..^5];
+                    name = value;
+                }
+                else if (key.EndsWith("_desc"))
+                {
+                    identifier = key[6..^5];
+                    desc = value;
+                }
+            }
+            else if (key.StartsWith("wallitem_"))
+            {
+                type = ItemType.Wall;
+                if (key.EndsWith("_name"))
+                {
+                    identifier = key[9..^5];
+                    name = value;
+                }
+                else if (key.EndsWith("_desc"))
+                {
+                    identifier = key[9..^5];
+                    desc = value;
+                }
+            }
+
+            if (identifier is not null)
+            {
+                if (!infos.TryGetValue(identifier, out FurniInfo? info))
+                    info = new(type) { Identifier = identifier };
+                if (name is not null)
+                    info = info with { Name = name };
+                if (desc is not null)
+                    info = info with { Description = desc };
+                infos[identifier] = info;
+            }
+        }
+
+        FloorItems = infos.Values.Where(x => x.Type is ItemType.Floor).ToImmutableArray();
+        WallItems = infos.Values.Where(x => x.Type is ItemType.Wall).ToImmutableArray();
+
+        _identifierMap = FloorItems.Concat(WallItems).ToImmutableDictionary(k => k.Identifier, v => v);
+        _wallItemMap = ImmutableDictionary<int, FurniInfo>.Empty;
+        _floorItemMap = ImmutableDictionary<int, FurniInfo>.Empty;
+    }
+
     /// <summary>
     /// Gets whether furni info with the specified type and kind exists or not.
     /// </summary>
@@ -120,7 +181,7 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
     /// <summary>
     /// Gets the information of the specified item.
     /// </summary>
-    public FurniInfo GetInfo(IItem item) => GetInfo(item.Type, item.Kind);
+    public FurniInfo GetInfo(IItem item) => item.Identifier is not null ? GetInfo(item.Identifier) : GetInfo(item.Type, item.Kind);
 
     /// <summary>
     /// Gets the information of the furni with the specified identifier.
@@ -300,4 +361,6 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
                 return currentGroup;
             });
     }
+
+    public static FurniData? FromOriginsTexts(ExternalTexts texts) => new(texts);
 }

@@ -31,11 +31,6 @@ public interface IFurni : IItem
     FurniUsage Usage { get; }
 
     /// <summary>
-    /// Gets the class name of the furni.
-    /// </summary>
-    string Identifier { get; }
-
-    /// <summary>
     /// Gets whether the furni is hidden client-side or not by the <see cref="RoomManager"/>.
     /// </summary>
     bool IsHidden { get; }

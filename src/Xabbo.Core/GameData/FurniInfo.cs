@@ -40,7 +40,7 @@ public record FurniInfo
     public bool RentBuyOut { get; init; }
     public bool IsBuildersClub { get; init; }
     public bool ExcludedDynamic { get; init; }
-    public string CustomParams { get; init; }
+    public string CustomParams { get; init; } = string.Empty;
     /// <summary>
     /// Gets the category of the furni.
     /// </summary>
@@ -55,6 +55,11 @@ public record FurniInfo
     public string Line { get; init; } = string.Empty;
     public string Environment { get; init; } = string.Empty;
     public bool IsRare { get; init; }
+
+    public FurniInfo(ItemType type)
+    {
+        Type = type;
+    }
 
     internal FurniInfo(ItemType type, Xml.FurniInfo proxy)
     {

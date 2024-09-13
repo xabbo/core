@@ -11,11 +11,6 @@ public interface IInventoryItem : IItem
     Id ItemId { get; }
 
     /// <summary>
-    /// Gets the identifier of this item (only available on Origins).
-    /// </summary>
-    string Identifier { get; }
-
-    /// <summary>
     /// Gets the furni category of the inventory item.
     /// </summary>
     FurniCategory Category { get; }

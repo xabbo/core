@@ -124,7 +124,7 @@ public class FloorItem : Furni, IFloorItem, IParserComposer<FloorItem>
         if (p.Client is ClientType.Shockwave)
         {
             p.WriteString(Id.ToString());
-            p.WriteString(Identifier);
+            p.WriteString(Identifier ?? "");
             p.WriteInt(X);
             p.WriteInt(Y);
             p.Compose(Dimensions ?? default);
@@ -150,7 +150,8 @@ public class FloorItem : Furni, IFloorItem, IParserComposer<FloorItem>
             p.WriteInt((int)Usage);
             p.WriteId(OwnerId);
 
-            if (Kind < 0) p.WriteString(Identifier);
+            if (Kind < 0)
+                p.WriteString(Identifier ?? "");
         }
     }
 

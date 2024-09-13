@@ -19,6 +19,8 @@ public sealed class MarketplaceOffer : IMarketplaceOffer, IParserComposer<Market
     public int Average { get; set; }
     public int Offers { get; set; }
 
+    string? IItem.Identifier => null;
+
     public MarketplaceOffer()
     {
         Data = new LegacyData();

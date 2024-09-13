@@ -13,6 +13,11 @@ public interface IItem
     int Kind { get; }
 
     /// <summary>
+    /// Gets the furni identifier.
+    /// </summary>
+    string? Identifier { get; }
+
+    /// <summary>
     /// Gets the ID of the item.
     /// </summary>
     Id Id { get; }

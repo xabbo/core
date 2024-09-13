@@ -17,6 +17,8 @@ public sealed class MarketplaceItemInfo : IMarketplaceItemInfo, IParserComposer<
     public List<MarketplaceTradeInfo> TradeInfo { get; set; }
     IReadOnlyList<IMarketplaceTradeInfo> IMarketplaceItemInfo.TradeInfo => TradeInfo;
 
+    string? IItem.Identifier => null;
+
     public MarketplaceItemInfo()
     {
         TradeInfo = [];

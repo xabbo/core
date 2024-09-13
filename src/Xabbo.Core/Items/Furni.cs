@@ -19,7 +19,7 @@ public abstract class Furni : IFurni, IComposer
     public int SecondsToExpiration { get; set; } = -1;
     public FurniUsage Usage { get; set; } = FurniUsage.None;
 
-    public string Identifier { get; set; } = string.Empty;
+    public string? Identifier { get; set; }
 
     public bool IsHidden { get; set; }
 

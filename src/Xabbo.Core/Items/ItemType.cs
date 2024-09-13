@@ -4,6 +4,7 @@ namespace Xabbo.Core;
 
 public enum ItemType
 {
+    None,
     Floor = 's',
     Wall = 'i',
     Badge = 'b',

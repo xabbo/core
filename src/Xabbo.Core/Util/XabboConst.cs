@@ -8,7 +8,7 @@ internal static class XabboConst
     public const float DefaultEpsilon = 0.0015f;
 
     public const string DefaultUserAgent =
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0";
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.79 Safari/537.36";
     public const string
         URL_EXTERNAL_VARIABLES = "https://www.habbo.$domain/gamedata/external_variables/1",
         API_USER_LOOKUP = "https://www.habbo.com/api/public/users?name=$name",

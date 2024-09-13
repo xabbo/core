@@ -18,6 +18,8 @@ public sealed class CatalogProduct : ICatalogProduct, IParserComposer<CatalogPro
     public bool IsWallItem => Type == ItemType.Wall;
     Id IItem.Id => -1;
 
+    string? IItem.Identifier => null;
+
     public CatalogProduct()
     {
         Variant = string.Empty;

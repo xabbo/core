@@ -2,7 +2,7 @@
 
 namespace Xabbo.Core.Web;
 
-internal class GameDataHash
+public class GameDataHash
 {
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
@@ -11,5 +11,5 @@ internal class GameDataHash
     public string Url { get; set; } = string.Empty;
 
     [JsonPropertyName("hash")]
-    public string Hash { get; set; } = string.Empty;
+    public string? Hash { get; set; }
 }
