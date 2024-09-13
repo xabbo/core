@@ -6,7 +6,7 @@ using Xabbo.Core.Events;
 
 namespace Xabbo.Core.Game;
 
-[Intercept]
+[Intercept(~ClientType.Shockwave)]
 public sealed partial class TradeManager(IExtension extension, ProfileManager profileManager, RoomManager roomManager)
     : GameStateManager(extension)
 {

@@ -8,7 +8,7 @@ using Xabbo.Core.Events;
 
 namespace Xabbo.Core.Game;
 
-[Intercept]
+[Intercept(~ClientType.Shockwave)]
 public sealed partial class ProfileManager : GameStateManager
 {
     private Task<IUserData> _taskUserData;
@@ -82,6 +82,7 @@ public sealed partial class ProfileManager : GameStateManager
     /// </summary>
     public Task<IUserData> GetUserDataAsync() => _taskUserData;
 
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.LatencyPingResponse))]
     private void HandleLatencyPingResponse(Intercept e)
     {
@@ -121,6 +122,7 @@ public sealed partial class ProfileManager : GameStateManager
         OnLoadedUserData();
     }
 
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.FigureUpdate))]
     private void HandleFigureUpdate(Intercept e)
     {

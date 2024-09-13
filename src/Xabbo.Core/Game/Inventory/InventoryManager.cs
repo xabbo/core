@@ -17,7 +17,7 @@ namespace Xabbo.Core.Game;
 /// <summary>
 /// Manages the user's inventory.
 /// </summary>
-[Intercept]
+[Intercept(~ClientType.Shockwave)]
 public sealed partial class InventoryManager : GameStateManager
 {
     private readonly ILogger _logger;
