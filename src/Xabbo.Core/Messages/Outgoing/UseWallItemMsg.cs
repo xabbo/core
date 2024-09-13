@@ -8,7 +8,7 @@ public sealed record UseWallItemMsg(Id Id, int State = 0) : IMessage<UseWallItem
     static Identifier IMessage<UseWallItemMsg>.Identifier => Out.UseWallItem;
     static bool IMessage<UseWallItemMsg>.UseTargetedIdentifiers => true;
 
-    Identifier IMessage<UseWallItemMsg>.GetIdentifier(ClientType client) => client switch
+    Identifier IMessage.GetIdentifier(ClientType client) => client switch
     {
         ClientType.Flash => Out.UseWallItem,
         _ => throw new UnsupportedClientException(client),

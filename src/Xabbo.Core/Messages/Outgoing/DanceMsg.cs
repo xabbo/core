@@ -15,7 +15,7 @@ public sealed record DanceMsg(Dances Dance = Dances.Dance) : IMessage<DanceMsg>
         Xabbo.Messages.Flash.Out.Dance,
     ];
 
-    Identifier IMessage<DanceMsg>.GetIdentifier(ClientType client) => client switch
+    Identifier IMessage.GetIdentifier(ClientType client) => client switch
     {
         ClientType.Shockwave => Dance switch {
             Dances.None => Xabbo.Messages.Shockwave.Out.STOP,

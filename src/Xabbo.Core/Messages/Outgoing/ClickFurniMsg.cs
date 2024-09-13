@@ -10,7 +10,7 @@ public sealed record ClickFurniMsg(ItemType Type, Id Id, int State = 0) : IMessa
     static Identifier IMessage<ClickFurniMsg>.Identifier => Out.ClickFurni;
     static bool IMessage<ClickFurniMsg>.UseTargetedIdentifiers => true;
 
-    Identifier IMessage<ClickFurniMsg>.GetIdentifier(ClientType client) => client switch
+    Identifier IMessage.GetIdentifier(ClientType client) => client switch
     {
         ClientType.Flash => Out.ClickFurni,
         _ => throw new UnsupportedClientException(client),

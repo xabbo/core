@@ -36,7 +36,7 @@ public sealed record UpdateMsg : IMessage<UpdateMsg>
 
     static Identifier IMessage<UpdateMsg>.Identifier => Out.UPDATE;
     static bool IMessage<UpdateMsg>.UseTargetedIdentifiers => true;
-    Identifier IMessage<UpdateMsg>.GetIdentifier(ClientType client) => client switch
+    Identifier IMessage.GetIdentifier(ClientType client) => client switch
     {
         ClientType.Shockwave => Out.UPDATE,
         _ => throw new UnsupportedClientException(client)

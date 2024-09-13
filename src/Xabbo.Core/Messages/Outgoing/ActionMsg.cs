@@ -13,7 +13,7 @@ public sealed record ActionMsg(Actions Action = Actions.None) : IMessage<ActionM
     ];
     static bool IMessage<ActionMsg>.UseTargetedIdentifiers => true;
 
-    Identifier IMessage<ActionMsg>.GetIdentifier(ClientType client) => client switch
+    Identifier IMessage.GetIdentifier(ClientType client) => client switch
     {
         not ClientType.Shockwave => Xabbo.Messages.Flash.Out.AvatarExpression,
         ClientType.Shockwave => Xabbo.Messages.Shockwave.Out.WAVE,

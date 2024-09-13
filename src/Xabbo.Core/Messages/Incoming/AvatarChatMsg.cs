@@ -76,7 +76,7 @@ public sealed record AvatarChatMsg : AvatarChatMsgBase, IMessage<AvatarChatMsg>
 {
     static Identifier[] IMessage<AvatarChatMsg>.Identifiers { get; } = [ In.Chat, In.Shout, In.Whisper ];
     static Identifier IMessage<AvatarChatMsg>.Identifier => default;
-    Identifier IMessage<AvatarChatMsg>.GetIdentifier(ClientType client) => Type switch
+    Identifier IMessage.GetIdentifier(ClientType client) => Type switch
     {
         ChatType.Talk => In.Chat,
         ChatType.Shout => In.Shout,

@@ -13,7 +13,7 @@ public sealed record UseFloorItemMsg(Id Id, int State = 0) : IMessage<UseFloorIt
     ];
     static bool IMessage<UseFloorItemMsg>.UseTargetedIdentifiers => true;
 
-    Identifier IMessage<UseFloorItemMsg>.GetIdentifier(ClientType client) => client switch
+    Identifier IMessage.GetIdentifier(ClientType client) => client switch
     {
         ClientType.Flash => Xabbo.Messages.Flash.Out.UseFurniture,
         ClientType.Shockwave => Xabbo.Messages.Shockwave.Out.SETSTUFFDATA,

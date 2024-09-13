@@ -10,7 +10,7 @@ public sealed record ChatMsg(ChatType Type, string Message, int BubbleStyle = 0,
     static Identifier[] IMessage<ChatMsg>.Identifiers { get; } = [Out.Chat, Out.Shout, Out.Whisper];
     static Identifier IMessage<ChatMsg>.Identifier => default;
 
-    Identifier IMessage<ChatMsg>.GetIdentifier(ClientType _) => Type switch
+    Identifier IMessage.GetIdentifier(ClientType _) => Type switch
     {
         ChatType.Talk => Out.Chat,
         ChatType.Shout => Out.Shout,
