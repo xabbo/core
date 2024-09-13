@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -659,24 +659,21 @@ public sealed partial class RoomManager : GameStateManager
 
         if (hide)
         {
-            if (furni.Type == ItemType.Floor)
+            if (furni is FloorItem floorItem)
             {
-                if (Interceptor.Session.IsUnity)
-                    Interceptor.Send(In.ObjectRemove, furni.Id, false, -1L, 0);
-                else
-                    Interceptor.Send(In.ObjectRemove, furni.Id.ToString(), false, -1, 0);
+                Interceptor.Send(new FloorItemRemovedMsg(floorItem));
             }
-            else if (furni.Type == ItemType.Wall)
+            else if (furni is WallItem)
             {
-                if (Interceptor.Session.IsUnity)
-                    Interceptor.Send(In.ItemRemove, furni.Id, -1L);
-                else
-                    Interceptor.Send(In.ItemRemove, furni.Id.ToString(), -1);
+                Interceptor.Send(new WallItemRemovedMsg(furni.Id));
             }
         }
         else
         {
-            Interceptor.Send(furni.IsFloorItem ? In.ObjectAdd : In.ItemAdd, furni);
+            if (furni is FloorItem floorItem)
+                Interceptor.Send(new FloorItemAddedMsg(floorItem));
+            else if (furni is WallItem wallItem)
+                Interceptor.Send(new WallItemAddedMsg(wallItem));
         }
 
         OnFurniVisibilityToggled(furni);

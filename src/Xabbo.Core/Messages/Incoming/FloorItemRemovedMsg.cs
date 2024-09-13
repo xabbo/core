@@ -12,6 +12,9 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <param name="Delay">The delay in milliseconds after which the item will be removed by the client.</param>
 public sealed record FloorItemRemovedMsg(Id Id, FloorItem? Item = null, bool Expired = false, Id PickerId = default, int Delay = 0) : IMessage<FloorItemRemovedMsg>
 {
+    public FloorItemRemovedMsg(FloorItem Item, bool Expired = false, Id PickerId = default, int Delay = 0)
+        : this(Item.Id, Item, Expired, PickerId, Delay) { }
+
     static Identifier IMessage<FloorItemRemovedMsg>.Identifier => In.ObjectRemove;
 
     public static FloorItemRemovedMsg Parse(in PacketReader p)
