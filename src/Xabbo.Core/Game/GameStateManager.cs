@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 using Xabbo.Messages;
+using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 
 namespace Xabbo.Core.Game;
@@ -27,23 +28,66 @@ public abstract class GameStateManager : INotifyPropertyChanged, IDisposable
     private bool _disposed;
     private IDisposable? _attachment;
 
+    private bool _connectedOnInit;
+    private bool _hasInitialized;
+    private IDisposable? _pingIntercept;
+
     protected IInterceptor Interceptor { get; }
     protected IMessageDispatcher Dispatcher => Interceptor.Dispatcher;
 
     public GameStateManager(IInterceptor interceptor)
     {
         Interceptor = interceptor;
+        Interceptor.Initialized += OnInitialized;
         Interceptor.Connected += OnConnected;
         Interceptor.Disconnected += OnDisconnected;
+    }
+
+    private void OnInitialized(InitializedArgs e)
+    {
+        _hasInitialized = false;
+        _connectedOnInit = e.IsGameConnected ?? false;
     }
 
     protected virtual void OnConnected(GameConnectedArgs e)
     {
         if (this is IMessageHandler handler)
             _attachment = handler.Attach(Interceptor);
+
+        if (_connectedOnInit && !_hasInitialized)
+        {
+            OnInitialize(true);
+            _hasInitialized = true;
+        }
+        else
+        {
+            if (e.Session.Client.Type is not ClientType.Shockwave)
+            {
+                _pingIntercept = Interceptor.Intercept(In.Ping, HandlePing);
+            }
+            else
+            {
+                _pingIntercept = Interceptor.Intercept(In.LatencyPingResponse, HandlePing);
+            }
+        }
+    }
+
+    private void HandlePing(Intercept e)
+    {
+        if (e.Sequence >= 10)
+        {
+            if (!_hasInitialized)
+                OnInitialize(false);
+            _pingIntercept?.Dispose();
+        }
     }
 
     protected virtual void OnDisconnected() { }
+
+    /// <summary>
+    /// Called when it is probably safe to initialize the state manager.
+    /// </summary>
+    protected virtual void OnInitialize(bool initializingOnConnect) { }
 
     protected virtual void Dispose(bool disposing)
     {
