@@ -110,9 +110,16 @@ public class FloorPlan : IFloorPlan, IParserComposer<FloorPlan>
 
     void IComposer.Compose(in PacketWriter p)
     {
-        p.WriteBool(UseLegacyScale);
-        p.WriteInt(WallHeight);
-        p.WriteString(ToString());
+        if (p.Client != ClientType.Shockwave)
+        {
+            p.WriteBool(UseLegacyScale);
+            p.WriteInt(WallHeight);
+            p.WriteString(ToString());
+        }
+        else
+        {
+            p.WriteContent(ToString());
+        }
     }
 
     static FloorPlan IParser<FloorPlan>.Parse(in PacketReader p)
@@ -126,7 +133,11 @@ public class FloorPlan : IFloorPlan, IParserComposer<FloorPlan>
             wallHeight = p.ReadInt();
         }
 
-        string map = p.ReadString();
+        string map = p.Client switch
+        {
+            ClientType.Shockwave => p.ReadContent(),
+            _ => p.ReadString()
+        };
 
         return new FloorPlan(map)
         {
