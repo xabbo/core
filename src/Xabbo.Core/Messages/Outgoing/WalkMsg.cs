@@ -3,9 +3,14 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
-public sealed record WalkMsg(int X, int Y) : IMessage<WalkMsg>
+public sealed record WalkMsg(Point Point) : IMessage<WalkMsg>
 {
     static Identifier IMessage<WalkMsg>.Identifier => Out.MoveAvatar;
+
+    public WalkMsg(int x, int y) : this(new Point(x, y)) { }
+
+    public int X => Point.X;
+    public int Y => Point.Y;
 
     static WalkMsg IParser<WalkMsg>.Parse(in PacketReader p) => p.Client switch
     {
@@ -17,13 +22,13 @@ public sealed record WalkMsg(int X, int Y) : IMessage<WalkMsg>
     {
         if (p.Client is ClientType.Shockwave)
         {
-            p.WriteB64((B64)X);
-            p.WriteB64((B64)Y);
+            p.WriteB64((B64)Point.X);
+            p.WriteB64((B64)Point.Y);
         }
         else
         {
-            p.WriteInt(X);
-            p.WriteInt(Y);
+            p.WriteInt(Point.X);
+            p.WriteInt(Point.Y);
         }
     }
 }

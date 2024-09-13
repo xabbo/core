@@ -1,12 +1,18 @@
 using System;
+
 using Xabbo.Messages;
 using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
-public sealed record LookToMsg(int X, int Y) : IMessage<LookToMsg>
+public sealed record LookToMsg(Point Point) : IMessage<LookToMsg>
 {
     public static Identifier Identifier => Out.LookTo;
+
+    public LookToMsg(int x, int y) : this(new Point(x, y)) { }
+
+    public int X => Point.X;
+    public int Y => Point.Y;
 
     public static LookToMsg Parse(in PacketReader p)
     {
@@ -27,20 +33,19 @@ public sealed record LookToMsg(int X, int Y) : IMessage<LookToMsg>
             y = p.ReadInt();
         }
 
-        return new LookToMsg(x, y);
+        return new LookToMsg((x, y));
     }
 
     public void Compose(in PacketWriter p)
     {
         if (p.Client is ClientType.Shockwave)
         {
-            p.WriteContent($"{X} {Y}");
+            p.WriteContent($"{Point.X} {Point.Y}");
         }
         else
         {
-            p.WriteInt(X);
-            p.WriteInt(Y);
+            p.WriteInt(Point.X);
+            p.WriteInt(Point.Y);
         }
     }
-
 }
