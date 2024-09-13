@@ -81,8 +81,6 @@ public class GameDataManager : IGameDataManager
         {
             url = $"{url}/{hash ?? "1"}";
             HttpResponseMessage response = await http.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                Console.WriteLine($"Failed to load {url}");
             response.EnsureSuccessStatusCode();
 
             using var outs = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite);
@@ -103,8 +101,6 @@ public class GameDataManager : IGameDataManager
     {
         if (!_loadSemaphore.Wait(0, cancellationToken))
             throw new InvalidOperationException("Game data is currently being loaded.");
-
-        Console.WriteLine("loading game data");
 
         try
         {
@@ -202,8 +198,6 @@ public class GameDataManager : IGameDataManager
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to load game data: {ex}");
-
             Reset();
             LoadFailed?.Invoke(ex);
             _tcsLoad?.TrySetException(ex);
@@ -213,8 +207,6 @@ public class GameDataManager : IGameDataManager
         {
             _tcsLoad = null;
             _loadSemaphore.Release();
-
-            Console.WriteLine($"loaded {Furni?.Count ?? 0} furni");
         }
     }
 
