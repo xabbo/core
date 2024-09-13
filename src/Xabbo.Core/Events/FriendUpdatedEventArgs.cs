@@ -1,7 +1,3 @@
 ﻿namespace Xabbo.Core.Events;
 
-public sealed class FriendUpdatedEventArgs(IFriend previous, IFriend current)
-    : FriendEventArgs(current)
-{
-    public IFriend Previous { get; } = previous;
-}
+public sealed record FriendUpdatedEventArgs(IFriend Previous, IFriend Friend) : FriendEventArgs(Friend);

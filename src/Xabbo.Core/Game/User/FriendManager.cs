@@ -10,6 +10,11 @@ using Xabbo.Interceptor;
 using Xabbo.Messages.Flash;
 
 using Xabbo.Core.Events;
+using Xabbo.Core.Messages.Incoming;
+using Xabbo.Core.Messages.Outgoing;
+
+using ModernIncoming = Xabbo.Core.Messages.Incoming.Modern;
+using OriginsIncoming = Xabbo.Core.Messages.Incoming.Origins;
 
 namespace Xabbo.Core.Game;
 
@@ -23,7 +28,7 @@ public sealed partial class FriendManager : GameStateManager
 
     private int _totalFragments = -1, _currentFragment = 0;
     private readonly List<Friend> _loadList = [];
-    private bool _isLoading = true, _isForceLoading;
+    private bool _isLoading = true, _isForceLoading, _receivedMessengerInit;
 
     public bool IsInitialized { get; private set; }
     public IEnumerable<IFriend> Friends => _friends.Select(x => x.Value);
@@ -46,7 +51,7 @@ public sealed partial class FriendManager : GameStateManager
     private void OnFriendUpdated(IFriend previous, IFriend current) => FriendUpdated?.Invoke(new FriendUpdatedEventArgs(previous, current));
 
     public event Action<FriendMessageEventArgs>? MessageReceived;
-    private void OnMessageReceived(Friend friend, string message) => MessageReceived?.Invoke(new FriendMessageEventArgs(friend, message));
+    private void OnMessageReceived(Friend friend, ConsoleMessage message) => MessageReceived?.Invoke(new FriendMessageEventArgs(friend, message));
     #endregion
 
     public FriendManager(IInterceptor interceptor, ILogger<FriendManager> logger)
@@ -61,6 +66,11 @@ public sealed partial class FriendManager : GameStateManager
         _logger = NullLogger.Instance;
     }
 
+    protected override void OnConnected(GameConnectedArgs e)
+    {
+        base.OnConnected(e);
+    }
+
     protected override void OnDisconnected()
     {
         _friends.Clear();
@@ -71,17 +81,27 @@ public sealed partial class FriendManager : GameStateManager
         _loadList.Clear();
         _isLoading = true;
         _isForceLoading = false;
+        _receivedMessengerInit = false;
     }
 
     /// <summary>
     /// Sends a private message to a user with the specified ID.
     /// </summary>
-    public void SendMessage(Id id, string message) => Interceptor.Send(Out.PostMessage, id, message);
+    public void SendMessage(Id id, string message) => Interceptor.Send(new SendConsoleMessageMsg { Recipients = [id], Message = message });
 
     /// <summary>
     /// Sends a private message to the specified friend.
     /// </summary>
     public void SendMessage(Friend friend, string message) => SendMessage(friend.Id, message);
+
+    private void CompleteLoadingFriends()
+    {
+        _isLoading = false;
+        _isForceLoading = false;
+        _loadList.Clear();
+        IsInitialized = true;
+        OnLoaded();
+    }
 
     private void AddFriend(Friend friend, bool raiseEvent = true)
     {
@@ -147,31 +167,42 @@ public sealed partial class FriendManager : GameStateManager
         }
     }
 
-    [InterceptIn(nameof(In.LatencyPingResponse))]
-    private void HandleLatencyPingResponse(Intercept e)
+    protected override void OnInitialize(bool initializingOnConnect)
     {
-        if (!IsInitialized && !_isForceLoading && e.Sequence > 10)
+        if (!_receivedMessengerInit)
         {
             _isForceLoading = true;
             Interceptor.Send(Out.MessengerInit);
         }
     }
 
-    [InterceptIn(nameof(In.MessengerInit))]
-    private void HandleMessengerInit(Intercept e)
+    [Intercept]
+    private void HandleMessengerInit(Intercept<MessengerInitMsg> e)
     {
-        if (_isLoading && _isForceLoading)
-            e.Block();
+        _receivedMessengerInit = true;
+        if (_isLoading)
+        {
+            if (_isForceLoading)
+                e.Block();
+
+            if (Interceptor.Session.Client.Type is ClientType.Shockwave)
+            {
+                // Friends list is available here
+                AddFriends(e.Msg.Friends, false);
+                if (_isLoading)
+                    CompleteLoadingFriends();
+            }
+        }
     }
 
-    [InterceptIn(nameof(In.FriendListFragment))]
-    private void HandleFriendListFragment(Intercept e)
+    [Intercept]
+    private void HandleFriendList(Intercept<FriendListMsg> e)
     {
         if (!_isLoading)
             return;
 
-        int total = e.Packet.Read<int>();
-        int current = e.Packet.Read<int>();
+        int total = e.Msg.FragmentCount;
+        int current = e.Msg.FragmentIndex;
 
         if (current != _currentFragment) return;
         if (_totalFragments == -1) _totalFragments = total;
@@ -181,72 +212,61 @@ public sealed partial class FriendManager : GameStateManager
         if (_isForceLoading)
             e.Block();
 
-        int n = e.Packet.Read<Length>();
-        for (int i = 0; i < n; i++)
-            _loadList.Add(e.Packet.Read<Friend>());
+        _loadList.AddRange(e.Msg);
 
         if (_currentFragment == total)
         {
             AddFriends(_loadList, false);
-
-            _isLoading = false;
-            _isForceLoading = false;
-            IsInitialized = true;
-            OnLoaded();
+            CompleteLoadingFriends();
         }
 
         _logger.LogTrace(
             "Received friend list fragment {fragmentIndex}/{totalFragments} ({fragmentCount})",
-            _currentFragment, total, n
+            _currentFragment, total, e.Msg.Count
         );
     }
 
-    [InterceptIn(nameof(In.FriendListUpdate))]
-    private void HandleFriendListUpdate(Intercept e)
+    [Intercept]
+    private void HandleFriendListUpdate(ModernIncoming.FriendListUpdateMsg msg)
     {
-        int n = e.Packet.Read<Length>();
-        for (int i = 0; i < n; i++)
+        foreach (var update in msg.Updates)
         {
-            e.Packet.Read<int>(); // category id : -1 = offline, 0 = online
-            e.Packet.Read<string>(); // category name
-        }
-
-        n = e.Packet.Read<Length>();
-        for (int i = 0; i < n; i++)
-        {
-            int updateType = e.Packet.Read<int>();
-            if (updateType == -1) // removed
+            switch (update.Type)
             {
-                long id = e.Packet.Read<Id>();
-                RemoveFriend(id);
-            }
-            else if (updateType == 0) // updated
-            {
-                Friend friend = e.Packet.Read<Friend>();
-                UpdateFriend(friend);
-            }
-            else if (updateType == 1) // added
-            {
-                Friend friend = e.Packet.Read<Friend>();
-                AddFriend(friend);
+                case FriendListUpdateType.Add when update.Friend is not null:
+                    AddFriend(update.Friend);
+                    break;
+                case FriendListUpdateType.Update when update.Friend is not null:
+                    UpdateFriend(update.Friend);
+                    break;
+                case FriendListUpdateType.Remove:
+                    RemoveFriend(update.Id);
+                    break;
             }
         }
     }
 
-    [InterceptIn(nameof(In.NewConsole))]
-    private void HandleNewConsole(Intercept e)
+    [Intercept]
+    private void HandleFriendAdded(OriginsIncoming.FriendAddedMsg msg) => AddFriend(msg.Friend);
+
+    [Intercept]
+    private void HandleFriendsRemoved(OriginsIncoming.FriendsRemovedMsg msg)
     {
-        Id id = e.Packet.Read<Id>();
-        if (!_friends.TryGetValue(id, out Friend? friend))
+        foreach (var id in msg)
+            RemoveFriend(id);
+    }
+
+    [Intercept]
+    private void HandleConsoleMessages(ConsoleMessagesMsg messages)
+    {
+        foreach (var message in messages)
         {
-            Debug.Log($"failed to get friend {friend} from id map");
-            return;
+            if (!_friends.TryGetValue(message.SenderId, out Friend? friend))
+            {
+                Debug.Log($"failed to get friend {friend} from id map");
+                continue;
+            }
+            OnMessageReceived(friend, message);
         }
-
-        string message = e.Packet.Read<string>();
-        // int secondsSinceSent
-        // string extraData
-
-        OnMessageReceived(friend, message);
     }
 }

@@ -1,6 +1,3 @@
 ﻿namespace Xabbo.Core.Events;
 
-public sealed class FriendMessageEventArgs(IFriend friend, string message) : FriendEventArgs(friend)
-{
-    public string Message { get; } = message;
-}
+public sealed record FriendMessageEventArgs(IFriend Friend, ConsoleMessage Message) : FriendEventArgs(Friend);

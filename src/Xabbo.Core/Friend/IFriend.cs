@@ -1,4 +1,6 @@
-﻿namespace Xabbo.Core;
+﻿using System.ComponentModel;
+
+namespace Xabbo.Core;
 
 /// <summary>
 /// Contains information about the user's friend.
@@ -28,11 +30,11 @@ public interface IFriend
     /// <summary>
     /// Gets the figure string of the friend.
     /// </summary>
-    string FigureString { get; }
+    string Figure { get; }
     /// <summary>
     /// Gets the category in the friend list that the friend belongs to.
     /// </summary>
-    Id CategoryId { get; }
+    int CategoryId { get; }
     /// <summary>
     /// Gets the motto of the friend.
     /// </summary>

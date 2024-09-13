@@ -9,8 +9,8 @@ public class Friend : IFriend, IParserComposer<Friend>
     public Gender Gender { get; set; }
     public bool IsOnline { get; set; }
     public bool CanFollow { get; set; }
-    public string FigureString { get; set; } = string.Empty;
-    public Id CategoryId { get; set; }
+    public string Figure { get; set; } = string.Empty;
+    public int CategoryId { get; set; }
     public string Motto { get; set; } = string.Empty;
     public string RealName { get; set; } = string.Empty;
     public string FacebookId { get; set; } = string.Empty;
@@ -19,22 +19,37 @@ public class Friend : IFriend, IParserComposer<Friend>
     public bool IsPocketHabboUser { get; set; }
     public Relation Relation { get; set; }
 
+    // Shockwave fields
+    public string Location { get; set; } = "";
+    public string LastAccess { get; set; } = "";
+
     public Friend() { }
 
     protected Friend(in PacketReader p)
     {
-        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+        if (p.Client is ClientType.Shockwave)
+        {
+            Id = p.ReadId();
+            Name = p.ReadString();
+            Gender = H.ToGender(p.ReadInt());
+            Motto = p.ReadString();
+            IsOnline = p.ReadBool();
+            Location = p.ReadString();
+            LastAccess = p.ReadString();
+            Figure = p.ReadString();
+            return;
+        }
 
         Id = p.ReadId();
         Name = p.ReadString();
         Gender = H.ToGender(p.ReadInt());
         IsOnline = p.ReadBool();
         CanFollow = p.ReadBool();
-        FigureString = p.ReadString();
-        CategoryId = p.ReadId();
+        Figure = p.ReadString();
+        CategoryId = p.ReadInt();
         Motto = p.ReadString();
 
-        if (p.Client == ClientType.Flash)
+        if (p.Client is ClientType.Flash)
         {
             RealName = p.ReadString();
             FacebookId = p.ReadString();
@@ -44,7 +59,7 @@ public class Friend : IFriend, IParserComposer<Friend>
         IsVipMember = p.ReadBool();
         IsPocketHabboUser = p.ReadBool();
 
-        if (p.Client == ClientType.Unity)
+        if (p.Client is ClientType.Unity)
         {
             RealName = p.ReadString();
             FacebookId = p.ReadString();
@@ -55,13 +70,26 @@ public class Friend : IFriend, IParserComposer<Friend>
 
     void IComposer.Compose(in PacketWriter p)
     {
+        if (p.Client is ClientType.Shockwave)
+        {
+            p.WriteId(Id);
+            p.WriteString(Name);
+            p.WriteInt((int)Gender);
+            p.WriteString(Motto);
+            p.WriteBool(IsOnline);
+            p.WriteString(Location);
+            p.WriteString(LastAccess);
+            p.WriteString(Figure);
+            return;
+        }
+
         p.WriteId(Id);
         p.WriteString(Name);
-        p.WriteInt(Gender.GetValue());
+        p.WriteInt(Gender.ToClientValue());
         p.WriteBool(IsOnline);
         p.WriteBool(CanFollow);
-        p.WriteString(FigureString);
-        p.WriteId(CategoryId);
+        p.WriteString(Figure);
+        p.WriteInt(CategoryId);
         p.WriteString(Motto);
         p.WriteString(RealName);
         p.WriteString(FacebookId);
