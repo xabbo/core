@@ -140,7 +140,7 @@ public class Figure
 
     public void RemovePart(string partType) => RemovePart(H.GetFigurePartType(partType));
 
-    public string GetGenderString() => gender.ToShortString();
+    public string GetGenderString() => gender.ToClientString();
 
     public string GetFigureString() => ToString();
 

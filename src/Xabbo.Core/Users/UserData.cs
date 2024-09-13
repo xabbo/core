@@ -132,7 +132,7 @@ public sealed class UserData : IUserData, IParserComposer<UserData>
         p.WriteId(Id);
         p.WriteString(Name);
         p.WriteString(Figure);
-        p.WriteString(Gender.ToShortString());
+        p.WriteString(Gender.ToClientString());
         p.WriteString(Motto);
         p.WriteString(RealName);
         p.WriteBool(DirectMail);

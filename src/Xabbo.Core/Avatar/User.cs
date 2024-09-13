@@ -40,7 +40,7 @@ public class User(Id id, int index) : Avatar(AvatarType.User, id, index), IUser
         if (p.Client == ClientType.Shockwave)
             return;
 
-        p.WriteString(Gender.ToShortString().ToLower());
+        p.WriteString(Gender.ToClientString().ToLower());
         p.WriteId(GroupId);
         p.WriteInt(GroupStatus);
         p.WriteString(GroupName);

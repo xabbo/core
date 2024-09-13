@@ -50,7 +50,7 @@ public class Bot : Avatar, IBot
 
         if (Type == AvatarType.PrivateBot)
         {
-            p.WriteString(Gender.ToShortString().ToLower());
+            p.WriteString(Gender.ToClientString().ToLower());
             p.WriteId(OwnerId);
             p.WriteString(OwnerName);
             p.WriteShortArray(Skills);

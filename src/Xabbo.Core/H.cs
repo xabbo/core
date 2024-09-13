@@ -15,21 +15,6 @@ public static partial class H
 
     public static bool IsValidAvatarName(string avatarName) => RegexAvatarValidator().IsMatch(avatarName);
 
-    public static Gender ToGender(int gender) => gender switch
-    {
-        0 => Gender.Female,
-        1 => Gender.Male,
-        _ => Gender.Unisex,
-    };
-
-    public static Gender ToGender(string gender) => gender.ToLower() switch
-    {
-        "m" or "male" => Gender.Male,
-        "f" or "female" => Gender.Female,
-        "u" or "unisex" => Gender.Unisex,
-        _ => throw new FormatException($"Unknown gender: '{gender}'."),
-    };
-
     public static ItemType ToItemType(string s)
     {
         if (s.Length != 1)

@@ -64,7 +64,7 @@ public abstract class Avatar(AvatarType type, Id id, int index) : IAvatar, IPars
             p.WriteInt(Index);
             p.WriteString(Name);
             p.WriteString(Figure);
-            p.WriteString(user?.Gender.ToShortString() ?? "");
+            p.WriteString(user?.Gender.ToClientString() ?? "");
             p.WriteString(Motto);
             p.Compose(Location);
             p.WriteString(user?.FigureExtra ?? "");
