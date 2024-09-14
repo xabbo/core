@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Interceptor;
 using Xabbo.Messages.Flash;
@@ -18,10 +17,11 @@ namespace Xabbo.Core.Game;
 /// Manages information about the current room, the user's permissions in the room, its furni, avatars and chat.
 /// </summary>
 [Intercept]
-public sealed partial class RoomManager : GameStateManager
+public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory? loggerFactory = null)
+    : GameStateManager(interceptor)
 {
-    private readonly ILogger _logger;
-    private readonly Dictionary<long, RoomData> _roomDataCache = new();
+    private readonly ILogger? Log = loggerFactory?.CreateLogger<RoomManager>();
+    private readonly Dictionary<long, RoomData> _roomDataCache = [];
 
     private Room? _currentRoom;
     private RoomData? _currentRoomData;
@@ -125,7 +125,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action? EnteredQueue;
     private void OnEnteredQueue()
     {
-        _logger.LogTrace("Entered queue. (pos:{queuePosition})", QueuePosition);
+        Log.Debug("Entered queue. (pos:{QueuePosition})", args: [QueuePosition]);
         EnteredQueue?.Invoke();
     }
 
@@ -135,7 +135,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action? QueuePositionUpdated;
     private void OnQueuePositionUpdated()
     {
-        _logger.LogTrace("Queue position updated. (pos:{queuePosition})", QueuePosition);
+        Log.Debug("Queue position updated. (pos:{QueuePosition})", args: [QueuePosition]);
         QueuePositionUpdated?.Invoke();
     }
 
@@ -145,7 +145,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action? Entering;
     private void OnEnteringRoom(long roomId)
     {
-        _logger.LogTrace("Entering room. (id:{roomId})", roomId);
+        Log.Debug("Entering room. (id:{RoomId})", args: [roomId]);
         Entering?.Invoke();
     }
 
@@ -155,7 +155,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<RoomEventArgs>? Entered;
     private void OnEnteredRoom(IRoom room)
     {
-        _logger.LogTrace("Entered room. (id:{roomId})", room.Id);
+        Log.Info("Entered room. (id:{RoomId}, name:{Name})", args: [room.Id, room.Name]);
         Entered?.Invoke(new RoomEventArgs(room));
     }
 
@@ -163,7 +163,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<RoomDataEventArgs>? RoomDataUpdated;
     private void OnRoomDataUpdated(RoomData roomData)
     {
-        _logger.LogTrace("Room data updated. (name:{name})", roomData.Name);
+        Log.Debug("Room data updated. (name:{Name})", args: [roomData.Name]);
         RoomDataUpdated?.Invoke(new RoomDataEventArgs(roomData));
     }
 
@@ -173,7 +173,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action? Left;
     private void OnLeftRoom()
     {
-        _logger.LogTrace("Left room.");
+        Log.Info("Left room.");
         Left?.Invoke();
     }
 
@@ -184,7 +184,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action? Kicked;
     private void OnKicked()
     {
-        _logger.LogTrace("Kicked from room.");
+        Log.Debug("Kicked from room.");
         Kicked?.Invoke();
     }
 
@@ -194,7 +194,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action? RightsUpdated;
     private void OnRightsUpdated()
     {
-        _logger.LogTrace("Rights updated.");
+        Log.Debug("Rights level updated to {Level}.", args: [RightsLevel]);
         RightsUpdated?.Invoke();
     }
     #endregion
@@ -208,7 +208,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<FloorItemsEventArgs>? FloorItemsLoaded;
     private void OnFloorItemsLoaded(IEnumerable<IFloorItem> items)
     {
-        _logger.LogTrace("Floor items loaded. ({n})", items.Count());
+        Log.Debug("Floor items loaded. ({Count})", args: [items.Count()]);
         FloorItemsLoaded?.Invoke(new FloorItemsEventArgs(items));
     }
 
@@ -218,7 +218,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<FloorItemEventArgs>? FloorItemAdded;
     private void OnFloorItemAdded(IFloorItem item)
     {
-        _logger.LogTrace("Floor item added. (id:{id})", item.Id);
+        Log.Trace("Floor item added. (id:{Id})", args: [item.Id]);
         FloorItemAdded?.Invoke(new FloorItemEventArgs(item));
     }
 
@@ -228,7 +228,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<FloorItemUpdatedEventArgs>? FloorItemUpdated;
     private void OnFloorItemUpdated(IFloorItem previousItem, IFloorItem updatedItem)
     {
-        _logger.LogTrace("Floor item updated. (id:{id})", updatedItem.Id);
+        Log.Trace("Floor item updated. (id:{Id})", args: [updatedItem.Id]);
         FloorItemUpdated?.Invoke(new FloorItemUpdatedEventArgs(previousItem, updatedItem));
     }
 
@@ -238,14 +238,14 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<FloorItemDataUpdatedEventArgs>? FloorItemDataUpdated;
     private void OnFloorItemDataUpdated(IFloorItem item, IItemData previousData)
     {
-        _logger.LogTrace("Floor item data updated. (id:{id})", item.Id);
+        Log.Trace("Floor item data updated. (id:{Id})", args: [item.Id]);
         FloorItemDataUpdated?.Invoke(new FloorItemDataUpdatedEventArgs(item, previousData));
     }
 
     public event Action<DiceUpdatedEventArgs>? DiceUpdated;
     private void OnDiceUpdated(IFloorItem item, int previousValue, int currentValue)
     {
-        _logger.LogTrace("Dice value updated. (id:{id})", item.Id);
+        Log.Trace("Dice value updated. (id:{Id})", args: [item.Id]);
         DiceUpdated?.Invoke(new DiceUpdatedEventArgs(item, previousValue, currentValue));
     }
 
@@ -255,9 +255,9 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<FloorItemSlideEventArgs>? FloorItemSlide;
     private void OnFloorItemSlide(IFloorItem item, Tile previousTile, Id rollerId)
     {
-        _logger.LogTrace(
-            "Floor item slide. (id:{id}, rollerId:{rollerId}, {from} -> {to})",
-            item.Id, rollerId, previousTile, item.Location
+        Log.Trace(
+            "Floor item slide. (id:{Id}, rollerId:{RollerId}, {From} -> {To})",
+            args: [item.Id, rollerId, previousTile, item.Location]
         );
         FloorItemSlide?.Invoke(new FloorItemSlideEventArgs(item, previousTile, rollerId));
     }
@@ -277,7 +277,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<FloorItemEventArgs>? FloorItemRemoved;
     private void OnFloorItemRemoved(IFloorItem item)
     {
-        _logger.LogTrace("Floor item removed. (id:{id})", item.Id);
+        Log.Trace("Floor item removed. (id:{Id})", args: [item.Id]);
         FloorItemRemoved?.Invoke(new FloorItemEventArgs(item));
     }
 
@@ -289,7 +289,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<WallItemsEventArgs>? WallItemsLoaded;
     private void OnWallItemsLoaded(IEnumerable<IWallItem> items)
     {
-        _logger.LogTrace("Wall items loaded. ({n})", items.Count());
+        Log.Debug("Wall items loaded. ({Count})", args: [items.Count()]);
         WallItemsLoaded?.Invoke(new WallItemsEventArgs(items));
     }
 
@@ -299,7 +299,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<WallItemEventArgs>? WallItemAdded;
     private void OnWallItemAdded(IWallItem item)
     {
-        _logger.LogTrace("Wall item added. (id:{id})", item.Id);
+        Log.Trace("Wall item added. (id:{Id})", args: [item.Id]);
         WallItemAdded?.Invoke(new WallItemEventArgs(item));
     }
 
@@ -309,7 +309,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<WallItemUpdatedEventArgs>? WallItemUpdated;
     private void OnWallItemUpdated(IWallItem previousItem, IWallItem updatedItem)
     {
-        _logger.LogTrace("Wall item updated. (id:{id})", updatedItem.Id);
+        Log.Trace("Wall item updated. (id:{Id})", args: [updatedItem.Id]);
         WallItemUpdated?.Invoke(new WallItemUpdatedEventArgs(previousItem, updatedItem));
     }
 
@@ -319,7 +319,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<WallItemEventArgs>? WallItemRemoved;
     private void OnWallItemRemoved(IWallItem item)
     {
-        _logger.LogTrace("Wall item removed. (id:{id})", item.Id);
+        Log.Trace("Wall item removed. (id:{id})", args: [item.Id]);
         WallItemRemoved?.Invoke(new WallItemEventArgs(item));
     }
 
@@ -349,7 +349,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<AvatarsEventArgs>? AvatarsAdded;
     private void OnAvatarsAdded(IEnumerable<IAvatar> avatars)
     {
-        _logger.LogTrace("Avatars added. ({n})", avatars.Count());
+        Log.Trace("Avatars added. ({Count})", args: [avatars.Count()]);
         AvatarsAdded?.Invoke(new AvatarsEventArgs(avatars));
     }
 
@@ -368,7 +368,7 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<AvatarsEventArgs>? AvatarsUpdated;
     private void OnAvatarsUpdated(IEnumerable<IAvatar> avatars)
     {
-        _logger.LogTrace("Avatars updated. ({n})", avatars.Count());
+        Log.Trace("Avatars updated. ({Count})", args: [avatars.Count()]);
         AvatarsUpdated?.Invoke(new AvatarsEventArgs(avatars));
     }
 
@@ -378,9 +378,9 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<AvatarSlideEventArgs>? AvatarSlide;
     private void OnAvatarSlide(IAvatar avatar, Tile previousTile)
     {
-        _logger.LogTrace(
-            "Avatar slide. ({avatarName} [{avatarId}:{avatarIndex}], {from} -> {to})",
-            avatar.Name, avatar.Id, avatar.Index, previousTile, avatar.Location
+        Log.Trace(
+            "Avatar slide. ({AvatarName} [{AvatarId}:{AvatarIndex}], {From} -> {To})",
+            args: [avatar.Name, avatar.Id, avatar.Index, previousTile, avatar.Location]
         );
         AvatarSlide?.Invoke(new AvatarSlideEventArgs(avatar, previousTile));
     }
@@ -393,9 +393,9 @@ public sealed partial class RoomManager : GameStateManager
         string previousFigure, Gender previousGender,
         string previousMotto, int previousAchievementScore)
     {
-        _logger.LogTrace(
-            "Avatar data updated. ({name} [{id}:{index}])",
-            avatar.Name, avatar.Id, avatar.Index
+        Log.Trace(
+            "Avatar data updated. ({Name} [{Id}:{Index}])",
+            args: [avatar.Name, avatar.Id, avatar.Index]
         );
         AvatarDataUpdated?.Invoke(new AvatarDataUpdatedEventArgs(
             avatar, previousFigure, previousGender,
@@ -409,9 +409,9 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<AvatarNameChangedEventArgs>? AvatarNameChanged;
     private void OnAvatarNameChanged(IAvatar avatar, string previousName)
     {
-        _logger.LogTrace(
-            "Avatar name changed. ({previousName} -> {avatarName} [{avatarId}:{avatarIndex}])",
-            previousName, avatar.Name, avatar.Id, avatar.Index
+        Log.Trace(
+            "Avatar name changed. ({PreviousName} -> {AvatarName} [{AvatarId}:{AvatarIndex}])",
+            args: [previousName, avatar.Name, avatar.Id, avatar.Index]
         );
         AvatarNameChanged?.Invoke(new AvatarNameChangedEventArgs(avatar, previousName));
     }
@@ -422,9 +422,9 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<AvatarIdleEventArgs>? AvatarIdle;
     private void OnAvatarIdle(IAvatar avatar, bool wasIdle)
     {
-        _logger.LogTrace(
-            "Avatar idle. ({avatarName} [{avatarId}:{avatarIndex}], {wasIdle} -> {isIdle})",
-            avatar.Name, avatar.Id, avatar.Index, wasIdle, avatar.IsIdle
+        Log.Trace(
+            "Avatar idle. ({AvatarName} [{AvatarId}:{AvatarIndex}], {WasIdle} -> {IsIdle})",
+            args: [avatar.Name, avatar.Id, avatar.Index, wasIdle, avatar.IsIdle]
         );
         AvatarIdle?.Invoke(new AvatarIdleEventArgs(avatar, wasIdle));
     }
@@ -435,9 +435,9 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<AvatarDanceEventArgs>? AvatarDance;
     private void OnAvatarDance(IAvatar avatar, Dances previousDance)
     {
-        _logger.LogTrace(
-            "Avatar dance. ({avatarName} [{avatarId}:{avatarIndex}], {previousDance} -> {dance})",
-            avatar.Name, avatar.Id, avatar.Index, previousDance, avatar.Dance
+        Log.Trace(
+            "Avatar dance. ({AvatarName} [{AvatarId}:{AvatarIndex}], {PreviousDance} -> {Dance})",
+            args: [avatar.Name, avatar.Id, avatar.Index, previousDance, avatar.Dance]
         );
         AvatarDance?.Invoke(new AvatarDanceEventArgs(avatar, previousDance));
     }
@@ -448,9 +448,9 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<AvatarHandItemEventArgs>? AvatarHandItem;
     private void OnAvatarHandItem(IAvatar avatar, int previousItem)
     {
-        _logger.LogTrace(
-            "Avatar hand item. ({avatarName} [{avatarId}:{avatarIndex}], {previousItemId} -> {itemId})",
-            avatar.Name, avatar.Id, avatar.Index, previousItem, avatar.HandItem
+        Log.Trace(
+            "Avatar hand item. ({AvatarName} [{AvatarId}:{AvatarIndex}], {PreviousItemId} -> {ItemId})",
+            args: [avatar.Name, avatar.Id, avatar.Index, previousItem, avatar.HandItem]
         );
         AvatarHandItem?.Invoke(new AvatarHandItemEventArgs(avatar, previousItem));
     }
@@ -461,9 +461,9 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<AvatarEffectEventArgs>? AvatarEffect;
     private void OnAvatarEffect(IAvatar avatar, int previousEffect)
     {
-        _logger.LogTrace(
-            "Avatar effect. ({avatarName} [{avatarId}:{avatarIndex}], {previousEffect} -> {effect})",
-            avatar.Name, avatar.Id, avatar.Index, previousEffect, avatar.Effect
+        Log.Trace(
+            "Avatar effect. ({AvatarName} [{AvatarId}:{AvatarIndex}], {PreviousEffect} -> {Effect})",
+            args: [avatar.Name, avatar.Id, avatar.Index, previousEffect, avatar.Effect]
         );
         AvatarEffect?.Invoke(new AvatarEffectEventArgs(avatar, previousEffect));
     }
@@ -474,9 +474,9 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<AvatarActionEventArgs>? AvatarAction;
     private void OnAvatarAction(IAvatar avatar, Actions action)
     {
-        _logger.LogTrace(
-            "Avatar action. ({avatarName} [{avatarId}:{avatarIndex}], action:{action})",
-            avatar.Name, avatar.Id, avatar.Index, action
+        Log.Trace(
+            "Avatar action. ({AvatarName} [{AvatarId}:{AvatarIndex}], action:{Action})",
+            args: [avatar.Name, avatar.Id, avatar.Index, action]
         );
         AvatarAction?.Invoke(new AvatarActionEventArgs(avatar, action));
     }
@@ -487,9 +487,9 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<AvatarTypingEventArgs>? AvatarTyping;
     private void OnAvatarTyping(IAvatar avatar, bool wasTyping)
     {
-        _logger.LogTrace(
-            "Avatar typing. ({avatarName} [{avatarId}:{avatarIndex}], {wasTyping} -> {isTyping})",
-            avatar.Name, avatar.Id, avatar.Index, wasTyping, avatar.IsTyping
+        Log.Trace(
+            "Avatar typing. ({AvatarName} [{AvatarId}:{AvatarIndex}], {WasTyping} -> {IsTyping})",
+            args: [avatar.Name, avatar.Id, avatar.Index, wasTyping, avatar.IsTyping]
         );
         AvatarTyping?.Invoke(new AvatarTypingEventArgs(avatar, wasTyping));
     }
@@ -500,9 +500,9 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<AvatarEventArgs>? AvatarRemoved;
     private void OnAvatarRemoved(IAvatar avatar)
     {
-        _logger.LogTrace(
-            "Avatar removed. ({avatarName} [{avatarId}:{avatarIndex}])",
-            avatar.Name, avatar.Id, avatar.Index
+        Log.Trace(
+            "Avatar removed. ({AvatarName} [{AvatarId}:{AvatarIndex}])",
+            args: [avatar.Name, avatar.Id, avatar.Index]
         );
         AvatarRemoved?.Invoke(new AvatarEventArgs(avatar));
     }
@@ -513,9 +513,9 @@ public sealed partial class RoomManager : GameStateManager
     public event Action<AvatarChatEventArgs>? AvatarChat;
     private void OnAvatarChat(AvatarChatEventArgs e)
     {
-        _logger.LogTrace(
-            "{type}:{bubble} {avatar} {message}",
-            e.ChatType, e.BubbleStyle, e.Avatar, e.Message
+        Log.Trace(
+            "{Type}({Bubble}) {Avatar} {Message}",
+            args: [e.ChatType, e.BubbleStyle, e.Avatar, e.Message]
         );
         AvatarChat?.Invoke(e);
     }
@@ -526,32 +526,22 @@ public sealed partial class RoomManager : GameStateManager
     /// </summary>
     public bool TryGetRoomData(long roomId, [NotNullWhen(true)] out RoomData? data) => _roomDataCache.TryGetValue(roomId, out data);
 
-    public RoomManager(ILogger<RoomManager> logger, IInterceptor interceptor)
-        : base(interceptor)
-    {
-        _logger = logger;
-    }
-
-    public RoomManager(IInterceptor interceptor)
-        : base(interceptor)
-    {
-        _logger = NullLogger.Instance;
-    }
-
     protected override void OnDisconnected() => ResetState();
 
     private void EnteringRoom(Id id)
     {
+        Log.Debug("Entering room {Id}.", args: [id]);
+
         CurrentRoomId = id;
 
         if (_roomDataCache.TryGetValue(id, out RoomData? data))
         {
             _currentRoomData = data;
-            _logger.LogTrace("Loaded room data from cache.");
+            Log.Trace("Loaded room data from cache.");
         }
         else
         {
-            _logger.LogTrace("Failed to load room data from cache.");
+            Log.Warn("Failed to load room data from cache.");
         }
 
         _currentRoom = new Room(id, data!);
@@ -580,7 +570,7 @@ public sealed partial class RoomManager : GameStateManager
 
     private void ResetState()
     {
-        _logger.LogTrace("Resetting room state");
+        Log.Debug("Resetting room state.");
 
         IsInQueue =
         IsLoadingRoom =
@@ -686,7 +676,7 @@ public sealed partial class RoomManager : GameStateManager
     public bool ShowFurni(IFurni furni) => SetFurniHidden(furni.Type, furni.Id, false);
     public bool HideFurni(IFurni furni) => SetFurniHidden(furni.Type, furni.Id, true);
 
-    #region - Room e.Packet handlers -
+    #region - Room packet handlers -
     [InterceptIn(nameof(In.GetGuestRoomResult))]
     private void HandleGetGuestRoomResult(Intercept e)
     {
@@ -694,19 +684,15 @@ public sealed partial class RoomManager : GameStateManager
 
         if (!_roomDataCache.ContainsKey(roomData.Id))
         {
-            _logger.LogTrace(
-                "Storing room data in cache. (id:{roomId}, name:'{roomName}', owner:'{roomOwner}')",
-                roomData.Id,
-                roomData.Name,
-                roomData.OwnerName
+            Log.Debug(
+                "Storing room data in cache. (id:{Id}, name:'{Name}', owner:'{Owner}')",
+                args: [roomData.Id, roomData.Name, roomData.OwnerName]
             );
         }
         else
         {
-            _logger.LogTrace("Updating room data cache. (id:{roomId}, name:'{roomName}', owner:'{roomOwner}')",
-                roomData.Id,
-                roomData.Name,
-                roomData.OwnerName
+            Log.Debug("Updating room data cache. (id:{Id}, name:'{Name}', owner:'{Owner}')",
+                args: [roomData.Id, roomData.Name, roomData.OwnerName]
             );
         }
 
@@ -774,20 +760,21 @@ public sealed partial class RoomManager : GameStateManager
     {
         if (!IsLoadingRoom)
         {
-            _logger.LogDebug("Not loading room.");
+            Log.Debug("Not loading room.");
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Warn("Current room is null.");
             return;
         }
 
         long roomId = e.Packet.Read<Id>();
         if (roomId != _currentRoom.Id)
         {
-            _logger.LogError("Room ID mismatch.");
+            Log.Error("Room ID mismatch. (expected: {Expected}, actual: {Actual})",
+                args: [_currentRoom.Id, roomId]);
             return;
         }
 
@@ -831,11 +818,11 @@ public sealed partial class RoomManager : GameStateManager
             if (_roomDataCache.TryGetValue(roomId, out RoomData? data))
             {
                 _currentRoomData = data;
-                _logger.LogTrace("Loaded room data from cache.");
+                Log.Debug("Loaded room data from cache.");
             }
             else
             {
-                _logger.LogTrace("Failed to load room data from cache.");
+                Log.Warn("Failed to load room data from cache.");
             }
 
             _currentRoom = new Room(roomId, data!);
@@ -852,13 +839,13 @@ public sealed partial class RoomManager : GameStateManager
     {
         if (!IsLoadingRoom)
         {
-            _logger.LogWarning($"[{nameof(HandleRoomProperty)}] Not loading room!");
+            Log.Warn("Not loading room.");
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogTrace($"[{nameof(HandleRoomProperty)}] Current room is null.");
+            Log.Warn("Current room is null.");
             return;
         }
 
@@ -867,7 +854,10 @@ public sealed partial class RoomManager : GameStateManager
         {
             string[] fields = e.Packet.ReadContent().Split('/');
             if (fields.Length != 2)
+            {
+                Log.Warn("Invalid field length in {Fields}.", args: [fields]);
                 return;
+            }
             (key, value) = (fields[0], fields[1]);
         }
         else
@@ -880,7 +870,7 @@ public sealed partial class RoomManager : GameStateManager
             case "floor": _currentRoom.Floor = value; break;
             case "wallpaper": _currentRoom.Wallpaper = value; break;
             case "landscape": _currentRoom.Landscape = value; break;
-            default: _logger.LogDebug("Unknown paint type: {type}.", key); break;
+            default: Log.Warn("Unknown paint type: {Type}.", args: [key]); break;
         }
 
         if (IsInRoom)
@@ -894,7 +884,7 @@ public sealed partial class RoomManager : GameStateManager
     {
         if (_currentRoom is null)
         {
-            _logger.LogTrace($"[{nameof(HandleYouAreController)}] Current room is null.");
+            Log.Trace("Current room is null.");
             return;
         }
 
@@ -903,7 +893,8 @@ public sealed partial class RoomManager : GameStateManager
             long roomId = e.Packet.Read<Id>();
             if (roomId != _currentRoom.Id)
             {
-                _logger.LogWarning($"[{nameof(HandleYouAreController)}] Room ID mismatch!");
+                Log.Warn("Room ID mismatch. (expected: {Expected}, actual: {Actual})",
+                    args: [_currentRoom.Id, roomId]);
                 return;
             }
             RightsLevel = e.Packet.Read<int>();
@@ -921,14 +912,14 @@ public sealed partial class RoomManager : GameStateManager
     {
         if (_currentRoom is null)
         {
-            _logger.LogTrace($"[{nameof(HandleYouAreNotController)}] Current room is null.");
+            Log.Trace("Current room is null.");
             return;
         }
 
         long roomId = e.Packet.Read<Id>();
         if (roomId != _currentRoom.Id)
         {
-            _logger.LogWarning($"[{nameof(HandleYouAreNotController)}] Room ID mismatch!");
+            Log.Warn("Room ID mismatch.");
             return;
         }
 
@@ -942,13 +933,13 @@ public sealed partial class RoomManager : GameStateManager
     {
         if (!IsLoadingRoom)
         {
-            _logger.LogWarning($"[{nameof(HandleRoomEntryTile)}] Not loading room!");
+            Log.Warn("Not loading room.");
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogTrace($"[{nameof(HandleRoomEntryTile)}] Current room is null.");
+            Log.Warn("Current room is null.");
             return;
         }
 
@@ -959,7 +950,7 @@ public sealed partial class RoomManager : GameStateManager
         _currentRoom.DoorTile = new Tile(x, y, 0);
         _currentRoom.EntryDirection = dir;
 
-        _logger.LogTrace("Received room entry tile. (x:{x}, y:{y}, dir: {dir})", x, y, dir);
+        Log.Debug("Received room entry tile. (x:{X}, y:{Y}, dir: {Dir})", args: [x, y, dir]);
     }
 
     // Shockwave does not have a furni heightmap.
@@ -969,32 +960,40 @@ public sealed partial class RoomManager : GameStateManager
     {
         if (!IsLoadingRoom)
         {
-            _logger.LogWarning($"[{nameof(HandleHeightMap)}] Not loading room!");
+            Log.Warn("Not loading room.");
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogTrace($"[{nameof(HandleHeightMap)}] Current room is null.");
+            Log.Warn("Current room is null.");
             return;
         }
 
         Heightmap heightmap = e.Packet.Read<Heightmap>();
         _currentRoom.Heightmap = heightmap;
 
-        _logger.LogTrace("Received stacking heightmap. (size:{width}x{length})", heightmap.Width, heightmap.Length);
+        Log.Debug("Received stacking heightmap. (size:{Width}x{Length})", args: [heightmap.Width, heightmap.Length]);
     }
 
+    // TODO: maybe unrelated to Shockwave's HeightMapUpdate, removing client target for now.
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.HeightMapUpdate))]
     private void HandleHeightMapUpdate(Intercept e)
     {
+        if (!IsInRoom) return;
+
         if (_currentRoom is null)
         {
-            _logger.LogTrace($"[{nameof(HandleHeightMapUpdate)}] Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
-        if (_currentRoom.Heightmap is null) return;
+        if (_currentRoom.Heightmap is null)
+        {
+            Log.Warn("Heightmap is null.");
+            return;
+        }
 
         int n = e.Packet.Read<byte>();
         for (int i = 0; i < n; i++)
@@ -1004,7 +1003,7 @@ public sealed partial class RoomManager : GameStateManager
             _currentRoom.Heightmap[x, y].Update(e.Packet.Read<short>());
         }
 
-        _logger.LogTrace("Received stacking heightmap diff. ({n} change(s))", n);
+        Log.Trace("Received stacking heightmap diff. ({Count} change(s))", args: [n]);
     }
 
     [InterceptIn(nameof(In.FloorHeightMap))]
@@ -1012,20 +1011,20 @@ public sealed partial class RoomManager : GameStateManager
     {
         if (!IsLoadingRoom)
         {
-            _logger.LogWarning($"[{nameof(HandleFloorHeightmap)}] Not loading room!");
+            Log.Trace("Not loading room.");
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogTrace($"[{nameof(HandleFloorHeightmap)}] Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
         FloorPlan floorPlan = e.Packet.Read<FloorPlan>();
         _currentRoom.FloorPlan = floorPlan;
 
-        _logger.LogTrace("Received floor heightmap. (size:{width}x{length})", floorPlan.Width, floorPlan.Length);
+        Log.Debug("Received floor heightmap. (size:{Width}x{Length})", args: [floorPlan.Width, floorPlan.Length]);
 
         if (Interceptor.Session.Is(ClientType.Shockwave))
         {
@@ -1038,10 +1037,7 @@ public sealed partial class RoomManager : GameStateManager
     [InterceptIn(nameof(In.RoomVisualizationSettings))]
     private void HandleRoomVisualizationSettings(Intercept e)
     {
-        if (_currentRoom is null)
-        {
-            return;
-        }
+        if (_currentRoom is null) return;
 
         _currentRoom.HideWalls = e.Packet.Read<bool>();
         _currentRoom.WallThickness = (Thickness)e.Packet.Read<int>();
@@ -1054,10 +1050,7 @@ public sealed partial class RoomManager : GameStateManager
     [InterceptIn(nameof(In.RoomChatSettings))]
     private void HandleRoomChatSettings(Intercept e)
     {
-        if (_currentRoom is null)
-        {
-            return;
-        }
+        if (_currentRoom is null) return;
 
         _currentRoom.Data.ChatSettings = e.Packet.Read<ChatSettings>();
 
@@ -1070,25 +1063,29 @@ public sealed partial class RoomManager : GameStateManager
     {
         if (!IsLoadingRoom)
         {
-            _logger.LogWarning($"[{nameof(HandleRoomEntryInfo)}] Not loading room!");
+            Log.Warn("Not loading room.");
             return;
         }
 
         long roomId = e.Packet.Read<Id>();
         if (roomId != _currentRoom?.Id)
         {
-            _logger.LogWarning(
-                "Room ID mismatch! (expected:{expectedRoomId}, actual:{actualRoomId})",
-                _currentRoom?.Id, roomId
+            Log.Warn(
+                "Room ID mismatch. (expected:{ExpectedRoomId}, actual:{ActualRoomId})",
+                args: [_currentRoom?.Id, roomId]
             );
             return;
         }
 
         if (_roomDataCache.TryGetValue(roomId, out RoomData? roomData))
         {
-            _logger.LogTrace("Loaded room data from cache.");
+            Log.Debug("Loaded room data from cache.");
             _currentRoomData = roomData;
             _currentRoom.Data = roomData;
+        }
+        else
+        {
+            Log.Debug("Failed to load room data from cache.");
         }
 
         IsOwner = e.Packet.Read<bool>();
@@ -1099,9 +1096,11 @@ public sealed partial class RoomManager : GameStateManager
     [InterceptIn(nameof(In.CloseConnection))]
     private void HandleCloseConnection(Intercept e)
     {
+        if (!IsInRoom) return;
+
         if (_currentRoom is null)
         {
-            _logger.LogWarning($"[{nameof(HandleCloseConnection)}] Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1120,6 +1119,8 @@ public sealed partial class RoomManager : GameStateManager
         if (!IsInRoom) return;
 
         GenericErrorCode errorCode = (GenericErrorCode)e.Packet.Read<int>();
+        Log.Trace("Received generic error code {Code}.", args: [errorCode]);
+
         if (errorCode == GenericErrorCode.Kicked)
             OnKicked();
     }
@@ -1131,13 +1132,13 @@ public sealed partial class RoomManager : GameStateManager
     {
         if (!IsLoadingRoom)
         {
-            _logger.LogDebug("Not loading room.");
+            Log.Trace("Not loading room.");
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1151,7 +1152,7 @@ public sealed partial class RoomManager : GameStateManager
             }
             else
             {
-                _logger.LogError("Failed to add floor item {itemId}.", item.Id);
+                Log.Warn("Failed to add floor item {Id}.", args: [item.Id]);
             }
         }
 
@@ -1170,15 +1171,11 @@ public sealed partial class RoomManager : GameStateManager
     [Intercept]
     void HandleFloorItemAdded(FloorItemAddedMsg added)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug($"[{nameof(HandleFloorItemAdded)}] Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning($"[{nameof(HandleFloorItemAdded)}] Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1188,22 +1185,18 @@ public sealed partial class RoomManager : GameStateManager
         }
         else
         {
-            _logger.LogError($"[{nameof(HandleFloorItemAdded)}] Failed to add floor item {{itemId}}.", added.Item.Id);
+            Log.Warn("Failed to add floor item {Id}.", args: [added.Item.Id]);
         }
     }
 
     [Intercept]
     void HandleFloorItemRemoved(FloorItemRemovedMsg removed)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleFloorItemRemoved));
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleFloorItemRemoved));
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1213,22 +1206,18 @@ public sealed partial class RoomManager : GameStateManager
         }
         else
         {
-            _logger.LogError("[{method}] Failed to remove item {id} from the dictionary", nameof(HandleFloorItemRemoved), removed.Id);
+            Log.Warn("Failed to remove item {Id} from the dictionary", args: [removed.Id]);
         }
     }
 
     [Intercept]
     void HandleFloorItemUpdated(FloorItemUpdatedMsg updated)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleFloorItemUpdated));
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleFloorItemUpdated));
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1243,27 +1232,23 @@ public sealed partial class RoomManager : GameStateManager
             }
             else
             {
-                _logger.LogError("[{method}] Failed to update floor item {itemId}", nameof(HandleFloorItemUpdated), updated.Item.Id);
+                Log.Warn("Failed to update floor item {Id}", args: [updated.Item.Id]);
             }
         }
         else
         {
-            _logger.LogError("[{method}] Failed to find floor item {itemId} to update", nameof(HandleFloorItemUpdated), updated.Item.Id);
+            Log.Error("Failed to find floor item {Id} to update", args: [updated.Item.Id]);
         }
     }
 
     [Intercept]
     void HandleSlideObjectBundle(SlideObjectBundleMsg msg)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleSlideObjectBundle));
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleSlideObjectBundle));
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1278,7 +1263,7 @@ public sealed partial class RoomManager : GameStateManager
             }
             else
             {
-                _logger.LogError("[{method}] Failed to find floor item {itemId} to update.", nameof(HandleSlideObjectBundle), objectUpdate.Id);
+                Log.Warn("Failed to find floor item {Id} to update.", args: [objectUpdate.Id]);
             }
         }
 
@@ -1294,7 +1279,7 @@ public sealed partial class RoomManager : GameStateManager
             }
             else
             {
-                _logger.LogError("Failed to find avatar with index {index} to update.", update.Avatar.Index);
+                Log.Warn("Failed to find avatar with index {Index} to update.", args: [update.Avatar.Index]);
             }
         }
     }
@@ -1302,21 +1287,17 @@ public sealed partial class RoomManager : GameStateManager
     [Intercept]
     void HandleFloorItemDataUpdated(FloorItemDataUpdatedMsg update)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleFloorItemDataUpdated));
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleFloorItemDataUpdated));
+            Log.Debug("Current room is null.");
             return;
         }
 
         if (!_currentRoom.FloorItems.TryGetValue(update.Id, out FloorItem? item))
         {
-            _logger.LogError("[{method}] Unable to find floor item {id} to update.", nameof(HandleFloorItemDataUpdated), update.Id);
+            Log.Warn("Unable to find floor item {Id} to update.", args: [update.Id]);
             return;
         }
 
@@ -1329,15 +1310,11 @@ public sealed partial class RoomManager : GameStateManager
     [Intercept]
     void HandleFloorItemsDataUpdated(FloorItemsDataUpdatedMsg msg)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("[{method}] Not in room.", nameof(HandleFloorItemsDataUpdated));
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("[{method}] Current room is null.", nameof(HandleFloorItemsDataUpdated));
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1345,7 +1322,7 @@ public sealed partial class RoomManager : GameStateManager
         {
             if (!_currentRoom.FloorItems.TryGetValue(id, out FloorItem? item))
             {
-                _logger.LogError("[{method}] Failed to find floor item {id} to update.", id, nameof(HandleFloorItemsDataUpdated));
+                Log.Warn("Failed to find floor item {Id} to update.", args: [id]);
                 continue;
             }
 
@@ -1363,7 +1340,7 @@ public sealed partial class RoomManager : GameStateManager
 
         if (!_currentRoom.FloorItems.TryGetValue(dice.Id, out FloorItem? item))
         {
-            _logger.LogError("[{method}] Failed to find floor item {id} to update.", nameof(HandleDiceValue), dice.Id);
+            Log.Warn("Failed to find floor item {Id} to update.", args: [dice.Id]);
             return;
         }
 
@@ -1380,13 +1357,13 @@ public sealed partial class RoomManager : GameStateManager
     {
         if (!IsLoadingRoom)
         {
-            _logger.LogDebug("Not loading room.");
+            Log.Trace("Not loading room.");
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1400,7 +1377,7 @@ public sealed partial class RoomManager : GameStateManager
             }
             else
             {
-                _logger.LogError("Failed to add wall item {itemId}.", item.Id);
+                Log.Warn("Failed to add wall item {Id}.", args: [item.Id]);
             }
         }
 
@@ -1419,15 +1396,11 @@ public sealed partial class RoomManager : GameStateManager
     [Intercept]
     void HandleItemAdd(WallItemAddedMsg added)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1437,22 +1410,18 @@ public sealed partial class RoomManager : GameStateManager
         }
         else
         {
-            _logger.LogError("Failed to add wall item {itemId}.", added.Item.Id);
+            Log.Warn("Failed to add wall item {Id}.", args: [added.Item.Id]);
         }
     }
 
     [Intercept]
     void HandleItemUpdate(WallItemUpdatedMsg updated)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1473,7 +1442,7 @@ public sealed partial class RoomManager : GameStateManager
 
         if (previousItem is null)
         {
-            _logger.LogError("Failed to find previous wall item {itemId} to update", updatedItem.Id);
+            Log.Warn("Failed to find previous wall item {Id} to update.", args: [updatedItem.Id]);
         }
         else
         {
@@ -1484,15 +1453,11 @@ public sealed partial class RoomManager : GameStateManager
     [Intercept]
     void HandleItemRemove(WallItemRemovedMsg removed)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1502,7 +1467,7 @@ public sealed partial class RoomManager : GameStateManager
         }
         else
         {
-            Debug.Log($"failed to remove item {removed.Id} from the dictionary");
+            Log.Warn("Failed to remove item {Id} from the dictionary.", args: [removed.Id]);
         }
     }
     #endregion
@@ -1513,13 +1478,13 @@ public sealed partial class RoomManager : GameStateManager
     {
         if (!IsLoadingRoom && !IsInRoom)
         {
-            _logger.LogDebug("Not loading room / not in room.");
+            Log.Trace("Not loading or in room.");
             return;
         }
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1534,7 +1499,7 @@ public sealed partial class RoomManager : GameStateManager
             }
             else
             {
-                _logger.LogError("Failed to add avatar {index} {name} (id:{id})", avatar.Index, avatar.Name, avatar.Id);
+                Log.Warn("Failed to add avatar {Index} {Name} (id:{Id})", args: [avatar.Index, avatar.Name, avatar.Id]);
             }
         }
 
@@ -1553,15 +1518,11 @@ public sealed partial class RoomManager : GameStateManager
     [Intercept]
     void HandleAvatarRemoved(AvatarRemovedMsg removed)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1571,22 +1532,18 @@ public sealed partial class RoomManager : GameStateManager
         }
         else
         {
-            _logger.LogError("Failed to remove avatar with index {index}", removed.Index);
+            Log.Warn("Failed to remove avatar with index {Index}.", args: [removed.Index]);
         }
     }
 
     [Intercept]
     void HandlerUserUpdate(AvatarUpdatesMsg updates)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1596,7 +1553,7 @@ public sealed partial class RoomManager : GameStateManager
         {
             if (!_currentRoom.Avatars.TryGetValue(update.Index, out Avatar? avatar))
             {
-                _logger.LogError("Failed to find avatar with index {index} to update", update.Index);
+                Log.Warn("Failed to find avatar with index {Index} to update", args: [update.Index]);
                 continue;
             }
 
@@ -1612,15 +1569,11 @@ public sealed partial class RoomManager : GameStateManager
     [Intercept]
     void HandleWiredMovements(WiredMovementsMsg movements)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1643,6 +1596,7 @@ public sealed partial class RoomManager : GameStateManager
             }
         }
 
+        Log.Trace("Received {Count} wired movements.", args: [movements.Count]);
         OnWiredMovements(movements);
     }
 
@@ -1651,15 +1605,11 @@ public sealed partial class RoomManager : GameStateManager
     [InterceptIn(nameof(In.UserChange))]
     void HandleUserChange(Intercept e)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1705,7 +1655,7 @@ public sealed partial class RoomManager : GameStateManager
         }
         else
         {
-            _logger.LogError("Failed to find avatar with index {index} to update.", index);
+            Log.Warn("Failed to find avatar with index {Index} to update.", args: [index]);
         }
     }
 
@@ -1713,15 +1663,11 @@ public sealed partial class RoomManager : GameStateManager
     [InterceptIn(nameof(In.UserNameChanged))]
     void HandleUserNameChanged(Intercept e)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1737,22 +1683,18 @@ public sealed partial class RoomManager : GameStateManager
         }
         else
         {
-            _logger.LogError("Failed to find avatar with index {index} to update.", index);
+            Log.Warn("Failed to find avatar with index {index} to update.", args: [index]);
         }
     }
 
     [Intercept]
     void HandleAvatarIdle(AvatarIdleMsg msg)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1764,22 +1706,18 @@ public sealed partial class RoomManager : GameStateManager
         }
         else
         {
-            _logger.LogError("Failed to find avatar with index {index} to update.", msg.Index);
+            Log.Warn("Failed to find avatar with index {Index} to update.", args: [msg.Index]);
         }
     }
 
     [Intercept]
     void HandleDance(AvatarDanceMsg msg)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1791,7 +1729,7 @@ public sealed partial class RoomManager : GameStateManager
         }
         else
         {
-            _logger.LogError("Failed to find avatar with index {index} to update.", msg.Index);
+            Log.Warn("Failed to find avatar with index {Index} to update.", args: [msg.Index]);
             return;
         }
     }
@@ -1799,15 +1737,11 @@ public sealed partial class RoomManager : GameStateManager
     [Intercept]
     void HandleExpression(AvatarActionMsg msg)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1817,22 +1751,18 @@ public sealed partial class RoomManager : GameStateManager
         }
         else
         {
-            _logger.LogError("Failed to find avatar with index {index} to update.", msg.Index);
+            Log.Error("Failed to find avatar with index {Index} to update.", args: [msg.Index]);
         }
     }
 
     [Intercept]
     void HandleCarryObject(AvatarHandItemMsg msg)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1844,22 +1774,18 @@ public sealed partial class RoomManager : GameStateManager
         }
         else
         {
-            _logger.LogError("Failed to find avatar with index {index} to update.", msg.Index);
+            Log.Warn("Failed to find avatar with index {Index} to update.", args: [msg.Index]);
         }
     }
 
     [Intercept]
     void HandleAvatarEffect(AvatarEffectMsg msg)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1871,22 +1797,18 @@ public sealed partial class RoomManager : GameStateManager
         }
         else
         {
-            _logger.LogError("Failed to find avatar with index {index} to update.", msg.Index);
+            Log.Warn("Failed to find avatar with index {Index} to update.", args: [msg.Index]);
         }
     }
 
     [Intercept]
     void HandleUserTyping(AvatarTypingMsg msg)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1898,22 +1820,18 @@ public sealed partial class RoomManager : GameStateManager
         }
         else
         {
-            _logger.LogError("Failed to find avatar with index {index} to update.", msg.Index);
+            Log.Warn("Failed to find avatar with index {Index} to update.", args: [msg.Index]);
         }
     }
 
     [Intercept]
     void HandleChat(Intercept<AvatarChatMsg> e)
     {
-        if (!IsInRoom)
-        {
-            _logger.LogDebug("Not in room.");
-            return;
-        }
+        if (!IsInRoom) return;
 
         if (_currentRoom is null)
         {
-            _logger.LogWarning("Current room is null.");
+            Log.Debug("Current room is null.");
             return;
         }
 
@@ -1921,7 +1839,7 @@ public sealed partial class RoomManager : GameStateManager
 
         if (!_currentRoom.Avatars.TryGetValue(chat.Index, out Avatar? avatar))
         {
-            _logger.LogError("Failed to find avatar with index {index}.", chat.Index);
+            Log.Warn("Failed to find avatar with index {Index}.", args: [chat.Index]);
             return;
         }
 

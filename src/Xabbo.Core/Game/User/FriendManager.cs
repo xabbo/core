@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Interceptor;
 using Xabbo.Messages.Flash;
@@ -19,9 +18,9 @@ using OriginsIncoming = Xabbo.Core.Messages.Incoming.Origins;
 namespace Xabbo.Core.Game;
 
 [Intercept]
-public sealed partial class FriendManager : GameStateManager
+public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFactory? loggerFactory = null) : GameStateManager(interceptor)
 {
-    private readonly ILogger _logger;
+    private readonly ILogger? Log = loggerFactory?.CreateLogger<FriendManager>();
 
     private readonly ConcurrentDictionary<Id, Friend> _friends = new();
     private readonly ConcurrentDictionary<string, Friend> _nameMap = new(StringComparer.OrdinalIgnoreCase);
@@ -39,32 +38,40 @@ public sealed partial class FriendManager : GameStateManager
 
     #region - Events -
     public event Action? Loaded;
-    private void OnLoaded() => Loaded?.Invoke();
+    private void OnLoaded()
+    {
+        Log.Info("Loaded {Count} friends.", args: [_friends.Count]);
+        Loaded?.Invoke();
+    }
 
     public event Action<FriendEventArgs>? FriendAdded;
-    private void OnFriendAdded(IFriend friend) => FriendAdded?.Invoke(new FriendEventArgs(friend));
+    private void OnFriendAdded(IFriend friend)
+    {
+        Log.Info("Added friend '{Name}' (id: {Id}).", args: [friend.Name, friend.Id]);
+        FriendAdded?.Invoke(new FriendEventArgs(friend));
+    }
 
     public event Action<FriendEventArgs>? FriendRemoved;
-    private void OnFriendRemoved(IFriend friend) => FriendRemoved?.Invoke(new FriendEventArgs(friend));
+    private void OnFriendRemoved(IFriend friend)
+    {
+        Log.Info("Removed friend '{Name}' (id: {Id}).", args: [friend.Name, friend.Id]);
+        FriendRemoved?.Invoke(new FriendEventArgs(friend));
+    }
 
     public event Action<FriendUpdatedEventArgs>? FriendUpdated;
-    private void OnFriendUpdated(IFriend previous, IFriend current) => FriendUpdated?.Invoke(new FriendUpdatedEventArgs(previous, current));
+    private void OnFriendUpdated(IFriend previous, IFriend current)
+    {
+        Log.Trace("Updated friend '{Name}' (id: {Id}).", args: [current.Name, current.Id]);
+        FriendUpdated?.Invoke(new FriendUpdatedEventArgs(previous, current));
+    }
 
     public event Action<FriendMessageEventArgs>? MessageReceived;
-    private void OnMessageReceived(Friend friend, ConsoleMessage message) => MessageReceived?.Invoke(new FriendMessageEventArgs(friend, message));
+    private void OnMessageReceived(Friend friend, ConsoleMessage message)
+    {
+        Log.Trace("Received message from '{Name}': '{Message}'.", args: [friend.Name, message.Content]);
+        MessageReceived?.Invoke(new FriendMessageEventArgs(friend, message));
+    }
     #endregion
-
-    public FriendManager(IInterceptor interceptor, ILogger<FriendManager> logger)
-        : base(interceptor)
-    {
-        _logger = logger;
-    }
-
-    public FriendManager(IInterceptor interceptor)
-        : base(interceptor)
-    {
-        _logger = NullLogger.Instance;
-    }
 
     protected override void OnConnected(GameConnectedArgs e)
     {
@@ -108,17 +115,22 @@ public sealed partial class FriendManager : GameStateManager
         if (_friends.TryAdd(friend.Id, friend))
         {
             if (!_nameMap.TryAdd(friend.Name, friend))
-                _logger.LogError("Failed to add friend {friend} to name map", friend);
+            {
+                Log.Error("Failed to add friend {Friend} to name map.", args: [friend]);
+            }
 
             if (raiseEvent)
             {
-                _logger.LogTrace("Added friend {friend}", friend);
                 OnFriendAdded(friend);
+            }
+            else
+            {
+                Log.Info("Added friend '{Name}' (id: {Id}).", args: [friend.Name, friend.Id]);
             }
         }
         else
         {
-            _logger.LogError("Failed to add friend {friend} to id map", friend);
+            Log.Error("Failed to add friend '{Name}' (id: {Id}) to ID map", args: [friend.Name, friend.Id]);
         }
     }
 
@@ -138,16 +150,15 @@ public sealed partial class FriendManager : GameStateManager
                 if (!_nameMap.TryRemove(previous.Name, out _) ||
                     !_nameMap.TryAdd(friend.Name, friend))
                 {
-                    _logger.LogError("Failed to update friend {friend} in name map", friend);
+                    Log.Warn("Failed to update friend {Friend} in name map.", args: [friend]);
                 }
             }
 
-            _logger.LogTrace("Updated friend {friend}", friend);
             OnFriendUpdated(previous, friend);
         }
         else
         {
-            _logger.LogError("Failed to get friend {friend} from id map to update", friend);
+            Log.Warn("Failed to get friend {Friend} from ID map to update.", args: [friend]);
         }
     }
 
@@ -156,14 +167,13 @@ public sealed partial class FriendManager : GameStateManager
         if (_friends.TryRemove(id, out Friend? friend))
         {
             if (!_nameMap.TryRemove(friend.Name, out _))
-                _logger.LogError("Failed to remove friend {id} from name map", id);
+                Log.Warn("Failed to remove friend {Id} from name map.", args: [id]);
 
-            _logger.LogTrace("Removed friend {friend}", friend);
             OnFriendRemoved(friend);
         }
         else
         {
-            _logger.LogError("Failed to remove friend {id} from id map", id);
+            Log.Warn("Failed to remove friend {Id} from ID map.", args: [id]);
         }
     }
 
@@ -204,25 +214,38 @@ public sealed partial class FriendManager : GameStateManager
         int total = e.Msg.FragmentCount;
         int current = e.Msg.FragmentIndex;
 
-        if (current != _currentFragment) return;
+        if (current != _currentFragment)
+        {
+            Log.Warn("Fragment index mismatch. (expected: {Expected}, actual: {Actual})",
+                args: [_currentFragment, current]);
+            return;
+        }
         if (_totalFragments == -1) _totalFragments = total;
-        else if (_totalFragments != total) return;
-        _currentFragment++;
+        else if (_totalFragments != total)
+        {
+            Log.Warn("Fragment count mismatch. (expected: {Expected}, actual: {Actual})",
+                args: [_totalFragments, total]);
+            return;
+        }
 
         if (_isForceLoading)
+        {
+            Log.Trace("Blocking packet");
             e.Block();
+        }
 
         _loadList.AddRange(e.Msg);
 
+        _currentFragment++;
         if (_currentFragment == total)
         {
             AddFriends(_loadList, false);
             CompleteLoadingFriends();
         }
 
-        _logger.LogTrace(
-            "Received friend list fragment {fragmentIndex}/{totalFragments} ({fragmentCount})",
-            _currentFragment, total, e.Msg.Count
+        Log.Trace(
+            "Received friend list fragment {FragmentIndex}/{TotalFragments} ({FragmentCount})",
+            args: [_currentFragment, total, e.Msg.Count]
         );
     }
 
@@ -263,7 +286,7 @@ public sealed partial class FriendManager : GameStateManager
         {
             if (!_friends.TryGetValue(message.SenderId, out Friend? friend))
             {
-                Debug.Log($"failed to get friend {friend} from id map");
+                Log.Warn("Failed to get friend {Id} from ID map.", args: [message.SenderId]);
                 continue;
             }
             OnMessageReceived(friend, message);
