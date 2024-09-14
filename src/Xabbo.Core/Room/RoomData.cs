@@ -50,9 +50,13 @@ public class RoomData : RoomInfo, IRoomData, IParserComposer<RoomData>
 
     protected override void Compose(in PacketWriter p)
     {
-        p.WriteBool(IsEntering);
+        if (p.Client is not ClientType.Shockwave)
+            p.WriteBool(IsEntering);
 
         base.Compose(in p);
+
+        if (p.Client is ClientType.Shockwave)
+            return;
 
         p.WriteBool(Forward);
         p.WriteBool(IsStaffPick);

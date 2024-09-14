@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.Design.Serialization;
+﻿using System;
+using System.Collections.Generic;
 
 using Xabbo.Messages;
 
@@ -40,6 +40,12 @@ public class RoomInfo : IRoomInfo, IParserComposer<RoomInfo>
     public string EventName { get; set; }
     public string EventDescription { get; set; }
     public int EventMinutesRemaining { get; set; }
+
+    // Origins
+    public bool CanOthersMoveFurni { get; set; }
+    public int AbsoluteMaxUsers { get; set; }
+    public string Model { get; set; } = "";
+    public int Alert { get; set; }
 
     public RoomInfo()
     {
@@ -110,24 +116,37 @@ public class RoomInfo : IRoomInfo, IParserComposer<RoomInfo>
 
     private void ParseOrigins(in PacketReader p)
     {
-        p.ReadBool(); // canOthersMoveFurni
+        CanOthersMoveFurni = p.ReadBool();
         Access = (RoomAccess)p.ReadInt();
         Id = p.ReadId();
         OwnerId = -1;
         OwnerName = p.ReadString();
-        p.ReadString(); // marker
+        Model = p.ReadString();
         Name = p.ReadString();
         Description = p.ReadString();
         if (p.ReadBool())
             Flags |= RoomFlags.ShowOwnerName;
-        Trading = (TradePermissions)p.ReadInt();
-        p.ReadInt(); // alert
+        Trading = p.ReadInt() switch
+        {
+            0 => TradePermissions.NotAllowed,
+            1 => TradePermissions.Allowed,
+            int value => throw new Exception($"Unknown trade permissions on Origins: {value}.")
+        };
+        Alert = p.ReadInt();
         MaxUsers = p.ReadInt();
-        p.ReadInt(); // absoluteMaxVisitors ?
+        AbsoluteMaxUsers = p.ReadInt();
     }
 
     void IComposer.Compose(in PacketWriter p) => Compose(in p);
     protected virtual void Compose(in PacketWriter p)
+    {
+        if (p.Client is ClientType.Shockwave)
+            ComposeOrigins(in p);
+        else
+            ComposeModern (in p);
+    }
+
+    private void ComposeModern(in PacketWriter p)
     {
         p.WriteId(Id);
         p.WriteString(Name);
@@ -164,6 +183,27 @@ public class RoomInfo : IRoomInfo, IParserComposer<RoomInfo>
             p.WriteString(EventDescription);
             p.WriteInt(EventMinutesRemaining);
         }
+    }
+
+    protected void ComposeOrigins(in PacketWriter p)
+    {
+        p.WriteBool(CanOthersMoveFurni);
+        p.WriteInt((int)Access);
+        p.WriteId(Id);
+        p.WriteString(OwnerName);
+        p.WriteString(Model);
+        p.WriteString(Name);
+        p.WriteString(Description);
+        p.WriteBool((Flags & RoomFlags.ShowOwnerName) > 0);
+        p.WriteInt(Trading switch
+        {
+            TradePermissions.NotAllowed => 0,
+            TradePermissions.Allowed => 1,
+            _ => throw new Exception($"Invalid trade permissions on Origins: {Trading}.")
+        });
+        p.WriteInt(Alert);
+        p.WriteInt(MaxUsers);
+        p.WriteInt(AbsoluteMaxUsers);
     }
 
     static RoomInfo IParser<RoomInfo>.Parse(in PacketReader p) => new(in p);
