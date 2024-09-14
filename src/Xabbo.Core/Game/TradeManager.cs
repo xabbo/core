@@ -1,5 +1,7 @@
 ﻿using System;
 
+using Microsoft.Extensions.Logging;
+
 using Xabbo.Extension;
 using Xabbo.Messages.Flash;
 using Xabbo.Core.Events;
@@ -7,9 +9,13 @@ using Xabbo.Core.Events;
 namespace Xabbo.Core.Game;
 
 [Intercept(~ClientType.Shockwave)]
-public sealed partial class TradeManager(IExtension extension, ProfileManager profileManager, RoomManager roomManager)
+public sealed partial class TradeManager(
+    IExtension extension, ProfileManager profileManager, RoomManager roomManager, ILoggerFactory? loggerFactory = null
+)
     : GameStateManager(extension)
 {
+    private readonly ILogger? Log = loggerFactory?.CreateLogger<ProfileManager>();
+
     private readonly ProfileManager _profileManager = profileManager;
     private readonly RoomManager _roomManager = roomManager;
 

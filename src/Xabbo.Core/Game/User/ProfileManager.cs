@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Logging;
+
 using Xabbo.Interceptor;
 using Xabbo.Messages.Flash;
 
@@ -11,6 +13,8 @@ namespace Xabbo.Core.Game;
 [Intercept(~ClientType.Shockwave)]
 public sealed partial class ProfileManager : GameStateManager
 {
+    private readonly ILogger? Log;
+
     private Task<IUserData> _taskUserData;
     private TaskCompletionSource<IUserData>? _tcsUserData;
 
@@ -55,9 +59,10 @@ public sealed partial class ProfileManager : GameStateManager
     #endregion
 
 #pragma warning disable CS8618
-    public ProfileManager(IInterceptor interceptor)
+    public ProfileManager(IInterceptor interceptor, ILoggerFactory? loggerFactory = null)
         : base(interceptor)
     {
+        Log = loggerFactory?.CreateLogger<ProfileManager>();
         Reset();
     }
 #pragma warning restore CS8618

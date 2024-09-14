@@ -18,9 +18,9 @@ namespace Xabbo.Core.Game;
 /// Manages the user's inventory.
 /// </summary>
 [Intercept(~ClientType.Shockwave)]
-public sealed partial class InventoryManager : GameStateManager
+public sealed partial class InventoryManager(IExtension extension, ILoggerFactory? loggerFactory = null) : GameStateManager(extension)
 {
-    private readonly ILogger _logger;
+    private readonly ILogger? Log = loggerFactory?.CreateLogger<InventoryManager>();
 
     private readonly List<InventoryFragment> _fragments = [];
     private bool _forceLoadingInventory;
@@ -46,18 +46,6 @@ public sealed partial class InventoryManager : GameStateManager
 
     public event Action<InventoryItemEventArgs>? ItemRemoved;
     private void OnItemRemoved(InventoryItem item) => ItemRemoved?.Invoke(new InventoryItemEventArgs(item));
-
-    public InventoryManager(ILogger<InventoryManager> logger, IExtension extension)
-        : base(extension)
-    {
-        _logger = logger;
-    }
-
-    public InventoryManager(IExtension extension)
-        : base(extension)
-    {
-        _logger = NullLogger.Instance;
-    }
 
     protected override void OnDisconnected()
     {
@@ -111,7 +99,7 @@ public sealed partial class InventoryManager : GameStateManager
     [InterceptIn(nameof(In.FurniListInvalidate))]
     private void HandleFurniListInvalidate(Intercept e)
     {
-        _logger.LogTrace("Inventory invalidated.");
+        Log.LogTrace("Inventory invalidated.");
 
         if (_inventory is not null)
         {
@@ -130,7 +118,7 @@ public sealed partial class InventoryManager : GameStateManager
 
         if (fragment.Index == 0)
         {
-            _logger.LogTrace("Resetting inventory load state.");
+            Log.LogTrace("Resetting inventory load state.");
 
             _currentPacketIndex = 0;
             _totalPackets = fragment.Total;
@@ -139,7 +127,7 @@ public sealed partial class InventoryManager : GameStateManager
         else if (_currentPacketIndex != fragment.Index ||
             _totalPackets != fragment.Total)
         {
-            _logger.LogWarning(
+            Log.LogWarning(
                 "Inventory load state mismatch!"
                 + " Expected {expectedIndex}/{expectedTotal};"
                 + " received {actualIndex}/{actualTotal} (index/total).",
@@ -149,14 +137,14 @@ public sealed partial class InventoryManager : GameStateManager
             return;
         }
 
-        _logger.LogTrace("Received inventory fragment {n} of {total}.", fragment.Index + 1, fragment.Total);
+        Log.LogTrace("Received inventory fragment {n} of {total}.", fragment.Index + 1, fragment.Total);
 
         _currentPacketIndex++;
         _fragments.Add(fragment);
 
         if (fragment.Index == (fragment.Total - 1))
         {
-            _logger.LogTrace("All inventory fragments received.");
+            Log.LogTrace("All inventory fragments received.");
 
             _inventory ??= new Inventory();
             _inventory.Clear();
@@ -166,7 +154,7 @@ public sealed partial class InventoryManager : GameStateManager
             {
                 if (!_inventory.TryAdd(item))
                 {
-                    _logger.LogWarning("Failed to add inventory item {itemId}!", item.ItemId);
+                    Log.LogWarning("Failed to add inventory item {itemId}!", item.ItemId);
                 }
             }
 
@@ -187,12 +175,12 @@ public sealed partial class InventoryManager : GameStateManager
 
         if (added)
         {
-            _logger.LogTrace("Added inventory item {id}.", item.Id);
+            Log.LogTrace("Added inventory item {id}.", item.Id);
             OnItemAdded(item);
         }
         else
         {
-            _logger.LogTrace("Updated inventory item {id}.", item.Id);
+            Log.LogTrace("Updated inventory item {id}.", item.Id);
             OnItemUpdated(item);
         }
     }
@@ -205,12 +193,12 @@ public sealed partial class InventoryManager : GameStateManager
         long itemId = e.Packet.Read<Id>();
         if (_inventory.TryRemove(itemId, out InventoryItem? item))
         {
-            _logger.LogTrace("Inventory item {id} removed.", itemId);
+            Log.LogTrace("Inventory item {id} removed.", itemId);
             OnItemRemoved(item);
         }
         else
         {
-            _logger.LogWarning("Failed to find inventory item {id} to remove!", itemId);
+            Log.LogWarning("Failed to find inventory item {id} to remove!", itemId);
         }
     }
 }
