@@ -204,8 +204,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     #region - Furni events -
     /// <summary>
     /// Invoked when the floor items are loaded.
-    /// This may happen multiple times depending on
-    /// how many items are in the room.
+    /// This may happen multiple times depending on how many items are in the room.
     /// </summary>
     public event Action<FloorItemsEventArgs>? FloorItemsLoaded;
 
@@ -224,6 +223,9 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     /// </summary>
     public event Action<FloorItemDataUpdatedEventArgs>? FloorItemDataUpdated;
 
+    /// <summary>
+    /// Invoked when a dice value is updated.
+    /// </summary>
     public event Action<DiceUpdatedEventArgs>? DiceUpdated;
 
     /// <summary>
@@ -252,16 +254,10 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     /// Invoked when a floor item is removed from the room.
     /// </summary>
     public event Action<FloorItemEventArgs>? FloorItemRemoved;
-    private void OnFloorItemRemoved(IFloorItem item)
-    {
-        Log.LogTrace("Floor item removed. (id:{Id})", item.Id);
-        FloorItemRemoved?.Invoke(new FloorItemEventArgs(item));
-    }
 
     /// <summary>
     /// Invoked when the wall items are loaded.
-    /// This may happen multiple times depending on
-    /// how many items are in the room.
+    /// This may happen multiple times depending on how many items are in the room.
     /// </summary>
     public event Action<WallItemsEventArgs>? WallItemsLoaded;
 
@@ -777,7 +773,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
             if (room.Avatars.TryAdd(avatar.Index, avatar))
             {
                 added.Add(avatar);
-                Log.LogTrace("Added avatar @{Index} '{Name}'.", added[0].Index, added[0].Name);
+                Log.LogTrace("Avatar @{Index} '{Name}' added.", added[0].Index, added[0].Name);
                 AvatarAdded?.Invoke(new AvatarEventArgs(avatar));
             }
             else
@@ -817,7 +813,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
             avatar.Update(update);
             updated.Add(avatar);
 
-            Log.LogTrace("Updated avatar @{Index} '{Name}': '{Status}'.",
+            Log.LogTrace("Avatar @{Index} '{Name}' updated: '{Status}'.",
                 avatar.Index, avatar.Name, update.Status);
             AvatarUpdated?.Invoke(new AvatarEventArgs(avatar));
         }
@@ -832,7 +828,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
 
         if (room.Avatars.TryRemove(index, out Avatar? avatar))
         {
-            Log.LogDebug("Avatar @{Index} '{Name}' removed.", avatar.Index, avatar.Index);
+            Log.LogDebug("Avatar @{Index} '{Name}' removed.", avatar.Index, avatar.Name);
             AvatarRemoved?.Invoke(new AvatarEventArgs(avatar));
         }
         else
