@@ -4,6 +4,7 @@ namespace Xabbo.Core;
 
 public enum TradePermissions
 {
+    None = -1,
     NotAllowed = 0,
     RightsHolders = 1,
     Allowed = 2

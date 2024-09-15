@@ -4,6 +4,7 @@ namespace Xabbo.Core;
 
 public enum RoomCategory
 {
+    None = -1,
     Party = 2,
     Games = 3,
     FansiteSquare = 5,

@@ -4,6 +4,7 @@ namespace Xabbo.Core;
 
 public enum RoomAccess
 {
+    None = -1,
     Open = 0,
     Doorbell = 1,
     Password = 2,

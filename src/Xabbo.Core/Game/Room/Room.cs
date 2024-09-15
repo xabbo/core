@@ -25,13 +25,13 @@ internal class Room : IRoom, INotifyPropertyChanged
     public Id Id { get; }
     public string Model { get; set; } = null!;
 
-    private RoomData _roomData = null!;
-    public RoomData Data
+    private RoomData? _roomData;
+    public RoomData? Data
     {
         get => _roomData;
         set => Set(ref _roomData, value);
     }
-    IRoomData IRoom.Data => Data;
+    IRoomData? IRoom.Data => Data;
 
     private string? _floor;
     public string? Floor
@@ -76,7 +76,7 @@ internal class Room : IRoom, INotifyPropertyChanged
 
     internal ConcurrentDictionary<int, Avatar> Avatars { get; } = new();
 
-    public Room(Id id, RoomData roomData)
+    public Room(Id id, RoomData? roomData)
     {
         Id = id;
         _roomData = roomData;

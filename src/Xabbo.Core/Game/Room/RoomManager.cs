@@ -90,13 +90,6 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
         set => Set(ref _room, value);
     }
 
-    private IRoomData? _roomData;
-    public IRoomData? Data
-    {
-        get => _roomData;
-        set => Set(ref _roomData, value);
-    }
-
     private int _rightsLevel;
     public int RightsLevel
     {
@@ -851,7 +844,6 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
         IsOwner = false;
 
         Room = _currentRoom = null;
-        Data = _currentRoomData = null;
 
         CurrentRoomId = -1;
 

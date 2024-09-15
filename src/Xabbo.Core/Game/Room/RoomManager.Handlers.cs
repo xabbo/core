@@ -34,12 +34,7 @@ partial class RoomManager
 
         if (IsInRoom && roomData.Id == _currentRoom?.Id)
         {
-            Set(ref _currentRoomData, roomData, nameof(Data));
-            if (_currentRoom is not null)
-            {
-                _currentRoom.Data = roomData;
-            }
-
+            _currentRoom.Data = roomData;
             OnRoomDataUpdated(roomData);
         }
     }
@@ -118,6 +113,8 @@ partial class RoomManager
     [InterceptIn(nameof(In.RoomReady))]
     private void HandleRoomReady(Intercept e)
     {
+        using var scope = Log.MethodScope();
+
         if (IsInQueue)
         {
             IsInQueue = false;
@@ -265,6 +262,8 @@ partial class RoomManager
     [InterceptIn(nameof(In.RoomEntryTile))]
     private void HandleRoomEntryTile(Intercept e)
     {
+        using var scope = Log.MethodScope();
+
         if (!IsLoadingRoom)
         {
             Log.LogWarning("Not loading room.");
@@ -292,6 +291,8 @@ partial class RoomManager
     [InterceptIn("f:" + nameof(In.HeightMap))]
     private void HandleHeightMap(Intercept e)
     {
+        using var scope = Log.MethodScope();
+
         if (!IsLoadingRoom)
         {
             Log.LogWarning("Not loading room.");
@@ -343,6 +344,8 @@ partial class RoomManager
     [InterceptIn(nameof(In.FloorHeightMap))]
     private void HandleFloorHeightmap(Intercept e)
     {
+        using var scope = Log.MethodScope();
+
         if (!IsLoadingRoom)
         {
             Log.LogTrace("Not loading room.");
@@ -384,17 +387,19 @@ partial class RoomManager
     [InterceptIn(nameof(In.RoomChatSettings))]
     private void HandleRoomChatSettings(Intercept e)
     {
-        if (_currentRoom is null) return;
+        if (!EnsureRoom(out Room? room) || room.Data is null)
+            return;
 
-        _currentRoom.Data.ChatSettings = e.Packet.Read<ChatSettings>();
-
-        OnRoomDataUpdated(_currentRoom.Data);
+        room.Data.ChatSettings = e.Packet.Read<ChatSettings>();
+        OnRoomDataUpdated(room.Data);
     }
 
     [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.RoomEntryInfo))]
     private void HandleRoomEntryInfo(Intercept e)
     {
+        using var scope = Log.MethodScope();
+
         if (!IsLoadingRoom)
         {
             Log.LogWarning("Not loading room.");
