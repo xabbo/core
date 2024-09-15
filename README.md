@@ -1,9 +1,116 @@
 ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Xabbo.Core?style=for-the-badge) ![Nuget](https://img.shields.io/nuget/dt/Xabbo.Core?style=for-the-badge)
 
-# Xabbo.Core
+# xabbo/core
 A library for parsing data structures, managing the game state, and interacting with the server for Habbo Hotel.
 
-### Building from source
+## Features
+
+### Parsers and composers
+
+Provides various parsers and composers for structures sent between the game client and server.\
+These work by implementing `IComposer` and `IParser<T>` from [xabbo/common](https://github.com/xabbo/common).
+
+```cs
+// Parsing an Avatar.
+var avatar = packet.Read<Avatar>();
+// You can now access avatar.Id, avatar.Name, avatar.Location, etc.
+
+// Composing an Avatar.
+packet.Write(avatar);
+
+// Inject a client-side user into the room.
+Id id = 1000; int index = 1000;
+ext.Send(In.Users, 1, new User(id, index)
+{
+    Name = "xabbo",
+    Motto = "hello from xabbo/core",
+    Location = (6, 6, 0),
+    Figure = "hr-3090-42.hd-180-1.ch-3110-64-1408.lg-275-64.ha-1003-64",
+});
+```
+
+### Messages
+
+Various messages are provided which allow you to send structured messages to the client/server without specifying the message name.\
+Most of these are also designed to be client-agnostic, meaning that they work on both the Flash and Shockwave clients, and are structured correctly depending on the current session.\
+These work by implementing `IMessage<T>` from xabbo/common.
+
+```cs
+// Sending messages - walk to a tile.
+// The implementation writes 32-bit integers on Flash, and B64 encoded integers on Shockwave.
+ext.Send(new WalkMsg(3, 4));
+
+// Intercepting outgoing chat messages.
+ext.Intercept<ChatMsg>(msg => Console.WriteLine($"You said: {msg.Message}"));
+
+// Intercepting and blocking incoming chat messages.
+ext.Intercept<AvatarChatMsg>((e, msg) => {
+    if (msg.Message.Contains("block"))
+        e.Block()
+});
+```
+
+### Game state managers
+
+Game state managers such as the `RoomManager` intercept packets to track the state of the game.\
+This allows you to easily implement higher-level logic without needing to manually intercept and parse packets.
+
+```cs
+// Log users who enter and leave the room, as well as chat messages.
+var roomManager = new RoomManager(ext);
+roomManager.AvatarsAdded += (e) => {
+    if (e.Avatars.Length == 1)
+        Console.WriteLine($"{e.Avatars[0].Name} entered the room.");
+};
+roomManager.AvatarRemoved += (e) => Console.WriteLine($"{e.Avatar.Name} left the room.");
+roomManager.AvatarChat += (e) => Console.WriteLine($"{e.Avatar.Name}: {e.Message}");
+```
+
+### Game data management
+
+A game data manager is provided that loads various resources such as the external texts, furni, figure, and product data.
+
+```cs
+var gameDataManager = new GameDataManager();
+gameDataManager.Loaded += () => Console.WriteLine($"Loaded {gameDataManager.Furni?.Count} furni");
+
+// Load game data once a connection is established, as we will have which Hotel to load game data for.
+ext.Connected += (e) => {
+    Task.Run(async () => {
+        try
+        {
+            Console.WriteLine($"Loading game data for hotel: {e.Session.Hotel}.");
+            await gameDataManager.LoadAsync(e.Session.Hotel);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to load game data: {ex}");
+        }
+    });
+};
+```
+outputs
+```
+Loading game data for hotel: US.
+Loaded 15146 furni
+```
+
+### Core extensions
+
+Various [extension methods](https://github.com/xabbo/core/blob/dev/src/Xabbo.Core/Extensions.cs) are provided for convenience.\
+For example, once game data has been loaded via the `GameDataManager`, you can easily get the name of any item with the `GetName()` extension method.\
+This works for any item as the extension is for the `IItem` interface, which is implemented by `Furni`, `InventoryItem`, `TradeItem`, `MarketplaceItemInfo`, `CatalogProduct` etc.
+
+```cs
+// Log the name of all items in the room.
+if (roomManager.EnsureRoom(out var room))
+{
+    foreach (var furni in room.Furni)
+        Console.WriteLine($"#{furni.Id}: {furni.GetName()}");
+}
+```
+
+## Building from source
 Requires the [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0).
 
 - Clone the repository & fetch submodules.
