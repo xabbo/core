@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -11,7 +10,6 @@ using Xabbo.Messages.Flash;
 
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages.Incoming;
-using System.Runtime.CompilerServices;
 
 namespace Xabbo.Core.Game;
 
@@ -299,9 +297,6 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     /// Invoked when avatars in the room are updated.
     /// </summary>
     public event Action<AvatarsEventArgs>? AvatarsUpdated;
-    private void OnAvatarsUpdated(IEnumerable<IAvatar> avatars)
-    {
-    }
 
     /// <summary>
     /// Invoked when an avatar slides along a roller.
@@ -451,7 +446,15 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
 
     protected override void OnDisconnected() => ResetState();
 
-    private bool EnsureRoom([NotNullWhen(true)] out Room? room)
+    /// <summary>
+    /// Ensures the user is in a room.
+    /// If the user is in a room, this method will return <c>true</c>
+    /// and <paramref name="room"/> will contain the current room instance.
+    /// </summary>
+    public bool EnsureRoom([NotNullWhen(true)] out IRoom? room)
+        => (room = _currentRoom) is not null;
+
+    private bool EnsureRoomInternal([NotNullWhen(true)] out Room? room)
     {
         room = _currentRoom;
         if (room is null)
@@ -468,7 +471,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
             return false;
         }
 
-        return EnsureRoom(out room);
+        return EnsureRoomInternal(out room);
     }
 
     private bool EnsureInRoom([NotNullWhen(true)] out Room? room)
@@ -480,7 +483,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
             return false;
         }
 
-        return EnsureRoom(out room);
+        return EnsureRoomInternal(out room);
     }
 
     private void EnteringRoom(Id id)
@@ -756,7 +759,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
             return;
         }
 
-        if (!EnsureRoom(out Room? room))
+        if (!EnsureRoomInternal(out Room? room))
             return;
 
         List<Avatar> added = [];

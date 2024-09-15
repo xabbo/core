@@ -387,7 +387,7 @@ partial class RoomManager
     [InterceptIn(nameof(In.RoomChatSettings))]
     private void HandleRoomChatSettings(Intercept e)
     {
-        if (!EnsureRoom(out Room? room) || room.Data is null)
+        if (!EnsureRoomInternal(out Room? room) || room.Data is null)
             return;
 
         room.Data.ChatSettings = e.Packet.Read<ChatSettings>();
