@@ -94,10 +94,6 @@ public class FloorItem : Furni, IFloorItem, IParserComposer<FloorItem>
         {
             Identifier = p.ReadString();
         }
-        else
-        {
-            Identifier = string.Empty;
-        }
     }
 
     private void ParseOrigins(in PacketReader p)
