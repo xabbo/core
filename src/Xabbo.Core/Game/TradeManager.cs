@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Extension;
 using Xabbo.Messages.Flash;
@@ -14,7 +15,7 @@ public sealed partial class TradeManager(
 )
     : GameStateManager(extension)
 {
-    private readonly ILogger? Log = loggerFactory?.CreateLogger<ProfileManager>();
+    private readonly ILogger Log = (ILogger?)loggerFactory?.CreateLogger<ProfileManager>() ?? NullLogger.Instance;
 
     private readonly ProfileManager _profileManager = profileManager;
     private readonly RoomManager _roomManager = roomManager;

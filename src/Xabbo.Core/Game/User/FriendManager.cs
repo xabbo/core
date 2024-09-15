@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Interceptor;
 using Xabbo.Messages.Flash;
@@ -20,7 +21,7 @@ namespace Xabbo.Core.Game;
 [Intercept]
 public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFactory? loggerFactory = null) : GameStateManager(interceptor)
 {
-    private readonly ILogger? Log = loggerFactory?.CreateLogger<FriendManager>();
+    private readonly ILogger Log = (ILogger?)loggerFactory?.CreateLogger<FriendManager>() ?? NullLogger.Instance;
 
     private readonly ConcurrentDictionary<Id, Friend> _friends = new();
     private readonly ConcurrentDictionary<string, Friend> _nameMap = new(StringComparer.OrdinalIgnoreCase);

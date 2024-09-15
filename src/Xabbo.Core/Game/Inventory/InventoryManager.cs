@@ -20,7 +20,7 @@ namespace Xabbo.Core.Game;
 [Intercept(~ClientType.Shockwave)]
 public sealed partial class InventoryManager(IExtension extension, ILoggerFactory? loggerFactory = null) : GameStateManager(extension)
 {
-    private readonly ILogger? Log = loggerFactory?.CreateLogger<InventoryManager>();
+    private readonly ILogger Log = (ILogger?)loggerFactory?.CreateLogger<InventoryManager>() ?? NullLogger.Instance;
 
     private readonly List<InventoryFragment> _fragments = [];
     private bool _forceLoadingInventory;

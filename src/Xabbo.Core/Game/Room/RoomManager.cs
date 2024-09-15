@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Interceptor;
 using Xabbo.Messages.Flash;
@@ -20,7 +21,7 @@ namespace Xabbo.Core.Game;
 public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory? loggerFactory = null)
     : GameStateManager(interceptor)
 {
-    private readonly ILogger? Log = loggerFactory?.CreateLogger<RoomManager>();
+    private readonly ILogger Log = (ILogger?)loggerFactory?.CreateLogger<RoomManager>() ?? NullLogger.Instance;
     private readonly Dictionary<long, RoomData> _roomDataCache = [];
 
     private Room? _currentRoom;
