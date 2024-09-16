@@ -18,35 +18,44 @@ var avatar = packet.Read<Avatar>();
 // Composing an Avatar.
 packet.Write(avatar);
 
-// Inject a client-side user into the room.
+// Injecting a client-side user into the room.
+int count = 1;
 Id id = 1000; int index = 1000;
-ext.Send(In.Users, 1, new User(id, index)
+ext.Send(In.Users, count, new User(id, index)
 {
     Name = "xabbo",
     Motto = "hello from xabbo/core",
     Location = (6, 6, 0),
-    Figure = "hr-3090-42.hd-180-1.ch-3110-64-1408.lg-275-64.ha-1003-64",
+    Figure = "hr-3090-42.hd-180-1.ch-3110-64-1408.lg-275-64.ha-1003-64"
 });
 ```
 
 ### Messages
 
-Various messages are provided which allow you to send structured messages to the client/server without specifying the message name.\
-Most of these are also designed to be client-agnostic, meaning that they work on both the Flash and Shockwave clients, and are structured correctly depending on the current session.\
+Various messages are provided which allow you to send structured messages to the client/server without specifying the message name.
+These are also designed to be client-agnostic where possible, meaning that they work on both the Flash and Shockwave clients, and are structured correctly depending on the current session.
 These work by implementing `IMessage<T>` from xabbo/common.
 
 ```cs
-// Sending messages - walk to a tile.
-// The implementation writes 32-bit integers on Flash, and B64 encoded integers on Shockwave.
+// Sending messages: walking to a tile.
 ext.Send(new WalkMsg(3, 4));
+// The implementation writes 32-bit integers on Flash, and B64 encoded integers on Shockwave.
+// This ensurest that the packet format is correct for the currently connected client.
 
 // Intercepting outgoing chat messages.
-ext.Intercept<ChatMsg>(msg => Console.WriteLine($"You said: {msg.Message}"));
+ext.Intercept<ChatMsg>(chat => Console.WriteLine($"You said: {chat.Message}"));
 
 // Intercepting and blocking incoming chat messages.
-ext.Intercept<AvatarChatMsg>((e, msg) => {
-    if (msg.Message.Contains("block"))
-        e.Block()
+// By accepting 2 arguments you will have access to the Intercept instance,
+// allowing you to block the intercepted packet.
+ext.Intercept<AvatarChatMsg>((e, chat) => {
+    if (chat.Message.Contains("block"))
+        e.Block();
+});
+
+// Modifying messages: replacing "apple" with "orange" in incoming chat messages.
+ext.Intercept<AvatarChatMsg>(chat => chat with {
+    Message = chat.Message.Replace("apple", "orange")
 });
 ```
 
@@ -68,13 +77,13 @@ roomManager.AvatarChat += (e) => Console.WriteLine($"{e.Avatar.Name}: {e.Message
 
 ### Game data management
 
-A game data manager is provided that loads various resources such as the external texts, furni, figure, and product data.
+A game data manager is provided which loads various resources such as the external texts, furni, figure, and product data.
 
 ```cs
 var gameDataManager = new GameDataManager();
 gameDataManager.Loaded += () => Console.WriteLine($"Loaded {gameDataManager.Furni?.Count} furni");
 
-// Load game data once a connection is established, as we will have which Hotel to load game data for.
+// Load game data once a connection is established, as we will have which hotel to load game data for.
 ext.Connected += (e) => {
     Task.Run(async () => {
         try
