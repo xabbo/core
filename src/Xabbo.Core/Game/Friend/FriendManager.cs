@@ -35,11 +35,6 @@ public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFacto
 
     #region - Events -
     public event Action? Loaded;
-    private void OnLoaded()
-    {
-        Log.LogInformation("Loaded {Count} friends.", _friends.Count);
-        Loaded?.Invoke();
-    }
 
     public event Action<FriendEventArgs>? FriendAdded;
 
@@ -48,11 +43,6 @@ public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFacto
     public event Action<FriendUpdatedEventArgs>? FriendUpdated;
 
     public event Action<FriendMessageEventArgs>? MessageReceived;
-    private void OnMessageReceived(Friend friend, ConsoleMessage message)
-    {
-        Log.LogTrace("Received message from '{Name}': '{Message}'.", friend.Name, message.Content);
-        MessageReceived?.Invoke(new FriendMessageEventArgs(friend, message));
-    }
     #endregion
 
     protected override void OnConnected(GameConnectedArgs e)
@@ -94,74 +84,81 @@ public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFacto
 
     private void CompleteLoadingFriends()
     {
+        Log.LogInformation("Loaded {Count} friends.", _friends.Count);
+
         _isLoading = false;
         _isForceLoading = false;
         _loadList.Clear();
+
         IsInitialized = true;
-        OnLoaded();
+        Loaded?.Invoke();
     }
 
-    private void AddFriend(Friend friend, bool raiseEvent = true)
+    private void AddFriend(Friend friend)
     {
-        if (_friends.TryAdd(friend.Id, friend))
+        if (!_friends.TryAdd(friend.Id, friend))
         {
-            if (!_nameMap.TryAdd(friend.Name, friend))
-            {
-                Log.LogWarning("Failed to add friend #{Id} '{Name}' to name map.", friend.Id, friend.Name);
-            }
+            Log.LogWarning("Failed to add friend #{Id} '{Name}'.", friend.Id, friend.Name);
+            return;
+        }
 
-            Log.LogDebug("Added friend #{Id} '{Name}'.", friend.Id, friend.Name);
-            if (raiseEvent)
-                FriendAdded?.Invoke(new FriendEventArgs(friend));
+        if (_isLoading)
+        {
+            Log.LogTrace("Loaded friend #{Id} '{Name}'.", friend.Id, friend.Name);
         }
         else
         {
-            Log.LogWarning("Failed to add friend #{Id} '{Name}'.", friend.Id, friend.Name);
+            Log.LogInformation("Added friend #{Id} '{Name}'.", friend.Id, friend.Name);
+            FriendAdded?.Invoke(new FriendEventArgs(friend));
+        }
+
+        if (!_nameMap.TryAdd(friend.Name, friend))
+        {
+            Log.LogWarning("Failed to add friend #{Id} '{Name}' to name map.", friend.Id, friend.Name);
         }
     }
 
-    private void AddFriends(IEnumerable<Friend> friends, bool raiseEvent = true)
+    private void AddFriends(IEnumerable<Friend> friends)
     {
         foreach (var friend in friends)
-            AddFriend(friend, raiseEvent);
+            AddFriend(friend);
     }
 
     private void UpdateFriend(Friend friend)
     {
-        if (_friends.TryGetValue(friend.Id, out Friend? previous) &&
-            _friends.TryUpdate(friend.Id, friend, previous))
+        if (!_friends.TryGetValue(friend.Id, out Friend? previous) ||
+            !_friends.TryUpdate(friend.Id, friend, previous))
         {
-            if (previous.Name != friend.Name)
-            {
-                if (!_nameMap.TryRemove(previous.Name, out _) ||
-                    !_nameMap.TryAdd(friend.Name, friend))
-                {
-                    Log.LogWarning("Failed to update friend {Friend} in name map.", friend);
-                }
-            }
+            Log.LogWarning("Failed to get friend #{Id} '{Name}' from ID map to update.", friend.Id, friend.Name);
+            return;
+        }
 
-            Log.LogTrace("Updated friend #{Id} '{Name}'.", friend.Id, friend.Name);
-            FriendUpdated?.Invoke(new FriendUpdatedEventArgs(previous, friend));
-        }
-        else
+        Log.LogTrace("Updated friend #{Id} '{Name}'.", friend.Id, friend.Name);
+
+        if (previous.Name != friend.Name)
         {
-            Log.LogWarning("Failed to get friend {Friend} from ID map to update.", friend);
+            if (!_nameMap.TryRemove(previous.Name, out _) ||
+                !_nameMap.TryAdd(friend.Name, friend))
+            {
+                Log.LogWarning("Failed to update friend #{Id} '{Name}' in name map.", friend.Id, friend.Name);
+            }
         }
+
+        FriendUpdated?.Invoke(new FriendUpdatedEventArgs(previous, friend));
     }
 
     private void RemoveFriend(Id id)
     {
-        if (_friends.TryRemove(id, out Friend? friend))
-        {
-            if (!_nameMap.TryRemove(friend.Name, out _))
-                Log.LogWarning("Failed to remove friend #{Id} '{Name}' from name map.", id, friend.Name);
-
-            Log.LogDebug("Removed friend #{Id} '{Name}'.", friend.Id, friend.Name);
-            FriendRemoved?.Invoke(new FriendEventArgs(friend));
-        }
-        else
+        if (!_friends.TryRemove(id, out Friend? friend))
         {
             Log.LogWarning("Failed to remove friend #{Id} from ID map.", id);
+            return;
         }
+
+        if (!_nameMap.TryRemove(friend.Name, out _))
+            Log.LogWarning("Failed to remove friend #{Id} '{Name}' from name map.", id, friend.Name);
+
+        Log.LogInformation("Removed friend #{Id} '{Name}'.", friend.Id, friend.Name);
+        FriendRemoved?.Invoke(new FriendEventArgs(friend));
     }
 }

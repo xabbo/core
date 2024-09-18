@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Xabbo.Core.Events;
 
 using Xabbo.Core.Messages.Incoming;
 
@@ -23,7 +24,7 @@ partial class FriendManager
             if (Interceptor.Session.Client.Type is ClientType.Shockwave)
             {
                 // Friends list is available here
-                AddFriends(e.Msg.Friends, false);
+                AddFriends(e.Msg.Friends);
                 if (_isLoading)
                     CompleteLoadingFriends();
             }
@@ -55,9 +56,14 @@ partial class FriendManager
             return;
         }
 
+        Log.LogTrace(
+            "Received friend list fragment {FragmentIndex}/{TotalFragments} ({FragmentCount})",
+            _currentFragment, total, e.Msg.Count
+        );
+
         if (_isForceLoading)
         {
-            Log.LogTrace("Blocking packet");
+            Log.LogTrace("Blocking packet.");
             e.Block();
         }
 
@@ -66,14 +72,9 @@ partial class FriendManager
         _currentFragment++;
         if (_currentFragment == total)
         {
-            AddFriends(_loadList, false);
+            AddFriends(_loadList);
             CompleteLoadingFriends();
         }
-
-        Log.LogTrace(
-            "Received friend list fragment {FragmentIndex}/{TotalFragments} ({FragmentCount})",
-            _currentFragment, total, e.Msg.Count
-        );
     }
 
     [Intercept]
@@ -127,7 +128,9 @@ partial class FriendManager
                 Log.LogWarning("Failed to get friend #{Id} from ID map.", message.SenderId);
                 continue;
             }
-            OnMessageReceived(friend, message);
+
+            Log.LogInformation("Received message from '{Name}': '{Message}'.", friend.Name, message.Content);
+            MessageReceived?.Invoke(new FriendMessageEventArgs(friend, message));
         }
     }
 }
