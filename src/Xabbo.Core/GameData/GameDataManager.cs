@@ -220,9 +220,6 @@ public class GameDataManager : IGameDataManager
             if (hotel.IsOrigins && Texts is not null && typesToLoad?.Contains(GameDataType.Furni) != false)
                 Furni = FurniData.FromOriginsTexts(Texts);
 
-            if (Furni is not null && Texts is not null)
-                Extensions.Initialize(Furni, Texts);
-
             Log.LogInformation("Game data loaded.");
             Loaded?.Invoke();
             _tcsLoad.TrySetResult();
