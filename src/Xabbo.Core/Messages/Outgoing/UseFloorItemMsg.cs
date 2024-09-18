@@ -35,9 +35,9 @@ public sealed record UseFloorItemMsg(Id Id, int State = 0) : IMessage<UseFloorIt
                 if (!Id.TryParse(strId, out id))
                     throw new FormatException($"Failed to parse ID when parsing UseFloorItemMsg: '{strId}'.");
                 string strState = p.ReadString();
-                if (strState is "C" or "OFF") // closed, off
+                if (strState is "C" or "OFF" or "FALSE") // closed, off
                     state = 0;
-                else if (strState is "O" or "ON") // open, on
+                else if (strState is "O" or "ON" or "TRUE") // open, on
                     state = 1;
                 else
                 {
