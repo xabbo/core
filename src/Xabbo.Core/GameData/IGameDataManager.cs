@@ -49,7 +49,7 @@ public interface IGameDataManager
     /// <summary>
     /// Loads game data for the specified hotel.
     /// </summary>
-    Task LoadAsync(Hotel hotel, GameDataType[] types, CancellationToken cancellationToken = default);
+    Task LoadAsync(Hotel hotel, GameDataType[]? typesToLoader = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Waits for game data to load.
