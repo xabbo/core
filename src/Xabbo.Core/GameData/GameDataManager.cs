@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -25,7 +26,7 @@ public class GameDataManager : IGameDataManager
         }
         else
         {
-            return "%HOME%/.xabbo/cache/gamedata";
+            return "%HOME%/.cache/xabbo/gamedata";
         }
     }
 
@@ -36,6 +37,8 @@ public class GameDataManager : IGameDataManager
     private Task _loadTask;
 
     public string CachePath { get; }
+    public TimeSpan MaxAge { get; set;} = TimeSpan.FromHours(3);
+    public bool CacheOnly { get; set; }
 
     public FigureData? Figure { get; private set; }
     public FurniData? Furni { get; private set; }
@@ -65,26 +68,26 @@ public class GameDataManager : IGameDataManager
         Texts = null;
     }
 
-    private async Task LoadDataAsync(
-        HttpClient http,
-        Hotel hotel,
-        GameDataType type,
-        string url,
-        string? hash,
+    private async Task LoadDataAsync(HttpClient http,
+        Hotel hotel, GameDataType gameDataType,
+        string url, string? hash,
         CancellationToken cancellationToken)
     {
-        string cacheFolderPath = Path.Combine(CachePath, hotel.Identifier, type.ToString().ToLower());
+        string cacheFolderPath = Path.Combine(CachePath, hotel.Identifier, gameDataType.ToString().ToLower());
         Directory.CreateDirectory(cacheFolderPath);
 
         string filePath = Path.Combine(cacheFolderPath, hash ?? "1");
 
-        FileInfo file = new FileInfo(filePath);
+        FileInfo file = new(filePath);
 
-        if (!file.Exists || (hash is null && (DateTime.Now - file.LastWriteTime).TotalHours > 3))
+        if (!file.Exists || (!CacheOnly && hash is null && (DateTime.Now - file.LastWriteTime) >= MaxAge))
         {
+            if (CacheOnly)
+                throw new Exception($"{gameDataType} data not found in cache-only mode.");
+
             url = $"{url}/{hash ?? "1"}";
 
-            Log.LogDebug("Loading {GamedataType} data from '{Url}'.", type, url);
+            Log.LogDebug("Loading {GamedataType} data from '{Url}'.", gameDataType, url);
 
             HttpResponseMessage response = await http.GetAsync(url, cancellationToken);
             response.EnsureSuccessStatusCode();
@@ -94,30 +97,35 @@ public class GameDataManager : IGameDataManager
         }
         else
         {
-            Log.LogDebug("Loading {GamedataType} data from disk cache.", type);
+            Log.LogDebug("Loading {GamedataType} data from disk cache.", gameDataType);
         }
 
-        switch (type)
+        switch (gameDataType)
         {
             case GameDataType.Furni: Furni = FurniData.LoadJsonFile(filePath); break;
             case GameDataType.Product: Products = ProductData.LoadJsonFile(filePath); break;
             case GameDataType.Texts: Texts = ExternalTexts.Load(filePath); break;
-            case GameDataType.Figure: Figure = FigureData.LoadXml(filePath); break;
+            case GameDataType.Figure:
+                if (hotel.IsOrigins)
+                    Figure = FigureData.LoadJsonOrigins(filePath);
+                else
+                    Figure = FigureData.LoadXml(filePath);
+                break;
             default:
-                Log.LogWarning("Unknown game data type: {GamedataType}.", type);
+                Log.LogWarning("Unknown game data type: {GamedataType}.", gameDataType);
                 break;
         }
     }
 
-    public async Task LoadAsync(Hotel hotel, CancellationToken cancellationToken = default)
+    public async Task LoadAsync(Hotel hotel, GameDataType[]? typesToLoad = null, CancellationToken cancellationToken = default)
     {
         if (!_loadSemaphore.Wait(0, cancellationToken))
             throw new InvalidOperationException("Game data is currently being loaded.");
 
-        Log.LogInformation("Loading game data for {Hotel}.", hotel.Name);
-
         try
         {
+            Log.LogInformation("Loading game data for {Hotel}.", hotel.Name);
+
             if (_tcsLoad is null)
             {
                 _tcsLoad = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -145,28 +153,22 @@ public class GameDataManager : IGameDataManager
                         Name = "external_texts",
                         Url = $"{baseUrl}/external_texts"
                     },
-                    // new GameDataHash
-                    // {
-                    //     Name = "figurepartlist",
-                    //     Url = $"{baseUrl}/figuredata"
-                    // }
+                    new GameDataHash
+                    {
+                        Name = "figurepartlist",
+                        Url = $"{baseUrl}/figuredata"
+                    }
                 ];
             }
             else
             {
                 GameDataHashesContainer? container = null;
                 FileInfo hashesFile = new(Path.Combine(hotelCachePath, "hashes.json"));
-                if (hashesFile.Exists &&
-                    (DateTime.Now - hashesFile.LastWriteTime) < TimeSpan.FromMinutes(15))
+                if (!hashesFile.Exists || (!CacheOnly && (DateTime.Now - hashesFile.LastWriteTime) >= MaxAge))
                 {
-                    Log.LogDebug("Loading game data hashes from disk cache.");
-                    container = JsonSerializer.Deserialize(
-                        await File.ReadAllTextAsync(hashesFile.FullName, cancellationToken),
-                        JsonContext.Default.GameDataHashesContainer
-                    );
-                }
-                else
-                {
+                    if (CacheOnly)
+                        throw new Exception("Game data hashes not found in cache-only mode.");
+
                     Log.LogDebug("Loading game data hashes...");
                     string json = await http.GetStringAsync(
                         $"https://{hotel.WebHost}/gamedata/hashes2",
@@ -175,6 +177,14 @@ public class GameDataManager : IGameDataManager
                     container = JsonSerializer.Deserialize(json, JsonContext.Default.GameDataHashesContainer);
 
                     await File.WriteAllTextAsync(hashesFile.FullName, json, cancellationToken);
+                }
+                else
+                {
+                    Log.LogDebug("Loading game data hashes from disk cache.");
+                    container = JsonSerializer.Deserialize(
+                        await File.ReadAllTextAsync(hashesFile.FullName, cancellationToken),
+                        JsonContext.Default.GameDataHashesContainer
+                    );
                 }
 
                 if (container is not null)
@@ -199,13 +209,15 @@ public class GameDataManager : IGameDataManager
 
                 if (!Enum.IsDefined(type)) continue;
 
+                if (typesToLoad?.Contains(type) == false) continue;
+
                 loadTasks.Add(LoadDataAsync(http, hotel, type, entry.Url, entry.Hash, cancellationToken));
             }
 
             await Task.WhenAll(loadTasks);
             Log.LogDebug("All load tasks completed.");
 
-            if (hotel.IsOrigins && Texts is not null)
+            if (hotel.IsOrigins && Texts is not null && typesToLoad?.Contains(GameDataType.Furni) != false)
                 Furni = FurniData.FromOriginsTexts(Texts);
 
             if (Furni is not null && Texts is not null)
