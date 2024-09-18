@@ -1,160 +1,80 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 
 namespace Xabbo.Core;
 
-public class Figure
+public sealed class Figure : IEquatable<Figure>, IEnumerable<Figure.Part>
 {
-    private static readonly char[] ItemSeparator = ['.'];
-    private static readonly Dictionary<int, Gender> GenderMap;
-    private const string FIGUREPART_GENDERS_RESOURCE_PATH = "Xabbo.Core.Resources.figure_part_genders";
+    private readonly Dictionary<FigurePartType, Part> _parts = [];
+    public IReadOnlyCollection<Part> Parts => _parts.Values;
+    public Gender Gender { get; set; } = Gender.Unisex;
 
-    static Figure()
+    public Part this[FigurePartType key]
     {
-        var dictionary = new Dictionary<int, Gender>();
-
-        Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(FIGUREPART_GENDERS_RESOURCE_PATH);
-        if (stream is not null)
-        {
-            using (stream)
-            using (StreamReader reader = new(stream))
-            {
-                string? line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    Gender gender;
-
-                    if (string.IsNullOrWhiteSpace(line)) continue;
-                    string[] split = line.Split(['/']);
-                    if (split.Length != 2) continue;
-                    if (!int.TryParse(split[0], out int partId)) continue;
-
-                    switch (split[1])
-                    {
-                        case "M": gender = Gender.Male; break;
-                        case "F": gender = Gender.Female; break;
-                        case "U": gender = Gender.Unisex; break;
-                        default: continue;
-                    }
-
-                    dictionary[partId] = gender;
-                }
-            }
-        }
-
-        GenderMap = dictionary;
-    }
-
-    public static bool TryGetGender(int partId, out Gender gender)
-        => GenderMap.TryGetValue(partId, out gender);
-
-    public static bool TryGetGender(Figure figure, out Gender gender)
-    {
-        foreach (var part in figure.Parts)
-        {
-            if (TryGetGender(part.Id, out gender) &&
-                gender != Gender.Unisex)
-            {
-                return true;
-            }
-        }
-        gender = Gender.Unisex;
-        return false;
-    }
-
-    public static bool TryGetGender(string figureString, out Gender gender)
-    {
-        string[] parts = figureString.Split(ItemSeparator, StringSplitOptions.RemoveEmptyEntries);
-        foreach (string part in parts)
-        {
-            int start = part.IndexOf('-');
-            if (start < 0) continue;
-            int end = part.IndexOf('-', start + 1);
-
-            string partIdString;
-            if (end < 0)
-                partIdString = part[(start + 1)..];
-            else
-                partIdString = part[(start + 1)..end];
-
-            if (!int.TryParse(partIdString, out int partId)) continue;
-            if (TryGetGender(partId, out gender) && gender != Gender.Unisex) return true;
-        }
-
-        gender = Gender.Unisex;
-        return false;
-    }
-
-    private Gender gender = Gender.Unisex;
-    public Gender Gender
-    {
-        get => gender;
+        get => _parts[key];
         set
         {
-            gender = value switch
+            if (value.Type != key)
             {
-                Gender.Male or Gender.Female or Gender.Unisex => value,
-                _ => throw new ArgumentException($"Invalid gender: {value}."),
-            };
+                throw new ArgumentException(
+                    $"Attempt to set {nameof(FigurePartType)}.{key} when "
+                    + $"{nameof(value)}.{nameof(Part.Type)} is {value.Type}",
+                    nameof(value)
+                );
+            }
+            _parts[key] = value;
         }
     }
 
-    private readonly List<FigurePart> parts = new();
-
-    public IReadOnlyList<FigurePart> Parts { get; }
-
-    public FigurePart? this[FigurePartType type] => parts.FirstOrDefault(part => part.Type == type);
-
-
-    public Figure()
-    {
-        Parts = parts.AsReadOnly();
-    }
+    public Figure() { }
 
     public Figure(Gender gender)
-        : this()
     {
         Gender = gender;
     }
 
-    public bool ContainsPart(FigurePartType type) => parts.Any(part => part.Type == type);
-
-    public void AddPart(FigurePart part)
+    public Figure(Gender gender, IEnumerable<Part> parts)
     {
-        var existingPart = this[part.Type];
-        if (existingPart != null)
-            parts.Remove(existingPart);
-        parts.Add(part);
+        Gender = gender;
+        foreach (var part in parts)
+            Add(part);
     }
 
-    public bool RemovePart(FigurePartType partType)
+    public bool Has(FigurePartType type) => _parts.ContainsKey(type);
+    public void Add(Part part) => _parts.Add(part.Type, part);
+    public void Add(FigurePartType type, int id) => _parts.Add(type, new Part(type, id));
+    public void Add(FigurePartType type, int id, params int[] colors) => _parts.Add(type, new Part(type, id, colors));
+    public bool TryGetPart(FigurePartType type, [NotNullWhen(true)] out Part? part) => _parts.TryGetValue(type, out part);
+    public bool Remove(FigurePartType partType) => _parts.Remove(partType);
+
+    public override string ToString() => string.Join('.', _parts.Values.Select(x => x.ToString()));
+
+    public override int GetHashCode()
     {
-        var part = this[partType];
-        if (part == null) return false;
-        return parts.Remove(part);
+        int hashCode = Gender.GetHashCode();
+        foreach (var part in Parts)
+            hashCode = (hashCode, part).GetHashCode();
+        return hashCode;
     }
 
-    public void RemovePart(string partType) => RemovePart(H.GetFigurePartType(partType));
+    public override bool Equals(object? obj) => Equals(obj as Figure);
 
-    public string GetGenderString() => gender.ToClientString();
+    public bool Equals(Figure? other) =>
+        other is not null &&
+        other.Gender == Gender &&
+        other.Parts.SequenceEqual(Parts);
 
-    public string GetFigureString() => ToString();
-
-    public static Figure ParseString(string figureString)
+    public static Figure Parse(string figureString)
     {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(figureString);
+
         var figure = new Figure();
-        var figurePartStrings = figureString.Split(ItemSeparator, StringSplitOptions.RemoveEmptyEntries);
+        var figurePartStrings = figureString.Split('.');
         foreach (var figurePartString in figurePartStrings)
-        {
-            var figurePart = FigurePart.ParseString(figurePartString);
-            if (figure[figurePart.Type] != null)
-                throw new FormatException($"Duplicate figure part type '{figurePart.Type.ToShortString()}'");
-            figure.AddPart(figurePart);
-        }
+            figure.Add(Part.Parse(figurePartString));
 
         if (TryGetGender(figure, out Gender gender))
             figure.Gender = gender;
@@ -166,14 +86,14 @@ public class Figure
     {
         figure = null;
         var tempFigure = new Figure();
-        var figurePartStrings = figureString.Split(new char[] { '.' });
+        var figurePartStrings = figureString.Split('.');
         foreach (var figurePartString in figurePartStrings)
         {
-            if (!FigurePart.TryParseString(figurePartString, out var figurePart))
+            if (!Part.TryParseString(figurePartString, out var figurePart))
                 return false;
             if (tempFigure[figurePart.Type] != null)
                 return false;
-            tempFigure.AddPart(figurePart);
+            tempFigure.Add(figurePart);
         }
 
         if (TryGetGender(tempFigure, out Gender gender))
@@ -183,32 +103,131 @@ public class Figure
         return true;
     }
 
-    public override string ToString() => string.Join(".", parts.Select(x => x.ToString()));
-
-    public override int GetHashCode()
+    public static bool TryGetGender(Figure figure, out Gender gender)
     {
-        unchecked
+        foreach (var part in figure.Parts)
         {
-            int hash = 647;
-
-            hash = (hash * 47) + (int)Gender;
-            foreach (var part in Parts.OrderBy(x => x.Type))
-                hash = (hash * 47) + part.GetHashCode();
-
-            return hash;
+            if (FigurePartGenders.GenderMap.TryGetValue(part.Id, out gender) &&
+                gender != Gender.Unisex)
+            {
+                return true;
+            }
         }
+        gender = Gender.Unisex;
+        return false;
     }
 
-    public override bool Equals(object? obj)
+    IEnumerator<Part> IEnumerable<Part>.GetEnumerator()
     {
-        if (obj is not Figure other ||
-            other.Gender != Gender ||
-            other.Parts.Count != Parts.Count)
-            return false;
+        throw new NotImplementedException();
+    }
 
-        return
-            other.Gender == Gender &&
-            other.Parts.Count == Parts.Count &&
-            other.Parts.All(part => part.Equals(this[part.Type]));
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        throw new NotImplementedException();
+    }
+
+
+    public sealed class Part : IEquatable<Part>
+    {
+        private static readonly char[] _partSeparator = ['-'];
+
+        public FigurePartType Type { get; }
+
+        public int Id { get; set; }
+        public List<int> Colors { get; } = [];
+
+        public Part(FigurePartType type)
+        {
+            Type = type;
+        }
+
+        public Part(FigurePartType type, int id)
+        {
+            Type = type;
+            Id = id;
+        }
+
+        public Part(FigurePartType type, int id, params int[] colors)
+        {
+            Type = type;
+            Id = id;
+            Colors = [.. colors];
+        }
+
+        public override string ToString() =>
+            $"{Type.ToShortString()}-{Id}"
+            + (Colors.Count > 0 ? $"-{string.Join('-', Colors)}" : "");
+
+        public static Part Parse(string figurePartString)
+        {
+            string[] split = figurePartString.Split(_partSeparator);
+            if (split.Length < 1) throw new FormatException("Empty figure part");
+            if (split.Length < 2) throw new FormatException($"Figure part '{split[0]}' has no ID");
+
+            var partType = H.GetFigurePartType(split[0]);
+
+            if (!int.TryParse(split[1], out int partId))
+                throw new FormatException($"Couldn't parse ID '{split[1]}' for figure part '{split[0]}'");
+
+            var figurePart = new Part(partType, partId);
+
+            for (int i = 2; i < split.Length; i++)
+            {
+                if (!int.TryParse(split[i], out int color))
+                    throw new FormatException($"Couldn't parse color '{split[i]}' for figure part '{split[0]}'");
+                figurePart.Colors.Add(color);
+            }
+
+            return figurePart;
+        }
+
+        public static bool TryParseString(string figurePartString, [NotNullWhen(true)] out Part? figurePart)
+        {
+            figurePart = null;
+
+            string[] split = figurePartString.Split(_partSeparator, StringSplitOptions.RemoveEmptyEntries);
+            if (split.Length < 2)
+                return false;
+
+            if (!H.TryGetFigurePartType(split[0], out FigurePartType partType))
+                return false;
+            if (!int.TryParse(split[1], out int partId))
+                return false;
+
+            var figurePartTemp = new Part(partType, partId);
+
+            for (int i = 2; i < split.Length; i++)
+            {
+                if (!int.TryParse(split[i], out int color))
+                    return false;
+                figurePartTemp.Colors.Add(color);
+            }
+
+            figurePart = figurePartTemp;
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = (Type, Id).GetHashCode();
+            foreach (var color in Colors)
+                hash = (hash, color).GetHashCode();
+            return hash;
+        }
+
+        public override bool Equals(object? obj) => Equals(obj as Part);
+
+        public bool Equals(Part? other) =>
+            other is not null &&
+            other.Type == Type &&
+            other.Id == Id &&
+            other.Colors.SequenceEqual(Colors);
+
+        public static implicit operator Part((FigurePartType type, int id) x) => new(x.type, x.id);
+        public static implicit operator Part((FigurePartType type, int id, int color1) x)
+            => new(x.type, x.id, x.color1);
+        public static implicit operator Part((FigurePartType type, int id, int color1, int color2) x)
+            => new(x.type, x.id, x.color1);
     }
 }

@@ -1,12 +1,10 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Collections.Immutable;
 
 namespace Xabbo.Core.GameData;
 
-public class FigureData
+public sealed class FigureData
 {
     public static FigureData LoadXml(Stream stream) => new(Xml.FigureData.Load(stream));
     public static FigureData LoadXml(string path)
@@ -15,164 +13,88 @@ public class FigureData
         return LoadXml(stream);
     }
 
-    public IReadOnlyList<Palette> Palettes { get; }
-    public IReadOnlyList<PartSetCollection> SetCollections { get; }
+    public static FigureData LoadJsonOrigins(string filePath) => new(Json.Origins.FigureData.Load(filePath));
+
+    public ImmutableDictionary<int, FigureColorPalette> Palettes { get; }
+    public ImmutableDictionary<FigurePartType, FigurePartSetCollection> SetCollections { get; }
+
+    public FigureColorPalette GetPalette(FigurePartSetCollection setCollection) => Palettes[setCollection.PaletteId];
+    public FigureColorPalette GetPalette(FigurePartType figurePartType) => Palettes[SetCollections[figurePartType].PaletteId];
 
     internal FigureData(Xml.FigureData proxy)
     {
         Palettes = proxy.Palettes
-            .Select(palette => new Palette(palette))
-            .ToList().AsReadOnly();
+            .Select(palette => new FigureColorPalette(palette))
+            .ToImmutableDictionary(palette => palette.Id);
 
         SetCollections = proxy.SetCollections
-            .Select(setCollection => new PartSetCollection(setCollection))
-            .ToList().AsReadOnly();
+            .Select(setCollection => new FigurePartSetCollection(setCollection))
+            .ToImmutableDictionary(setCollection => setCollection.Type);
     }
 
-    public Palette? GetPalette(int id) => Palettes.FirstOrDefault(x => x.Id == id);
-
-    public Palette GetPalette(PartSetCollection setCollection) => GetPalette(setCollection.PaletteId)
-        ?? throw new Exception($"No palette found for part set collection: {setCollection.Type}.");
-
-    public Palette GetPalette(FigurePartType figurePartType) => GetPalette(GetSetCollection(figurePartType));
-
-    public PartSetCollection GetSetCollection(FigurePartType figurePartType)
-        => SetCollections.FirstOrDefault(x => x.Type == figurePartType)
-        ?? throw new Exception($"No set collection found for figure part type: {figurePartType}.");
-
-    public class Palette
+    internal FigureData(Json.Origins.FigureData proxy)
     {
-        public int Id { get; }
-        public IReadOnlyList<Color> Colors { get; }
+        // Each figure part set in the Origins figure data has its own list of colors.
+        // This means we cannot use the PartSetType.PaletteId to reference a color palette.
+        // Therefore, we generate a color palette for each figure part set as they have unique IDs,
+        // using the figure part set ID as the color palette ID,
+        // and the index into each figure part set's color list as the color's ID.
+        Palettes = proxy.MalePartSets.Values.Concat(proxy.FemalePartSets.Values)
+            .SelectMany(partSets => partSets)
+            .ToImmutableDictionary(
+                partSet => partSet.Id,
+                partSet => new FigureColorPalette
+                {
+                    Id = partSet.Id,
+                    Colors = partSet.Colors
+                        .Select((color, index) => (color, index))
+                        .ToImmutableDictionary(
+                            pair => pair.index,
+                            pair => new FigurePartColor
+                            {
+                                Id = pair.index,
+                                Index = pair.index,
+                                Value = pair.color
+                            }
+                        )
+                }
+            );
 
-        internal Palette(Xml.FigureData.Palette proxy)
-        {
-            Id = proxy.Id;
-            Colors = proxy.Colors
-                .Select(color => new Color(color))
-                .ToList().AsReadOnly();
-        }
-
-        public Color? GetColor(int id) => Colors.FirstOrDefault(x => x.Id == id);
+        SetCollections = proxy.MalePartSets.Keys.Concat(proxy.FemalePartSets.Keys)
+            .Distinct()
+            .ToImmutableDictionary(
+                H.GetFigurePartType,
+                partSetType => new FigurePartSetCollection(
+                    H.GetFigurePartType(partSetType), proxy)
+            );
     }
 
-    public class Color
-    {
-        public int Id { get; }
-        public int Index { get; }
-        public int RequiredClubLevel { get; }
-        public bool IsSelectable { get; }
-        public string Value { get; }
-
-        public bool IsClubRequired => RequiredClubLevel > 0;
-
-        internal Color(Xml.FigureData.Color proxy)
-        {
-            Id = proxy.Id;
-            Index = proxy.Index;
-            RequiredClubLevel = proxy.RequiredClubLevel;
-            IsSelectable = proxy.IsSelectable;
-            Value = proxy.Value;
-        }
-    }
-
-    public class PartSetCollection
-    {
-        /// <summary>
-        /// The figure part type of this part set collection.
-        /// </summary>
-        public FigurePartType Type { get; }
-        /// <summary>
-        /// The color palette that this part set collection uses.
-        /// </summary>
-        public int PaletteId { get; }
-        public int mand_m_0 { get; }
-        public int mand_f_0 { get; }
-        public int mand_m_1 { get; }
-        public int mand_f_1 { get; }
-        public IReadOnlyList<PartSet> Sets { get; }
-
-        internal PartSetCollection(Xml.FigureData.PartSetCollection proxy)
-        {
-            Type = H.GetFigurePartType(proxy.Type);
-            PaletteId = proxy.PaletteId;
-            mand_m_0 = proxy.mand_m_0;
-            mand_f_0 = proxy.mand_f_0;
-            mand_m_1 = proxy.mand_m_1;
-            mand_f_1 = proxy.mand_f_1;
-            Sets = proxy.Sets
-                .Select(partSet => new PartSet(partSet))
-                .ToList().AsReadOnly();
-        }
-
-        public PartSet? GetSet(int id) => Sets.FirstOrDefault(x => x.Id == id);
-    }
-
-    public class PartSet
-    {
-        public int Id { get; }
-        public Gender Gender { get; }
-        public int RequiredClubLevel { get; }
-        public bool IsColorable { get; }
-        public bool IsSelectable { get; }
-        public bool IsPreSelectable { get; }
-        public bool IsSellable { get; }
-        public IReadOnlyList<Part> Parts { get; }
-
-        public bool IsClubRequired => RequiredClubLevel > 0;
-
-        internal PartSet(Xml.FigureData.PartSet proxy)
-        {
-            Id = proxy.Id;
-            Gender = H.ToGender(proxy.Gender);
-            RequiredClubLevel = proxy.RequiredClubLevel;
-            IsColorable = proxy.IsColorable;
-            IsSelectable = proxy.IsSelectable;
-            IsPreSelectable = proxy.IsPreSelectable;
-            IsSellable = proxy.IsSellable;
-            Parts = proxy.Parts
-                .Select(part => new Part(part))
-                .ToList().AsReadOnly();
-        }
-
-        public Part? GetPart(int id) => Parts.FirstOrDefault(x => x.Id == id);
-    }
-
-    public class Part
-    {
-        public int Id { get; }
-        public string Type { get; }
-        public bool IsColorable { get; }
-        public int Index { get; }
-        public int ColorIndex { get; }
-
-        internal Part(Xml.FigureData.Part proxy)
-        {
-            Id = proxy.Id;
-            Type = proxy.Type;
-            IsColorable = proxy.IsColorable;
-            Index = proxy.Index;
-            ColorIndex = proxy.ColorIndex;
-        }
-    }
-
+    /// <summary>
+    /// Attempts to derive the specified Figure's gender using information from the figure data.
+    /// </summary>
     public bool TryGetGender(Figure figure, out Gender gender)
     {
         gender = Gender.Unisex;
 
         foreach (var part in figure.Parts)
         {
-            var partSetCollection = GetSetCollection(part.Type);
-            if (partSetCollection == null) continue;
-            var partSet = partSetCollection.GetSet(part.Id);
-            if (partSet == null) continue;
+            if (!SetCollections.TryGetValue(part.Type, out FigurePartSetCollection? partSetCollection))
+                continue;
+            if (!partSetCollection.PartSets.TryGetValue(part.Id, out FigurePartSet? partSet))
+                continue;
             if (partSet.Gender != Gender.Unisex)
+            {
+                gender = partSet.Gender;
                 break;
+            }
         }
 
         return gender != Gender.Unisex;
     }
 
+    /// <summary>
+    /// Attempts to derive the specified Figure's gender using information from the figure data.
+    /// </summary>
     public bool TryGetGender(string figureString, out Gender gender)
     {
         gender = Gender.Unisex;

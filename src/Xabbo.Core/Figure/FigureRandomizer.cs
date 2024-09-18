@@ -37,43 +37,43 @@ public class FigureRandomizer
         };
     }
 
-    private static int GetColorCount(PartSet partSet)
+    private static int GetColorCount(FigurePartSet partSet)
         => partSet.Parts.Select(x => x.ColorIndex).Where(x => x > 0).Distinct().Count();
 
-    private Color[] GetColors(PartSetCollection setCollection) =>
-        FigureData.GetPalette(setCollection).Colors
+    private FigurePartColor[] GetColors(FigurePartSetCollection setCollection) =>
+        FigureData.GetPalette(setCollection).Colors.Values
         .Where(x =>
             x.IsSelectable &&
             (AllowHC || !x.IsClubRequired)
         ).ToArray();
 
-    private PartSet[] GetPartSets(FigurePartType partType, Gender gender)
-        => FigureData.GetSetCollection(partType).Sets
+    private FigurePartSet[] GetPartSets(FigurePartType partType, Gender gender)
+        => FigureData.SetCollections[partType].PartSets.Values
         .Where(set =>
             set.IsSelectable && !set.IsSellable &&
             (AllowHC || !set.IsClubRequired) &&
             ((set.Gender & gender) > 0)
         ).ToArray();
 
-    private PartSet? GetRandomPartSet(FigurePartType partType, Gender gender)
+    private FigurePartSet? GetRandomPartSet(FigurePartType partType, Gender gender)
     {
         var selection = GetPartSets(partType, gender);
         if (selection.Length == 0) return null;
         return selection[random.Next(selection.Length)];
     }
 
-    public void RandomizeColors(FigurePart part)
+    public void RandomizeColors(Figure.Part part)
     {
-        var partSetCollection = FigureData.GetSetCollection(part.Type);
+        var partSetCollection = FigureData.SetCollections[part.Type];
         if (partSetCollection == null) return;
-        var partSet = partSetCollection.GetSet(part.Id);
+        var partSet = partSetCollection.PartSets[part.Id];
         if (partSet == null) return;
 
         part.Colors.Clear();
         if (partSet.IsColorable)
         {
             int colorCount = GetColorCount(partSet);
-            var colorSelection = FigureData.GetPalette(partSetCollection).Colors.Where(x =>
+            var colorSelection = FigureData.GetPalette(partSetCollection).Colors.Values.Where(x =>
                 (AllowHC || !x.IsClubRequired) &&
                 x.IsSelectable
             ).ToArray();
@@ -89,11 +89,11 @@ public class FigureRandomizer
         }
     }
 
-    public FigureData.Color GetRandomColor(FigurePartType figurePartType)
+    public FigurePartColor GetRandomColor(FigurePartType figurePartType)
     {
-        var set = FigureData.GetSetCollection(figurePartType);
-        if (set is null) throw new Exception($"Unknown part type: {figurePartType}.");
-        var selection = FigureData.GetPalette(set).Colors.Where(x => x.IsSelectable && (AllowHC || !x.IsClubRequired)).ToArray();
+        var set = FigureData.SetCollections[figurePartType];
+        // if (set is null) throw new Exception($"Unknown part type: {figurePartType}.");
+        var selection = FigureData.GetPalette(set).Colors.Values.Where(x => x.IsSelectable && (AllowHC || !x.IsClubRequired)).ToArray();
         return selection[random.Next(selection.Length)];
     }
 
@@ -105,7 +105,7 @@ public class FigureRandomizer
             throw new ArgumentException($"Invalid gender for figure generator: {gender}");
 
         var figure = new Figure(gender);
-        foreach (var setCollection in FigureData.SetCollections)
+        foreach (var setCollection in FigureData.SetCollections.Values)
         {
             if (!Probabilities.TryGetValue(setCollection.Type, out double probability))
                 continue;
@@ -117,7 +117,7 @@ public class FigureRandomizer
                 var partSet = GetRandomPartSet(partType, gender);
                 if (partSet == null) continue;
 
-                var figurePart = new FigurePart(partType, partSet.Id);
+                var figurePart = new Figure.Part(partType, partSet.Id);
                 if (partSet.IsColorable)
                 {
                     int colorCount = GetColorCount(partSet);
@@ -130,7 +130,7 @@ public class FigureRandomizer
                     }
                 }
 
-                figure.AddPart(figurePart);
+                figure.Add(figurePart);
             }
         }
 

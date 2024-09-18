@@ -49,18 +49,30 @@ public static partial class H
     {
         switch (partTypeString.ToLower())
         {
+            case "ha": partType = FigurePartType.Hat; break;
             case "hr": partType = FigurePartType.Hair; break;
+            case "hrb": partType = FigurePartType.HairBelow; break;
+            case "bd": partType = FigurePartType.Body; break;
             case "hd": partType = FigurePartType.Head; break;
             case "ch": partType = FigurePartType.Chest; break;
+            case "ls": partType = FigurePartType.LeftSleeve; break;
+            case "rs": partType = FigurePartType.RightSleeve; break;
+            case "lh": partType = FigurePartType.LeftHand; break;
+            case "rh": partType = FigurePartType.RightHand; break;
+            case "li": partType = FigurePartType.LeftHandItem; break;
+            case "ri": partType = FigurePartType.RightHandItem; break;
             case "lg": partType = FigurePartType.Legs; break;
             case "sh": partType = FigurePartType.Shoes; break;
-            case "ha": partType = FigurePartType.Hat; break;
             case "he": partType = FigurePartType.HeadAccessory; break;
+            case "ey": partType = FigurePartType.Eyes; break;
             case "ea": partType = FigurePartType.EyeAccessory; break;
+            case "fc": partType = FigurePartType.Face; break;
             case "fa": partType = FigurePartType.FaceAccessory; break;
             case "ca": partType = FigurePartType.ChestAccessory; break;
             case "wa": partType = FigurePartType.WaistAccessory; break;
             case "cc": partType = FigurePartType.Coat; break;
+            case "lc": partType = FigurePartType.LeftCoatSleeve; break;
+            case "rc": partType = FigurePartType.RightCoatSleeve; break;
             case "cp": partType = FigurePartType.ChestPrint; break;
             default: partType = default; return false;
         }

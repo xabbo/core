@@ -5,17 +5,29 @@ namespace Xabbo.Core;
 public enum FigurePartType
 {
     Hair,
+    HairBelow,
+    Body,
     Head,
     Chest,
+    LeftSleeve,
+    RightSleeve,
+    LeftHand,
+    RightHand,
+    LeftHandItem,
+    RightHandItem,
     Legs,
     Shoes,
     Hat,
     HeadAccessory,
+    Eyes,
     EyeAccessory,
+    Face,
     FaceAccessory,
     ChestAccessory,
     WaistAccessory,
     Coat,
+    LeftCoatSleeve,
+    RightCoatSleeve,
     ChestPrint
 }
 
