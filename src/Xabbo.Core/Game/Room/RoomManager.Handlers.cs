@@ -602,7 +602,7 @@ partial class RoomManager
     }
 
     [Intercept]
-    void HandlerUserUpdate(AvatarUpdatesMsg updates)
+    void HandlerUserUpdate(AvatarStatusMsg updates)
     {
         using (Log.MethodScope())
             UpdateAvatars(updates);

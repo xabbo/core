@@ -1,9 +1,16 @@
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Xabbo.Core.Events;
+using Xabbo.Core.Messages.Incoming;
+using Xabbo.Core.Messages.Incoming.Modern;
 
 using Xabbo.Messages.Flash;
 
+using Modern = Xabbo.Core.Messages.Incoming.Modern;
+
 namespace Xabbo.Core.Game;
 
+[Intercept]
 partial class ProfileManager
 {
     [Intercept(~ClientType.Shockwave)]
@@ -27,51 +34,59 @@ partial class ProfileManager
         }
     }
 
-    [InterceptIn(nameof(In.UserObject))]
-    private void HandleUserObject(Intercept e)
+    [Intercept]
+    private void HandleUserData(Intercept<UserDataMsg> e)
     {
+        using var scope = Log.MethodScope();
+
         if (_isLoadingProfile)
         {
             e.Block();
             _isLoadingProfile = false;
         }
 
-        UserData = e.Packet.Read<UserData>();
+        UserData = e.Msg.UserData;
 
-        _taskUserData = Task.FromResult<IUserData>(UserData);
-
-        _tcsUserData?.TrySetResult(UserData);
-        _tcsUserData = null;
-
-        OnLoadedUserData();
-    }
-
-    [Intercept(~ClientType.Shockwave)]
-    [InterceptIn(nameof(In.FigureUpdate))]
-    private void HandleFigureUpdate(Intercept e)
-    {
-        if (UserData is null) return;
-
-        UserData.Figure = e.Packet.Read<string>();
-        UserData.Gender = H.ToGender(e.Packet.Read<string>());
-
-        OnUserDataUpdated();
-    }
-
-    [InterceptIn(nameof(In.UserUpdate))]
-    private void HandleUserUpdate(Intercept e)
-    {
-        if (UserData is null) return;
-
-        int index = e.Packet.Read<int>();
-        if (index == -1)
+        if (_tcsUserData.TrySetResult(UserData))
         {
-            UserData.Figure = e.Packet.Read<string>();
-            UserData.Gender = H.ToGender(e.Packet.Read<string>());
-            UserData.Motto = e.Packet.Read<string>();
-            AchievementScore = e.Packet.Read<int>();
+            Log.LogInformation("Loaded user data.");
+            UserDataLoaded?.Invoke();
+        }
+        else
+        {
+            Log.LogTrace("User data updated.");
+            UserDataUpdated?.Invoke();
+        }
+    }
 
-            OnUserDataUpdated();
+    [Intercept]
+    private void HandleFigureUpdate(FigureUpdateMsg update)
+    {
+        if (UserData is null) return;
+
+        UserData.Figure = update.Figure;
+        UserData.Gender = update.Gender;
+
+        using (Log.MethodScope())
+            Log.LogTrace("User data updated.");
+        UserDataUpdated?.Invoke();
+    }
+
+    [Intercept]
+    private void HandleUserUpdate(AvatarUpdatedMsg update)
+    {
+        if (UserData is null) return;
+
+        if (update.Index == -1)
+        {
+            UserData.Figure = update.Figure;
+            UserData.Gender = update.Gender;
+            UserData.Motto = update.Motto;
+            AchievementScore = update.AchievementScore;
+
+            using (Log.MethodScope())
+                Log.LogTrace("User data updated.");
+            UserDataUpdated?.Invoke();
         }
     }
 
@@ -81,8 +96,8 @@ partial class ProfileManager
         HomeRoom = e.Packet.Read<int>();
     }
 
-    [InterceptIn(nameof(In.CreditBalance))]
-    private void HandleCreditBalance(Intercept e)
+    [Intercept]
+    private void HandleCreditBalance(Intercept<CreditBalanceMsg> e)
     {
         if (_isLoadingCredits)
         {
@@ -90,45 +105,64 @@ partial class ProfileManager
             e.Block();
         }
 
-        Credits = (int)e.Packet.Read<float>();
+        int? previousCredits = Credits;
+        Credits = e.Msg.Credits;
 
-        OnCreditsUpdated();
+        if (previousCredits != Credits)
+        {
+            using (Log.MethodScope())
+            {
+                if (!previousCredits.HasValue)
+                    Log.LogInformation("Loaded credits: {Credits}.", Credits);
+                else
+                    Log.LogInformation("Credits updated: {Credits}.", Credits);
+            }
+            CreditsUpdated?.Invoke(new CreditsUpdatedEventArgs(e.Msg.Credits, previousCredits));
+        }
     }
 
-    [InterceptIn(nameof(In.ActivityPoints))]
-    private void HandleActivityPoints(Intercept e)
+    [Intercept]
+    private void HandleActivityPoints(Modern.ActivityPointsMsg msg)
     {
-        Points = e.Packet.Read<ActivityPoints>();
+        Points = msg.ActivityPoints;
 
-        OnLoadedPoints();
+        using (Log.MethodScope())
+            Log.LogTrace("Activity points loaded.");
+
+        PointsLoaded?.Invoke();
     }
 
-    [InterceptIn(nameof(In.HabboActivityPointNotification))]
-    private void HandleHabboActivityPointNotification(Intercept e)
+    [Intercept]
+    private void HandleActivityPointUpdated(Modern.ActivityPointUpdatedMsg msg)
     {
-        int amount = e.Packet.Read<int>();
-        int change = e.Packet.Read<int>();
-        var type = (ActivityPointType)e.Packet.Read<int>();
+        Points[msg.Type] = msg.Amount;
 
-        Points[type] = amount;
+        using (Log.MethodScope())
+            Log.LogTrace("Activity points updated: {ActivityPointType} {Change:+0;-#} = {Amount}.",
+                msg.Type, msg.Change, msg.Amount);
 
-        OnPointsUpdated(type, amount, change);
+        ActivityPointUpdated?.Invoke(new ActivityPointUpdatedEventArgs(msg.Type, msg.Amount, msg.Change));
     }
 
-    [InterceptIn(nameof(In.Achievements))]
-    private void HandleAchievements(Intercept e)
+    [Intercept]
+    private void HandleAchievements(Modern.AchievementsMsg msg)
     {
-        Achievements = e.Packet.Read<Achievements>();
+        Achievements = msg.Achievements;
 
-        OnLoadedAchievements();
+        using (Log.MethodScope())
+            Log.LogInformation("Loaded {Count} achievements.", Achievements.Count);
+
+        AchievementsLoaded?.Invoke();
     }
 
-    [InterceptIn(nameof(In.Achievement))]
-    private void HandleAchievement(Intercept e)
+    [Intercept]
+    private void HandleAchievement(Modern.AchievementMsg msg)
     {
-        var achievement = e.Packet.Read<Achievement>();
-        Achievements?.Add(achievement);
+        Achievements?.Add(msg.Achievement);
 
-        OnAchievementUpdated(achievement);
+        using (Log.MethodScope())
+            Log.LogTrace("Achievement #{Id} ({BadgeId}) updated.", msg.Achievement.Id, msg.Achievement.BadgeId);
+
+        AchievementUpdated?.Invoke(new AchievementUpdatedEventArgs(msg.Achievement));
     }
 }

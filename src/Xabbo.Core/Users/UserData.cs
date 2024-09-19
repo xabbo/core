@@ -76,7 +76,7 @@ public sealed class UserData : IUserData, IParserComposer<UserData>
 
     private void ParseOrigins(in PacketReader p)
     {
-        string[] lines = p.ReadString().Split('\r');
+        string[] lines = p.ReadContent().Split('\r');
         foreach (string line in lines)
         {
             string[] fields = line.Split('=', 2);
@@ -127,23 +127,41 @@ public sealed class UserData : IUserData, IParserComposer<UserData>
 
     void IComposer.Compose(in PacketWriter p)
     {
-        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
-
-        p.WriteId(Id);
-        p.WriteString(Name);
-        p.WriteString(Figure);
-        p.WriteString(Gender.ToClientString());
-        p.WriteString(Motto);
-        p.WriteString(RealName);
-        p.WriteBool(DirectMail);
-        p.WriteInt(TotalRespects);
-        p.WriteInt(RespectsLeft);
-        p.WriteInt(ScratchesLeft);
-        p.WriteBool(StreamPublishingAllowed);
-        p.WriteString(LastAccessDate);
-        p.WriteBool(IsNameChangeable);
-        p.WriteBool(IsSafetyLocked);
-        p.WriteBool(_Bool5);
+        if (p.Client is ClientType.Shockwave)
+        {
+            p.WriteContent(string.Join('\r', [
+                $"name={Name}",
+                $"figure={Figure}",
+                $"sex={Gender.ToClientString().ToLower()}",
+                $"customData={CustomData}",
+                $"ph_tickets={PoolTickets}",
+                $"ph_figure={PoolFigure}",
+                $"photo_film={PhotoFilm}",
+                $"directMail={(DirectMail ? '1' : '0')}",
+                $"onlineStatus={(ShowOnline ? '1' : '0')}",
+                $"publicProfileEnabled={(PublicProfileEnabled ? '1' : '0')}",
+                $"friendRequestsEnabled={(FriendRequestsEnabled ? '1' : '0')}",
+                $"offlineMessagingEnabled={(OfflineMessagingEnabled ? '1' : '0')}",
+            ]));
+        }
+        else
+        {
+            p.WriteId(Id);
+            p.WriteString(Name);
+            p.WriteString(Figure);
+            p.WriteString(Gender.ToClientString());
+            p.WriteString(Motto);
+            p.WriteString(RealName);
+            p.WriteBool(DirectMail);
+            p.WriteInt(TotalRespects);
+            p.WriteInt(RespectsLeft);
+            p.WriteInt(ScratchesLeft);
+            p.WriteBool(StreamPublishingAllowed);
+            p.WriteString(LastAccessDate);
+            p.WriteBool(IsNameChangeable);
+            p.WriteBool(IsSafetyLocked);
+            p.WriteBool(_Bool5);
+        }
     }
 
     static UserData IParser<UserData>.Parse(in PacketReader p) => new(in p);

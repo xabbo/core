@@ -1,12 +1,11 @@
 ﻿namespace Xabbo.Core;
 
-public interface IAvatarStatusUpdate
+public interface IAvatarStatus
 {
     int Index { get; }
     Tile Location { get; }
     int HeadDirection { get; }
     int Direction { get; }
-    string Status { get; }
 
     Stances Stance { get; }
 

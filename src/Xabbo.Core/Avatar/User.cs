@@ -31,7 +31,7 @@ public class User(Id id, int index) : Avatar(AvatarType.User, id, index), IUser
         IsModerator = p.ReadBool();
     }
 
-    protected override void OnUpdate(AvatarStatusUpdate update) { }
+    protected override void OnUpdate(AvatarStatus update) { }
 
     public override void Compose(in PacketWriter p)
     {

@@ -3,14 +3,14 @@ using System;
 using Xabbo.Messages;
 using Xabbo.Messages.Shockwave;
 
-namespace Xabbo.Core.Messages.Outgoing.Shockwave;
+namespace Xabbo.Core.Messages.Outgoing.Origins;
 
 /// <summary>
 /// Sent to the server when updating the user's profile or account.
 /// <para/>
 /// Supported clients: Shockwave.
 /// </summary>
-public sealed record UpdateMsg : IMessage<UpdateMsg>
+public sealed record UpdateProfileMsg : IMessage<UpdateProfileMsg>
 {
     public enum FieldId : short
     {
@@ -34,8 +34,8 @@ public sealed record UpdateMsg : IMessage<UpdateMsg>
         TotpCode
     }
 
-    static Identifier IMessage<UpdateMsg>.Identifier => Out.UPDATE;
-    static bool IMessage<UpdateMsg>.UseTargetedIdentifiers => true;
+    static Identifier IMessage<UpdateProfileMsg>.Identifier => Out.UPDATE;
+    static bool IMessage<UpdateProfileMsg>.UseTargetedIdentifiers => true;
     Identifier IMessage.GetIdentifier(ClientType client) => client switch
     {
         ClientType.Shockwave => Out.UPDATE,
@@ -61,9 +61,9 @@ public sealed record UpdateMsg : IMessage<UpdateMsg>
     public bool? OfflineMessagingEnabled { get; set; }
     public string? TotpCode { get; set; }
 
-    public static UpdateMsg Parse(in PacketReader p)
+    public static UpdateProfileMsg Parse(in PacketReader p)
     {
-        UpdateMsg msg = new();
+        UpdateProfileMsg msg = new();
         while (p.Available > 0)
         {
             FieldId fieldId = (FieldId)p.ReadShort();

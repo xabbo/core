@@ -8,18 +8,18 @@ using Xabbo.Interceptor;
 using Xabbo.Messages.Flash;
 
 using Xabbo.Core.Events;
+using Xabbo.Core.Messages.Outgoing;
 
 namespace Xabbo.Core.Game;
 
-[Intercept(~ClientType.Shockwave)]
 public sealed partial class ProfileManager : GameStateManager
 {
     private readonly ILogger Log;
 
-    private Task<IUserData> _taskUserData;
-    private TaskCompletionSource<IUserData>? _tcsUserData;
+    private TaskCompletionSource<IUserData> _tcsUserData = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     private bool _isLoadingProfile, _isLoadingCredits;
+    private bool _requestOnConnect;
 
     public UserData? UserData { get; private set; }
     public int? HomeRoom { get; private set; }
@@ -32,46 +32,59 @@ public sealed partial class ProfileManager : GameStateManager
     public int? Duckets => Points.TryGetValue(ActivityPointType.Ducket, out int value) ? (int?)value : null;
 
     #region - Events -
-    public event EventHandler? LoadedUserData;
-    private void OnLoadedUserData() => LoadedUserData?.Invoke(this, EventArgs.Empty);
-
-    public event EventHandler? UserDataUpdated;
-    private void OnUserDataUpdated() => UserDataUpdated?.Invoke(this, EventArgs.Empty);
-
-    public event EventHandler? HomeRoomUpdated;
-    private void OnHomeRoomUpdated() => HomeRoomUpdated?.Invoke(this, EventArgs.Empty);
-
-    public event EventHandler? LoadedAchievements;
-    private void OnLoadedAchievements() => LoadedAchievements?.Invoke(this, EventArgs.Empty);
-
-    public event EventHandler? AchievementUpdated;
-    private void OnAchievementUpdated(IAchievement achievement)
-        => AchievementUpdated?.Invoke(this, EventArgs.Empty); // TODO AchievementEventArgs
-
-    public event EventHandler? CreditsUpdated;
-    private void OnCreditsUpdated() => CreditsUpdated?.Invoke(this, EventArgs.Empty);
-
-    public event EventHandler? LoadedPoints;
-    private void OnLoadedPoints() => LoadedPoints?.Invoke(this, EventArgs.Empty);
-
-    public event EventHandler<PointsUpdatedEventArgs>? PointsUpdated;
-    private void OnPointsUpdated(ActivityPointType type, int amount, int change)
-        => PointsUpdated?.Invoke(this, new PointsUpdatedEventArgs(type, amount, change));
+    public event Action? UserDataLoaded;
+    public event Action? UserDataUpdated;
+    public event Action? HomeRoomUpdated;
+    public event Action? AchievementsLoaded;
+    public event Action<AchievementUpdatedEventArgs>? AchievementUpdated; // TODO AchievementEventArgs
+    public event Action<CreditsUpdatedEventArgs>? CreditsUpdated;
+    public event Action? PointsLoaded;
+    public event Action<ActivityPointUpdatedEventArgs>? ActivityPointUpdated;
     #endregion
 
 #pragma warning disable CS8618
+
     public ProfileManager(IInterceptor interceptor, ILoggerFactory? loggerFactory = null)
         : base(interceptor)
     {
         Log = (ILogger?)loggerFactory?.CreateLogger<ProfileManager>() ?? NullLogger.Instance;
         Reset();
     }
+
 #pragma warning restore CS8618
+
+    protected override void OnInitialize(bool initializingAfterConnect)
+    {
+        base.OnInitialize(initializingAfterConnect);
+
+        if (UserData is null && !_isLoadingProfile)
+        {
+            Log.LogInformation("Requesting user data.");
+
+            _isLoadingProfile = true;
+            Interceptor.Send(new RequestUserDataMsg());
+        }
+
+        if (!Session.IsOrigins && Achievements is null)
+        {
+            Log.LogInformation("Requesting achievements.");
+            Interceptor.Send(Out.GetAchievements);
+        }
+
+        if (Credits is null && !_isLoadingCredits)
+        {
+            Log.LogInformation("Requesting credits.");
+
+            _isLoadingCredits = true;
+            Interceptor.Send(Out.GetCreditsInfo);
+        }
+    }
+
+    protected override void OnDisconnected() => Reset();
 
     private void Reset()
     {
         _tcsUserData = new TaskCompletionSource<IUserData>();
-        _taskUserData = _tcsUserData.Task;
 
         UserData = null;
         Points = new ActivityPoints();
@@ -81,10 +94,8 @@ public sealed partial class ProfileManager : GameStateManager
         _isLoadingCredits = false;
     }
 
-    protected override void OnDisconnected() => Reset();
-
     /// <summary>
     /// Waits for the user data to load, or returns the user's data immediately if it has already loaded.
     /// </summary>
-    public Task<IUserData> GetUserDataAsync() => _taskUserData;
+    public Task<IUserData> GetUserDataAsync() => _tcsUserData.Task;
 }

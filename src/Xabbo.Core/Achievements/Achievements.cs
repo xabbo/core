@@ -29,7 +29,7 @@ public sealed class Achievements : IAchievements, ICollection<Achievement>, IPar
 
     private Achievements(in PacketReader p) : this()
     {
-        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+        UnsupportedClientException.ThrowIfOrigins(p.Client);
 
         foreach (var achievement in p.ParseArray<Achievement>())
             Add(achievement);
@@ -52,7 +52,7 @@ public sealed class Achievements : IAchievements, ICollection<Achievement>, IPar
 
     void IComposer.Compose(in PacketWriter p)
     {
-        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+        UnsupportedClientException.ThrowIfOrigins(p.Client);
 
         p.ComposeArray(_dict.Values);
         p.WriteString(DefaultCategory);

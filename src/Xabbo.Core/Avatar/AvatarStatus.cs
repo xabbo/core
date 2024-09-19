@@ -9,7 +9,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public class AvatarStatusUpdate : IAvatarStatusUpdate, IReadOnlyDictionary<string, IReadOnlyList<string>>, IParserComposer<AvatarStatusUpdate>
+public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnlyList<string>>, IParserComposer<AvatarStatus>
 {
     private readonly Dictionary<string, string[]> fragments = new(StringComparer.OrdinalIgnoreCase);
 
@@ -17,11 +17,6 @@ public class AvatarStatusUpdate : IAvatarStatusUpdate, IReadOnlyDictionary<strin
     public Tile Location { get; set; }
     public int HeadDirection { get; set; }
     public int Direction { get; set; }
-    public string Status
-    {
-        get => CompileStatus();
-        set => ParseStatus(value);
-    }
 
     // sit, lay
     public Stances Stance
@@ -195,25 +190,24 @@ public class AvatarStatusUpdate : IAvatarStatusUpdate, IReadOnlyDictionary<strin
 
     public IReadOnlyList<string> this[string key] => fragments[key];
 
-    public AvatarStatusUpdate()
+    public AvatarStatus()
     {
         Location = default;
         HeadDirection = 0;
         Direction = 0;
     }
 
-    public AvatarStatusUpdate(IAvatarStatusUpdate original)
+    public AvatarStatus(IAvatarStatus original)
     {
         Index = original.Index;
         Location = original.Location;
         HeadDirection = original.HeadDirection;
         Direction = original.Direction;
-        Status = original.Status;
+        ParseStatus(original.ToString() ?? "");
     }
 
-    private AvatarStatusUpdate(in PacketReader p)
+    private AvatarStatus(in PacketReader p)
     {
-        // TODO Shockwave
         Index = p.ReadInt();
         Location = p.Parse<Tile>();
         HeadDirection = p.ReadInt();
@@ -303,5 +297,7 @@ public class AvatarStatusUpdate : IAvatarStatusUpdate, IReadOnlyDictionary<strin
         return ((IEnumerable<KeyValuePair<string, IReadOnlyCollection<string>>>)this).GetEnumerator();
     }
 
-    static AvatarStatusUpdate IParser<AvatarStatusUpdate>.Parse(in PacketReader p) => new(in p);
+    public override string ToString() => CompileStatus();
+
+    static AvatarStatus IParser<AvatarStatus>.Parse(in PacketReader p) => new(in p);
 }

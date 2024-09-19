@@ -33,6 +33,7 @@ public abstract class GameStateManager : INotifyPropertyChanged, IDisposable
     private IDisposable? _pingIntercept;
 
     protected IInterceptor Interceptor { get; }
+    protected Session Session => Interceptor.Session;
     protected IMessageDispatcher Dispatcher => Interceptor.Dispatcher;
 
     public GameStateManager(IInterceptor interceptor)
@@ -77,17 +78,24 @@ public abstract class GameStateManager : INotifyPropertyChanged, IDisposable
         if (e.Sequence >= 10)
         {
             if (!_hasInitialized)
+            {
                 OnInitialize(false);
+                _hasInitialized = true;
+            }
             _pingIntercept?.Dispose();
         }
     }
 
-    protected virtual void OnDisconnected() { }
+    protected virtual void OnDisconnected()
+    {
+        _hasInitialized = false;
+        _connectedOnInit = false;
+    }
 
     /// <summary>
     /// Called when it is probably safe to initialize the state manager.
     /// </summary>
-    protected virtual void OnInitialize(bool initializingOnConnect) { }
+    protected virtual void OnInitialize(bool initializingAfterConnect) { }
 
     protected virtual void Dispose(bool disposing)
     {

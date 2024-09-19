@@ -5,13 +5,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
-public sealed class AvatarUpdatesMsg : List<AvatarStatusUpdate>, IMessage<AvatarUpdatesMsg>
+public sealed class AvatarStatusMsg : List<AvatarStatus>, IMessage<AvatarStatusMsg>
 {
-    public AvatarUpdatesMsg() { }
-    public AvatarUpdatesMsg(int capacity) : base(capacity) { }
-    public AvatarUpdatesMsg(IEnumerable<AvatarStatusUpdate> collection) : base(collection) { }
+    public AvatarStatusMsg() { }
+    public AvatarStatusMsg(int capacity) : base(capacity) { }
+    public AvatarStatusMsg(IEnumerable<AvatarStatus> collection) : base(collection) { }
 
-    static Identifier IMessage<AvatarUpdatesMsg>.Identifier => In.UserUpdate;
-    static AvatarUpdatesMsg IParser<AvatarUpdatesMsg>.Parse(in PacketReader p) => new(p.ParseArray<AvatarStatusUpdate>());
+    static Identifier IMessage<AvatarStatusMsg>.Identifier => In.UserUpdate;
+    static AvatarStatusMsg IParser<AvatarStatusMsg>.Parse(in PacketReader p) => new(p.ParseArray<AvatarStatus>());
     void IComposer.Compose(in PacketWriter p) => p.ComposeArray(this);
 }

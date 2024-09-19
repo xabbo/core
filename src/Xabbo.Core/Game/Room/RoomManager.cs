@@ -791,7 +791,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
         }
     }
 
-    void UpdateAvatars(IEnumerable<AvatarStatusUpdate> updates)
+    void UpdateAvatars(IEnumerable<AvatarStatus> updates)
     {
         if (!EnsureInRoom(out Room? room))
             return;
@@ -810,7 +810,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
             updated.Add(avatar);
 
             Log.LogTrace("Avatar @{Index} '{Name}' updated: '{Status}'.",
-                avatar.Index, avatar.Name, update.Status);
+                avatar.Index, avatar.Name, update.ToString());
             AvatarUpdated?.Invoke(new AvatarEventArgs(avatar));
         }
 

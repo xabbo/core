@@ -95,10 +95,10 @@ public interface IAvatar : IFloorEntity
     /// <summary>
     /// Gets the current update of the avatar.
     /// </summary>
-    IAvatarStatusUpdate? CurrentUpdate { get; }
+    IAvatarStatus? CurrentUpdate { get; }
 
     /// <summary>
     /// Gets the previous update of the avatar.
     /// </summary>
-    IAvatarStatusUpdate? PreviousUpdate { get; }
+    IAvatarStatus? PreviousUpdate { get; }
 }

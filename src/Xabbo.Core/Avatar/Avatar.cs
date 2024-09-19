@@ -34,12 +34,12 @@ public abstract class Avatar(AvatarType type, Id id, int index) : IAvatar, IPars
     public int HandItem { get; set; }
     public int Effect { get; set; }
 
-    public AvatarStatusUpdate? CurrentUpdate { get; private set; }
-    IAvatarStatusUpdate? IAvatar.CurrentUpdate => CurrentUpdate;
-    public AvatarStatusUpdate? PreviousUpdate { get; private set; }
-    IAvatarStatusUpdate? IAvatar.PreviousUpdate => PreviousUpdate;
+    public AvatarStatus? CurrentUpdate { get; private set; }
+    IAvatarStatus? IAvatar.CurrentUpdate => CurrentUpdate;
+    public AvatarStatus? PreviousUpdate { get; private set; }
+    IAvatarStatus? IAvatar.PreviousUpdate => PreviousUpdate;
 
-    public void Update(AvatarStatusUpdate update)
+    public void Update(AvatarStatus update)
     {
         if (update.Index != Index)
             throw new InvalidOperationException("Avatar update index does not match the index of this avatar.");
@@ -53,7 +53,7 @@ public abstract class Avatar(AvatarType type, Id id, int index) : IAvatar, IPars
         CurrentUpdate = update;
     }
 
-    protected virtual void OnUpdate(AvatarStatusUpdate update) { }
+    protected virtual void OnUpdate(AvatarStatus update) { }
 
     public virtual void Compose(in PacketWriter p)
     {
