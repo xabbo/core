@@ -10,6 +10,7 @@ using Xabbo.Messages.Flash;
 
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages.Incoming;
+using Xabbo.Core.Messages.Outgoing;
 
 namespace Xabbo.Core.Game;
 
@@ -978,9 +979,9 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     public void Pickup(ItemType type, Id id)
     {
         if (type == ItemType.Floor)
-            Interceptor.Send(Out.PickupObject, 2, id);
+            Interceptor.Send(new PickupFloorItemMsg(id));
         else if (type == ItemType.Wall)
-            Interceptor.Send(Out.PickupObject, 1, id);
+            Interceptor.Send(new PickupWallItemMsg(id));
     }
 
     public void UpdateStackTile(IFloorItem stackTile, float height) => UpdateStackTile(stackTile.Id, height);
