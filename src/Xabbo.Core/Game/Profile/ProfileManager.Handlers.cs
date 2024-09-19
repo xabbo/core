@@ -90,12 +90,6 @@ partial class ProfileManager
         }
     }
 
-    // TODO: [InterceptIn(nameof(In.?)]
-    private void HandleUserHomeRoom(Intercept e)
-    {
-        HomeRoom = e.Packet.Read<int>();
-    }
-
     [Intercept]
     private void HandleCreditBalance(Intercept<CreditBalanceMsg> e)
     {

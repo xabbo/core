@@ -19,10 +19,8 @@ public sealed partial class ProfileManager : GameStateManager
     private TaskCompletionSource<IUserData> _tcsUserData = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     private bool _isLoadingProfile, _isLoadingCredits;
-    private bool _requestOnConnect;
 
     public UserData? UserData { get; private set; }
-    public int? HomeRoom { get; private set; }
     public Achievements? Achievements { get; private set; }
 
     public int? AchievementScore { get; private set; }
@@ -34,7 +32,6 @@ public sealed partial class ProfileManager : GameStateManager
     #region - Events -
     public event Action? UserDataLoaded;
     public event Action? UserDataUpdated;
-    public event Action? HomeRoomUpdated;
     public event Action? AchievementsLoaded;
     public event Action<AchievementUpdatedEventArgs>? AchievementUpdated; // TODO AchievementEventArgs
     public event Action<CreditsUpdatedEventArgs>? CreditsUpdated;
