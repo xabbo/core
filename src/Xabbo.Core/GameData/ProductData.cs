@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.Json;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 using Xabbo.Core.Serialization;
@@ -20,7 +21,7 @@ public sealed class ProductData : IReadOnlyDictionary<string, ProductInfo>
         );
     }
 
-    private readonly Dictionary<string, ProductInfo> _map = new();
+    private readonly ImmutableDictionary<string, ProductInfo> _map;
 
     public ProductInfo this[string key] => _map[key];
     public IEnumerable<string> Keys => _map.Keys;
@@ -29,19 +30,19 @@ public sealed class ProductData : IReadOnlyDictionary<string, ProductInfo>
 
     internal ProductData(Json.ProductData productDataProxy)
     {
+        Dictionary<string, ProductInfo> map = [];
+
         foreach (var productInfoProxy in productDataProxy.Container.Product)
         {
             ProductInfo productInfo = new(productInfoProxy);
 
-            if (_map.ContainsKey(productInfo.Code))
+            if (!map.TryAdd(productInfo.Code, productInfo))
             {
-                System.Diagnostics.Debug.WriteLine($"[!] Duplicate product code '{productInfo.Code}' in JSON product data.");
-            }
-            else
-            {
-                _map.Add(productInfo.Code, productInfo);
+                System.Diagnostics.Debug.WriteLine($"Duplicate product code '{productInfo.Code}' in product data.");
             }
         }
+
+        _map = map.ToImmutableDictionary();
     }
 
     public bool ContainsKey(string key) => _map.ContainsKey(key);
@@ -50,23 +51,9 @@ public sealed class ProductData : IReadOnlyDictionary<string, ProductInfo>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
 
-public class ProductInfo
+public sealed record ProductInfo(string Code, string Name, string Description)
 {
-    public string Code { get; }
-    public string Name { get; }
-    public string Description { get; }
-
-    public ProductInfo(string code, string name, string description)
-    {
-        Code = code;
-        Name = name;
-        Description = description;
-    }
-
     internal ProductInfo(Json.ProductInfo proxy)
-    {
-        Code = proxy.Code;
-        Name = proxy.Name;
-        Description = proxy.Description;
-    }
+        : this(proxy.Code, proxy.Name, proxy.Description)
+    { }
 }

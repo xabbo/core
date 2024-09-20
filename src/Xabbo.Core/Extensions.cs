@@ -18,8 +18,8 @@ public static class Extensions
     private static FurniData? _furniData;
     private static ExternalTexts? _texts;
 
-    private static FurniData FurniData => _furniData ?? throw new InvalidOperationException($"{nameof(Extensions)} has not been initialized.");
-    private static ExternalTexts Texts => _texts ?? throw new InvalidOperationException($"{nameof(Extensions)} has not been initialized.");
+    private static FurniData FurniData => _furniData ?? throw new InvalidOperationException($"{typeof(Extensions).FullName} has not been initialized.");
+    private static ExternalTexts Texts => _texts ?? throw new InvalidOperationException($"{typeof(Extensions).FullName} has not been initialized.");
 
     /// <summary>
     /// Gets if Xabbo core extensions have been initialized.
@@ -146,53 +146,19 @@ public static class Extensions
         };
     }
 
-    /// <summary>
-    /// Determines whether the item specifies a furni variant (not state) in its data.
-    /// </summary>
-    private static bool HasVariant(IItem item) => item.Type switch
-    {
-        ItemType.Wall => FurniData.GetInfo(item).Identifier.Equals("poster"),
-        ItemType.Badge or ItemType.Effect or ItemType.Bot => true,
-        _ => false
-    };
+    /// <inheritdoc cref="FurniData.HasVariant(IItem)" />
+    public static bool HasVariant(this IItem item) => FurniData.HasVariant(item);
 
-    private static bool TryGetVariant(IItem item, [NotNullWhen(true)] out string? variant)
-    {
-        if (HasVariant(item))
-        {
-            variant = item switch
-            {
-                ItemDescriptor x => x.Variant,
-                IFloorItem x => x.Data.Value,
-                IWallItem x => x.Data,
-                IInventoryItem x => x.Data.Value,
-                IMarketplaceOffer x => x.Data.Value,
-                ICatalogProduct x => x.Variant,
-                _ => null
-            };
-        }
-        else
-        {
-            variant = null;
-        }
+    /// <inheritdoc cref="FurniData.GetVariant(IItem)" />
+    public static string? GetVariant(this IItem item) => FurniData.GetVariant(item);
 
-        return !string.IsNullOrWhiteSpace(variant);
-    }
+    /// <inheritdoc cref="FurniData.TryGetVariant(IItem, out string?)" />
+    public static bool TryGetVariant(this IItem item, [NotNullWhen(true)] out string? variant) => FurniData.TryGetVariant(item, out variant);
 
-    /// <summary>
-    /// Gets the variant of this item.
-    /// </summary>
-    public static string GetVariant(this IItem item)
-        => TryGetVariant(item, out string? variant) ? variant : throw new InvalidOperationException($"Failed to find variant for item type: {item.GetType()}.");
-
-    /// <summary>
-    /// Gets the furni info of this item.
-    /// </summary>
+    /// <inheritdoc cref="FurniData.GetInfo(IItem)" />
     public static FurniInfo GetInfo(this IItem item) => FurniData.GetInfo(item);
 
-    /// <summary>
-    /// Gets the furni info of this item.
-    /// </summary>
+    /// <inheritdoc cref="FurniData.TryGetInfo(IItem, out FurniInfo?)" />
     public static bool TryGetInfo(this IItem item, [NotNullWhen(true)] out FurniInfo? info) => FurniData.TryGetInfo(item, out info);
 
     /// <summary>
@@ -254,8 +220,7 @@ public static class Extensions
             case ItemType.Wall:
                 if (FurniData.TryGetInfo(item, out FurniInfo? info))
                 {
-                    if (info.Identifier == "poster" &&
-                        TryGetVariant(item, out variant))
+                    if (TryGetVariant(item, out variant))
                     {
                         if (Texts.TryGetPosterName(variant, out string? posterName))
                         {

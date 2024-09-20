@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 
 namespace Xabbo.Core.GameData;
 
-public class FurniData : IReadOnlyCollection<FurniInfo>
+public sealed class FurniData : IReadOnlyCollection<FurniInfo>
 {
     public static FurniData LoadJson(string json) => new(Json.FurniData.Load(json));
     public static FurniData LoadJsonFile(string path) => LoadJson(File.ReadAllText(path));
@@ -20,23 +20,23 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
         return LoadXml(stream);
     }
 
-    private readonly IReadOnlyDictionary<string, FurniInfo> _identifierMap;
-    private readonly IReadOnlyDictionary<int, FurniInfo> _floorItemMap, _wallItemMap;
+    private readonly ImmutableDictionary<string, FurniInfo> _identifierMap;
+    private readonly ImmutableDictionary<int, FurniInfo> _floorItemMap, _wallItemMap;
 
     /// <summary>
     /// Gets the information of all floor items.
     /// </summary>
-    public IReadOnlyCollection<FurniInfo> FloorItems { get; }
+    public ImmutableArray<FurniInfo> FloorItems  { get; }
 
     /// <summary>
     /// Gets the information of all wall items.
     /// </summary>
-    public IReadOnlyCollection<FurniInfo> WallItems { get; }
+    public ImmutableArray<FurniInfo> WallItems { get; }
 
     /// <summary>
     /// Gets the total number of <see cref="FurniInfo"/> contained in the furni data.
     /// </summary>
-    public int Count => FloorItems.Count + WallItems.Count;
+    public int Count => FloorItems.Length + WallItems.Length;
 
     public IEnumerator<FurniInfo> GetEnumerator() => FloorItems.Concat(WallItems).GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -50,30 +50,30 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
     {
         FloorItems = proxy.FloorItems
             .Select(furniInfoProxy => new FurniInfo(ItemType.Floor, furniInfoProxy))
-            .ToList().AsReadOnly();
+            .ToImmutableArray();
 
         WallItems = proxy.WallItems
             .Select(furniInfoProxy => new FurniInfo(ItemType.Wall, furniInfoProxy))
-            .ToList().AsReadOnly();
+            .ToImmutableArray();
 
-        _identifierMap = this.ToDictionary(furniInfo => furniInfo.Identifier, StringComparer.InvariantCultureIgnoreCase);
-        _floorItemMap = FloorItems.ToDictionary(furniInfo => furniInfo.Kind);
-        _wallItemMap = WallItems.ToDictionary(wallItem => wallItem.Kind);
+        _identifierMap = this.ToImmutableDictionary(furniInfo => furniInfo.Identifier, StringComparer.InvariantCultureIgnoreCase);
+        _floorItemMap = FloorItems.ToImmutableDictionary(furniInfo => furniInfo.Kind);
+        _wallItemMap = WallItems.ToImmutableDictionary(wallItem => wallItem.Kind);
     }
 
     internal FurniData(Json.FurniData proxy)
     {
         FloorItems = proxy.RoomItemTypes.FurniType
             .Select(furniInfoProxy => new FurniInfo(ItemType.Floor, furniInfoProxy))
-            .ToList().AsReadOnly();
+            .ToImmutableArray();
 
         WallItems = proxy.WallItemTypes.FurniType
             .Select(furniInfoProxy => new FurniInfo(ItemType.Wall, furniInfoProxy))
-            .ToList().AsReadOnly();
+            .ToImmutableArray();
 
-        _identifierMap = this.ToDictionary(furniInfo => furniInfo.Identifier, StringComparer.InvariantCultureIgnoreCase);
-        _floorItemMap = FloorItems.ToDictionary(furniInfo => furniInfo.Kind);
-        _wallItemMap = WallItems.ToDictionary(wallItem => wallItem.Kind);
+        _identifierMap = this.ToImmutableDictionary(furniInfo => furniInfo.Identifier, StringComparer.InvariantCultureIgnoreCase);
+        _floorItemMap = FloorItems.ToImmutableDictionary(furniInfo => furniInfo.Kind);
+        _wallItemMap = WallItems.ToImmutableDictionary(wallItem => wallItem.Kind);
     }
 
     internal FurniData(ExternalTexts texts)
@@ -119,7 +119,7 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
             if (identifier is not null)
             {
                 if (!infos.TryGetValue(identifier, out FurniInfo? info))
-                    info = new(type) { Identifier = identifier };
+                    info = new(type, -1, identifier);
                 if (name is not null)
                     info = info with { Name = name };
                 if (desc is not null)
@@ -148,10 +148,11 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
             _ => false
         };
     }
+
     /// <summary>
     /// Gets whether furni info for the specified item exists or not.
     /// </summary>
-    public bool Exists(IItem item) => Exists(item.Type, item.Kind);
+    public bool Exists(IItem item) => item.Identifier is not null ? Exists(item.Identifier) : Exists(item.Type, item.Kind);
 
     /// <summary>
     /// Gets whether furni info with the specified identifier exists or not.
@@ -179,14 +180,22 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
     };
 
     /// <summary>
-    /// Gets the information of the specified item.
-    /// </summary>
-    public FurniInfo GetInfo(IItem item) => item.Identifier is not null ? GetInfo(item.Identifier) : GetInfo(item.Type, item.Kind);
-
-    /// <summary>
     /// Gets the information of the furni with the specified identifier.
     /// </summary>
-    public FurniInfo GetInfo(string identifier) => _identifierMap[identifier];
+    public FurniInfo GetInfo(string identifier)
+    {
+        if (!TryGetInfo(identifier, out FurniInfo? info))
+            throw new Exception($"Furni info not found for '{identifier}'.");
+        return info;
+    }
+
+    /// <summary>
+    /// Gets the information of the specified item.
+    /// </summary>
+    public FurniInfo GetInfo(IItem item) =>
+        item.Identifier is not null
+        ? GetInfo(item.Identifier)
+        : GetInfo(item.Type, item.Kind);
 
     /// <summary>
     /// Gets the information of the furni with the specified type and kind.
@@ -203,7 +212,12 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
     }
 
     /// <summary>
-    /// Gets the information of the specified item.
+    /// Gets the information of the furni with the specified identifier.
+    /// </summary>
+    public bool TryGetInfo(string identifier, [NotNullWhen(true)] out FurniInfo? info) => _identifierMap.TryGetValue(identifier, out info);
+
+    /// <summary>
+    /// Attempts to get the information of the specified item.
     /// </summary>
     public bool TryGetInfo(IItem item, [NotNullWhen(true)] out FurniInfo? info)
     {
@@ -214,20 +228,13 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
     }
 
     /// <summary>
-    /// Gets the information of the furni with the specified identifier.
-    /// </summary>
-    public bool TryGetInfo(string identifier, [NotNullWhen(true)] out FurniInfo? info)
-        => _identifierMap.TryGetValue(identifier, out info);
-
-    /// <summary>
     /// Gets the information of the floor item with the specified kind.
     /// </summary>
     public FurniInfo GetFloorItem(int kind)
     {
-        if (!_floorItemMap.TryGetValue(kind, out FurniInfo? furniInfo))
-            throw new Exception($"Failed to find furni info for item: Floor/{kind}.");
-
-        return furniInfo;
+        if (!_floorItemMap.TryGetValue(kind, out FurniInfo? info))
+            throw new Exception($"Failed to find furni info for floor item #{kind}.");
+        return info;
     }
 
     /// <summary>
@@ -235,17 +242,16 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
     /// </summary>
     public FurniInfo GetWallItem(int kind)
     {
-        if (!_wallItemMap.TryGetValue(kind, out FurniInfo? furniInfo))
-            throw new Exception($"Failed to find furni info for item: Wall/{kind}.");
-
-        return furniInfo;
+        if (!_wallItemMap.TryGetValue(kind, out FurniInfo? info))
+            throw new Exception($"Failed to find furni info for wall item #{kind}.");
+        return info;
     }
 
     private static IEnumerable<FurniInfo> FindItems(IEnumerable<FurniInfo> infos, string searchText)
     {
         searchText = searchText.ToLower();
         return infos
-            .Where(x => x.Name.ToLower().Contains(searchText))
+            .Where(x => x.Name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase))
             .OrderBy(x => Math.Abs(x.Name.Length - searchText.Length));
     }
 
@@ -283,54 +289,70 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
     public FurniInfo? FindWallItem(string searchText) => FindItems(WallItems, searchText).FirstOrDefault();
 
     /// <summary>
+    /// Determines whether an item specifies a variant (not state) in its data.
+    /// </summary>
+    public static bool HasVariant(FurniInfo info) => info.Identifier.Equals("poster");
+
+    /// <summary>
+    /// Determines whether the item specifies a variant (not state) in its data.
+    /// </summary>
+    public bool HasVariant(IItem item) => item.Type switch
+    {
+        ItemType.Wall => HasVariant(GetInfo(item)),
+        ItemType.Badge or ItemType.Effect or ItemType.Bot => true,
+        _ => false
+    };
+
+    private static string? GetVariantInternal(IItem item) => item switch
+    {
+        ItemDescriptor x => x.Variant,
+        IFloorItem x => x.Data.Value,
+        IWallItem x => x.Data,
+        IInventoryItem x => x.Data.Value,
+        IMarketplaceOffer x => x.Data.Value,
+        ICatalogProduct x => x.Variant,
+        _ => null
+    };
+
+    /// <summary>
+    /// Gets the item's variant, or null if the specified item does not have a variant.
+    /// </summary>
+    public string? GetVariant(IItem item)
+    {
+        if (HasVariant(item))
+        {
+            return GetVariantInternal(item) ??
+                throw new ArgumentException("Failed to get variant for the specified item.", nameof(item));
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Attempts to get the variant of the specified item.
+    /// </summary>
+    public bool TryGetVariant(IItem item, [NotNullWhen(true)] out string? variant)
+    {
+        if (!HasVariant(item))
+        {
+            variant = null;
+            return false;
+        }
+
+        variant = GetVariantInternal(item);
+        return variant is not null;
+    }
+
+    /// <summary>
     /// Gets the <see cref="ItemDescriptor"/> of the specified item.
     /// </summary>
     public ItemDescriptor GetItemDescriptor(IItem item)
-    {
-        string variant = string.Empty;
+        => new(item.Type, item.Kind, item.Identifier, GetVariant(item));
 
-        var info = GetInfo(item) ?? throw new ArgumentException(
-            $"Unable to find furni info for {item.Type.ToString().ToLower()} item {item.Kind}."
-        );
-
-        if (info.Identifier == "poster")
-        {
-            if (item is IInventoryItem inventoryItem)
-            {
-                variant = inventoryItem.Data.Value;
-            }
-            else if (item is IWallItem wallItem)
-            {
-                variant = wallItem.Data;
-            }
-            else if (item is ICatalogProduct catalogProduct)
-            {
-                variant = catalogProduct.Variant;
-            }
-            else
-            {
-                throw new ArgumentException($"Unable to find variant for poster of item type: {item.GetType().FullName}.");
-            }
-        }
-
-        return new ItemDescriptor(item.Type, item.Kind, item.Identifier, variant);
-    }
-
+    /// <summary>
+    /// Gets the <see cref="ItemDescriptor"/> of the specified inventory item.
+    /// </summary>
     public StackDescriptor GetStackDescriptor(IInventoryItem item)
-    {
-        string variant = string.Empty;
-
-        var info = GetInfo(item) ?? throw new ArgumentException(
-            $"Unable to find furni info for {item.Type.ToString().ToLower()} item {item.Kind}."
-        );
-
-        if (info.Identifier == "poster")
-        {
-            variant = item.Data.Value;
-        }
-
-        return new StackDescriptor(item.Type, item.Kind, item.Identifier, variant, item.IsTradeable, item.IsGroupable);
-    }
+        => new(item.Type, item.Kind, item.Identifier, GetVariant(item), item.IsTradeable, item.IsGroupable);
 
     /// <summary>
     /// Groups items by maximum slots/items in order to offer in a trade.
@@ -368,5 +390,5 @@ public class FurniData : IReadOnlyCollection<FurniInfo>
             });
     }
 
-    public static FurniData? FromOriginsTexts(ExternalTexts texts) => new(texts);
+    public static FurniData FromOriginsTexts(ExternalTexts texts) => new(texts);
 }

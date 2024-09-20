@@ -43,21 +43,15 @@ public sealed class FigureData
             .SelectMany(partSets => partSets)
             .ToImmutableDictionary(
                 partSet => partSet.Id,
-                partSet => new FigureColorPalette
-                {
-                    Id = partSet.Id,
-                    Colors = partSet.Colors
+                partSet => new FigureColorPalette(
+                    Id: partSet.Id,
+                    Colors: partSet.Colors
                         .Select((color, index) => (color, index))
                         .ToImmutableDictionary(
                             pair => pair.index,
-                            pair => new FigurePartColor
-                            {
-                                Id = pair.index,
-                                Index = pair.index,
-                                Value = pair.color
-                            }
+                            pair => new FigurePartColor(pair.index, pair.index, pair.color)
                         )
-                }
+                )
             );
 
         SetCollections = proxy.MalePartSets.Keys.Concat(proxy.FemalePartSets.Keys)
