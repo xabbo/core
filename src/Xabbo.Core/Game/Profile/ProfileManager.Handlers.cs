@@ -1,10 +1,8 @@
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages.Incoming;
 using Xabbo.Core.Messages.Incoming.Modern;
-
-using Xabbo.Messages.Flash;
 
 using Modern = Xabbo.Core.Messages.Incoming.Modern;
 
@@ -13,27 +11,6 @@ namespace Xabbo.Core.Game;
 [Intercept]
 partial class ProfileManager
 {
-    [Intercept(~ClientType.Shockwave)]
-    [InterceptIn(nameof(In.LatencyPingResponse))]
-    private void HandleLatencyPingResponse(Intercept e)
-    {
-        if (e.Packet.Read<int>() == 0) return;
-
-        if (UserData is null && !_isLoadingProfile)
-        {
-            _isLoadingProfile = true;
-            Interceptor.Send(Out.InfoRetrieve);
-        }
-
-        if (Achievements is null) Interceptor.Send(Out.GetAchievements);
-
-        if (Credits is null && !_isLoadingCredits)
-        {
-            _isLoadingCredits = true;
-            Interceptor.Send(Out.GetCreditsInfo);
-        }
-    }
-
     [Intercept]
     private void HandleUserData(Intercept<UserDataMsg> e)
     {
