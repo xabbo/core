@@ -12,8 +12,8 @@ public sealed class Sticky : IParserComposer<Sticky>
 
     public Sticky()
     {
-        Color = string.Empty;
-        Text = string.Empty;
+        Color = "";
+        Text = "";
     }
 
     private Sticky(in PacketReader p)
@@ -31,7 +31,7 @@ public sealed class Sticky : IParserComposer<Sticky>
         }
         else
         {
-            Text = string.Empty;
+            Text = "";
         }
     }
 

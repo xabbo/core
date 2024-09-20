@@ -8,8 +8,8 @@ public sealed class GroupMember : IGroupMember, IParserComposer<GroupMember>
 {
     public GroupMemberType Type { get; set; }
     public Id Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Figure { get; set; } = string.Empty;
+    public string Name { get; set; } = "";
+    public string Figure { get; set; } = "";
     public DateTime Joined { get; set; }
 
     public GroupMember() { }

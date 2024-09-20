@@ -5,10 +5,10 @@ namespace Xabbo.Core.Web;
 public class GameDataHash
 {
     [JsonPropertyName("name")]
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = "";
 
     [JsonPropertyName("url")]
-    public string Url { get; set; } = string.Empty;
+    public string Url { get; set; } = "";
 
     [JsonPropertyName("hash")]
     public string? Hash { get; set; }

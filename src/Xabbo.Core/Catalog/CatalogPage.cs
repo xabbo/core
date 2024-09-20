@@ -23,7 +23,7 @@ public sealed class CatalogPage : ICatalogPage, IParserComposer<CatalogPage>
     public CatalogPage()
     {
         CatalogType =
-        LayoutCode = string.Empty;
+        LayoutCode = "";
 
         Images = [];
         Texts = [];

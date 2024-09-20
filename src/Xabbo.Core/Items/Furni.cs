@@ -12,7 +12,7 @@ public abstract class Furni : IFurni, IComposer
     public int Kind { get; set; }
     public Id Id { get; set; }
     public Id OwnerId { get; set; }
-    public string OwnerName { get; set; } = string.Empty;
+    public string OwnerName { get; set; } = "";
 
     public abstract int State { get; }
 

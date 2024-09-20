@@ -26,7 +26,7 @@ public class CatalogPageNode : ICatalogPageNode, IParserComposer<CatalogPageNode
     public CatalogPageNode()
     {
         Name =
-        Title = string.Empty;
+        Title = "";
 
         OfferIds = [];
         Children = [];

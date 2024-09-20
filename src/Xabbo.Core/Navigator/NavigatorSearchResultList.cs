@@ -15,7 +15,7 @@ public class NavigatorSearchResultList : List<RoomInfo>, IParserComposer<Navigat
     public NavigatorSearchResultList()
     {
         Category =
-        Text = string.Empty;
+        Text = "";
     }
 
     protected NavigatorSearchResultList(in PacketReader p)

@@ -25,7 +25,7 @@ public class WallItem : Furni, IWallItem, IParserComposer<WallItem>
         OwnerId = -1;
         OwnerName = "(unknown)";
 
-        Data = string.Empty;
+        Data = "";
         SecondsToExpiration = -1;
         Usage = FurniUsage.None;
         Location = WallLocation.Zero;

@@ -5,15 +5,15 @@ namespace Xabbo.Core;
 public class Friend : IFriend, IParserComposer<Friend>
 {
     public Id Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = "";
     public Gender Gender { get; set; }
     public bool IsOnline { get; set; }
     public bool CanFollow { get; set; }
-    public string Figure { get; set; } = string.Empty;
+    public string Figure { get; set; } = "";
     public int CategoryId { get; set; }
-    public string Motto { get; set; } = string.Empty;
-    public string RealName { get; set; } = string.Empty;
-    public string FacebookId { get; set; } = string.Empty;
+    public string Motto { get; set; } = "";
+    public string RealName { get; set; } = "";
+    public string FacebookId { get; set; } = "";
     public bool IsAcceptingOfflineMessages { get; set; }
     public bool IsVipMember { get; set; }
     public bool IsPocketHabboUser { get; set; }

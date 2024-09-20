@@ -46,13 +46,13 @@ public class FigureData
         public bool IsSelectable { get; set; }
 
         [XmlText]
-        public string Value { get; set; } = string.Empty;
+        public string Value { get; set; } = "";
     }
 
     public class PartSetCollection
     {
         [XmlAttribute("type")]
-        public string Type { get; set; } = string.Empty;
+        public string Type { get; set; } = "";
 
         [XmlAttribute("paletteid")]
         public int PaletteId { get; set; }
@@ -79,7 +79,7 @@ public class FigureData
         public int Id { get; set; }
 
         [XmlAttribute("gender")]
-        public string Gender { get; set; } = string.Empty;
+        public string Gender { get; set; } = "";
 
         [XmlAttribute("club")]
         public int RequiredClubLevel { get; set; }
@@ -106,7 +106,7 @@ public class FigureData
         public int Id { get; set; }
 
         [XmlAttribute("type")]
-        public string Type { get; set; } = string.Empty;
+        public string Type { get; set; } = "";
 
         [XmlAttribute("colorable")]
         public bool IsColorable { get; set; }

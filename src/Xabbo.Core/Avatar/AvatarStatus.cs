@@ -97,7 +97,7 @@ public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnly
             }
             else
             {
-                fragments["mv"] = new string[] { value.ToString() ?? string.Empty };
+                fragments["mv"] = new string[] { value.ToString() ?? "" };
             }
         }
     }

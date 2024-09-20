@@ -13,6 +13,6 @@ public class PhotoInfo
 
     public PhotoInfo()
     {
-        Id = string.Empty;
+        Id = "";
     }
 }

@@ -7,15 +7,15 @@ namespace Xabbo.Core;
 public sealed class GroupMembers : List<GroupMember>, IGroupMembers, IParserComposer<GroupMembers>
 {
     public Id GroupId { get; set; }
-    public string GroupName { get; set; } = string.Empty;
+    public string GroupName { get; set; } = "";
     public Id HomeRoomId { get; set; }
-    public string BadgeCode { get; set; } = string.Empty;
+    public string BadgeCode { get; set; } = "";
     public int TotalEntries { get; set; }
     public bool IsAllowedToManage { get; set; }
     public int PageSize { get; set; }
     public int PageIndex { get; set; }
     public GroupMemberSearchType SearchType { get; set; }
-    public string Filter { get; set; } = string.Empty;
+    public string Filter { get; set; } = "";
 
     IGroupMember IReadOnlyList<IGroupMember>.this[int index] => this[index];
     IEnumerator<IGroupMember> IEnumerable<IGroupMember>.GetEnumerator() => GetEnumerator();

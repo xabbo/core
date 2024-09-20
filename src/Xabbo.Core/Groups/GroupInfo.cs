@@ -5,10 +5,10 @@ namespace Xabbo.Core;
 public sealed class GroupInfo : IGroupInfo, IParserComposer<GroupInfo>
 {
     public Id Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string BadgeCode { get; set; } = string.Empty;
-    public string PrimaryColor { get; set; } = string.Empty;
-    public string SecondaryColor { get; set; } = string.Empty;
+    public string Name { get; set; } = "";
+    public string BadgeCode { get; set; } = "";
+    public string PrimaryColor { get; set; } = "";
+    public string SecondaryColor { get; set; } = "";
     public bool IsFavorite { get; set; }
     public Id OwnerId { get; set; }
     public bool HasForum { get; set; }

@@ -56,7 +56,7 @@ public class RoomInfo : IRoomInfo, IParserComposer<RoomInfo>
         GroupName =
         GroupBadge =
         EventName =
-        EventDescription = string.Empty;
+        EventDescription = "";
         Tags = [];
     }
 

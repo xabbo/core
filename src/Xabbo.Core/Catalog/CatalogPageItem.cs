@@ -18,7 +18,7 @@ public sealed class CatalogPageItem : ICatalogPageItem, IParserComposer<CatalogP
         Name =
         PromotionalImage =
         Location =
-        ProductCode = string.Empty;
+        ProductCode = "";
     }
 
     private CatalogPageItem(in PacketReader p) : this()

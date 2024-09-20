@@ -22,7 +22,7 @@ public sealed partial class SearchMarketplaceTask(
     protected override void OnExecute() => Interceptor.Send(
         Out.GetMarketplaceOffers,
         _from ?? -1, _to ?? -1,
-        _searchText ?? string.Empty,
+        _searchText ?? "",
         (int)_sort
     );
 

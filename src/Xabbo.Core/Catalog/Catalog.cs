@@ -16,7 +16,7 @@ public class Catalog : ICatalog, IEnumerable<CatalogPageNode>, IParserComposer<C
     public Catalog()
     {
         RootNode = new CatalogPageNode();
-        Type = string.Empty;
+        Type = "";
     }
 
     protected Catalog(in PacketReader p)

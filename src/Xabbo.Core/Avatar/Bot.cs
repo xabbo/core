@@ -24,7 +24,7 @@ public class Bot : Avatar, IBot
 
         Gender = Gender.Unisex;
         OwnerId = -1;
-        OwnerName = string.Empty;
+        OwnerName = "";
         Skills = [];
     }
 

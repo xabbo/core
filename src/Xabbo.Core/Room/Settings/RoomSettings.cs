@@ -69,10 +69,10 @@ public class RoomSettings : IParserComposer<RoomSettings>
     void IComposer.Compose(in PacketWriter p)
     {
         p.WriteId(Id);
-        p.WriteString(Name ?? string.Empty);
-        p.WriteString(Description ?? string.Empty);
+        p.WriteString(Name ?? "");
+        p.WriteString(Description ?? "");
         p.WriteInt((int)Access);
-        p.WriteString(Password ?? string.Empty);
+        p.WriteString(Password ?? "");
         p.WriteInt(MaxVisitors);
         p.WriteInt((int)Category);
         p.WriteStringArray(Tags);

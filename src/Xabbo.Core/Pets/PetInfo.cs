@@ -7,7 +7,7 @@ namespace Xabbo.Core;
 public sealed class PetInfo : IParserComposer<PetInfo>
 {
     public Id Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = "";
     public int Level { get; set; }
     public int MaxLevel { get; set; }
     public int Experience { get; set; }
@@ -19,7 +19,7 @@ public sealed class PetInfo : IParserComposer<PetInfo>
     public int Scratches { get; set; }
     public int OwnerId { get; set; }
     public int Age { get; set; }
-    public string OwnerName { get; set; } = string.Empty;
+    public string OwnerName { get; set; } = "";
     public int Breed { get; set; }
     public bool HasFreeSaddle { get; set; }
     public bool IsRiding { get; set; }

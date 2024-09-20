@@ -35,7 +35,7 @@ public abstract class ItemData : IItemData, IParserComposer<ItemData>
     protected ItemData(ItemDataType type)
     {
         Type = type;
-        Value = string.Empty;
+        Value = "";
     }
 
     protected ItemData(IItemData data)

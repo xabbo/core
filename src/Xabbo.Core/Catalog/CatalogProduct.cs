@@ -22,7 +22,7 @@ public sealed class CatalogProduct : ICatalogProduct, IParserComposer<CatalogPro
 
     public CatalogProduct()
     {
-        Variant = string.Empty;
+        Variant = "";
     }
 
     private CatalogProduct(in PacketReader p)

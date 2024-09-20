@@ -5,14 +5,14 @@ namespace Xabbo.Core;
 public sealed class UserSearchResult : IParserComposer<UserSearchResult>
 {
     public Id Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Motto { get; set; } = string.Empty;
+    public string Name { get; set; } = "";
+    public string Motto { get; set; } = "";
     public bool Online { get; set; }
     public bool UnknownBoolA { get; set; }
-    public string UnknownStringA { get; set; } = string.Empty;
+    public string UnknownStringA { get; set; } = "";
     public Id UnknownLongA { get; set; }
-    public string Figure { get; set; } = string.Empty;
-    public string RealName { get; set; } = string.Empty;
+    public string Figure { get; set; } = "";
+    public string RealName { get; set; } = "";
 
     public UserSearchResult() { }
 

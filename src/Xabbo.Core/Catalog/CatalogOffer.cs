@@ -9,7 +9,7 @@ public class CatalogOffer : ICatalogOffer, IParserComposer<CatalogOffer>
     public int Id { get; set; }
     public CatalogPage? Page { get; set; }
     ICatalogPage? ICatalogOffer.Page => Page;
-    public string FurniLine { get; set; } = string.Empty;
+    public string FurniLine { get; set; } = "";
     public bool IsRentable { get; set; }
     public int PriceInCredits { get; set; }
     public int PriceInActivityPoints { get; set; }
@@ -21,13 +21,13 @@ public class CatalogOffer : ICatalogOffer, IParserComposer<CatalogOffer>
     public int ClubLevel { get; set; }
     public bool CanPurchaseMultiple { get; set; }
     public bool IsPet { get; set; }
-    public string PreviewImage { get; set; } = string.Empty;
+    public string PreviewImage { get; set; } = "";
 
     public CatalogOffer()
     {
-        FurniLine = string.Empty;
+        FurniLine = "";
         Products = new List<CatalogProduct>();
-        PreviewImage = string.Empty;
+        PreviewImage = "";
     }
 
     protected CatalogOffer(in PacketReader p)

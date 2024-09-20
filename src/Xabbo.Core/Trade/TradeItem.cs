@@ -26,7 +26,7 @@ public class TradeItem : ITradeItem, IParserComposer<TradeItem>
     bool IInventoryItem.IsRecyclable => true;
     bool IInventoryItem.IsTradeable => true;
     bool IInventoryItem.IsSellable => true;
-    string IInventoryItem.SlotId => string.Empty;
+    string IInventoryItem.SlotId => "";
     int IInventoryItem.SecondsToExpiration => -1;
     bool IInventoryItem.HasRentPeriodStarted => false;
     Id IInventoryItem.RoomId => -1;

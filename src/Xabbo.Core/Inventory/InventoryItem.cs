@@ -21,10 +21,10 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
     public bool HasRentPeriodStarted { get; set; }
     public Id RoomId { get; set; }
     public short _Short1 { get; set; }
-    public string SlotId { get; set; } = string.Empty;
+    public string SlotId { get; set; } = "";
     public int _Int3 { get; set; }
 
-    public string _String3 { get; set; } = string.Empty;
+    public string _String3 { get; set; } = "";
     public long Extra { get; set; }
     public int _Int5 { get; set; }
 
@@ -112,7 +112,7 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
         }
         else
         {
-            _String3 = string.Empty;
+            _String3 = "";
         }
     }
 
