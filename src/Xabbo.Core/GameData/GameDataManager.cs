@@ -37,7 +37,7 @@ public class GameDataManager : IGameDataManager
     private Task _loadTask;
 
     public string CachePath { get; }
-    public TimeSpan MaxAge { get; set;} = TimeSpan.FromHours(3);
+    public TimeSpan MaxAge { get; set; } = TimeSpan.FromHours(3);
     public bool CacheOnly { get; set; }
 
     public FigureData? Figure { get; private set; }

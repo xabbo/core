@@ -125,7 +125,8 @@ public class WallItem : Furni, IWallItem, IParserComposer<WallItem>
         if (!int.TryParse(fields[0], out int id))
             throw new Exception($"Invalid ID when parsing WallItem: {fields[0]}.");
 
-        WallItem wallItem = new() {
+        WallItem wallItem = new()
+        {
             Id = id,
             Identifier = fields[1],
             OwnerId = -1,

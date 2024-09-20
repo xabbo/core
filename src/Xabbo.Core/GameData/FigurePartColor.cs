@@ -16,5 +16,6 @@ public sealed record FigurePartColor(
         Value: proxy.Value,
         IsSelectable: proxy.IsSelectable,
         RequiredClubLevel: proxy.RequiredClubLevel
-    ) { }
+    )
+    { }
 }

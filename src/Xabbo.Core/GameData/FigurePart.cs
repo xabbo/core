@@ -14,5 +14,6 @@ public sealed record FigurePart(
         IsColorable: proxy.IsColorable,
         Index: proxy.Index,
         ColorIndex: proxy.ColorIndex
-    ) { }
+    )
+    { }
 }

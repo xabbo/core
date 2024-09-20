@@ -4,7 +4,8 @@ namespace Xabbo.Core.GameData;
 
 public sealed class FigureConverter
 {
-    private static readonly Dictionary<int, int> _hairToHatMap = new() {
+    private static readonly Dictionary<int, int> _hairToHatMap = new()
+    {
         // m
         [120] = 1001,
         [130] = 1010,
@@ -68,13 +69,13 @@ public sealed class FigureConverter
         Figure figure = [];
         for (int i = 0; i < originsFigureString.Length; i += 5)
         {
-            int id = int.Parse(originsFigureString[i..(i+3)]);
-            int colorIndex = int.Parse(originsFigureString[(i+3)..(i+5)]);
+            int id = int.Parse(originsFigureString[i..(i + 3)]);
+            int colorIndex = int.Parse(originsFigureString[(i + 3)..(i + 5)]);
 
             FigurePartType partType = _partSetTypeMap[id];
             int paletteId = ModernFigureData.SetCollections[partType].PaletteId;
 
-            var color = OriginsFigureData.Palettes[id].Colors[colorIndex-1];
+            var color = OriginsFigureData.Palettes[id].Colors[colorIndex - 1];
             if (_colorMap.TryGetValue((paletteId, color.Value.ToLower()), out int colorId))
                 figure.Add(partType, id, colorId);
             else

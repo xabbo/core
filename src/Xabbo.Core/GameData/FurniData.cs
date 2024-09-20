@@ -26,7 +26,7 @@ public sealed class FurniData : IReadOnlyCollection<FurniInfo>
     /// <summary>
     /// Gets the information of all floor items.
     /// </summary>
-    public ImmutableArray<FurniInfo> FloorItems  { get; }
+    public ImmutableArray<FurniInfo> FloorItems { get; }
 
     /// <summary>
     /// Gets the information of all wall items.

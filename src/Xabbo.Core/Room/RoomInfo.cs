@@ -143,7 +143,7 @@ public class RoomInfo : IRoomInfo, IParserComposer<RoomInfo>
         if (p.Client is ClientType.Shockwave)
             ComposeOrigins(in p);
         else
-            ComposeModern (in p);
+            ComposeModern(in p);
     }
 
     private void ComposeModern(in PacketWriter p)

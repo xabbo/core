@@ -13,5 +13,6 @@ public sealed record FigureColorPalette(
         Colors: proxy.Colors
             .Select(color => new FigurePartColor(color))
             .ToImmutableDictionary(color => color.Id)
-    ) { }
+    )
+    { }
 }

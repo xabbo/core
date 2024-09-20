@@ -37,5 +37,6 @@ public sealed record FigurePartSet(
         Parts: proxy.Parts
             .Select(part => new FigurePart(part))
             .ToImmutableArray()
-    ) { }
+    )
+    { }
 }

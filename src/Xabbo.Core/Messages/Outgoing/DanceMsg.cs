@@ -17,7 +17,8 @@ public sealed record DanceMsg(Dances Dance = Dances.Dance) : IMessage<DanceMsg>
 
     Identifier IMessage.GetIdentifier(ClientType client) => client switch
     {
-        ClientType.Shockwave => Dance switch {
+        ClientType.Shockwave => Dance switch
+        {
             Dances.None => Xabbo.Messages.Shockwave.Out.STOP,
             _ => Xabbo.Messages.Shockwave.Out.DANCE,
         },

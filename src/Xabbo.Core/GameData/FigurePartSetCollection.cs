@@ -23,7 +23,8 @@ public sealed record FigurePartSetCollection(
                 .Select(partSet => new FigurePartSet(Gender.Female, partSet))
             )
             .ToImmutableDictionary(partSet => partSet.Id)
-    ) { }
+    )
+    { }
 
     internal FigurePartSetCollection(Xml.FigureData.PartSetCollection proxy) : this(
         Type: H.GetFigurePartType(proxy.Type),
@@ -35,5 +36,6 @@ public sealed record FigurePartSetCollection(
         PartSets: proxy.Sets
             .Select(partSet => new FigurePartSet(partSet))
             .ToImmutableDictionary(partSet => partSet.Id)
-    ) { }
+    )
+    { }
 }

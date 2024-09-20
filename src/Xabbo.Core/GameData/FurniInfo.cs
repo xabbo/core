@@ -60,7 +60,8 @@ public sealed record FurniInfo(
         CanSitOn: proxy.CanSitOn,
         CanLayOn: proxy.CanLayOn,
         Line: proxy.FurniLine ?? ""
-    ) { }
+    )
+    { }
 
     internal FurniInfo(ItemType type, Json.FurniInfo proxy) : this(
         Type: type,
@@ -89,7 +90,8 @@ public sealed record FurniInfo(
         Line: proxy.FurniLine ?? "",
         Environment: proxy.Environment ?? "",
         IsRare: proxy.Rare
-    ) { }
+    )
+    { }
 
     /// <summary>
     /// Returns <c>true</c> if <see cref="CanStandOn"/>, <see cref="CanSitOn"/> and <see cref="CanLayOn"/> are all <c>false</c>.
