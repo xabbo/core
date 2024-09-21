@@ -1,7 +1,7 @@
 ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Xabbo.Core?style=for-the-badge) ![Nuget](https://img.shields.io/nuget/dt/Xabbo.Core?style=for-the-badge)
 
 # xabbo/core
-A library for parsing data structures, managing the game state, and interacting with the server for Habbo Hotel.
+Provides data structures, parsers, composers, messages, game state, and game data management for xabbo based extensions.
 
 ## Features
 
