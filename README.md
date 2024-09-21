@@ -59,6 +59,24 @@ ext.Intercept<AvatarChatMsg>(chat => chat with {
 });
 ```
 
+### Request messages
+
+Request messages are a pair of request/response messages with a response data type.
+This allows you to easily request data and receive its response asynchronously.
+These work by implementing `IRequestMessage<TReq, TRes, TData>` from xabbo/common.
+
+Let's take a look at the `GetUserDataMsg` which gets the user's own data.\
+It implements `IRequestMessage<GetUserDataMsg, UserDataMsg, UserData>`, which means it sends a `GetUserDataMsg`, receives a `UserDataMsg` and returns a `UserData` object.
+
+```cs
+// In an async method...
+Console.WriteLine("Requesting user data...");
+// Sends a GetUserDataMsg, receives a UserDataMsg and returns a UserData object.
+var userData = await ext.RequestAsync(new GetUserDataMsg());
+// Now we have the UserData object which includes the user's name, ID, etc.
+Console.WriteLine($"Received user data for: {userData.Name}");
+```
+
 ### Game state managers
 
 Game state managers such as the `RoomManager` intercept packets to track the state of the game.\
