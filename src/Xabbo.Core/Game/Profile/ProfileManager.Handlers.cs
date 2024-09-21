@@ -50,7 +50,7 @@ partial class ProfileManager
     }
 
     [Intercept]
-    private void HandleUserUpdate(AvatarUpdatedMsg update)
+    private void HandleUserUpdate(UserUpdatedMsg update)
     {
         if (UserData is null) return;
 

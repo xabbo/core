@@ -18,3 +18,8 @@ tasks:
       - dotnet clean
       - dotnet build-server shutdown
       - dotnet build
+  new-request:
+    silent: true
+    interactive: true
+    cmds:
+      - .scripts/new-request.sh

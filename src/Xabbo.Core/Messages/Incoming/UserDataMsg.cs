@@ -3,6 +3,9 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Response for <see cref="Outgoing.GetUserDataMsg"/>.
+/// </summary>
 public sealed record UserDataMsg(UserData UserData) : IMessage<UserDataMsg>
 {
     static Identifier IMessage<UserDataMsg>.Identifier => In.UserObject;

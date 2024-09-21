@@ -15,6 +15,8 @@ public sealed partial class GetCatalogPageTask : InterceptorTask<ICatalogPage>
     private readonly int _pageId;
     private readonly string _catalogType;
 
+    protected override ClientType SupportedClients => ~ClientType.Shockwave;
+
     public GetCatalogPageTask(IInterceptor interceptor, int pageId, string catalogType)
         : base(interceptor)
     {

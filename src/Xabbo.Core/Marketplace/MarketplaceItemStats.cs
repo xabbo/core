@@ -5,7 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-public sealed class MarketplaceItemInfo : IMarketplaceItemInfo, IParserComposer<MarketplaceItemInfo>
+public sealed class MarketplaceItemStats : IMarketplaceItemStats, IParserComposer<MarketplaceItemStats>
 {
     public Id Id => -1;
     public ItemType Type { get; set; }
@@ -15,16 +15,16 @@ public sealed class MarketplaceItemInfo : IMarketplaceItemInfo, IParserComposer<
     public int Offers { get; set; }
     public int HistorySizeInDays { get; set; }
     public List<MarketplaceTradeInfo> TradeInfo { get; set; }
-    IReadOnlyList<IMarketplaceTradeInfo> IMarketplaceItemInfo.TradeInfo => TradeInfo;
+    IReadOnlyList<IMarketplaceTradeInfo> IMarketplaceItemStats.TradeInfo => TradeInfo;
 
     string? IItem.Identifier => null;
 
-    public MarketplaceItemInfo()
+    public MarketplaceItemStats()
     {
         TradeInfo = [];
     }
 
-    private MarketplaceItemInfo(in PacketReader p)
+    private MarketplaceItemStats(in PacketReader p)
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
@@ -62,7 +62,7 @@ public sealed class MarketplaceItemInfo : IMarketplaceItemInfo, IParserComposer<
         p.WriteInt(Kind);
     }
 
-    public override string ToString() => $"{nameof(MarketplaceItemInfo)}/{Type}:{Kind}";
+    public override string ToString() => $"{nameof(MarketplaceItemStats)}/{Type}:{Kind}";
 
-    static MarketplaceItemInfo IParser<MarketplaceItemInfo>.Parse(in PacketReader p) => new(in p);
+    static MarketplaceItemStats IParser<MarketplaceItemStats>.Parse(in PacketReader p) => new(in p);
 }

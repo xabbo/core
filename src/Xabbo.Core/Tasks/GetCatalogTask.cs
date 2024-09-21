@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
@@ -7,20 +6,17 @@ using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks;
 
-public class GetCatalogTask : InterceptorTask<ICatalog>
+[Intercept]
+public sealed partial class GetCatalogTask(IInterceptor interceptor, string type) : InterceptorTask<ICatalog>(interceptor)
 {
-    private readonly string _type;
+    private readonly string _type = type;
 
-    public GetCatalogTask(IInterceptor interceptor, string type)
-        : base(interceptor)
-    {
-        _type = type;
-    }
+    protected override ClientType SupportedClients => ~ClientType.Shockwave;
 
     protected override void OnExecute() => Interceptor.Send(Out.GetCatalogIndex, _type);
 
     [InterceptIn(nameof(In.CatalogIndex))]
-    protected void HandleCatalogIndex(Intercept e)
+    void HandleCatalogIndex(Intercept e)
     {
         try
         {

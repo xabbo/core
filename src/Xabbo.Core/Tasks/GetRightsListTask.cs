@@ -7,11 +7,13 @@ using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Core.Tasks;
 
-[Intercept]
-public sealed partial class GetRightsListTask(IInterceptor interceptor, long roomId)
+[Intercept(~ClientType.Shockwave)]
+public sealed partial class GetRightsListTask(IInterceptor interceptor, Id roomId)
     : InterceptorTask<List<(long Id, string Name)>>(interceptor)
 {
-    private readonly long _roomId = roomId;
+    private readonly Id _roomId = roomId;
+
+    protected override ClientType SupportedClients => ~ClientType.Shockwave;
 
     protected override void OnExecute() => Interceptor.Send(Out.GetFlatControllers, _roomId);
 

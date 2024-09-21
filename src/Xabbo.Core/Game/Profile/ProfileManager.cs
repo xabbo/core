@@ -59,7 +59,7 @@ public sealed partial class ProfileManager : GameStateManager
             Log.LogInformation("Requesting user data.");
 
             _isLoadingProfile = true;
-            Interceptor.Send(new RequestUserDataMsg());
+            Interceptor.Send(new GetUserDataMsg());
         }
 
         if (!Session.IsOrigins && Achievements is null)

@@ -2,7 +2,7 @@
 
 namespace Xabbo.Core;
 
-public interface IMarketplaceItemInfo : IItem
+public interface IMarketplaceItemStats : IItem
 {
     /// <summary>
     /// Gets the average sale price in the last week.

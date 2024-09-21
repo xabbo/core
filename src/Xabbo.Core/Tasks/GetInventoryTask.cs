@@ -8,25 +8,22 @@ using Xabbo.Core.Game;
 
 namespace Xabbo.Core.Tasks;
 
-public class GetInventoryTask : InterceptorTask<IInventory>
+[Intercept(~ClientType.Shockwave)]
+public sealed partial class GetInventoryTask(IInterceptor interceptor, bool blockPackets = true) : InterceptorTask<IInventory>(interceptor)
 {
     private int _total = -1, _index = 0;
     private readonly Inventory inventory = new();
 
-    private readonly bool _blockPackets;
+    private readonly bool _blockPackets = blockPackets;
 
-    public GetInventoryTask(IInterceptor interceptor, bool blockPackets = true)
-        : base(interceptor)
-    {
-        _blockPackets = blockPackets;
-    }
+    protected override ClientType SupportedClients => ~ClientType.Shockwave;
 
     public GetInventoryTask(IInterceptor interceptor) : this(interceptor, true) { }
 
     protected override void OnExecute() => Interceptor.Send(Out.RequestFurniInventory);
 
     [InterceptIn(nameof(In.FurniList))]
-    protected void OnInventoryItems(Intercept e)
+    void OnInventoryItems(Intercept e)
     {
         try
         {

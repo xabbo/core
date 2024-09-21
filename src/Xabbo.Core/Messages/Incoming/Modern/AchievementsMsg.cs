@@ -6,10 +6,7 @@ namespace Xabbo.Core.Messages.Incoming.Modern;
 /// <summary>
 /// Received when achievements are loaded.
 /// <para/>
-/// Supported on:
-/// <list type="bullet">
-/// <item>Flash</item>
-/// </list>
+/// Response for <see cref="Outgoing.Modern.GetAchievementsMsg"/>.
 /// </summary>
 public sealed record AchievementsMsg(Achievements Achievements) : IMessage<AchievementsMsg>
 {

@@ -1,29 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 using Xabbo.Messages.Flash;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
+using Xabbo.Core.Messages.Incoming;
 
 namespace Xabbo.Core.Tasks;
 
-public class GetFriendsTask : InterceptorTask<List<Friend>>
+[Intercept]
+public sealed partial class GetFriendsTask(IInterceptor interceptor) : InterceptorTask<List<Friend>>(interceptor)
 {
     private int _totalExpected = -1, _currentIndex = 0;
-    private readonly List<Friend> _friends = new List<Friend>();
-
-    public GetFriendsTask(IInterceptor interceptor)
-        : base(interceptor)
-    { }
+    private readonly List<Friend> _friends = [];
 
     protected override void OnExecute() => Interceptor.Send(Out.MessengerInit);
 
-    [InterceptIn(nameof(In.MessengerInit))]
-    protected void OnInitFriends(Intercept e) => e.Block();
+    [Intercept]
+    void OnInitFriends(Intercept<MessengerInitMsg> e)
+    {
+        try
+        {
+            e.Block();
 
+            if (Session.IsOrigins)
+            {
+                SetResult(e.Msg.Friends);
+            }
+        }
+        catch (Exception ex) { SetException(ex); }
+    }
+
+    [Intercept(~ClientType.Shockwave)]
     [InterceptIn(nameof(In.FriendListFragment))]
-    protected void OnFriends(Intercept e)
+    void OnFriends(Intercept e)
     {
         try
         {

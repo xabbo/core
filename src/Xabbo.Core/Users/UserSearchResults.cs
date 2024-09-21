@@ -9,8 +9,8 @@ namespace Xabbo.Core;
 
 public class UserSearchResults : IReadOnlyCollection<UserSearchResult>, IParserComposer<UserSearchResults>
 {
-    public IReadOnlyList<UserSearchResult> Friends { get; }
-    public IReadOnlyList<UserSearchResult> Others { get; }
+    public IReadOnlyList<UserSearchResult> Friends { get; } = [];
+    public IReadOnlyList<UserSearchResult> Others { get; } = [];
 
     public int Count => Friends.Count + Others.Count;
     public IEnumerator<UserSearchResult> GetEnumerator() => Friends.Concat(Others).GetEnumerator();
@@ -18,8 +18,15 @@ public class UserSearchResults : IReadOnlyCollection<UserSearchResult>, IParserC
 
     protected UserSearchResults(in PacketReader p)
     {
-        Friends = [.. p.ParseArray<UserSearchResult>()];
-        Others = [.. p.ParseArray<UserSearchResult>()];
+        if (p.Client is ClientType.Shockwave)
+        {
+            Others = [p.Parse<UserSearchResult>()];
+        }
+        else
+        {
+            Friends = [.. p.ParseArray<UserSearchResult>()];
+            Others = [.. p.ParseArray<UserSearchResult>()];
+        }
     }
 
     public UserSearchResult? GetResult(string name) => this.FirstOrDefault(result =>
@@ -27,8 +34,17 @@ public class UserSearchResults : IReadOnlyCollection<UserSearchResult>, IParserC
 
     void IComposer.Compose(in PacketWriter p)
     {
-        p.ComposeArray(Friends);
-        p.ComposeArray(Others);
+        if (p.Client is ClientType.Shockwave)
+        {
+            if (Friends.Count > 0 || Others.Count != 1)
+                throw new Exception("UserSearchResults must only have a single result in Others on Shockwave.");
+            p.Compose(Others[0]);
+        }
+        else
+        {
+            p.ComposeArray(Friends);
+            p.ComposeArray(Others);
+        }
     }
 
     static UserSearchResults IParser<UserSearchResults>.Parse(in PacketReader p) => new(in p);

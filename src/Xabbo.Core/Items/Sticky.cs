@@ -7,32 +7,18 @@ public sealed class Sticky : IParserComposer<Sticky>
     public static readonly StickyColors Colors = new();
 
     public Id Id { get; set; }
-    public string Color { get; set; }
-    public string Text { get; set; }
+    public string Color { get; set; } = "";
+    public string Text { get; set; } = "";
 
-    public Sticky()
+    public static Sticky ParseString(Id id, string data)
     {
-        Color = "";
-        Text = "";
-    }
-
-    private Sticky(in PacketReader p)
-    {
-        if (p.Client == ClientType.Shockwave)
-            Id = (Id)p.ReadString();
-        else
-            Id = p.ReadId();
-        string text = p.ReadString();
-        int spaceIndex = text.IndexOf(' ');
-        Color = text[0..6];
-        if (spaceIndex == 6)
+        string[] split = data.Split(' ', 2);
+        return new Sticky
         {
-            Text = text[7..];
-        }
-        else
-        {
-            Text = "";
-        }
+            Id = id,
+            Color = split.Length < 1 ? "" : split[0],
+            Text = split.Length < 2 ? "" : split[1]
+        };
     }
 
     void IComposer.Compose(in PacketWriter p)
@@ -41,5 +27,14 @@ public sealed class Sticky : IParserComposer<Sticky>
         p.WriteString($"{Color} {Text}");
     }
 
-    static Sticky IParser<Sticky>.Parse(in PacketReader p) => new(p);
+    static Sticky IParser<Sticky>.Parse(in PacketReader p)
+    {
+        var id = p.Client switch
+        {
+            ClientType.Unity => p.ReadId(),
+            not ClientType.Unity => (Id)p.ReadString()
+        };
+        string data = p.ReadString();
+        return ParseString(id, data);
+    }
 }
