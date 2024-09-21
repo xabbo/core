@@ -6,15 +6,15 @@ namespace Xabbo.Core.Messages.Incoming.Modern;
 /// <summary>
 /// Received when an avatar's figure, motto or achievement score updates.
 /// </summary>
-public sealed record UserUpdatedMsg(
+public sealed record UserChangedMsg(
     int Index, string Figure, Gender Gender, string Motto, int AchievementScore
 )
-    : IMessage<UserUpdatedMsg>
+    : IMessage<UserChangedMsg>
 {
-    static bool IMessage<UserUpdatedMsg>.UseTargetedIdentifiers => true;
-    static Identifier IMessage<UserUpdatedMsg>.Identifier => In.UserUpdate;
+    static bool IMessage<UserChangedMsg>.UseTargetedIdentifiers => true;
+    static Identifier IMessage<UserChangedMsg>.Identifier => In.UserChange;
 
-    static UserUpdatedMsg IParser<UserUpdatedMsg>.Parse(in PacketReader p) => new(
+    static UserChangedMsg IParser<UserChangedMsg>.Parse(in PacketReader p) => new(
         Index: p.ReadInt(),
         Figure: p.ReadString(),
         Gender: H.ToGender(p.ReadString()),
