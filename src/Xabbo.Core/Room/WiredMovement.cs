@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 
 using Xabbo.Messages;
 
@@ -21,7 +20,11 @@ public enum WiredMovementType
     /// <summary>
     /// Used when a wall item is moved by wired.
     /// </summary>
-    WallItem = 2
+    WallItem = 2,
+    /// <summary>
+    /// Used when a user's direction is updated by wired.
+    /// </summary>
+    UserDirection
 }
 
 /// <summary>
@@ -49,7 +52,8 @@ public abstract class WiredMovement(WiredMovementType type) : IParserComposer<Wi
             WiredMovementType.User => new UserWiredMovement(in p),
             WiredMovementType.FloorItem => new FloorItemWiredMovement(in p),
             WiredMovementType.WallItem => new WallItemWiredMovement(in p),
-            _ => throw new Exception($"Unknown wired movement type: {type}"),
+            WiredMovementType.UserDirection => new UserDirectionWiredMovement(in p),
+            _ => throw new Exception($"Unknown wired movement type: {type}."),
         };
     }
 }
@@ -180,5 +184,29 @@ public class WallItemWiredMovement : WiredMovement
         p.WriteInt(Destination.Offset.X);
         p.WriteInt(Destination.Offset.Y);
         p.WriteInt(AnimationTime);
+    }
+}
+
+public class UserDirectionWiredMovement : WiredMovement
+{
+    public int Index { get; set; }
+    public int BodyDirection { get; set; }
+    public int HeadDirection { get; set; }
+
+    public UserDirectionWiredMovement() : base(WiredMovementType.WallItem) { }
+
+    internal UserDirectionWiredMovement(in PacketReader p) : this()
+    {
+        Index = p.ReadInt();
+        BodyDirection = p.ReadInt();
+        HeadDirection = p.ReadInt();
+    }
+
+    protected override void Compose(in PacketWriter p)
+    {
+        base.Compose(p);
+        p.WriteInt(Index);
+        p.WriteInt(BodyDirection);
+        p.WriteInt(HeadDirection);
     }
 }
