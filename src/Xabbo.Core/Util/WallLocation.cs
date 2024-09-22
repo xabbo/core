@@ -144,7 +144,7 @@ public readonly record struct WallLocation(Point Wall, Point Offset, WallOrienta
             return false;
 
         string[] parts = locationString.Split(' ');
-        if (parts.Length != 3 ||
+        if (parts.Length < 3 ||
             parts[0].Length < 6 ||
             parts[1].Length < 5 ||
             parts[2].Length != 1 ||
