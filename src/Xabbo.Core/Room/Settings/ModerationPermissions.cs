@@ -8,7 +8,8 @@ public enum ModerationPermissions
     OwnerOnly = 0,
     RightsHolders = 1,
     AllUsers = 2,
-    GroupAdmins = 4
+    GroupAdmins = 4,
+    GroupAdminsAndRightsHolders = RightsHolders | GroupAdmins
 }
 
 public static partial class XabboEnumExtensions
