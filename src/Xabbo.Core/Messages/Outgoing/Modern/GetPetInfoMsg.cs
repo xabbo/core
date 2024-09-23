@@ -9,6 +9,7 @@ namespace Xabbo.Core.Messages.Outgoing.Modern;
 /// </summary>
 public sealed record GetPetInfoMsg(Id Id) : IRequestMessage<GetPetInfoMsg, PetInfoMsg, PetInfo>
 {
+    static ClientType IMessage<GetPetInfoMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<GetPetInfoMsg>.Identifier => Out.GetPetInfo;
     PetInfo IResponseData<PetInfoMsg, PetInfo>.GetData(PetInfoMsg msg) => msg.Info;
     static GetPetInfoMsg IParser<GetPetInfoMsg>.Parse(in PacketReader p) => new(p.ReadId());

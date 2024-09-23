@@ -13,6 +13,7 @@ namespace Xabbo.Core.Messages.Outgoing.Modern;
 /// <param name="Open">Whether the open the group information in-client.</param>
 public sealed record GetGroupDataMsg(Id Id, bool Open = false) : IRequestMessage<GetGroupDataMsg, GroupDataMsg>
 {
+    static ClientType IMessage<GetGroupDataMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<GetGroupDataMsg>.Identifier => Out.GetHabboGroupDetails;
     bool IRequestFor<GroupDataMsg>.MatchResponse(GroupDataMsg msg) => msg.Group.Id == Id;
     static GetGroupDataMsg IParser<GetGroupDataMsg>.Parse(in PacketReader p) => new(p.ReadId(), p.ReadBool());

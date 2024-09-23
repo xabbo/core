@@ -13,6 +13,7 @@ namespace Xabbo.Core.Messages.Outgoing.Modern;
 /// <param name="Open">Whether the open the profile in-client.</param>
 public sealed record GetProfileMsg(Id Id, bool Open = false) : IRequestMessage<GetProfileMsg, ProfileMsg, UserProfile>
 {
+    static ClientType IMessage<GetProfileMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<GetProfileMsg>.Identifier => Out.GetExtendedProfile;
     bool IRequestFor<ProfileMsg>.MatchResponse(ProfileMsg response) => response.Profile.Id == Id;
     UserProfile IResponseData<ProfileMsg, UserProfile>.GetData(ProfileMsg msg) => msg.Profile;

@@ -5,6 +5,7 @@ namespace Xabbo.Core.Messages.Outgoing.Modern;
 
 public sealed record GetBadgesMsg : IMessage<GetBadgesMsg>
 {
+    static ClientType IMessage<GetBadgesMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<GetBadgesMsg>.Identifier => Out.GetBadges;
     static GetBadgesMsg IParser<GetBadgesMsg>.Parse(in PacketReader p) => new();
     void IComposer.Compose(in PacketWriter p) { }

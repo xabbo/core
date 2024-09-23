@@ -10,6 +10,7 @@ namespace Xabbo.Core.Messages.Outgoing.Modern;
 public sealed record GetMarketplaceItemStatsMsg(ItemType Type, int Kind)
     : IRequestMessage<GetMarketplaceItemStatsMsg, MarketplaceItemStatsMsg, MarketplaceItemStats>
 {
+    static ClientType IMessage<GetMarketplaceItemStatsMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<GetMarketplaceItemStatsMsg>.Identifier => Out.GetMarketplaceItemStats;
     bool IRequestFor<MarketplaceItemStatsMsg>.MatchResponse(MarketplaceItemStatsMsg msg) => msg.Stats.Type == Type && msg.Stats.Kind == Kind;
     MarketplaceItemStats IResponseData<MarketplaceItemStatsMsg, MarketplaceItemStats>.GetData(MarketplaceItemStatsMsg msg) => msg.Stats;

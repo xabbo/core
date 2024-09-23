@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using Xabbo.Messages;
 using Xabbo.Messages.Flash;
 
-namespace Xabbo.Core.Messages.Incoming;
+namespace Xabbo.Core.Messages.Incoming.Modern;
 
 public sealed class WiredMovementsMsg : List<WiredMovement>, IMessage<WiredMovementsMsg>
 {
-    static bool IMessage<WiredMovementsMsg>.UseTargetedIdentifiers => true;
+    static ClientType IMessage<WiredMovementsMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<WiredMovementsMsg>.Identifier => In.WiredMovements;
 
     public WiredMovementsMsg() { }

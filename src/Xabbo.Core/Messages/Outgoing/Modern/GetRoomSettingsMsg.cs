@@ -9,6 +9,7 @@ namespace Xabbo.Core.Messages.Outgoing.Modern;
 /// </summary>
 public sealed record GetRoomSettingsMsg(Id Id) : IRequestMessage<GetRoomSettingsMsg, RoomSettingsMsg, RoomSettings>
 {
+    static ClientType IMessage<GetRoomSettingsMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<GetRoomSettingsMsg>.Identifier => Out.GetRoomSettings;
     bool IRequestFor<RoomSettingsMsg>.MatchResponse(RoomSettingsMsg msg) => msg.Settings.Id == Id;
     RoomSettings IResponseData<RoomSettingsMsg, RoomSettings>.GetData(RoomSettingsMsg msg) => msg.Settings;

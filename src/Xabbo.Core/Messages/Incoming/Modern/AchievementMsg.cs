@@ -6,26 +6,12 @@ namespace Xabbo.Core.Messages.Incoming.Modern;
 
 /// <summary>
 /// Received when an achievement is updated.
-/// <para/>
-/// Supported on:
-/// <list type="bullet">
-/// <item>Flash</item>
-/// </list>
 /// </summary>
 public sealed record AchievementMsg(Achievement Achievement) : IMessage<AchievementMsg>
 {
-    static bool IMessage<AchievementMsg>.UseTargetedIdentifiers => true;
+    static ClientType IMessage<AchievementMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<AchievementMsg>.Identifier => In.Achievement;
 
-    static AchievementMsg IParser<AchievementMsg>.Parse(in PacketReader p)
-    {
-        UnsupportedClientException.ThrowIfOrigins(p.Client);
-        return new AchievementMsg(p.Parse<Achievement>());
-    }
-
-    void IComposer.Compose(in PacketWriter p)
-    {
-        UnsupportedClientException.ThrowIfOrigins(p.Client);
-        p.Compose(Achievement);
-    }
+    static AchievementMsg IParser<AchievementMsg>.Parse(in PacketReader p) => new(p.Parse<Achievement>());
+    void IComposer.Compose(in PacketWriter p) => p.Compose(Achievement);
 }

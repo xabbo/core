@@ -14,6 +14,7 @@ namespace Xabbo.Core.Messages.Outgoing.Modern;
 /// </summary>
 public sealed record UpdateAvatarMsg(Gender Gender, string Figure) : IMessage<UpdateAvatarMsg>
 {
+    static ClientType IMessage<UpdateAvatarMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<UpdateAvatarMsg>.Identifier => Out.UpdateFigureData; // TODO check header
 
     Identifier IMessage.GetIdentifier(ClientType client) => client switch
@@ -26,8 +27,6 @@ public sealed record UpdateAvatarMsg(Gender Gender, string Figure) : IMessage<Up
 
     static UpdateAvatarMsg IParser<UpdateAvatarMsg>.Parse(in PacketReader p)
     {
-        UnsupportedClientException.ThrowIfOrigins(p.Client);
-
         return new(
             Gender: H.ToGender(p.ReadString()),
             Figure: p.ReadString()

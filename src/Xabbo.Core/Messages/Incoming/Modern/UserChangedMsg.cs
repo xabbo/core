@@ -11,7 +11,7 @@ public sealed record UserChangedMsg(
 )
     : IMessage<UserChangedMsg>
 {
-    static bool IMessage<UserChangedMsg>.UseTargetedIdentifiers => true;
+    static ClientType IMessage<UserChangedMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<UserChangedMsg>.Identifier => In.UserChange;
 
     static UserChangedMsg IParser<UserChangedMsg>.Parse(in PacketReader p) => new(

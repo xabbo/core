@@ -71,5 +71,4 @@ public sealed record UseFloorItemMsg(Id Id, int State = 0) : IMessage<UseFloorIt
                 throw new UnsupportedClientException(p.Client);
         }
     }
-
 }

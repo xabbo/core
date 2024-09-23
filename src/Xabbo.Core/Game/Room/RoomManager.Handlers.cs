@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Xabbo.Messages.Flash;
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages.Incoming;
+using Xabbo.Core.Messages.Incoming.Modern;
 
 namespace Xabbo.Core.Game;
 

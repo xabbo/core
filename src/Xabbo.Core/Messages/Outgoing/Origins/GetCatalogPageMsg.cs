@@ -8,6 +8,7 @@ namespace Xabbo.Core.Messages.Outgoing.Origins;
 /// </summary>
 public sealed record GetCatalogPageMsg(string Name, string Type = "production", string Locale = "en") : IMessage<GetCatalogPageMsg>
 {
+    static ClientType IMessage<GetCatalogPageMsg>.SupportedClients => ClientType.Origins;
     static Identifier IMessage<GetCatalogPageMsg>.Identifier => Out.GetCatalogPage;
 
     static GetCatalogPageMsg IParser<GetCatalogPageMsg>.Parse(in PacketReader p) => new(

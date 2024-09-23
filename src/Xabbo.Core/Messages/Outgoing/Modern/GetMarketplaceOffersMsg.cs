@@ -15,6 +15,7 @@ public sealed record GetMarketplaceOffersMsg(
 )
     : IRequestMessage<GetMarketplaceOffersMsg, MarketplaceOffersMsg, MarketplaceOffer[]>
 {
+    static ClientType IMessage<GetMarketplaceOffersMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<GetMarketplaceOffersMsg>.Identifier => Out.GetMarketplaceOffers;
 
     MarketplaceOffer[] IResponseData<MarketplaceOffersMsg, MarketplaceOffer[]>.GetData(MarketplaceOffersMsg msg) => [.. msg.Offers];

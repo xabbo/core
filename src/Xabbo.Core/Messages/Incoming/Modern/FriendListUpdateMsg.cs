@@ -7,7 +7,7 @@ namespace Xabbo.Core.Messages.Incoming.Modern;
 
 public sealed class FriendListUpdateMsg : IMessage<FriendListUpdateMsg>
 {
-    static bool IMessage<FriendListUpdateMsg>.UseTargetedIdentifiers => true;
+    static ClientType IMessage<FriendListUpdateMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<FriendListUpdateMsg>.Identifier => In.FriendListUpdate;
 
     public List<FriendCategory> Categories { get; set; } = [];
@@ -15,8 +15,6 @@ public sealed class FriendListUpdateMsg : IMessage<FriendListUpdateMsg>
 
     static FriendListUpdateMsg IParser<FriendListUpdateMsg>.Parse(in PacketReader p)
     {
-        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
-
         return new()
         {
             Categories = [.. p.ParseArray<FriendCategory>()],
@@ -26,8 +24,6 @@ public sealed class FriendListUpdateMsg : IMessage<FriendListUpdateMsg>
 
     void IComposer.Compose(in PacketWriter p)
     {
-        UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
-
         p.ComposeArray(Categories);
         p.ComposeArray(Updates);
     }

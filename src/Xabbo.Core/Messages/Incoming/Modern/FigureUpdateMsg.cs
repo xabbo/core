@@ -5,7 +5,7 @@ namespace Xabbo.Core.Messages.Incoming.Modern;
 
 public sealed record FigureUpdateMsg(string Figure, Gender Gender) : IMessage<FigureUpdateMsg>
 {
-    static bool IMessage<FigureUpdateMsg>.UseTargetedIdentifiers => true;
+    static ClientType IMessage<FigureUpdateMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<FigureUpdateMsg>.Identifier => In.FigureUpdate;
 
     static FigureUpdateMsg IParser<FigureUpdateMsg>.Parse(in PacketReader p) => new(

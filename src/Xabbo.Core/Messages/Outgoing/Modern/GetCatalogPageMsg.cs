@@ -8,7 +8,7 @@ namespace Xabbo.Core.Messages.Outgoing.Modern;
 /// </summary>
 public sealed record GetCatalogPageMsg(int Id, int OfferId = -1, string Type = "NORMAL") : IMessage<GetCatalogPageMsg>
 {
-    static bool IMessage<GetCatalogPageMsg>.UseTargetedIdentifiers => true;
+    static ClientType IMessage<GetCatalogPageMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<GetCatalogPageMsg>.Identifier => Out.GetCatalogPage;
 
     static GetCatalogPageMsg IParser<GetCatalogPageMsg>.Parse(in PacketReader p) => new(

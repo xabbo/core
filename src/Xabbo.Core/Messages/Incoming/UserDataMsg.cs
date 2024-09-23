@@ -4,6 +4,8 @@ using Xabbo.Messages.Flash;
 namespace Xabbo.Core.Messages.Incoming;
 
 /// <summary>
+/// Received after requesting the user's data.
+/// <para/>
 /// Response for <see cref="Outgoing.GetUserDataMsg"/>.
 /// </summary>
 public sealed record UserDataMsg(UserData UserData) : IMessage<UserDataMsg>

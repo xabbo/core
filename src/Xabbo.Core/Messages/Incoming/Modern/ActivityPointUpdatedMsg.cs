@@ -6,23 +6,17 @@ namespace Xabbo.Core.Messages.Incoming.Modern;
 public sealed record ActivityPointUpdatedMsg(ActivityPointType Type, int Amount, int Change)
     : IMessage<ActivityPointUpdatedMsg>
 {
-    static bool IMessage<ActivityPointUpdatedMsg>.UseTargetedIdentifiers => true;
+    static ClientType IMessage<ActivityPointUpdatedMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<ActivityPointUpdatedMsg>.Identifier => In.HabboActivityPointNotification;
 
-    static ActivityPointUpdatedMsg IParser<ActivityPointUpdatedMsg>.Parse(in PacketReader p)
-    {
-        UnsupportedClientException.ThrowIfOrigins(p.Client);
-
-        int amount = p.ReadInt();
-        int change = p.ReadInt();
-        var type = (ActivityPointType)p.ReadInt();
-        return new(type, amount, change);
-    }
+    static ActivityPointUpdatedMsg IParser<ActivityPointUpdatedMsg>.Parse(in PacketReader p) => new(
+        Amount: p.ReadInt(),
+        Change: p.ReadInt(),
+        Type: (ActivityPointType)p.ReadInt()
+    );
 
     void IComposer.Compose(in PacketWriter p)
     {
-        UnsupportedClientException.ThrowIfOrigins(p.Client);
-
         p.WriteInt(Amount);
         p.WriteInt(Change);
         p.WriteInt((int)Type);

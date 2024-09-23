@@ -8,6 +8,7 @@ namespace Xabbo.Core.Messages.Incoming.Modern;
 /// </summary>
 public sealed record GroupMembersMsg(GroupMembers Members) : IMessage<GroupMembersMsg>
 {
+    static ClientType IMessage<GroupMembersMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<GroupMembersMsg>.Identifier => In.GuildMembers;
     static GroupMembersMsg IParser<GroupMembersMsg>.Parse(in PacketReader p) => new(p.Parse<GroupMembers>());
     void IComposer.Compose(in PacketWriter p) => p.Compose(Members);

@@ -9,6 +9,7 @@ public sealed record GetGroupMembersMsg(
 )
     : IRequestMessage<GetGroupMembersMsg, GroupMembersMsg, GroupMembers>
 {
+    static ClientType IMessage<GetGroupMembersMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<GetGroupMembersMsg>.Identifier => Out.GetGuildMembers;
 
     bool IRequestFor<GroupMembersMsg>.MatchResponse(GroupMembersMsg msg) =>

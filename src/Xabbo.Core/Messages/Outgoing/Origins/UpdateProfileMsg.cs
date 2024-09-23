@@ -34,13 +34,8 @@ public sealed record UpdateProfileMsg : IMessage<UpdateProfileMsg>
         TotpCode
     }
 
+    static ClientType IMessage<UpdateProfileMsg>.SupportedClients => ClientType.Origins;
     static Identifier IMessage<UpdateProfileMsg>.Identifier => Out.UPDATE;
-    static bool IMessage<UpdateProfileMsg>.UseTargetedIdentifiers => true;
-    Identifier IMessage.GetIdentifier(ClientType client) => client switch
-    {
-        ClientType.Shockwave => Out.UPDATE,
-        _ => throw new UnsupportedClientException(client)
-    };
 
     public bool? ParentAgree { get; set; }
     public string? Name { get; set; }
