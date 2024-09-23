@@ -5,7 +5,7 @@ using Xabbo.Core.Messages.Incoming;
 namespace Xabbo.Core.Messages.Outgoing;
 
 /// <summary>
-/// Requests the room data for the specified room ID.
+/// Sent when requesting room data for the specified room ID.
 /// <para/>
 /// Request for <see cref="RoomDataMsg"/>.
 /// </summary>
