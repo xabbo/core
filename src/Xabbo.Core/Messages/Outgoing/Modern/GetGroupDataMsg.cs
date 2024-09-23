@@ -11,11 +11,12 @@ namespace Xabbo.Core.Messages.Outgoing.Modern;
 /// </summary>
 /// <param name="Id">The ID of the group to request information for.</param>
 /// <param name="Open">Whether the open the group information in-client.</param>
-public sealed record GetGroupDataMsg(Id Id, bool Open = false) : IRequestMessage<GetGroupDataMsg, GroupDataMsg>
+public sealed record GetGroupDataMsg(Id Id, bool Open = false) : IRequestMessage<GetGroupDataMsg, GroupDataMsg, GroupData>
 {
     static ClientType IMessage<GetGroupDataMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<GetGroupDataMsg>.Identifier => Out.GetHabboGroupDetails;
     bool IRequestFor<GroupDataMsg>.MatchResponse(GroupDataMsg msg) => msg.Group.Id == Id;
+    GroupData IResponseData<GroupDataMsg, GroupData>.GetData(GroupDataMsg msg) => msg.Group;
     static GetGroupDataMsg IParser<GetGroupDataMsg>.Parse(in PacketReader p) => new(p.ReadId(), p.ReadBool());
     void IComposer.Compose(in PacketWriter p)
     {
