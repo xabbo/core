@@ -4,7 +4,7 @@ using Xabbo.Messages.Flash;
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
 /// <summary>
-/// Response for <see cref="Outgoing.Modern.GetProfileMsg"/>.
+/// Response for <see cref="Outgoing.Modern.GetProfileMsg"/> or <see cref="Outgoing.Modern.GetProfileByNameMsg"/> .
 /// </summary>
 public sealed record ProfileMsg(UserProfile Profile) : IMessage<ProfileMsg>
 {
