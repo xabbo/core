@@ -1,10 +1,11 @@
 using System;
-
+using System.ComponentModel;
 using Xabbo.Messages;
 using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+[EditorBrowsable(EditorBrowsableState.Never)]
 public abstract record AvatarChatMsgBase(ChatType Type)
 {
     public int Index { get; init; }
