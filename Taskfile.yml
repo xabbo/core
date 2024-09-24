@@ -6,18 +6,6 @@ tasks:
   init:
     cmds:
       - git config --local core.hooksPath .githooks/
-  build:
-    cmds:
-      - dotnet build
-  test:
-    deps: [build]
-    cmds:
-      - dotnet test --no-build
-  rebuild:
-    cmds:
-      - dotnet clean
-      - dotnet build-server shutdown
-      - dotnet build
   new-message:
     silent: true
     interactive: true
@@ -28,3 +16,18 @@ tasks:
     interactive: true
     cmds:
       - .scripts/new-request.sh
+  test:
+    deps: [build]
+    cmds:
+      - dotnet test --no-build
+  build:
+    cmds:
+      - dotnet build
+  rebuild:
+    cmds:
+      - dotnet clean
+      - dotnet build-server shutdown
+      - dotnet build
+  pack:
+    cmds:
+      - dotnet pack src/Xabbo.Core -c Release -o pkg
