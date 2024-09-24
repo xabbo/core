@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+endl=$'\n'
 
 dirIncoming="src/Xabbo.Core/Messages/Incoming"
 dirOutgoing="src/Xabbo.Core/Messages/Outgoing"
@@ -49,6 +50,11 @@ gum style "Response identifier: ${responseIdentifier:=${responseMsg%Msg}}"
 responseData=$(gum input --header="Response data type:")
 gum style "Response data type: ${responseData}"
 
+if [[ -n $clientType ]]; then
+  supportedClientsReq="static ClientType IMessage<$requestMsg>.SupportedClients => ClientType.$clientType;${endl}    "
+  supportedClientsRes="static ClientType IMessage<$responseMsg>.SupportedClients => ClientType.$clientType;${endl}    "
+fi
+
 # Output request source
 
 cat << EOF > $requestMsgFile
@@ -63,7 +69,7 @@ namespace Xabbo.Core.Messages.Outgoing${clientNamespace};
 /// </summary>
 public sealed record $requestMsg : IRequestMessage<$requestMsg, $responseMsg, $responseData>
 {
-    static Identifier IMessage<$requestMsg>.Identifier => Out.$requestIdentifier;
+    ${supportedClientsReq}static Identifier IMessage<$requestMsg>.Identifier => Out.$requestIdentifier;
     $responseData IResponseData<$responseMsg, $responseData>.GetData($responseMsg msg) => msg.$responseData;
     static $requestMsg IParser<$requestMsg>.Parse(in PacketReader p)
     {
@@ -89,7 +95,7 @@ namespace Xabbo.Core.Messages.Incoming${clientNamespace};
 /// </summary>
 public sealed record $responseMsg($responseData $responseData) : IMessage<$responseMsg>
 {
-    static Identifier IMessage<$responseMsg>.Identifier => In.$responseIdentifier;
+    ${supportedClientsRes}static Identifier IMessage<$responseMsg>.Identifier => In.$responseIdentifier;
     static $responseMsg IParser<$responseMsg>.Parse(in PacketReader p) => new(p.Parse<$responseData>());
     void IComposer.Compose(in PacketWriter p) => p.Compose($responseData);
 }
