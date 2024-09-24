@@ -36,18 +36,15 @@ partial class RoomManager
         if (IsInRoom && roomData.Id == _currentRoom?.Id)
         {
             _currentRoom.Data = roomData;
-            OnRoomDataUpdated(roomData);
+            UpdateRoomData(roomData);
         }
     }
 
     [InterceptIn(nameof(In.OpenConnection))]
     private void HandleOpenConnection(Intercept e)
     {
-        if (IsInQueue || IsRingingDoorbell || IsLoadingRoom || IsInRoom)
-        {
-            ResetState();
-            OnLeftRoom();
-        }
+        // Leave current room if we are in one.
+        LeaveRoom();
 
         // Room ID is not available yet on Shockwave.
         if (Interceptor.Session.Is(ClientType.Shockwave))
@@ -63,10 +60,10 @@ partial class RoomManager
         long roomId = e.Packet.Read<Id>();
         if (roomId != _currentRoom?.Id) return;
 
-        if (e.Packet.Read<short>() == 2 &&
+        if (e.Packet.Read<Length>() == 2 &&
             e.Packet.Read<string>() == "visitors" &&
             e.Packet.Read<int>() == 2 &&
-            e.Packet.Read<short>() == 1 &&
+            e.Packet.Read<Length>() == 1 &&
             e.Packet.Read<string>() == "visitors")
         {
             bool enteredQueue = !IsInQueue;
@@ -76,11 +73,13 @@ partial class RoomManager
 
             if (enteredQueue)
             {
-                OnEnteredQueue();
+                Log.LogDebug("Entered queue. (pos:{QueuePosition})", QueuePosition);
+                EnteredQueue?.Invoke();
             }
             else
             {
-                OnQueuePositionUpdated();
+                Log.LogDebug("Queue position updated. (pos:{QueuePosition})", QueuePosition);
+                QueuePositionUpdated?.Invoke();
             }
         }
     }
@@ -123,8 +122,8 @@ partial class RoomManager
         }
         else if (IsLoadingRoom || IsInRoom)
         {
-            ResetState();
-            OnLeftRoom();
+            // Leave current room if we are in one.
+            LeaveRoom();
         }
 
         string model;
@@ -163,7 +162,8 @@ partial class RoomManager
         _currentRoom.Model = model;
         IsLoadingRoom = true;
 
-        OnEnteringRoom(roomId);
+        Log.LogDebug("Entering room. (id:{RoomId})", roomId);
+        Entering?.Invoke();
     }
 
     [InterceptIn(nameof(In.RoomProperty))]
@@ -220,6 +220,8 @@ partial class RoomManager
             return;
         }
 
+        int level;
+
         if (!Interceptor.Session.Is(ClientType.Shockwave))
         {
             long roomId = e.Packet.Read<Id>();
@@ -229,14 +231,14 @@ partial class RoomManager
                     _currentRoom.Id, roomId);
                 return;
             }
-            RightsLevel = e.Packet.Read<int>();
+            level = e.Packet.Read<int>();
         }
         else
         {
-            RightsLevel = 4;
+            level = 4;
         }
 
-        OnRightsUpdated();
+        UpdateRightsLevel(level);
     }
 
     [InterceptIn(nameof(In.YouAreNotController))]
@@ -255,8 +257,7 @@ partial class RoomManager
             return;
         }
 
-        RightsLevel = 0;
-        OnRightsUpdated();
+        UpdateRightsLevel(0);
     }
 
     [Intercept(~ClientType.Shockwave)]
@@ -392,7 +393,7 @@ partial class RoomManager
             return;
 
         room.Data.ChatSettings = e.Packet.Read<ChatSettings>();
-        OnRoomDataUpdated(room.Data);
+        UpdateRoomData(room.Data);
     }
 
     [Intercept(~ClientType.Shockwave)]
@@ -444,11 +445,7 @@ partial class RoomManager
             return;
         }
 
-        if (IsRingingDoorbell || IsInQueue || IsLoadingRoom || IsInRoom)
-        {
-            ResetState();
-            OnLeftRoom();
-        }
+        LeaveRoom();
     }
 
     // TODO: Check how this works on Shockwave
@@ -462,7 +459,10 @@ partial class RoomManager
         Log.LogTrace("Received generic error code {Code}.", errorCode);
 
         if (errorCode == GenericErrorCode.Kicked)
-            OnKicked();
+        {
+            Log.LogDebug("Kicked from room.");
+            Kicked?.Invoke();
+        }
     }
     #endregion
 
@@ -547,7 +547,11 @@ partial class RoomManager
                 var previousTile = avatar.Location;
                 avatar.Location = new Tile(update.To, update.Avatar.ToZ);
 
-                OnAvatarSlide(avatar, previousTile);
+                Log.LogTrace(
+                    "Avatar slide. ({AvatarName} [{AvatarId}:{AvatarIndex}], {From} -> {To})",
+                    avatar.Name, avatar.Id, avatar.Index, previousTile, avatar.Location
+                );
+                AvatarSlide?.Invoke(new AvatarSlideEventArgs(avatar, previousTile));
             }
             else
             {
@@ -640,7 +644,7 @@ partial class RoomManager
         }
 
         Log.LogTrace("Received {Count} wired movements.", movements.Count);
-        OnWiredMovements(movements);
+        WiredMovements?.Invoke(new WiredMovementsEventArgs(movements));
     }
 
     // TODO: check
@@ -691,10 +695,14 @@ partial class RoomManager
                 previousAchievementScore = updatedAchievementScore;
             }
 
-            OnAvatarDataUpdated(avatar,
-                previousFigure, previousGender,
-                previousMotto, previousAchievementScore
+            Log.LogTrace(
+                "Avatar data updated. ({Name} [{Id}:{Index}])",
+                avatar.Name, avatar.Id, avatar.Index
             );
+            AvatarDataUpdated?.Invoke(new AvatarDataUpdatedEventArgs(
+                avatar, previousFigure, previousGender,
+                previousMotto, previousAchievementScore
+            ));
         }
         else
         {
@@ -722,7 +730,12 @@ partial class RoomManager
         {
             string previousName = avatar.Name;
             avatar.Name = newName;
-            OnAvatarNameChanged(avatar, previousName);
+
+            Log.LogTrace(
+                "Avatar name changed. ({PreviousName} -> {AvatarName} [{AvatarId}:{AvatarIndex}])",
+                previousName, avatar.Name, avatar.Id, avatar.Index
+            );
+            AvatarNameChanged?.Invoke(new AvatarNameChangedEventArgs(avatar, previousName));
         }
         else
         {
@@ -745,7 +758,12 @@ partial class RoomManager
         {
             bool wasIdle = avatar.IsIdle;
             avatar.IsIdle = msg.Idle;
-            OnAvatarIdle(avatar, wasIdle);
+
+            Log.LogTrace(
+                "Avatar idle. ({AvatarName} [{AvatarId}:{AvatarIndex}], {WasIdle} -> {IsIdle})",
+                avatar.Name, avatar.Id, avatar.Index, wasIdle, avatar.IsIdle
+            );
+            AvatarIdle?.Invoke(new AvatarIdleEventArgs(avatar, wasIdle));
         }
         else
         {
@@ -768,7 +786,12 @@ partial class RoomManager
         {
             Dances previousDance = avatar.Dance;
             avatar.Dance = msg.Dance;
-            OnAvatarDance(avatar, previousDance);
+
+            Log.LogTrace(
+                "Avatar dance. ({AvatarName} [{AvatarId}:{AvatarIndex}], {PreviousDance} -> {Dance})",
+                avatar.Name, avatar.Id, avatar.Index, previousDance, avatar.Dance
+            );
+            AvatarDance?.Invoke(new AvatarDanceEventArgs(avatar, previousDance));
         }
         else
         {
@@ -790,7 +813,11 @@ partial class RoomManager
 
         if (_currentRoom.Avatars.TryGetValue(msg.Index, out Avatar? avatar))
         {
-            OnAvatarAction(avatar, msg.Action);
+            Log.LogTrace(
+                "Avatar action. ({AvatarName} [{AvatarId}:{AvatarIndex}], action:{Action})",
+                avatar.Name, avatar.Id, avatar.Index, msg.Action
+            );
+            AvatarAction?.Invoke(new AvatarActionEventArgs(avatar, msg.Action));
         }
         else
         {
@@ -813,7 +840,12 @@ partial class RoomManager
         {
             int previousItem = avatar.HandItem;
             avatar.HandItem = msg.Item;
-            OnAvatarHandItem(avatar, previousItem);
+
+            Log.LogTrace(
+                "Avatar hand item. ({AvatarName} [{AvatarId}:{AvatarIndex}], {PreviousItemId} -> {ItemId})",
+                avatar.Name, avatar.Id, avatar.Index, previousItem, avatar.HandItem
+            );
+            AvatarHandItem?.Invoke(new AvatarHandItemEventArgs(avatar, previousItem));
         }
         else
         {
@@ -836,7 +868,12 @@ partial class RoomManager
         {
             int previousEffect = avatar.Effect;
             avatar.Effect = msg.Effect;
-            OnAvatarEffect(avatar, previousEffect);
+
+            Log.LogTrace(
+                "Avatar effect. ({AvatarName} [{AvatarId}:{AvatarIndex}], {PreviousEffect} -> {Effect})",
+                avatar.Name, avatar.Id, avatar.Index, previousEffect, avatar.Effect
+            );
+            AvatarEffect?.Invoke(new AvatarEffectEventArgs(avatar, previousEffect));
         }
         else
         {
@@ -859,7 +896,12 @@ partial class RoomManager
         {
             bool wasTyping = avatar.IsTyping;
             avatar.IsTyping = msg.Typing;
-            OnAvatarTyping(avatar, wasTyping);
+
+            Log.LogTrace(
+                "Avatar typing. ({AvatarName} [{AvatarId}:{AvatarIndex}], {WasTyping} -> {IsTyping})",
+                avatar.Name, avatar.Id, avatar.Index, wasTyping, avatar.IsTyping
+            );
+            AvatarTyping?.Invoke(new AvatarTypingEventArgs(avatar, wasTyping));
         }
         else
         {
@@ -886,8 +928,13 @@ partial class RoomManager
             return;
         }
 
+        Log.LogTrace(
+            "{Type}({Bubble}) {Avatar} {Message}",
+            chat.Type, chat.Style, avatar, chat.Message
+        );
+
         AvatarChatEventArgs chatEventArgs = new(avatar, chat.Type, chat.Message, chat.Style);
-        OnAvatarChat(chatEventArgs);
+        AvatarChat?.Invoke(chatEventArgs);
 
         if (chatEventArgs.IsBlocked || avatar.IsHidden) e.Block();
     }

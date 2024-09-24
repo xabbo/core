@@ -112,334 +112,6 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     public bool CanKick => CheckPermission(Room?.Data?.Moderation.WhoCanKick);
     public bool CanBan => CheckPermission(Room?.Data?.Moderation.WhoCanBan);
 
-    #region - Room events -
-    /// <summary>
-    /// Invoked when the user enters the queue to a room.
-    /// </summary>
-    public event Action? EnteredQueue;
-    private void OnEnteredQueue()
-    {
-        Log.LogDebug("Entered queue. (pos:{QueuePosition})", QueuePosition);
-        EnteredQueue?.Invoke();
-    }
-
-    /// <summary>
-    /// Invoked when the user's position in the queue is updated.
-    /// </summary>
-    public event Action? QueuePositionUpdated;
-    private void OnQueuePositionUpdated()
-    {
-        Log.LogDebug("Queue position updated. (pos:{QueuePosition})", QueuePosition);
-        QueuePositionUpdated?.Invoke();
-    }
-
-    /// <summary>
-    /// Invoked when the user enters a room and begins loading the room state.
-    /// </summary>
-    public event Action? Entering;
-    private void OnEnteringRoom(long roomId)
-    {
-        Log.LogDebug("Entering room. (id:{RoomId})", roomId);
-        Entering?.Invoke();
-    }
-
-    /// <summary>
-    /// Invoked after the user has entered the room and the room state is fully loaded.
-    /// </summary>
-    public event Action<RoomEventArgs>? Entered;
-    private void OnEnteredRoom(IRoom room)
-    {
-        Log.LogInformation("Entered room. (id:{RoomId}, name:{Name})", room.Id, room.Name);
-        Entered?.Invoke(new RoomEventArgs(room));
-    }
-
-    /// <summary>Invoked when the room data is updated.</summary>
-    public event Action<RoomDataEventArgs>? RoomDataUpdated;
-    private void OnRoomDataUpdated(RoomData roomData)
-    {
-        Log.LogDebug("Room data updated. (name:{Name})", roomData.Name);
-        RoomDataUpdated?.Invoke(new RoomDataEventArgs(roomData));
-    }
-
-    /// <summary>
-    /// Invoked when the user leaves a room.
-    /// </summary>
-    public event Action? Left;
-    private void OnLeftRoom()
-    {
-        Log.LogInformation("Left room.");
-        Left?.Invoke();
-    }
-
-    /// <summary>
-    /// Invoked when the user is kicked from the room.
-    /// The user still remains in the room at this point until their avatar leaves through the door.
-    /// </summary>
-    public event Action? Kicked;
-    private void OnKicked()
-    {
-        Log.LogDebug("Kicked from room.");
-        Kicked?.Invoke();
-    }
-
-    /// <summary>
-    /// Invoked when the user's rights to the room are updated.
-    /// </summary>
-    public event Action? RightsUpdated;
-    private void OnRightsUpdated()
-    {
-        Log.LogDebug("Rights level updated to {Level}.", RightsLevel);
-        RightsUpdated?.Invoke();
-    }
-    #endregion
-
-    #region - Furni events -
-    /// <summary>
-    /// Invoked when the floor items are loaded.
-    /// This may happen multiple times depending on how many items are in the room.
-    /// </summary>
-    public event Action<FloorItemsEventArgs>? FloorItemsLoaded;
-
-    /// <summary>
-    /// Invoked when a floor item is added to the room.
-    /// </summary>
-    public event Action<FloorItemEventArgs>? FloorItemAdded;
-
-    /// <summary>
-    /// Invoked when a floor item is updated.
-    /// </summary>
-    public event Action<FloorItemUpdatedEventArgs>? FloorItemUpdated;
-
-    /// <summary>
-    /// Invoked when a floor item's data is updated.
-    /// </summary>
-    public event Action<FloorItemDataUpdatedEventArgs>? FloorItemDataUpdated;
-
-    /// <summary>
-    /// Invoked when a dice value is updated.
-    /// </summary>
-    public event Action<DiceUpdatedEventArgs>? DiceUpdated;
-
-    /// <summary>
-    /// Invoked when a floor item slides due to a roller or wired update.
-    /// </summary>
-    public event Action<FloorItemSlideEventArgs>? FloorItemSlide;
-    private void OnFloorItemSlide(IFloorItem item, Tile previousTile, Id rollerId)
-    {
-        Log.LogTrace(
-            "Floor item slide. (id:{Id}, rollerId:{RollerId}, {From} -> {To})",
-            item.Id, rollerId, previousTile, item.Location
-        );
-        FloorItemSlide?.Invoke(new FloorItemSlideEventArgs(item, previousTile, rollerId));
-    }
-
-    /// <summary>
-    /// Invoked when users or furni are moved by wired.
-    /// </summary>
-    public event Action<WiredMovementsEventArgs>? WiredMovements;
-    private void OnWiredMovements(IEnumerable<WiredMovement> movements)
-    {
-        WiredMovements?.Invoke(new WiredMovementsEventArgs(movements));
-    }
-
-    /// <summary>
-    /// Invoked when a floor item is removed from the room.
-    /// </summary>
-    public event Action<FloorItemEventArgs>? FloorItemRemoved;
-
-    /// <summary>
-    /// Invoked when the wall items are loaded.
-    /// This may happen multiple times depending on how many items are in the room.
-    /// </summary>
-    public event Action<WallItemsEventArgs>? WallItemsLoaded;
-
-    /// <summary>
-    /// Invoked when a wall item is added to the room.
-    /// </summary>
-    public event Action<WallItemEventArgs>? WallItemAdded;
-
-    /// <summary>
-    /// Invoked when a wall item is udpated.
-    /// </summary>
-    public event Action<WallItemUpdatedEventArgs>? WallItemUpdated;
-
-    /// <summary>
-    /// Invoked when a wall item is removed from the room.
-    /// </summary>
-    public event Action<WallItemEventArgs>? WallItemRemoved;
-
-    /// <summary>
-    /// Invoked when a furni's visibility is toggled using <see cref="HideFurni(IFurni)"/> or <see cref="ShowFurni(IFurni)"/>.
-    /// </summary>
-    public event Action<FurniEventArgs>? FurniVisibilityToggled;
-    private void OnFurniVisibilityToggled(IFurni furni)
-    {
-        FurniVisibilityToggled?.Invoke(new FurniEventArgs(furni));
-    }
-    #endregion
-
-    #region - Avatar events -
-    /// <summary>
-    /// Invoked when an avatar has been added to the room.
-    /// </summary>
-    public event Action<AvatarEventArgs>? AvatarAdded;
-
-    /// <summary>
-    /// Invoked when avatars have been added to the room.
-    /// </summary>
-    public event Action<AvatarsEventArgs>? AvatarsAdded;
-
-    /// <summary>
-    /// Invoked when an avatar in the room is updated.
-    /// </summary>
-    public event Action<AvatarEventArgs>? AvatarUpdated;
-
-    /// <summary>
-    /// Invoked when avatars in the room are updated.
-    /// </summary>
-    public event Action<AvatarsEventArgs>? AvatarsUpdated;
-
-    /// <summary>
-    /// Invoked when an avatar slides along a roller.
-    /// </summary>
-    public event Action<AvatarSlideEventArgs>? AvatarSlide;
-    private void OnAvatarSlide(IAvatar avatar, Tile previousTile)
-    {
-        Log.LogTrace(
-            "Avatar slide. ({AvatarName} [{AvatarId}:{AvatarIndex}], {From} -> {To})",
-            avatar.Name, avatar.Id, avatar.Index, previousTile, avatar.Location
-        );
-        AvatarSlide?.Invoke(new AvatarSlideEventArgs(avatar, previousTile));
-    }
-
-    /// <summary>
-    /// Invoked when an avatar's figure, gender, motto or achievement score is updated.
-    /// </summary>
-    public event Action<AvatarDataUpdatedEventArgs>? AvatarDataUpdated;
-    private void OnAvatarDataUpdated(IAvatar avatar,
-        string previousFigure, Gender previousGender,
-        string previousMotto, int previousAchievementScore)
-    {
-        Log.LogTrace(
-            "Avatar data updated. ({Name} [{Id}:{Index}])",
-            avatar.Name, avatar.Id, avatar.Index
-        );
-        AvatarDataUpdated?.Invoke(new AvatarDataUpdatedEventArgs(
-            avatar, previousFigure, previousGender,
-            previousMotto, previousAchievementScore
-        ));
-    }
-
-    /// <summary>
-    /// Invoked when an avatar's name changes.
-    /// </summary>
-    public event Action<AvatarNameChangedEventArgs>? AvatarNameChanged;
-    private void OnAvatarNameChanged(IAvatar avatar, string previousName)
-    {
-        Log.LogTrace(
-            "Avatar name changed. ({PreviousName} -> {AvatarName} [{AvatarId}:{AvatarIndex}])",
-            previousName, avatar.Name, avatar.Id, avatar.Index
-        );
-        AvatarNameChanged?.Invoke(new AvatarNameChangedEventArgs(avatar, previousName));
-    }
-
-    /// <summary>
-    /// Invoked when an avatar's idle status updates.
-    /// </summary>
-    public event Action<AvatarIdleEventArgs>? AvatarIdle;
-    private void OnAvatarIdle(IAvatar avatar, bool wasIdle)
-    {
-        Log.LogTrace(
-            "Avatar idle. ({AvatarName} [{AvatarId}:{AvatarIndex}], {WasIdle} -> {IsIdle})",
-            avatar.Name, avatar.Id, avatar.Index, wasIdle, avatar.IsIdle
-        );
-        AvatarIdle?.Invoke(new AvatarIdleEventArgs(avatar, wasIdle));
-    }
-
-    /// <summary>
-    /// Invoked when an avatar's dance updates.
-    /// </summary>
-    public event Action<AvatarDanceEventArgs>? AvatarDance;
-    private void OnAvatarDance(IAvatar avatar, Dances previousDance)
-    {
-        Log.LogTrace(
-            "Avatar dance. ({AvatarName} [{AvatarId}:{AvatarIndex}], {PreviousDance} -> {Dance})",
-            avatar.Name, avatar.Id, avatar.Index, previousDance, avatar.Dance
-        );
-        AvatarDance?.Invoke(new AvatarDanceEventArgs(avatar, previousDance));
-    }
-
-    /// <summary>
-    /// Invoked when an avatar's hand item updates.
-    /// </summary>
-    public event Action<AvatarHandItemEventArgs>? AvatarHandItem;
-    private void OnAvatarHandItem(IAvatar avatar, int previousItem)
-    {
-        Log.LogTrace(
-            "Avatar hand item. ({AvatarName} [{AvatarId}:{AvatarIndex}], {PreviousItemId} -> {ItemId})",
-            avatar.Name, avatar.Id, avatar.Index, previousItem, avatar.HandItem
-        );
-        AvatarHandItem?.Invoke(new AvatarHandItemEventArgs(avatar, previousItem));
-    }
-
-    /// <summary>
-    /// Invoked when an avatar's effect updates.
-    /// </summary>
-    public event Action<AvatarEffectEventArgs>? AvatarEffect;
-    private void OnAvatarEffect(IAvatar avatar, int previousEffect)
-    {
-        Log.LogTrace(
-            "Avatar effect. ({AvatarName} [{AvatarId}:{AvatarIndex}], {PreviousEffect} -> {Effect})",
-            avatar.Name, avatar.Id, avatar.Index, previousEffect, avatar.Effect
-        );
-        AvatarEffect?.Invoke(new AvatarEffectEventArgs(avatar, previousEffect));
-    }
-
-    /// <summary>
-    /// Invoked when an avatar performs an action.
-    /// </summary>
-    public event Action<AvatarActionEventArgs>? AvatarAction;
-    private void OnAvatarAction(IAvatar avatar, Actions action)
-    {
-        Log.LogTrace(
-            "Avatar action. ({AvatarName} [{AvatarId}:{AvatarIndex}], action:{Action})",
-            avatar.Name, avatar.Id, avatar.Index, action
-        );
-        AvatarAction?.Invoke(new AvatarActionEventArgs(avatar, action));
-    }
-
-    /// <summary>
-    /// Invoked when an avatar's typing status updates.
-    /// </summary>
-    public event Action<AvatarTypingEventArgs>? AvatarTyping;
-    private void OnAvatarTyping(IAvatar avatar, bool wasTyping)
-    {
-        Log.LogTrace(
-            "Avatar typing. ({AvatarName} [{AvatarId}:{AvatarIndex}], {WasTyping} -> {IsTyping})",
-            avatar.Name, avatar.Id, avatar.Index, wasTyping, avatar.IsTyping
-        );
-        AvatarTyping?.Invoke(new AvatarTypingEventArgs(avatar, wasTyping));
-    }
-
-    /// <summary>
-    /// Invoked when an avatar is removed from the room.
-    /// </summary>
-    public event Action<AvatarEventArgs>? AvatarRemoved;
-
-    /// <summary>
-    /// Invoked when an avatar in the room talks.
-    /// </summary>
-    public event Action<AvatarChatEventArgs>? AvatarChat;
-    private void OnAvatarChat(AvatarChatEventArgs e)
-    {
-        Log.LogTrace(
-            "{Type}({Bubble}) {Avatar} {Message}",
-            e.ChatType, e.BubbleStyle, e.Avatar, e.Message
-        );
-        AvatarChat?.Invoke(e);
-    }
-    #endregion
-
     /// <summary>
     /// Retrieves the room data from the cache if it is available.
     /// </summary>
@@ -524,7 +196,20 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
         IsInRoom = true;
         Room = room;
 
-        OnEnteredRoom(room);
+        Log.LogInformation("Entered room. (id:{RoomId}, name:{Name})", room.Id, room.Data?.Name ?? "?");
+        Entered?.Invoke(new RoomEventArgs(room));
+    }
+
+    private void UpdateRoomData(RoomData roomData)
+    {
+        Log.LogDebug("Room data updated. (name:{Name})", roomData.Name);
+        RoomDataUpdated?.Invoke(new RoomDataEventArgs(roomData));
+    }
+
+    private void UpdateRightsLevel(int rightsLevel)
+    {
+        Log.LogDebug("Rights level updated to {Level}.", RightsLevel);
+        RightsUpdated?.Invoke();
     }
 
     #region - Furni -
@@ -835,6 +520,21 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     }
     #endregion
 
+    private void LeaveRoom()
+    {
+        if (IsInQueue || IsRingingDoorbell || IsLoadingRoom || IsInRoom)
+        {
+            ResetState();
+
+            Log.LogInformation("Left room.");
+            Left?.Invoke();
+        }
+        else
+        {
+            Log.LogDebug("LeaveRoom: not in a room.");
+        }
+    }
+
     private void ResetState()
     {
         Log.LogDebug("Resetting room state.");
@@ -932,61 +632,12 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
                 Interceptor.Send(new WallItemAddedMsg(wallItem));
         }
 
-        OnFurniVisibilityToggled(furni);
+        FurniVisibilityToggled?.Invoke(new FurniEventArgs(furni));
         return true;
     }
 
     public bool ShowFurni(ItemType type, Id id) => SetFurniHidden(type, id, false);
     public bool HideFurni(ItemType type, Id id) => SetFurniHidden(type, id, true);
-
     public bool ShowFurni(IFurni furni) => SetFurniHidden(furni.Type, furni.Id, false);
     public bool HideFurni(IFurni furni) => SetFurniHidden(furni.Type, furni.Id, true);
-
-    #region - Furni interaction -
-    public void Place(long itemId, int x, int y, int direction)
-        => Interceptor.Send(Out.PlaceObject, itemId, x, y, direction);
-    public void Place(long itemId, (int X, int Y) location, int direction)
-        => Interceptor.Send(Out.PlaceObject, itemId, location.X, location.Y, direction);
-    public void Place(IInventoryItem item, int x, int y, int direction)
-        => Place(item.Id, x, y, direction);
-    public void Place(IInventoryItem item, (int X, int Y) location, int direction)
-        => Place(item.Id, location, direction);
-
-    public void Place(Id itemId, WallLocation location)
-        => Interceptor.Send(Out.PlaceObject, itemId, location.Wall.X, location.Wall.Y, location.Offset.X, location.Offset.Y); // Orientation ?
-    public void Place(IInventoryItem item, WallLocation location)
-        => Place(item.Id, location);
-
-    public void Move(long floorItemId, int x, int y, int direction)
-        => Interceptor.Send(Out.MoveObject, floorItemId, x, y, direction);
-    public void Move(long floorItemId, (int X, int Y) location, int direction)
-        => Interceptor.Send(Out.MoveObject, floorItemId, location.X, location.Y, direction);
-    public void Move(IFloorItem item, int x, int y, int direction)
-        => Move(item.Id, x, y, direction);
-    public void Move(IFloorItem item, (int X, int Y) location, int direction)
-        => Move(item.Id, location.X, location.Y, direction);
-
-    public void Move(Id wallItemId, WallLocation loc) => Interceptor.Send(
-        Out.MoveWallItem, wallItemId,
-        loc.Wall.X, loc.Wall.Y,
-        loc.Offset.X, loc.Offset.Y,
-        loc.Orientation.Value.ToString()
-    );
-    public void Move(IWallItem item, WallLocation location)
-        => Move(item.Id, location);
-
-    public void Pickup(IFurni item) => Pickup(item.Type, item.Id);
-    public void Pickup(ItemType type, Id id)
-    {
-        if (type == ItemType.Floor)
-            Interceptor.Send(new PickupFloorItemMsg(id));
-        else if (type == ItemType.Wall)
-            Interceptor.Send(new PickupWallItemMsg(id));
-    }
-
-    public void UpdateStackTile(IFloorItem stackTile, float height) => UpdateStackTile(stackTile.Id, height);
-    public void UpdateStackTile(long stackTileId, float height)
-        => Interceptor.Send(Out.SetCustomStackingHeight, stackTileId, (int)Math.Round(height * 100.0));
-
-    #endregion
 }
