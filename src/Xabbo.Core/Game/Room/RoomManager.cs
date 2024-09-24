@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Interceptor;
-using Xabbo.Messages.Flash;
 
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages.Incoming;
-using Xabbo.Core.Messages.Outgoing;
 
 namespace Xabbo.Core.Game;
 
@@ -25,7 +22,6 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     private readonly Dictionary<long, RoomData> _roomDataCache = [];
 
     private Room? _currentRoom;
-    private RoomData? _currentRoomData;
 
     private bool _gotHeightMap, _gotUsers, _gotObjects, _gotItems;
 
@@ -167,7 +163,6 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
 
         if (_roomDataCache.TryGetValue(id, out RoomData? data))
         {
-            _currentRoomData = data;
             Log.LogDebug("Loaded room data from cache.");
         }
         else
@@ -175,7 +170,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
             Log.LogWarning("Failed to load room data from cache.");
         }
 
-        _currentRoom = new Room(id, data!);
+        _currentRoom = new Room(id, data);
     }
 
     // Checks the load state and enters the room on Shockwave.

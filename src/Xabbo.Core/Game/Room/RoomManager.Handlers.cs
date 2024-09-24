@@ -148,7 +148,6 @@ partial class RoomManager
         {
             if (_roomDataCache.TryGetValue(roomId, out RoomData? data))
             {
-                _currentRoomData = data;
                 Log.LogDebug("Loaded room data from cache.");
             }
             else
@@ -156,7 +155,7 @@ partial class RoomManager
                 Log.LogWarning("Failed to load room data from cache.");
             }
 
-            _currentRoom = new Room(roomId, data!);
+            _currentRoom = new Room(roomId, data);
         }
 
         _currentRoom.Model = model;
@@ -421,7 +420,6 @@ partial class RoomManager
         if (_roomDataCache.TryGetValue(roomId, out RoomData? roomData))
         {
             Log.LogDebug("Loaded room data from cache.");
-            _currentRoomData = roomData;
             _currentRoom.Data = roomData;
         }
         else
