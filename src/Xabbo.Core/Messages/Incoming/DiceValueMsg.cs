@@ -21,9 +21,16 @@ public sealed record DiceValueMsg(Id Id, int Value) : IMessage<DiceValueMsg>
                 throw new Exception($"Invalid field count when parsing {nameof(DiceValueMsg)}.");
             if (!Id.TryParse(fields[0], out id))
                 throw new FormatException($"Failed to parse {nameof(Id)} in {nameof(DiceValueMsg)}.");
-            if (!int.TryParse(fields[1], out value))
-                throw new FormatException($"Failed to parse {nameof(Value)} in {nameof(DiceValueMsg)}.");
-            value %= (int)id;
+            if (fields.Length >= 2)
+            {
+                if (!int.TryParse(fields[1], out value))
+                    throw new FormatException($"Failed to parse {nameof(Value)} in {nameof(DiceValueMsg)}.");
+                value %= (int)id;
+            }
+            else
+            {
+                value = -1;
+            }
         }
         else
         {
