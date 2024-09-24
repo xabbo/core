@@ -26,7 +26,7 @@ public sealed class WallItemsMsg : List<WallItem>, IMessage<WallItemsMsg>
         }
         else
         {
-            var ownerDictionary = new Dictionary<long, string>();
+            var ownerDictionary = new Dictionary<Id, string>();
 
             int n = p.ReadLength();
             for (int i = 0; i < n; i++)
@@ -55,7 +55,7 @@ public sealed class WallItemsMsg : List<WallItem>, IMessage<WallItemsMsg>
         }
         else
         {
-            var ownerIds = new HashSet<long>();
+            var ownerIds = new HashSet<Id>();
             var ownerDictionary = this
                 .Where(x => ownerIds.Add(x.OwnerId))
                 .ToDictionary(

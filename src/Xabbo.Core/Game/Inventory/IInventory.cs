@@ -16,7 +16,7 @@ public interface IInventory : IEnumerable<IInventoryItem>
     /// </summary>
     /// <param name="id">The ID of the item to retrieve.</param>
     /// <returns>The item with the specified ID, or <c>null</c> if it does not exist.</returns>
-    IInventoryItem? GetItem(long id);
+    IInventoryItem? GetItem(Id id);
 
     /// <summary>
     /// Attempts to get the item with the specified ID.
@@ -27,5 +27,5 @@ public interface IInventory : IEnumerable<IInventoryItem>
     /// or <c>null</c> if it does not exist.
     /// </param>
     /// <returns>true if the item was retrieved successfully, otherwise false.</returns>
-    bool TryGetItem(long id, [NotNullWhen(true)] out IInventoryItem? item);
+    bool TryGetItem(Id id, [NotNullWhen(true)] out IInventoryItem? item);
 }

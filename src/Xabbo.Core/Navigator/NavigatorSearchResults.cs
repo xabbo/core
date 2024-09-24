@@ -28,7 +28,7 @@ public sealed class NavigatorSearchResults : List<NavigatorSearchResultList>, IP
 
     public IEnumerable<RoomInfo> GetRooms()
     {
-        var hashSet = new HashSet<long>();
+        var hashSet = new HashSet<Id>();
         foreach (var roomInfo in this.SelectMany(list => list))
         {
             if (hashSet.Add(roomInfo.Id))

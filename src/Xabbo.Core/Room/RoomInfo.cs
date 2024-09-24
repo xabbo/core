@@ -34,7 +34,7 @@ public class RoomInfo : IRoomInfo, IParserComposer<RoomInfo>
     public bool AllowPets => Flags.HasFlag(RoomFlags.AllowPets);
 
     public string OfficialRoomPicRef { get; set; }
-    public long GroupId { get; set; }
+    public Id GroupId { get; set; }
     public string GroupName { get; set; }
     public string GroupBadge { get; set; }
     public string EventName { get; set; }

@@ -57,7 +57,7 @@ partial class RoomManager
     [InterceptIn(nameof(In.RoomQueueStatus))]
     private void HandleRoomQueueStatus(Intercept e)
     {
-        long roomId = e.Packet.Read<Id>();
+        Id roomId = e.Packet.Read<Id>();
         if (roomId != _currentRoom?.Id) return;
 
         if (e.Packet.Read<Length>() == 2 &&
@@ -99,7 +99,7 @@ partial class RoomManager
             return;
         }
 
-        long roomId = e.Packet.Read<Id>();
+        Id roomId = e.Packet.Read<Id>();
         if (roomId != _currentRoom.Id)
         {
             Log.LogError("Room ID mismatch. (expected: {Expected}, actual: {Actual})",
@@ -223,7 +223,7 @@ partial class RoomManager
 
         if (!Interceptor.Session.Is(ClientType.Shockwave))
         {
-            long roomId = e.Packet.Read<Id>();
+            Id roomId = e.Packet.Read<Id>();
             if (roomId != _currentRoom.Id)
             {
                 Log.LogWarning("Room ID mismatch. (expected: {Expected}, actual: {Actual})",
@@ -249,7 +249,7 @@ partial class RoomManager
             return;
         }
 
-        long roomId = e.Packet.Read<Id>();
+        Id roomId = e.Packet.Read<Id>();
         if (roomId != _currentRoom.Id)
         {
             Log.LogWarning("Room ID mismatch.");
@@ -407,7 +407,7 @@ partial class RoomManager
             return;
         }
 
-        long roomId = e.Packet.Read<Id>();
+        Id roomId = e.Packet.Read<Id>();
         if (roomId != _currentRoom?.Id)
         {
             Log.LogWarning(
@@ -720,7 +720,7 @@ partial class RoomManager
             return;
         }
 
-        long id = e.Packet.Read<Id>();
+        Id id = e.Packet.Read<Id>();
         int index = e.Packet.Read<int>();
         string newName = e.Packet.Read<string>();
 

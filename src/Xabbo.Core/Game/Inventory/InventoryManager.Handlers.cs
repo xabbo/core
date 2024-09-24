@@ -104,7 +104,7 @@ partial class InventoryManager
     {
         if (_inventory is null) return;
 
-        long itemId = e.Packet.Read<Id>();
+        Id itemId = e.Packet.Read<Id>();
         if (_inventory.TryRemove(itemId, out InventoryItem? item))
         {
             Log.LogTrace("Inventory item {id} removed.", itemId);

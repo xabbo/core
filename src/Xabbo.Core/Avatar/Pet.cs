@@ -17,7 +17,7 @@ public class Pet(Id id, int index) : Avatar(AvatarType.Pet, id, index), IPet
     public int Level { get; set; }
     public string Posture { get; set; } = "";
 
-    internal Pet(long id, int index, in PacketReader p)
+    internal Pet(Id id, int index, in PacketReader p)
         : this(id, index)
     {
         if (p.Client == ClientType.Shockwave)

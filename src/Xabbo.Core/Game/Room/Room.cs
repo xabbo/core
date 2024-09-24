@@ -71,8 +71,8 @@ internal class Room : IRoom, INotifyPropertyChanged
     IEnumerable<IWallItem> IRoom.WallItems => WallItems.Select(x => x.Value);
     IEnumerable<IAvatar> IRoom.Avatars => Avatars.Select(x => x.Value);
 
-    internal ConcurrentDictionary<long, FloorItem> FloorItems { get; } = new();
-    internal ConcurrentDictionary<long, WallItem> WallItems { get; } = new();
+    internal ConcurrentDictionary<Id, FloorItem> FloorItems { get; } = new();
+    internal ConcurrentDictionary<Id, WallItem> WallItems { get; } = new();
 
     internal ConcurrentDictionary<int, Avatar> Avatars { get; } = new();
 

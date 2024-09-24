@@ -789,7 +789,7 @@ public static class Extensions
     /// <summary>
     /// Gets items owned by the specified user ID.
     /// </summary>
-    public static IEnumerable<T> OwnedBy<T>(this IEnumerable<T> items, long ownerId)
+    public static IEnumerable<T> OwnedBy<T>(this IEnumerable<T> items, Id ownerId)
         where T : IFurni => items.Where(item => item.OwnerId == ownerId);
 
     /// <summary>

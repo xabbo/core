@@ -19,7 +19,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     : GameStateManager(interceptor)
 {
     private readonly ILogger Log = (ILogger?)loggerFactory?.CreateLogger<RoomManager>() ?? NullLogger.Instance;
-    private readonly Dictionary<long, RoomData> _roomDataCache = [];
+    private readonly Dictionary<Id, RoomData> _roomDataCache = [];
 
     private Room? _currentRoom;
 
@@ -29,8 +29,8 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     /// Gets the ID of the current room. The <see cref="Room"/> may not be available
     /// even when the current room ID is set (e.g. when in the queue).
     /// </summary>
-    private long _currentRoomId = -1;
-    public long CurrentRoomId
+    private Id _currentRoomId = -1;
+    public Id CurrentRoomId
     {
         get => _currentRoomId;
         private set => Set(ref _currentRoomId, value);
@@ -111,7 +111,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     /// <summary>
     /// Retrieves the room data from the cache if it is available.
     /// </summary>
-    public bool TryGetRoomData(long roomId, [NotNullWhen(true)] out RoomData? data) => _roomDataCache.TryGetValue(roomId, out data);
+    public bool TryGetRoomData(Id roomId, [NotNullWhen(true)] out RoomData? data) => _roomDataCache.TryGetValue(roomId, out data);
 
     protected override void OnDisconnected() => ResetState();
 

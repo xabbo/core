@@ -30,7 +30,7 @@ public interface IRoomInfo
     bool AllowPets { get; }
 
     string OfficialRoomPicRef { get; }
-    long GroupId { get; }
+    Id GroupId { get; }
     string GroupName { get; }
     string GroupBadge { get; }
     string EventName { get; }

@@ -8,7 +8,7 @@ namespace Xabbo.Core.Game;
 
 public class Inventory : IInventory, IEnumerable<InventoryItem>
 {
-    private readonly ConcurrentDictionary<long, InventoryItem> _items = new();
+    private readonly ConcurrentDictionary<Id, InventoryItem> _items = new();
 
     public bool IsInvalidated { get; set; }
 
@@ -29,12 +29,12 @@ public class Inventory : IInventory, IEnumerable<InventoryItem>
         return _items.AddOrUpdate(item.ItemId, item, (id, existingItem) => item, out added);
     }
 
-    public InventoryItem? GetItem(long id) => TryGetItem(id, out InventoryItem? item) ? item : null;
-    IInventoryItem? IInventory.GetItem(long id) => GetItem(id);
-    public bool TryGetItem(long itemId, [NotNullWhen(true)] out InventoryItem? item) => _items.TryGetValue(itemId, out item);
-    bool IInventory.TryGetItem(long id, [NotNullWhen(true)] out IInventoryItem? item) => (item = GetItem(id)) is not null;
+    public InventoryItem? GetItem(Id id) => TryGetItem(id, out InventoryItem? item) ? item : null;
+    IInventoryItem? IInventory.GetItem(Id id) => GetItem(id);
+    public bool TryGetItem(Id itemId, [NotNullWhen(true)] out InventoryItem? item) => _items.TryGetValue(itemId, out item);
+    bool IInventory.TryGetItem(Id id, [NotNullWhen(true)] out IInventoryItem? item) => (item = GetItem(id)) is not null;
 
-    public bool TryRemove(long itemId, [NotNullWhen(true)] out InventoryItem? item) => _items.TryRemove(itemId, out item);
+    public bool TryRemove(Id itemId, [NotNullWhen(true)] out InventoryItem? item) => _items.TryRemove(itemId, out item);
     public void Clear() => _items.Clear();
 
     public IEnumerator<InventoryItem> GetEnumerator() => _items.Select(x => x.Value).GetEnumerator();

@@ -16,7 +16,7 @@ public class User(Id id, int index) : Avatar(AvatarType.User, id, index), IUser
     public int RightsLevel => CurrentUpdate?.ControlLevel ?? 0;
     public bool HasRights => RightsLevel > 0;
 
-    internal User(long id, int index, in PacketReader p)
+    internal User(Id id, int index, in PacketReader p)
         : this(id, index)
     {
         if (p.Client is ClientType.Shockwave)

@@ -5,7 +5,7 @@
 /// </summary>
 public interface IUserData
 {
-    long Id { get; }
+    Id Id { get; }
     string Name { get; }
     string Figure { get; }
     Gender Gender { get; }

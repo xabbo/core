@@ -16,7 +16,7 @@ public sealed class FloorItemsMsg : List<FloorItem>, IMessage<FloorItemsMsg>
     static FloorItemsMsg IParser<FloorItemsMsg>.Parse(in PacketReader p)
     {
         int n;
-        var ownerDictionary = new Dictionary<long, string>();
+        var ownerDictionary = new Dictionary<Id, string>();
 
         if (p.Client is not ClientType.Shockwave)
         {
@@ -42,7 +42,7 @@ public sealed class FloorItemsMsg : List<FloorItem>, IMessage<FloorItemsMsg>
     {
         if (p.Client is not ClientType.Shockwave)
         {
-            var ownerIds = new HashSet<long>();
+            var ownerIds = new HashSet<Id>();
             var ownerDictionary = this
                 .Where(x => ownerIds.Add(x.OwnerId))
                 .ToDictionary(

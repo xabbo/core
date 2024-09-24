@@ -9,7 +9,7 @@ namespace Xabbo.Core;
 /// </summary>
 public sealed class UserData : IUserData, IParserComposer<UserData>
 {
-    public long Id { get; set; }
+    public Id Id { get; set; }
     public string Name { get; set; } = "";
     public string Figure { get; set; } = "";
     public Gender Gender { get; set; }
