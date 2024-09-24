@@ -11,6 +11,7 @@ public sealed record GetBannedUsersMsg(Id RoomId) : IRequestMessage<GetBannedUse
 {
     static ClientType IMessage<GetBannedUsersMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<GetBannedUsersMsg>.Identifier => Out.GetBannedUsersFromRoom;
+    bool IRequestFor<BannedUsersMsg>.MatchResponse(BannedUsersMsg msg) => msg.RoomId == RoomId;
     static GetBannedUsersMsg IParser<GetBannedUsersMsg>.Parse(in PacketReader p) => new(p.ReadId());
     void IComposer.Compose(in PacketWriter p) => p.WriteId(RoomId);
 }
