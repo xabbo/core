@@ -113,7 +113,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     /// </summary>
     public bool TryGetRoomData(Id roomId, [NotNullWhen(true)] out RoomData? data) => _roomDataCache.TryGetValue(roomId, out data);
 
-    protected override void OnDisconnected() => ResetState();
+    protected override void OnDisconnected() => LeaveRoom();
 
     /// <summary>
     /// Ensures the user is in a room.
