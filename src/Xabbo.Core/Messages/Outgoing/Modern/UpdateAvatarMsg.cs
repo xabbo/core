@@ -14,8 +14,8 @@ namespace Xabbo.Core.Messages.Outgoing.Modern;
 /// </summary>
 public sealed record UpdateAvatarMsg(Gender Gender, string Figure) : IMessage<UpdateAvatarMsg>
 {
-    static ClientType IMessage<UpdateAvatarMsg>.SupportedClients => ClientType.Modern;
-    static Identifier IMessage<UpdateAvatarMsg>.Identifier => Out.UpdateFigureData; // TODO check header
+    static bool IMessage<UpdateAvatarMsg>.UseTargetedIdentifiers => true;
+    static Identifier IMessage<UpdateAvatarMsg>.Identifier => Out.UpdateFigureData;
 
     Identifier IMessage.GetIdentifier(ClientType client) => client switch
     {
