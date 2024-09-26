@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,9 +23,9 @@ public class Heightmap : IHeightmap, IEnumerable<HeightmapTile>, IParserComposer
             return _tiles[y * Width + x];
         }
     }
-    public HeightmapTile this[(int X, int Y) location] => this[location.X, location.Y];
+    public HeightmapTile this[Point point] => this[point.X, point.Y];
     IHeightmapTile IHeightmap.this[int x, int y] => this[x, y];
-    IHeightmapTile IHeightmap.this[(int X, int Y) location] => this[location];
+    IHeightmapTile IHeightmap.this[Point point] => this[point];
 
     public Heightmap(int width, int length)
     {

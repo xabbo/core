@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Xabbo.Core;
 
@@ -28,5 +28,5 @@ public interface IHeightmap : IEnumerable<IHeightmapTile>
     /// <summary>
     /// Gets the tile in this heightmap at the specified location.
     /// </summary>
-    IHeightmapTile this[(int X, int Y) location] { get; }
+    IHeightmapTile this[Point point] { get; }
 }

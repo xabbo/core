@@ -1,4 +1,4 @@
-﻿namespace Xabbo.Core;
+namespace Xabbo.Core;
 
 public interface IFloorPlan
 {
@@ -31,6 +31,11 @@ public interface IFloorPlan
     /// Gets the tile height at the specified coordinates in this floor plan.
     /// </summary>
     int this[int x, int y] { get; }
+
+    /// <summary>
+    /// Gets the tile height at the specified coordinates.
+    /// </summary>
+    int this[Point point] { get; }
 
     /// <summary>
     /// Gets if the tile at the specified coordinates in this floor plan is walkable.

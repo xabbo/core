@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -25,6 +25,12 @@ public class FloorPlan : IFloorPlan, IParserComposer<FloorPlan>
     {
         get => GetHeight(x, y);
         set => SetHeight(x, y, value);
+    }
+
+    public int this[Point point]
+    {
+        get => this[point.X, point.Y];
+        set => this[point.X, point.Y] = value;
     }
 
     public FloorPlan(int width, int length)
