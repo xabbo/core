@@ -73,37 +73,37 @@ public sealed partial class TradeManager(
     public bool IsWaitingConfirmation { get; private set; }
 
     /// <summary>
-    /// Invoked when a trade is opened.
+    /// Occurs when a trade is opened.
     /// </summary>
     public event EventHandler<TradeStartEventArgs>? Opened;
 
     /// <summary>
-    /// Invoked when a trade fails to open.
+    /// Occurs when a trade fails to open.
     /// </summary>
     public event EventHandler<TradeStartFailEventArgs>? OpenFailed;
 
     /// <summary>
-    /// Invoked when a trade is updated.
+    /// Occurs when a trade is updated.
     /// </summary>
     public event EventHandler<TradeOfferEventArgs>? Updated;
 
     /// <summary>
-    /// Invoked when a trade is accepted.
+    /// Occurs when a trade is accepted.
     /// </summary>
     public event EventHandler<TradeAcceptEventArgs>? Accepted;
 
     /// <summary>
-    /// Invoked when a trade is awaiting confirmation.
+    /// Occurs when a trade is awaiting confirmation.
     /// </summary>
     public event EventHandler? WaitingConfirm;
 
     /// <summary>
-    /// Invoked when a trade is closed.
+    /// Occurs when a trade is closed.
     /// </summary>
     public event EventHandler<TradeStopEventArgs>? Closed;
 
     /// <summary>
-    /// Invoked when a trade is completed.
+    /// Occurs when a trade is completed.
     /// </summary>
     public event EventHandler<TradeCompleteEventArgs>? Completed;
 

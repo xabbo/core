@@ -59,37 +59,37 @@ public sealed partial class ProfileManager : GameStateManager
 
     #region - Events -
     /// <summary>
-    /// Invoked when the user's data is first loaded.
+    /// Occurs when the user's data is first loaded.
     /// </summary>
     public event Action? UserDataLoaded;
 
     /// <summary>
-    /// Invoked when the user's data is updated.
+    /// Occurs when the user's data is updated.
     /// </summary>
     public event Action? UserDataUpdated;
 
     /// <summary>
-    /// Invoked when the user's achievements are loaded.
+    /// Occurs when the user's achievements are loaded.
     /// </summary>
     public event Action? AchievementsLoaded;
 
     /// <summary>
-    /// Invoked when the an achievement of the user is updated.
+    /// Occurs when the an achievement of the user is updated.
     /// </summary>
     public event Action<AchievementUpdatedEventArgs>? AchievementUpdated;
 
     /// <summary>
-    /// Invoked when the user's credits are updated.
+    /// Occurs when the user's credits are updated.
     /// </summary>
     public event Action<CreditsUpdatedEventArgs>? CreditsUpdated;
 
     /// <summary>
-    /// Invoked when the user's activity points are loaded.
+    /// Occurs when the user's activity points are loaded.
     /// </summary>
     public event Action? PointsLoaded;
 
     /// <summary>
-    /// Invoked when the user's activity points are updated.
+    /// Occurs when the user's activity points are updated.
     /// </summary>
     public event Action<ActivityPointUpdatedEventArgs>? ActivityPointUpdated;
     #endregion

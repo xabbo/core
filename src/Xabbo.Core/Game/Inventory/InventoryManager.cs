@@ -32,27 +32,27 @@ public sealed partial class InventoryManager(IExtension extension, ILoggerFactor
     public IInventory? Inventory => _inventory;
 
     /// <summary>
-    /// Invoked when the user's inventory is invalidated and needs to be reloaded.
+    /// Occurs when the user's inventory is invalidated and needs to be reloaded.
     /// </summary>
     public event Action? Invalidated;
 
     /// <summary>
-    /// Invoked when the user's inventory is loaded.
+    /// Occurs when the user's inventory is loaded.
     /// </summary>
     public event Action? Loaded;
 
     /// <summary>
-    /// Invoked when an item is added to the user's inventory.
+    /// Occurs when an item is added to the user's inventory.
     /// </summary>
     public event Action<InventoryItemEventArgs>? ItemAdded;
 
     /// <summary>
-    /// Invoked when an item in the user's inventory is updated.
+    /// Occurs when an item in the user's inventory is updated.
     /// </summary>
     public event Action<InventoryItemEventArgs>? ItemUpdated;
 
     /// <summary>
-    /// Invoked when an item removed from the user's inventory.
+    /// Occurs when an item removed from the user's inventory.
     /// </summary>
     public event Action<InventoryItemEventArgs>? ItemRemoved;
 

@@ -35,17 +35,17 @@ public interface IGameDataManager
     ExternalTexts? Texts { get; }
 
     /// <summary>
-    /// Invoked when game data begins loading.
+    /// Occurs when game data begins loading.
     /// </summary>
     event Action Loading;
 
     /// <summary>
-    /// Invoked when game data is successfully loaded.
+    /// Occurs when game data is successfully loaded.
     /// </summary>
     event Action Loaded;
 
     /// <summary>
-    /// Invoked when game data fails to load.
+    /// Occurs when game data fails to load.
     /// </summary>
     event Action<Exception> LoadFailed;
 

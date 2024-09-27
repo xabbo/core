@@ -66,27 +66,27 @@ public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFacto
 
     #region - Events -
     /// <summary>
-    /// Invoked when the user's friends are loaded.
+    /// Occurs when the user's friends are loaded.
     /// </summary>
     public event Action? Loaded;
 
     /// <summary>
-    /// Invoked when a friend is added.
+    /// Occurs when a friend is added.
     /// </summary>
     public event Action<FriendEventArgs>? FriendAdded;
 
     /// <summary>
-    /// Invoked when a friend is removed.
+    /// Occurs when a friend is removed.
     /// </summary>
     public event Action<FriendEventArgs>? FriendRemoved;
 
     /// <summary>
-    /// Invoked when a friend is updated.
+    /// Occurs when a friend is updated.
     /// </summary>
     public event Action<FriendUpdatedEventArgs>? FriendUpdated;
 
     /// <summary>
-    /// Invoked when a message is received from a friend.
+    /// Occurs when a message is received from a friend.
     /// </summary>
     public event Action<FriendMessageEventArgs>? MessageReceived;
     #endregion
