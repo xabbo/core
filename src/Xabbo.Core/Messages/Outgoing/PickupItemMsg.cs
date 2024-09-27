@@ -5,6 +5,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
+/// <summary>
+/// Sent when picking up an item from a room.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Type">The type of the item to pick up.</param>
+/// <param name="Id">The ID of the item to pick up.</param>
 public record PickupItemMsg(ItemType Type, Id Id) : IMessage<PickupItemMsg>
 {
     const int ExpectedFieldCount = 3;
@@ -48,8 +55,8 @@ public record PickupItemMsg(ItemType Type, Id Id) : IMessage<PickupItemMsg>
 
         return itemType switch
         {
-            ItemType.Wall => new PickupWallItemMsg(id),
-            ItemType.Floor => new PickupFloorItemMsg(id),
+            ItemType.Wall => new PickupItemMsg(ItemType.Floor, id),
+            ItemType.Floor => new PickupItemMsg(ItemType.Wall, id),
             _ => throw new Exception("Unknown item type when parsing PickupItemMsg.")
         };
     }
@@ -78,6 +85,3 @@ public record PickupItemMsg(ItemType Type, Id Id) : IMessage<PickupItemMsg>
         }
     }
 }
-
-public sealed record PickupFloorItemMsg(Id Id) : PickupItemMsg(ItemType.Floor, Id) { public new ItemType Type => base.Type; }
-public sealed record PickupWallItemMsg(Id Id) : PickupItemMsg(ItemType.Wall, Id) { public new ItemType Type => base.Type; }
