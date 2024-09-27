@@ -10,6 +10,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when removing the rights of a user from the current room.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.RemoveRights"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.REMOVERIGHTS"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Ids">The list of user IDs to remove rights from. Applies to <see cref="ClientType.Modern"/> clients.</param>
 /// <param name="Name">The name of the user to remove rights from. Applies to the <see cref="ClientType.Origins"/> client.</param>

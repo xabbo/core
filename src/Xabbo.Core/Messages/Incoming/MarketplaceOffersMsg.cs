@@ -10,6 +10,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Response for <see cref="Outgoing.SearchMarketplaceOffersMsg"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.MarketPlaceOffers"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Offers">The list of marketplace offers.</param>
 public sealed record MarketplaceOffersMsg(List<MarketplaceOffer> Offers) : IMessage<MarketplaceOffersMsg>

@@ -9,6 +9,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when the value of a dice is updated.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.DiceValue"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.DICE_VALUE"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Id">The ID of the dice.</param>
 /// <param name="Value">The updated dice value.</param>

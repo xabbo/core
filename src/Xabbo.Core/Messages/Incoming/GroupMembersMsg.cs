@@ -9,6 +9,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Response for <see cref="Outgoing.SearchGroupMembersMsg"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.GuildMembers"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Members">The group members.</param>
 public sealed record GroupMembersMsg(GroupMembers Members) : IMessage<GroupMembersMsg>

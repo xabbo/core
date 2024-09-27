@@ -11,6 +11,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received after requesting the user's list of friends.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.FriendListFragment"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.BUDDYLIST"/>.</item>
+/// </list>
 /// </summary>
 public sealed class FriendListMsg : List<Friend>, IMessage<FriendListMsg>
 {

@@ -9,6 +9,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when updating the user's profile or account.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Origins"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.UPDATE"/>.</item>
+/// </list>
 /// </summary>
 public sealed record UpdateProfileMsg : IMessage<UpdateProfileMsg>
 {

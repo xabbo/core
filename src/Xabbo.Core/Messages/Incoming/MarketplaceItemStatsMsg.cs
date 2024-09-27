@@ -9,6 +9,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Response for <see cref="Outgoing.GetMarketplaceItemStatsMsg"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.MarketplaceItemStats"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Stats">The marketplace item statistics.</param>
 public sealed record MarketplaceItemStatsMsg(MarketplaceItemStats Stats) : IMessage<MarketplaceItemStatsMsg>

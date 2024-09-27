@@ -10,6 +10,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Request for <see cref="PetInfoMsg"/>. Returns a <see cref="PetInfo"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.GetPetInfo"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Id">The ID of the pet to retrieve information for.</param>
 public sealed record GetPetInfoMsg(Id Id) : IRequestMessage<GetPetInfoMsg, PetInfoMsg, PetInfo>

@@ -10,6 +10,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Request for <see cref="CreditBalanceMsg"/>. Returns an <see cref="int"/> indicating the user's current balance.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.GetCreditsInfo"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.GET_CREDITS"/>.</item>
+/// </list>
 /// </summary>
 public sealed record GetCreditBalanceMsg : IRequestMessage<GetCreditBalanceMsg, CreditBalanceMsg, int>
 {

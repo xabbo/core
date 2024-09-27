@@ -9,6 +9,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when picking up an item from a room.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.PickupObject"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.ADDSTRIPITEM"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Type">The type of the item to pick up.</param>
 /// <param name="Id">The ID of the item to pick up.</param>

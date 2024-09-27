@@ -8,6 +8,14 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when requesting room data for the specified room ID.
 /// <para/>
 /// Request for <see cref="RoomDataMsg"/>. Returns <see cref="RoomData"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.GetGuestRoom"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.GETFLATINFO"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Id">The room ID to request data for.</param>
 /// <param name="Entering">Whether the user is entering the room. Does not apply to Origins.</param>

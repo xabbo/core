@@ -9,6 +9,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when clicking a furni.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.ClickFurni"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Type">The type of item that was clicked.</param>
 /// <param name="Id">The ID of the item that was clicked.</param>

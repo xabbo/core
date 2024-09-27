@@ -7,6 +7,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when an avatar's effect is updated.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.AvatarEffect"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Index">The index of the avatar.</param>
 /// <param name="Effect">The avatar's updated effect ID.</param>

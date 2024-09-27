@@ -11,6 +11,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when friends are removed from the user's friend list.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Origins"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.REMOVE_BUDDY"/>.</item>
+/// </list>
 /// </summary>
 public sealed class FriendsRemovedMsg : List<Id>, IMessage<FriendsRemovedMsg>
 {

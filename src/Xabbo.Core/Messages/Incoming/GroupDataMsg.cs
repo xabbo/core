@@ -9,6 +9,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Response for <see cref="Outgoing.GetGroupDataMsg"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.HabboGroupDetails"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Group">The group's information.</param>
 public sealed record GroupDataMsg(GroupData Group) : IMessage<GroupDataMsg>

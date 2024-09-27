@@ -10,6 +10,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Request for <see cref="GroupMembersMsg"/>. Returns a <see cref="GroupMembers"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.GetGuildMembers"/>.</item>
+/// </list>
 /// </remarks>
 /// <param name="Id">The ID of the group.</param>
 /// <param name="Page">The page number of the group's member list to retrieve.</param>

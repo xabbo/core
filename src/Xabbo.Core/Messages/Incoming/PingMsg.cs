@@ -7,6 +7,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received periodically to check if the connection is alive.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.Ping"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.PING"/>.</item>
+/// </list>
 /// </summary>
 public sealed record PingMsg : IMessage<PingMsg>
 {

@@ -9,6 +9,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when a floor item is removed from the room.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.ObjectRemove"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.ACTIVEOBJECT_REMOVE"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Id">The ID of the floor item that was removed.</param>
 /// <param name="Item">The instance of the floor item that was removed. Only available on <see cref="ClientType.Shockwave"/>.</param>

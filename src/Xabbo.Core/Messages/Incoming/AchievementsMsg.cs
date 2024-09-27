@@ -7,10 +7,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when achievements are loaded.
 /// <para/>
 /// Response for <see cref="Outgoing.GetAchievementsMsg"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers: <see cref="In.Achievements"/>.
 /// </summary>
-/// <remarks>
-/// Supported on <see cref="ClientType.Modern"/>.
-/// </remarks>
 public sealed record AchievementsMsg(Achievements Achievements) : IMessage<AchievementsMsg>
 {
     static ClientType IMessage<AchievementsMsg>.SupportedClients => ClientType.Modern;

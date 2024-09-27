@@ -8,6 +8,16 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when starting, stopping or changing dances in a room.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Xabbo.Messages.Flash.Out.Dance"/>.</item>
+/// <item>
+/// Shockwave:
+/// <see cref="Xabbo.Messages.Shockwave.Out.DANCE"/>,
+/// <see cref="Xabbo.Messages.Shockwave.Out.STOP"/>.
+/// </item>
+/// </list>
 /// </summary>
 /// <param name="Dance">The dance to change to.</param>
 public sealed record DanceMsg(AvatarDance Dance = AvatarDance.Dance) : IMessage<DanceMsg>

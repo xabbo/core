@@ -11,6 +11,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when avatars' statuses are updated in the room.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.UserUpdate"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.STATUS"/>.</item>
+/// </list>
 /// </summary>
 public sealed class AvatarStatusMsg : List<AvatarStatus>, IMessage<AvatarStatusMsg>
 {

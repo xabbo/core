@@ -7,6 +7,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when using a wall item.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.UseWallItem"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Id">The ID of the wall item.</param>
 /// <param name="State">The state of the wall item. Appears to be unused - items are always toggled between states.</param>

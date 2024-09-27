@@ -7,6 +7,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when muting a user in a room.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.MuteUser"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Id">The ID of the user to mute.</param>
 /// <param name="RoomId">The ID of the room to mute the user in.</param>

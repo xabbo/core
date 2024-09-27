@@ -9,6 +9,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Response for <see cref="Outgoing.SearchUserMsg"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.HabboSearchResult"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.HABBO_SEARCH_RESULT"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Results">The search results.</param>
 public sealed record SearchUserResultsMsg(UserSearchResults Results) : IMessage<SearchUserResultsMsg>

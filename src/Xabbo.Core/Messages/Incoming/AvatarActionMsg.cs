@@ -7,6 +7,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when an avatar performs an action.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.Expression"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Index">The avatar's index.</param>
 /// <param name="Action">The action that the avatar peformed.</param>

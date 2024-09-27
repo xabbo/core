@@ -9,6 +9,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when removing friends from the user's friends list.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.RemoveFriend"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.FRIENDLIST_REMOVEFRIEND"/>.</item>
+/// </list>
 /// </summary>
 public sealed class RemoveFriendsMsg : List<Id>, IMessage<RemoveFriendsMsg>
 {

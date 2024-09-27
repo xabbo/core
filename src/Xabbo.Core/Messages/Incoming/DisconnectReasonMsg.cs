@@ -7,6 +7,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// May be received before the server closes the connection to specify a reason for the disconnection.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.DisconnectReason"/>.</item>
+/// </list>
 /// </summary>
 public sealed record DisconnectReasonMsg(DisconnectReason Reason = DisconnectReason.Unknown) : IMessage<DisconnectReasonMsg>
 {

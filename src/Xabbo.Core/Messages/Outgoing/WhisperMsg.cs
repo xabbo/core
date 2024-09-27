@@ -7,6 +7,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when whispering in a room.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.Whisper"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.WHISPER"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Message">The chat message content.</param>
 /// <param name="BubbleStyle">The chat bubble style. Applies to <see cref="ClientType.Modern"/> clients.</param>

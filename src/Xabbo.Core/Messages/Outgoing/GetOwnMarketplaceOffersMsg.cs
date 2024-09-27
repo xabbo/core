@@ -10,6 +10,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Request for <see cref="OwnMarketplaceOffersMsg"/>. Returns a <see cref="UserMarketplaceOffers"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.GetMarketplaceOwnOffers"/>.</item>
+/// </list>
 /// </summary>
 public sealed record GetOwnMarketplaceOffersMsg : IRequestMessage<GetOwnMarketplaceOffersMsg, OwnMarketplaceOffersMsg, UserMarketplaceOffers>
 {

@@ -7,6 +7,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when an avatar's hand item updates.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.CarryObject"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Index">The index of the avatar.</param>
 /// <param name="Item">The avatar's updated hand item ID.</param>

@@ -8,6 +8,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when performing an action in a room.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Xabbo.Messages.Flash.Out.AvatarExpression"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.WAVE"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Action">
 /// The action to perform.

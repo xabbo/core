@@ -9,6 +9,17 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when sending a chat message in a room.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.Chat"/>, <see cref="Out.Whisper"/>, <see cref="Out.Shout"/>.</item>
+/// <item>
+/// Shockwave:
+/// <see cref="Xabbo.Messages.Shockwave.Out.CHAT"/>,
+/// <see cref="Xabbo.Messages.Shockwave.Out.WHISPER"/>,
+/// <see cref="Xabbo.Messages.Shockwave.Out.SHOUT"/>.
+/// </item>
+/// </list>
 /// </summary>
 /// <param name="Type">The type of the chat message.</param>
 /// <param name="Message">The chat message content.</param>

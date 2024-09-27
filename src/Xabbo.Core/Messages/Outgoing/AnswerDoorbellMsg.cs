@@ -7,6 +7,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when responding to the doorbell.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.LetUserIn"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.LETUSERIN"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Name">The name of the user.</param>
 /// <param name="Accept">Whether to accept the user into the room.</param>

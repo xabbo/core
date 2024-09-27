@@ -11,6 +11,8 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when objects in the room are moved by wired.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers: <see cref="In.WiredMovements"/>.
 /// </summary>
 public sealed class WiredMovementsMsg : List<WiredMovement>, IMessage<WiredMovementsMsg>
 {

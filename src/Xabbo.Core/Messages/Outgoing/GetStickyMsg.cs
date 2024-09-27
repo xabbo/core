@@ -10,6 +10,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Request for <see cref="ItemDataMsg"/>. Returns a <see cref="Sticky"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.GetItemData"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.G_IDATA"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Id">The ID of the sticky note to retrieve.</param>
 public sealed record GetStickyMsg(Id Id) : IRequestMessage<GetStickyMsg, ItemDataMsg, Sticky>

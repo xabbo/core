@@ -7,6 +7,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when a floor item is updated in the room.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.ObjectUpdate"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.ACTIVEOBJECT_UPDATE"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Item">The updated floor item.</param>
 public sealed record FloorItemUpdatedMsg(FloorItem Item) : IMessage<FloorItemUpdatedMsg>

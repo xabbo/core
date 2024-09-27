@@ -7,6 +7,8 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when the user's activity points are updated.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers: <see cref="In.HabboActivityPointNotification"/>.
 /// </summary>
 public sealed record ActivityPointUpdatedMsg(ActivityPointType Type, int Amount, int Change)
     : IMessage<ActivityPointUpdatedMsg>

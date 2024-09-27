@@ -7,6 +7,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when the user's own figure is updated.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.FigureUpdate"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Figure">The user's updated figure string.</param>
 /// <param name="Gender">The user's updated gender.</param>

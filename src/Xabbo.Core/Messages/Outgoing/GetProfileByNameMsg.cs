@@ -11,6 +11,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Request for <see cref="ProfileMsg"/>. Returns <see cref="UserProfile"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.GetExtendedProfileByName"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Name">The name of the user whose profile to request.</param>
 public sealed record GetProfileByNameMsg(string Name) : IRequestMessage<GetProfileByNameMsg, ProfileMsg, UserProfile>

@@ -10,6 +10,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Response for <see cref="Outgoing.GetBannedUsersMsg"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.BannedUsersFromRoom"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="RoomId">The ID of the room.</param>
 /// <param name="Users">The list of banned users.</param>

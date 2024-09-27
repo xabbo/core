@@ -7,6 +7,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when moving a wall item.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.MoveWallItem"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.MOVEITEM"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Id">The ID of the wall item to move.</param>
 /// <param name="Location">The location to move the wall item to.</param>

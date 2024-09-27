@@ -7,6 +7,14 @@ namespace Xabbo.Core.Messages.Outgoing;
 
 /// <summary>
 /// Sent when banning a user from a room.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.BanUserWithDuration"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.ROOMBAN"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Id">The ID of the user to ban. Applies to <see cref="ClientType.Modern"/> clients.</param>
 /// <param name="RoomId">The ID of the room to ban the user from. Applies to <see cref="ClientType.Modern"/> clients.</param>

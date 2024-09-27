@@ -9,6 +9,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when the user's friend list is updated.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.FriendListUpdate"/>.</item>
+/// </list>
 /// </summary>
 public sealed class FriendListUpdateMsg : IMessage<FriendListUpdateMsg>
 {

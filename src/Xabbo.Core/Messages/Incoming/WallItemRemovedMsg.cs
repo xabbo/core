@@ -9,6 +9,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when a wall item is removed from the room.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.ItemRemove"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.REMOVEITEM"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Id">The ID of the wall item that was removed.</param>
 /// <param name="PickerId">

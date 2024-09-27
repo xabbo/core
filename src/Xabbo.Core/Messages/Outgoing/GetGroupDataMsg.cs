@@ -10,6 +10,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Request for <see cref="GroupDataMsg"/>. Returns <see cref="GroupData"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.GetHabboGroupDetails"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Id">The ID of the group to request information for.</param>
 /// <param name="Open">Whether to open the group information in-client.</param>

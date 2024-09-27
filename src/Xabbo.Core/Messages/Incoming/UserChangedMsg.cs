@@ -7,6 +7,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when an avatar's figure, motto or achievement score updates.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.UserChange"/>.</item>
+/// </list>
 /// </summary>
 public sealed record UserChangedMsg(
     int Index, string Figure, Gender Gender, string Motto, int AchievementScore

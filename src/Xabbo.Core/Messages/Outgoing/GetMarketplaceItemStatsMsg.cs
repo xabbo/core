@@ -10,6 +10,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Request for <see cref="MarketplaceItemStatsMsg"/>. Returns a <see cref="MarketplaceItemStats"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.GetMarketplaceItemStats"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Type">The type of the item to get marketplace statistics for.</param>
 /// <param name="Kind">The kind of the item to get marketplace statistics for.</param>

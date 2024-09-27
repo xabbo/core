@@ -7,6 +7,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when requesting a catalog page.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.GetCatalogPage"/>.</item>
+/// </list>
 /// </summary>
 public sealed record GetCatalogPageMsg(int Id, int OfferId = -1, string Type = "NORMAL") : IMessage<GetCatalogPageMsg>
 {

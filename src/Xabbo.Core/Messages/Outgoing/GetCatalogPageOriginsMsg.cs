@@ -7,6 +7,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when requesting a catalog page.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Origins"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.GET_CATALOG_PAGE"/>.</item>
+/// </list>
 /// </summary>
 public sealed record GetCatalogPageOriginsMsg(string Name, string Type = "production", string Locale = "en") : IMessage<GetCatalogPageOriginsMsg>
 {

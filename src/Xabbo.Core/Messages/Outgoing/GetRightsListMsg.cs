@@ -10,6 +10,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Request for <see cref="RightsListMsg"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.GetFlatControllers"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="RoomId">The ID of the room to request the rights list for.</param>
 public sealed record GetRightsListMsg(Id RoomId) : IRequestMessage<GetRightsListMsg, RightsListMsg>

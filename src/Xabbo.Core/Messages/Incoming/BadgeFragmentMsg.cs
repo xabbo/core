@@ -7,6 +7,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received after requesting the user's list of badges.
 /// <para/>
 /// A sequence of fragments are received in response to <see cref="Outgoing.GetBadgesMsg"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.Badges"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Badges">The list of badges in the fragment.</param>
 /// <param name="FragmentIndex">The sequence index of the fragment.</param>

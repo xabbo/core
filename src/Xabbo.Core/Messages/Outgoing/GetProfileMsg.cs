@@ -11,6 +11,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Returns a <see cref="UserProfile"/>.
 /// <para/>
 /// Supported clients: <see cref="ClientType.Modern"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.GetExtendedProfile"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Id">The ID of the user whose profile to request.</param>
 /// <param name="Open">Whether the open the profile in-client.</param>

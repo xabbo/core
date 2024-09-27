@@ -11,6 +11,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <item><see cref="ClientType.Modern"/> (Intercept/Send)</item>
 /// <item><see cref="ClientType.Shockwave"/> (Send only: translates to <see cref="UpdateProfileMsg"/>)</item>
 /// </list>
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Out.UpdateFigureData"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.UPDATE"/>.</item>
+/// </list>
 /// </summary>
 public sealed record UpdateAvatarMsg(Gender Gender, string Figure) : IMessage<UpdateAvatarMsg>
 {

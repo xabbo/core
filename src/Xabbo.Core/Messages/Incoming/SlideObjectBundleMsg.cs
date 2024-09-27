@@ -7,6 +7,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received when a group of items and/or an avatar are moved by a roller.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="In.SlideObjectBundle"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.SLIDEOBJECTBUNDLE"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Bundle">The group of items being updated.</param>
 public sealed record SlideObjectBundleMsg(SlideObjectBundle Bundle) : IMessage<SlideObjectBundleMsg>

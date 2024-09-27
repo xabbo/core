@@ -8,6 +8,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when using a floor item.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>.
+/// <para/>
+/// Identifiers:
+/// <list type="bullet">
+/// <item>Flash: <see cref="Xabbo.Messages.Flash.Out.UseFurniture"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.SETSTUFFDATA"/>.</item>
+/// </list>
 /// </summary>
 /// <param name="Id">The ID of the floor item.</param>
 /// <param name="State">The state of the floor item. Appears to be unused - items are always toggled between states.</param>
