@@ -1,13 +1,19 @@
 ﻿namespace Xabbo.Core.Events;
 
+/// <summary>
+/// Provides data for the <see cref="Game.TradeManager.OpenFailed"/> event.
+/// </summary>
+/// <param name="reason">The reason that the trade failed to start.</param>
+/// <param name="name">The name of the user that the trade failed to start with.</param>
 public sealed class TradeStartFailEventArgs(int reason, string name)
 {
     /// <summary>
-    /// The reason that the trade failed to start.
+    /// Gets reason that the trade failed to start.
     /// </summary>
     public int Reason { get; } = reason;
+
     /// <summary>
-    /// The name of the user the trade failed to start with.
+    /// Gets name of the user that the trade failed to start with.
     /// </summary>
     public string Name { get; } = name;
 }

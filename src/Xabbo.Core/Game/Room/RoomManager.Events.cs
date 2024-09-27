@@ -154,9 +154,9 @@ public sealed partial class RoomManager
     public event Action<AvatarSlideEventArgs>? AvatarSlide;
 
     /// <summary>
-    /// Occurs when an avatar's figure, gender, motto or achievement score is updated.
+    /// Occurs when an avatar's figure, gender, motto or achievement score changes.
     /// </summary>
-    public event Action<AvatarDataUpdatedEventArgs>? AvatarDataUpdated;
+    public event Action<AvatarChangedEventArgs>? AvatarChanged;
 
     /// <summary>
     /// Occurs when an avatar's name changes.

@@ -1,15 +1,21 @@
 ﻿namespace Xabbo.Core.Events;
 
-public sealed class DiceUpdatedEventArgs(IFloorItem dice, int previous, int value)
+/// <summary>
+/// Provides data for the <see cref="Game.RoomManager.DiceUpdated"/> event.
+/// </summary>
+/// <param name="dice">The dice.</param>
+/// <param name="previousValue">The previous value of the dice.</param>
+/// <param name="updatedValue">The updated value of the dice.</param>
+public sealed class DiceUpdatedEventArgs(IFloorItem dice, int previousValue, int updatedValue)
     : FloorItemEventArgs(dice)
 {
     /// <summary>
-    /// The previous value of the dice.
+    /// Gets the previous value of the dice.
     /// </summary>
-    public int PreviousValue { get; } = previous;
+    public int PreviousValue { get; } = previousValue;
 
     /// <summary>
-    /// The current value of the dice.
+    /// Gets the updated value of the dice.
     /// </summary>
-    public int Value { get; } = value;
+    public int Value { get; } = updatedValue;
 }

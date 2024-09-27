@@ -1,14 +1,19 @@
 ﻿namespace Xabbo.Core.Events;
 
-public sealed class TradeStartEventArgs(bool isTrader, IUser partner)
+/// <summary>
+/// Provides data for the <see cref="Game.TradeManager.Opened"/> event.
+/// </summary>
+/// <param name="isInitiator">Whether the current user initiated the trade.</param>
+/// <param name="partner">The partner's avatar instance.</param>
+public sealed class TradeStartEventArgs(bool isInitiator, IUser partner)
 {
     /// <summary>
-    /// Gets if the user was the one who initiated the trade.
+    /// Gets whether the current user initiated the trade.
     /// </summary>
-    public bool IsTrader { get; } = isTrader;
+    public bool IsInitiator { get; } = isInitiator;
 
     /// <summary>
-    /// Gets the partner of the trade.
+    /// Gets the trade partner's avatar instance.
     /// </summary>
     public IUser Partner { get; } = partner;
 }

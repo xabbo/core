@@ -696,7 +696,7 @@ partial class RoomManager
                 "Avatar data updated. ({Name} [{Id}:{Index}])",
                 avatar.Name, avatar.Id, avatar.Index
             );
-            AvatarDataUpdated?.Invoke(new AvatarDataUpdatedEventArgs(
+            AvatarChanged?.Invoke(new AvatarChangedEventArgs(
                 avatar, previousFigure, previousGender,
                 previousMotto, previousAchievementScore
             ));
