@@ -5,8 +5,8 @@ using Xabbo.Core.Messages.Incoming;
 
 namespace Xabbo.Core.Game;
 
-using ModernIncoming = Messages.Incoming.Modern;
-using OriginsIncoming = Messages.Incoming.Origins;
+using ModernIncoming = Messages.Incoming;
+using OriginsIncoming = Messages.Incoming;
 
 partial class FriendManager
 {

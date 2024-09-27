@@ -2,9 +2,8 @@ using Microsoft.Extensions.Logging;
 
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages.Incoming;
-using Xabbo.Core.Messages.Incoming.Modern;
 
-using Modern = Xabbo.Core.Messages.Incoming.Modern;
+using Modern = Xabbo.Core.Messages.Incoming;
 
 namespace Xabbo.Core.Game;
 

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
-using Xabbo.Core.Messages.Outgoing.Modern;
-using Xabbo.Core.Messages.Incoming.Modern;
+using Xabbo.Core.Messages.Outgoing;
+using Xabbo.Core.Messages.Incoming;
 
 namespace Xabbo.Core.Tasks;
 
