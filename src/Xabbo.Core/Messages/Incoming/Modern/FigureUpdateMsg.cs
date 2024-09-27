@@ -3,6 +3,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
+/// <summary>
+/// Received when the user's own figure is updated.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
+/// </summary>
+/// <param name="Figure">The user's updated figure string.</param>
+/// <param name="Gender">The user's updated gender.</param>
 public sealed record FigureUpdateMsg(string Figure, Gender Gender) : IMessage<FigureUpdateMsg>
 {
     static ClientType IMessage<FigureUpdateMsg>.SupportedClients => ClientType.Modern;

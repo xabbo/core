@@ -4,7 +4,9 @@ using Xabbo.Messages.Flash;
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
 /// <summary>
-/// Received before the server closes the connection to specify the reason for the disconnection.
+/// May be received before the server closes the connection to specify a reason for the disconnection.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
 public sealed record DisconnectReasonMsg(DisconnectReason Reason = DisconnectReason.Unknown) : IMessage<DisconnectReasonMsg>
 {

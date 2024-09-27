@@ -5,6 +5,11 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Received when avatars are added to the room.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
 public sealed class AvatarsAddedMsg : List<Avatar>, IMessage<AvatarsAddedMsg>
 {
     public AvatarsAddedMsg() { }

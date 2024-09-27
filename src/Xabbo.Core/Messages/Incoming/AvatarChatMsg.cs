@@ -5,7 +5,7 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
-[EditorBrowsable(EditorBrowsableState.Never)]
+[EditorBrowsable(EditorBrowsableState.Advanced)]
 public abstract record AvatarChatMsgBase(ChatType Type)
 {
     public int Index { get; init; }
@@ -72,6 +72,8 @@ public abstract record AvatarChatMsgBase(ChatType Type)
 
 /// <summary>
 /// Received when an avatar in the room sends a chat message.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
 /// </summary>
 public sealed record AvatarChatMsg : AvatarChatMsgBase, IMessage<AvatarChatMsg>
 {
@@ -101,6 +103,11 @@ public sealed record AvatarChatMsg : AvatarChatMsgBase, IMessage<AvatarChatMsg>
     void IComposer.Compose(in PacketWriter p) => Compose(in p);
 }
 
+/// <summary>
+/// Received when an avatar in the room sends a talk message.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
 public sealed record AvatarTalkMsg : AvatarChatMsgBase, IMessage<AvatarTalkMsg>
 {
     static Identifier IMessage<AvatarTalkMsg>.Identifier => In.Chat;
@@ -126,6 +133,11 @@ public sealed record AvatarTalkMsg : AvatarChatMsgBase, IMessage<AvatarTalkMsg>
     void IComposer.Compose(in PacketWriter p) => Compose(in p);
 }
 
+/// <summary>
+/// Received when an avatar in the room sends a shout message.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
 public sealed record AvatarShoutMsg : AvatarChatMsgBase, IMessage<AvatarShoutMsg>
 {
     static Identifier IMessage<AvatarShoutMsg>.Identifier => In.Shout;
@@ -151,6 +163,11 @@ public sealed record AvatarShoutMsg : AvatarChatMsgBase, IMessage<AvatarShoutMsg
     void IComposer.Compose(in PacketWriter p) => Compose(in p);
 }
 
+/// <summary>
+/// Received when an avatar in the room sends a whisper message.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
 public sealed record AvatarWhisperMsg : AvatarChatMsgBase, IMessage<AvatarWhisperMsg>
 {
     static Identifier IMessage<AvatarWhisperMsg>.Identifier => In.Whisper;

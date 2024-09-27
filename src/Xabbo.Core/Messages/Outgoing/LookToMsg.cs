@@ -5,13 +5,26 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
+/// <summary>
+/// Sent when looking towards a tile.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Point">The point to look towards.</param>
 public sealed record LookToMsg(Point Point) : IMessage<LookToMsg>
 {
     public static Identifier Identifier => Out.LookTo;
 
-    public LookToMsg(int x, int y) : this(new Point(x, y)) { }
+    public LookToMsg(int X, int Y) : this(new Point(X, Y)) { }
 
+    /// <summary>
+    /// Gets the X coordinate.
+    /// </summary>
     public int X => Point.X;
+
+    /// <summary>
+    /// Gets the Y coordinate.
+    /// </summary>
     public int Y => Point.Y;
 
     public static LookToMsg Parse(in PacketReader p)

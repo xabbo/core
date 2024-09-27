@@ -5,8 +5,13 @@ using Xabbo.Core.Messages.Incoming.Modern;
 namespace Xabbo.Core.Messages.Outgoing.Modern;
 
 /// <summary>
+/// Sent when requesting the settings for a room.
+/// <para/>
 /// Request for <see cref="RoomSettingsMsg"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
+/// <param name="Id">The ID of the room to request settings for.</param>
 public sealed record GetRoomSettingsMsg(Id Id) : IRequestMessage<GetRoomSettingsMsg, RoomSettingsMsg, RoomSettings>
 {
     static ClientType IMessage<GetRoomSettingsMsg>.SupportedClients => ClientType.Modern;

@@ -3,6 +3,14 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Received after searching for a user in the console.
+/// <para/>
+/// Response for <see cref="Outgoing.SearchUserMsg"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Results">The search results.</param>
 public sealed record SearchUserResultsMsg(UserSearchResults Results) : IMessage<SearchUserResultsMsg>
 {
     static Identifier IMessage<SearchUserResultsMsg>.Identifier => In.HabboSearchResult;

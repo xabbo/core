@@ -5,6 +5,11 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
+/// <summary>
+/// Sent when removing friends from the user's friends list.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
 public sealed class RemoveFriendsMsg : List<Id>, IMessage<RemoveFriendsMsg>
 {
     public RemoveFriendsMsg() { }

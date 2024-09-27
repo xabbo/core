@@ -5,6 +5,12 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Received when an avatar is removed from the room.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Index">The index of the avatar that was removed.</param>
 public sealed record AvatarRemovedMsg(int Index) : IMessage<AvatarRemovedMsg>
 {
     static Identifier IMessage<AvatarRemovedMsg>.Identifier => In.UserRemove;

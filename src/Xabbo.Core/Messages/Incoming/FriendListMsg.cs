@@ -5,6 +5,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Represents a friend list fragment.
+/// <para/>
+/// Received after requesting the user's list of friends.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
 public sealed class FriendListMsg : List<Friend>, IMessage<FriendListMsg>
 {
     public FriendListMsg() { }

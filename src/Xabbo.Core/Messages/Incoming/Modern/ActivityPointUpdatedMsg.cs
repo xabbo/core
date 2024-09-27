@@ -3,6 +3,11 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
+/// <summary>
+/// Received when the user's activity points are updated.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
+/// </summary>
 public sealed record ActivityPointUpdatedMsg(ActivityPointType Type, int Amount, int Change)
     : IMessage<ActivityPointUpdatedMsg>
 {

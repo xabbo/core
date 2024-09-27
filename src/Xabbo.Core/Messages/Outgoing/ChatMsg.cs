@@ -5,6 +5,15 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
+/// <summary>
+/// Sent when sending a chat message in a room.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Type">The type of the chat message.</param>
+/// <param name="Message">The chat message content.</param>
+/// <param name="BubbleStyle">The chat bubble style. Applies to <see cref="ClientType.Modern"/> clients.</param>
+/// <param name="Recipient">The recipient of the message, if this is a <see cref="ChatType.Whisper"/> message.</param>
 public sealed record ChatMsg(ChatType Type, string Message, int BubbleStyle = 0, string Recipient = "") : IMessage<ChatMsg>
 {
     static Identifier[] IMessage<ChatMsg>.Identifiers { get; } = [Out.Chat, Out.Shout, Out.Whisper];

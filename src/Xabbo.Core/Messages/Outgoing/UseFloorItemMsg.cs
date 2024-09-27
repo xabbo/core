@@ -4,6 +4,13 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
+/// <summary>
+/// Sent when using a floor item.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Id">The ID of the floor item.</param>
+/// <param name="State">The state of the floor item. Appears to be unused - items are always toggled between states.</param>
 public sealed record UseFloorItemMsg(Id Id, int State = 0) : IMessage<UseFloorItemMsg>
 {
     static Identifier IMessage<UseFloorItemMsg>.Identifier => default;

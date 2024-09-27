@@ -6,9 +6,9 @@ using Xabbo.Messages.Shockwave;
 namespace Xabbo.Core.Messages.Outgoing.Origins;
 
 /// <summary>
-/// Sent to the server when updating the user's profile or account.
+/// Sent when updating the user's profile or account.
 /// <para/>
-/// Supported clients: Shockwave.
+/// Supported clients: <see cref="ClientType.Origins"/>.
 /// </summary>
 public sealed record UpdateProfileMsg : IMessage<UpdateProfileMsg>
 {

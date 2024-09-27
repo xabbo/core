@@ -6,6 +6,11 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Received when friends send a message to the user via the console.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
 public sealed class ConsoleMessagesMsg : List<ConsoleMessage>, IMessage<ConsoleMessagesMsg>
 {
     static Identifier IMessage<ConsoleMessagesMsg>.Identifier => In.NewConsole;

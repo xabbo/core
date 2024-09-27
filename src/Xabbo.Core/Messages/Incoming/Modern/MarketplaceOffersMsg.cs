@@ -5,8 +5,13 @@ using Xabbo.Messages.Flash;
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
 /// <summary>
-/// Response for <see cref="Outgoing.Modern.GetMarketplaceOffersMsg"/>.
+/// Received after searching the marketplace for offers.
+/// <para/>
+/// Response for <see cref="Outgoing.Modern.SearchMarketplaceOffersMsg"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
+/// <param name="Offers">The list of marketplace offers.</param>
 public sealed record MarketplaceOffersMsg(List<MarketplaceOffer> Offers) : IMessage<MarketplaceOffersMsg>
 {
     static ClientType IMessage<MarketplaceOffersMsg>.SupportedClients => ClientType.Modern;

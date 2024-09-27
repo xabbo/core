@@ -3,6 +3,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Received when an avatar in the room starts or stops typing.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
+/// </summary>
+/// <param name="Index">The index of the avatar.</param>
+/// <param name="Typing">Whether the avatar is typing.</param>
 public sealed record AvatarTypingMsg(int Index, bool Typing) : IMessage<AvatarTypingMsg>
 {
     static ClientType IMessage<AvatarTypingMsg>.SupportedClients => ClientType.Modern;

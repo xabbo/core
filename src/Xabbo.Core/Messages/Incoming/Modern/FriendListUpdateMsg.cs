@@ -5,6 +5,11 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
+/// <summary>
+/// Received when the user's friend list is updated.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
+/// </summary>
 public sealed class FriendListUpdateMsg : IMessage<FriendListUpdateMsg>
 {
     static ClientType IMessage<FriendListUpdateMsg>.SupportedClients => ClientType.Modern;

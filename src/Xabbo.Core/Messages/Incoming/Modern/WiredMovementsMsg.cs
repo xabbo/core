@@ -5,6 +5,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
+/// <summary>
+/// Represents a list of wired movement updates.
+/// <para/>
+/// Received when objects in the room are moved by wired.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
+/// </summary>
 public sealed class WiredMovementsMsg : List<WiredMovement>, IMessage<WiredMovementsMsg>
 {
     static ClientType IMessage<WiredMovementsMsg>.SupportedClients => ClientType.Modern;

@@ -5,6 +5,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
+/// <summary>
+/// Sent when kicking a user from the room.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Id">The ID of the user to kick. Applies to <see cref="ClientType.Modern"/> clients.</param>
+/// <param name="Name">The name of the user to kick. Applies to the <see cref="ClientType.Origins"/> client.</param>
 public sealed record KickUserMsg(Id? Id = null, string? Name = null) : IMessage<KickUserMsg>
 {
     static Identifier IMessage<KickUserMsg>.Identifier => Out.KickUser;

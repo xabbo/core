@@ -4,7 +4,11 @@ using Xabbo.Messages.Flash;
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
 /// <summary>
+/// Received after requesting the user's own marketplace offers.
+/// <para/>
 /// Response for <see cref="Outgoing.Modern.GetOwnMarketplaceOffersMsg"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
 public sealed record OwnMarketplaceOffersMsg(UserMarketplaceOffers Offers) : IMessage<OwnMarketplaceOffersMsg>
 {

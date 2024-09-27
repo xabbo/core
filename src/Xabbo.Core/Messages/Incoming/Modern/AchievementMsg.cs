@@ -6,6 +6,8 @@ namespace Xabbo.Core.Messages.Incoming.Modern;
 
 /// <summary>
 /// Received when an achievement is updated.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
 public sealed record AchievementMsg(Achievement Achievement) : IMessage<AchievementMsg>
 {

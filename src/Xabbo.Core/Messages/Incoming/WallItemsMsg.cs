@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,6 +6,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Represents a list of wall items.
+/// <para/>
+/// Received when wall items in the room are loaded.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
 public sealed class WallItemsMsg : List<WallItem>, IMessage<WallItemsMsg>
 {
     public WallItemsMsg() { }

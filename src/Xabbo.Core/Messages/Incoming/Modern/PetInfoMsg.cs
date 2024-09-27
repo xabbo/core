@@ -4,8 +4,13 @@ using Xabbo.Messages.Flash;
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
 /// <summary>
+/// Received after requesting a pet's information.
+/// <para/>
 /// Response for <see cref="Outgoing.Modern.GetPetInfoMsg"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
+/// <param name="Info">The requested pet's information.</param>
 public sealed record PetInfoMsg(PetInfo Info) : IMessage<PetInfoMsg>
 {
     static ClientType IMessage<PetInfoMsg>.SupportedClients => ClientType.Modern;

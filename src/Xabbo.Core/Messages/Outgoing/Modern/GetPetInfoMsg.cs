@@ -5,8 +5,13 @@ using Xabbo.Core.Messages.Incoming.Modern;
 namespace Xabbo.Core.Messages.Outgoing.Modern;
 
 /// <summary>
-/// Request for <see cref="PetInfoMsg"/>.
+/// Sent when requesting a pet's information.
+/// <para/>
+/// Request for <see cref="PetInfoMsg"/>. Returns a <see cref="PetInfo"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
+/// <param name="Id">The ID of the pet to retrieve information for.</param>
 public sealed record GetPetInfoMsg(Id Id) : IRequestMessage<GetPetInfoMsg, PetInfoMsg, PetInfo>
 {
     static ClientType IMessage<GetPetInfoMsg>.SupportedClients => ClientType.Modern;

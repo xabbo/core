@@ -3,6 +3,11 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Received periodically to check if the connection is alive.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
 public sealed record PingMsg : IMessage<PingMsg>
 {
     static Identifier IMessage<PingMsg>.Identifier => In.Ping;

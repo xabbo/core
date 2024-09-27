@@ -3,6 +3,12 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
+/// <summary>
+/// Sent when clicking a tile in a room to walk to.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Point">The coordinates of the tile.</param>
 public sealed record WalkMsg(Point Point) : IMessage<WalkMsg>
 {
     static Identifier IMessage<WalkMsg>.Identifier => Out.MoveAvatar;

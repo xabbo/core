@@ -5,8 +5,16 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
-/// <param name="Id">The wall item ID.</param>
-/// <param name="PickerId">The ID of the user who picked up the item.</param>
+/// <summary>
+/// Received when a wall item is removed from the room.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Id">The ID of the wall item that was removed.</param>
+/// <param name="PickerId">
+/// The ID of the user who picked up the item.
+/// Only available on <see cref="ClientType.Modern"/> clients.
+/// </param>
 public sealed record WallItemRemovedMsg(Id Id, Id PickerId = default) : IMessage<WallItemRemovedMsg>
 {
     static Identifier IMessage<WallItemRemovedMsg>.Identifier => In.ItemRemove;

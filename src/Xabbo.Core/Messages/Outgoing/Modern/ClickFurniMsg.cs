@@ -5,6 +5,14 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing.Modern;
 
+/// <summary>
+/// Sent when clicking a furni.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
+/// </summary>
+/// <param name="Type">The type of item that was clicked.</param>
+/// <param name="Id">The ID of the item that was clicked.</param>
+/// <param name="State">Appears to be unused.</param>
 public sealed record ClickFurniMsg(ItemType Type, Id Id, int State = 0) : IMessage<ClickFurniMsg>
 {
     static ClientType IMessage<ClickFurniMsg>.SupportedClients => ClientType.Modern;

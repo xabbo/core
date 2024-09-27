@@ -8,6 +8,8 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Sent when requesting the user's data.
 /// <para/>
 /// Request for <see cref="UserDataMsg"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
 /// </summary>
 public sealed record GetUserDataMsg : IRequestMessage<GetUserDataMsg, UserDataMsg, UserData>
 {

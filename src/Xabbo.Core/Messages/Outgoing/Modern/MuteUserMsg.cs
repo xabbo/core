@@ -3,6 +3,14 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing.Modern;
 
+/// <summary>
+/// Sent when muting a user in a room.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
+/// </summary>
+/// <param name="Id">The ID of the user to mute.</param>
+/// <param name="RoomId">The ID of the room to mute the user in.</param>
+/// <param name="Minutes">The duration in minutes to mute the user for.</param>
 public sealed record MuteUserMsg(Id Id, Id RoomId, int Minutes) : IMessage<MuteUserMsg>
 {
     static ClientType IMessage<MuteUserMsg>.SupportedClients => ClientType.Modern;

@@ -3,6 +3,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing.Modern;
 
+/// <summary>
+/// Sent when requesting the user's badges.
+/// <para/>
+/// Responds with a sequence of <see cref="Incoming.Modern.BadgeFragmentMsg"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
+/// </summary>
 public sealed record GetBadgesMsg : IMessage<GetBadgesMsg>
 {
     static ClientType IMessage<GetBadgesMsg>.SupportedClients => ClientType.Modern;

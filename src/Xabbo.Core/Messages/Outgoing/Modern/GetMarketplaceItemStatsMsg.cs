@@ -5,8 +5,14 @@ using Xabbo.Core.Messages.Incoming.Modern;
 namespace Xabbo.Core.Messages.Outgoing.Modern;
 
 /// <summary>
-/// Request for <see cref="MarketplaceItemStatsMsg"/>.
+/// Sent when requesting the marketplace statistics of an item.
+/// <para/>
+/// Request for <see cref="MarketplaceItemStatsMsg"/>. Returns a <see cref="MarketplaceItemStats"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
+/// <param name="Type">The type of the item to get marketplace statistics for.</param>
+/// <param name="Kind">The kind of the item to get marketplace statistics for.</param>
 public sealed record GetMarketplaceItemStatsMsg(ItemType Type, int Kind)
     : IRequestMessage<GetMarketplaceItemStatsMsg, MarketplaceItemStatsMsg, MarketplaceItemStats>
 {

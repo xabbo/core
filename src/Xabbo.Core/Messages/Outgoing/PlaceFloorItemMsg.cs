@@ -5,8 +5,18 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
+/// <summary>
+/// Sent when placing a floor item in a room.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Flash"/>, <see cref="ClientType.Shockwave"/>.
+/// </summary>
+/// <param name="ItemId">The ID of the floor item to place.</param>
+/// <param name="Location">The location to place the item at.</param>
+/// <param name="Direction">The direction to place the item in.</param>
+/// <param name="SizeX">The size of the object on the X axis. Applies to the <see cref="ClientType.Origins"/> client.</param>
+/// <param name="SizeY">The size of the object on the Y axis. Applies to the <see cref="ClientType.Origins"/> client.</param>
 public sealed record PlaceFloorItemMsg(
-    Id ItemId, int X, int Y, int Direction, int SizeX = 1, int SizeY = 1
+    Id ItemId, Point Location, int Direction, int SizeX = 1, int SizeY = 1
 )
     : IMessage<PlaceFloorItemMsg>
 {
@@ -17,6 +27,20 @@ public sealed record PlaceFloorItemMsg(
     };
 
     static Identifier IMessage<PlaceFloorItemMsg>.Identifier => Out.PlaceObject;
+
+    /// <summary>
+    /// Gets the X coordinate.
+    /// </summary>
+    public int X => Location.X;
+
+    /// <summary>
+    /// Gets the Y coordinate.
+    /// </summary>
+    public int Y => Location.Y;
+
+    public PlaceFloorItemMsg(Id itemId, int X, int Y, int direction, int sizeX = 1, int sizeY = 1)
+        : this(itemId, (X, Y), direction, sizeX, sizeY)
+    { }
 
     static bool IMessage<PlaceFloorItemMsg>.Match(in PacketReader p)
     {

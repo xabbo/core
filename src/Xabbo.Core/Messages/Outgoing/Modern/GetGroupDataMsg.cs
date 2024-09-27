@@ -7,10 +7,12 @@ namespace Xabbo.Core.Messages.Outgoing.Modern;
 /// <summary>
 /// Sent when requesting a group's information.
 /// <para/>
-/// Request for <see cref="GroupDataMsg"/>.
+/// Request for <see cref="GroupDataMsg"/>. Returns <see cref="GroupData"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
 /// <param name="Id">The ID of the group to request information for.</param>
-/// <param name="Open">Whether the open the group information in-client.</param>
+/// <param name="Open">Whether to open the group information in-client.</param>
 public sealed record GetGroupDataMsg(Id Id, bool Open = false) : IRequestMessage<GetGroupDataMsg, GroupDataMsg, GroupData>
 {
     static ClientType IMessage<GetGroupDataMsg>.SupportedClients => ClientType.Modern;

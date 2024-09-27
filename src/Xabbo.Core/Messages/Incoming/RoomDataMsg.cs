@@ -7,6 +7,8 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received after requesting room data for a specified room.
 /// <para/>
 /// Response for <see cref="Outgoing.GetRoomDataMsg"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
 /// </summary>
 public sealed record RoomDataMsg(RoomData Data) : IMessage<RoomDataMsg>
 {

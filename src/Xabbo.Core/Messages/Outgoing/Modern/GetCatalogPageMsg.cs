@@ -4,7 +4,9 @@ using Xabbo.Messages.Flash;
 namespace Xabbo.Core.Messages.Outgoing.Modern;
 
 /// <summary>
-/// Sent when requesting a catalog page on modern clients.
+/// Sent when requesting a catalog page.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
 public sealed record GetCatalogPageMsg(int Id, int OfferId = -1, string Type = "NORMAL") : IMessage<GetCatalogPageMsg>
 {

@@ -3,6 +3,14 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
+/// <summary>
+/// Received after requesting the user's list of badges.
+/// <para/>
+/// A sequence of fragments are received in response to <see cref="Outgoing.Modern.GetBadgesMsg"/>.
+/// </summary>
+/// <param name="Badges">The list of badges in the fragment.</param>
+/// <param name="FragmentIndex">The sequence index of the fragment.</param>
+/// <param name="TotalFragments">The total number of fragments in the sequence.</param>
 public sealed record BadgeFragmentMsg(Badge[] Badges, int FragmentIndex = 0, int TotalFragments = 1)
     : IMessage<BadgeFragmentMsg>
 {

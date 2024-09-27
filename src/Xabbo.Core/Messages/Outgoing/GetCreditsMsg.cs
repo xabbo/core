@@ -1,14 +1,20 @@
 using Xabbo.Messages;
 using Xabbo.Messages.Flash;
+using Xabbo.Core.Messages.Incoming;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
 /// <summary>
 /// Sent when requesting the user's credit balance.
+/// <para/>
+/// Request for <see cref="CreditBalanceMsg"/>. Returns an <see cref="int"/> indicating the user's current balance.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
 /// </summary>
-public sealed record GetCreditsMsg : IMessage<GetCreditsMsg>
+public sealed record GetCreditBalanceMsg : IRequestMessage<GetCreditBalanceMsg, CreditBalanceMsg, int>
 {
-    static Identifier IMessage<GetCreditsMsg>.Identifier => Out.GetCreditsInfo;
-    static GetCreditsMsg IParser<GetCreditsMsg>.Parse(in PacketReader p) => new();
+    static Identifier IMessage<GetCreditBalanceMsg>.Identifier => Out.GetCreditsInfo;
+    int IResponseData<CreditBalanceMsg, int>.GetData(CreditBalanceMsg msg) => msg.Credits;
+    static GetCreditBalanceMsg IParser<GetCreditBalanceMsg>.Parse(in PacketReader p) => new();
     void IComposer.Compose(in PacketWriter p) { }
 }

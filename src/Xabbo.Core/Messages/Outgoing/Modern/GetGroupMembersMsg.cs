@@ -4,13 +4,24 @@ using Xabbo.Core.Messages.Incoming.Modern;
 
 namespace Xabbo.Core.Messages.Outgoing.Modern;
 
-public sealed record GetGroupMembersMsg(
+/// <remarks>
+/// Sent when searching the list of a group's members.
+/// <para/>
+/// Request for <see cref="GroupMembersMsg"/>. Returns a <see cref="GroupMembers"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
+/// </remarks>
+/// <param name="Id">The ID of the group.</param>
+/// <param name="Page">The page number of the group's member list to retrieve.</param>
+/// <param name="Filter">The search text used to filter members by name.</param>
+/// <param name="SearchType">The type of the member search.</param>
+public sealed record SearchGroupMembersMsg(
     Id Id, int Page = 0, string Filter = "", GroupMemberSearchType SearchType = GroupMemberSearchType.Members
 )
-    : IRequestMessage<GetGroupMembersMsg, GroupMembersMsg, GroupMembers>
+    : IRequestMessage<SearchGroupMembersMsg, GroupMembersMsg, GroupMembers>
 {
-    static ClientType IMessage<GetGroupMembersMsg>.SupportedClients => ClientType.Modern;
-    static Identifier IMessage<GetGroupMembersMsg>.Identifier => Out.GetGuildMembers;
+    static ClientType IMessage<SearchGroupMembersMsg>.SupportedClients => ClientType.Modern;
+    static Identifier IMessage<SearchGroupMembersMsg>.Identifier => Out.GetGuildMembers;
 
     bool IRequestFor<GroupMembersMsg>.MatchResponse(GroupMembersMsg msg) =>
         msg.Members.GroupId == Id &&
@@ -20,7 +31,7 @@ public sealed record GetGroupMembersMsg(
 
     GroupMembers IResponseData<GroupMembersMsg, GroupMembers>.GetData(GroupMembersMsg msg) => msg.Members;
 
-    static GetGroupMembersMsg IParser<GetGroupMembersMsg>.Parse(in PacketReader p) => new(
+    static SearchGroupMembersMsg IParser<SearchGroupMembersMsg>.Parse(in PacketReader p) => new(
         Id: p.ReadId(),
         Page: p.ReadInt(),
         Filter: p.ReadString(),

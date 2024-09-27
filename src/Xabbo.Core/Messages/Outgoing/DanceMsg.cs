@@ -4,6 +4,12 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
+/// <summary>
+/// Sent when starting, stopping or changing dances in a room.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Dance">The dance to change to.</param>
 public sealed record DanceMsg(Dances Dance = Dances.Dance) : IMessage<DanceMsg>
 {
     static Identifier IMessage<DanceMsg>.Identifier => default;

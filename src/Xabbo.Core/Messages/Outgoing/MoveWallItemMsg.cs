@@ -3,6 +3,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
+/// <summary>
+/// Sent when moving a wall item.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Id">The ID of the wall item to move.</param>
+/// <param name="Location">The location to move the wall item to.</param>
 public sealed record MoveWallItemMsg(Id Id, WallLocation Location) : IMessage<MoveWallItemMsg>
 {
     static Identifier IMessage<MoveWallItemMsg>.Identifier => Out.MoveWallItem;

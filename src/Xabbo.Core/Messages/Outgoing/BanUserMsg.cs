@@ -5,6 +5,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
+/// <summary>
+/// Sent when banning a user from a room.
+/// </summary>
+/// <param name="Id">The ID of the user to ban. Applies to <see cref="ClientType.Modern"/> clients.</param>
+/// <param name="RoomId">The ID of the room to ban the user from. Applies to <see cref="ClientType.Modern"/> clients.</param>
+/// <param name="Name">The name of the user to ban. Applies to the <see cref="ClientType.Origins"/> client.</param>
+/// <param name="Duration">The duration of the ban.</param>
 public sealed record BanUserMsg(Id? Id = null, Id? RoomId = null, string? Name = null, BanDuration Duration = BanDuration.Permanent) : IMessage<BanUserMsg>
 {
     public BanUserMsg(IUser user, Id roomId, BanDuration duration = BanDuration.Permanent)

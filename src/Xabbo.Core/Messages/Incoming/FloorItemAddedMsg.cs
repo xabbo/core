@@ -3,6 +3,12 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Received when a floor item is added to the room.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Item">The floor item that was added.</param>
 public sealed record FloorItemAddedMsg(FloorItem Item) : IMessage<FloorItemAddedMsg>
 {
     static Identifier IMessage<FloorItemAddedMsg>.Identifier => In.ObjectAdd;

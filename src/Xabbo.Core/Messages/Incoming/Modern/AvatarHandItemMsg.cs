@@ -3,6 +3,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
+/// <summary>
+/// Received when an avatar's hand item updates.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
+/// </summary>
+/// <param name="Index">The index of the avatar.</param>
+/// <param name="Item">The avatar's updated hand item ID.</param>
 public sealed record AvatarHandItemMsg(int Index, int Item) : IMessage<AvatarHandItemMsg>
 {
     static ClientType IMessage<AvatarHandItemMsg>.SupportedClients => ClientType.Modern;

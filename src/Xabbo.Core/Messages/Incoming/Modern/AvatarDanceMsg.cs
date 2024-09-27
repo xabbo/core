@@ -3,6 +3,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
+/// <summary>
+/// Received when an avatar starts or stops dancing.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
+/// </summary>
+/// <param name="Index">The avatar's index.</param>
+/// <param name="Dance">The avatar's updated dance.</param>
 public sealed record AvatarDanceMsg(int Index, Dances Dance) : IMessage<AvatarDanceMsg>
 {
     static ClientType IMessage<AvatarDanceMsg>.SupportedClients => ClientType.Modern;

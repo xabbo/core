@@ -5,6 +5,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
+/// <summary>
+/// Sent when placing a wall item in a room.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Flash"/>, <see cref="ClientType.Shockwave"/>.
+/// </summary>
+/// <param name="ItemId">The ID of the wall item to place.</param>
+/// <param name="Location">The location to place the wall item at.</param>
 public sealed record PlaceWallItemMsg(Id ItemId, WallLocation Location) : IMessage<PlaceWallItemMsg>
 {
     static Identifier IMessage<PlaceWallItemMsg>.Identifier => Out.PlaceObject;

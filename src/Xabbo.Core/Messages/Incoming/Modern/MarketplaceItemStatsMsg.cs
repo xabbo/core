@@ -4,8 +4,13 @@ using Xabbo.Messages.Flash;
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
 /// <summary>
+/// Received after requesting the marketplace statistics of an item.
+/// <para/>
 /// Response for <see cref="Outgoing.Modern.GetMarketplaceItemStatsMsg"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
+/// <param name="Stats">The marketplace item statistics.</param>
 public sealed record MarketplaceItemStatsMsg(MarketplaceItemStats Stats) : IMessage<MarketplaceItemStatsMsg>
 {
     static ClientType IMessage<MarketplaceItemStatsMsg>.SupportedClients => ClientType.Modern;

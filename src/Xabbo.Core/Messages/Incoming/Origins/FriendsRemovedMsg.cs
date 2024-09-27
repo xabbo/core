@@ -5,6 +5,13 @@ using Xabbo.Messages.Shockwave;
 
 namespace Xabbo.Core.Messages.Incoming.Origins;
 
+/// <summary>
+/// Represents a list of user IDs to be removed from the friend's list.
+/// <para/>
+/// Received when friends are removed from the user's friend list.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Origins"/>.
+/// </summary>
 public sealed class FriendsRemovedMsg : List<Id>, IMessage<FriendsRemovedMsg>
 {
     static ClientType IMessage<FriendsRemovedMsg>.SupportedClients => ClientType.Origins;

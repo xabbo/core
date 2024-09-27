@@ -4,8 +4,13 @@ using Xabbo.Messages.Flash;
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
 /// <summary>
-/// Response for <see cref="Outgoing.Modern.GetGroupMembersMsg"/>.
+/// Received after searching the list of a group's members.
+/// <para/>
+/// Response for <see cref="Outgoing.Modern.SearchGroupMembersMsg"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
+/// <param name="Members">The group members.</param>
 public sealed record GroupMembersMsg(GroupMembers Members) : IMessage<GroupMembersMsg>
 {
     static ClientType IMessage<GroupMembersMsg>.SupportedClients => ClientType.Modern;

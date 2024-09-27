@@ -4,6 +4,11 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Received when initializing the messenger.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
 public sealed record MessengerInitMsg : IMessage<MessengerInitMsg>
 {
     public static Identifier Identifier => In.MessengerInit;

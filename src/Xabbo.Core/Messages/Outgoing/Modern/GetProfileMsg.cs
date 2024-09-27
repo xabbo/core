@@ -8,6 +8,9 @@ namespace Xabbo.Core.Messages.Outgoing.Modern;
 /// Sent when requesting a user's profile.
 /// <para/>
 /// Request for <see cref="ProfileMsg"/>.
+/// Returns a <see cref="UserProfile"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
 /// <param name="Id">The ID of the user whose profile to request.</param>
 /// <param name="Open">Whether the open the profile in-client.</param>

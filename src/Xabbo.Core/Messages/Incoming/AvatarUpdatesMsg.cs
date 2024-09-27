@@ -5,6 +5,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Represents a list of avatar status updates.
+/// <para/>
+/// Received when avatars' statuses are updated in the room.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
 public sealed class AvatarStatusMsg : List<AvatarStatus>, IMessage<AvatarStatusMsg>
 {
     public AvatarStatusMsg() { }

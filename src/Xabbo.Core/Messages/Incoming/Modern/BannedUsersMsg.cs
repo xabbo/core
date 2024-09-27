@@ -5,8 +5,14 @@ using Xabbo.Messages.Flash;
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
 /// <summary>
+/// Received after requesting the list of banned users from a room.
+/// <para/>
 /// Response for <see cref="Outgoing.Modern.GetBannedUsersMsg"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
+/// <param name="RoomId">The ID of the room.</param>
+/// <param name="Users">The list of banned users.</param>
 public sealed record BannedUsersMsg(Id RoomId, List<IdName> Users) : IMessage<BannedUsersMsg>
 {
     static ClientType IMessage<BannedUsersMsg>.SupportedClients => ClientType.Modern;

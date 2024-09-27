@@ -6,12 +6,30 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
+/// <summary>
+/// Sent when sending a message to a friend via the console.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <remarks>
+/// Only a single recipient is supported on <see cref="ClientType.Modern"/> clients.
+/// On the <see cref="ClientType.Origins"/> client, you can specify multiple recipients.
+/// </remarks>
 public sealed class SendConsoleMessageMsg : IMessage<SendConsoleMessageMsg>
 {
     public static Identifier Identifier => Out.SendMsg;
 
+    /// <summary>
+    /// The list of recipient IDs.
+    /// Only a single recipient is supported on <see cref="ClientType.Modern"/> clients.
+    /// </summary>
     public List<Id> Recipients { get; set; } = [];
+
+    /// <summary>
+    /// The message content.
+    /// </summary>
     public string Message { get; set; } = "";
+
     public int ConfirmationId { get; set; }
 
     public static SendConsoleMessageMsg Parse(in PacketReader p) => p.Client switch

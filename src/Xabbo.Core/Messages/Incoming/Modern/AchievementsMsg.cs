@@ -8,6 +8,9 @@ namespace Xabbo.Core.Messages.Incoming.Modern;
 /// <para/>
 /// Response for <see cref="Outgoing.Modern.GetAchievementsMsg"/>.
 /// </summary>
+/// <remarks>
+/// Supported on <see cref="ClientType.Modern"/>.
+/// </remarks>
 public sealed record AchievementsMsg(Achievements Achievements) : IMessage<AchievementsMsg>
 {
     static ClientType IMessage<AchievementsMsg>.SupportedClients => ClientType.Modern;

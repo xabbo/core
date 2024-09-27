@@ -3,6 +3,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
+/// <summary>
+/// Received when an avatar performs an action.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
+/// </summary>
+/// <param name="Index">The avatar's index.</param>
+/// <param name="Action">The action that the avatar peformed.</param>
 public sealed record AvatarActionMsg(int Index, Actions Action) : IMessage<AvatarActionMsg>
 {
     static ClientType IMessage<AvatarActionMsg>.SupportedClients => ClientType.Modern;

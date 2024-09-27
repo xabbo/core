@@ -7,7 +7,7 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <summary>
 /// Sent when requesting room data for the specified room ID.
 /// <para/>
-/// Request for <see cref="RoomDataMsg"/>.
+/// Request for <see cref="RoomDataMsg"/>. Returns <see cref="RoomData"/>.
 /// </summary>
 /// <param name="Id">The room ID to request data for.</param>
 /// <param name="Entering">Whether the user is entering the room. Does not apply to Origins.</param>

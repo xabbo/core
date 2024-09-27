@@ -5,6 +5,8 @@ namespace Xabbo.Core.Messages.Incoming;
 
 /// <summary>
 /// Receives when a user rings the doorbell.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
 /// </summary>
 /// <param name="Name">The name of the user who is ringing the doorbell.</param>
 public sealed record DoorbellMsg(string Name) : IMessage<DoorbellMsg>

@@ -5,6 +5,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Received when the value of a dice is updated.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Id">The ID of the dice.</param>
+/// <param name="Value">The updated dice value.</param>
 public sealed record DiceValueMsg(Id Id, int Value) : IMessage<DiceValueMsg>
 {
     static Identifier IMessage<DiceValueMsg>.Identifier => In.DiceValue;

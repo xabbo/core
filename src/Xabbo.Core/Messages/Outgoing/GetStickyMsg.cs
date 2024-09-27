@@ -4,6 +4,14 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Outgoing;
 
+/// <summary>
+/// Sent when requesting a sticky note's contents.
+/// <para/>
+/// Request for <see cref="ItemDataMsg"/>. Returns a <see cref="Sticky"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Id">The ID of the sticky note to retrieve.</param>
 public sealed record GetStickyMsg(Id Id) : IRequestMessage<GetStickyMsg, ItemDataMsg, Sticky>
 {
     static Identifier IMessage<GetStickyMsg>.Identifier => Out.GetItemData;

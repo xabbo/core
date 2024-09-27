@@ -5,6 +5,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Received when a floor item's data is updated.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
+/// <param name="Id">The ID of the floor item that was updated.</param>
+/// <param name="Data">The updated item data.</param>
 public sealed record FloorItemDataUpdatedMsg(Id Id, ItemData Data) : IMessage<FloorItemDataUpdatedMsg>
 {
     static Identifier IMessage<FloorItemDataUpdatedMsg>.Identifier => In.ObjectDataUpdate;

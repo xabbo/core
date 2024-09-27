@@ -4,7 +4,11 @@ using Xabbo.Messages.Flash;
 namespace Xabbo.Core.Messages.Incoming;
 
 /// <summary>
-/// Received in response to <see cref="Outgoing.GetItemDataMsg"/>
+/// Received after requesting the data of a wall item.
+/// <para/>
+/// Response for <see cref="Outgoing.GetItemDataMsg"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
 /// </summary>
 public sealed record ItemDataMsg(Id Id, string Data) : IMessage<ItemDataMsg>
 {

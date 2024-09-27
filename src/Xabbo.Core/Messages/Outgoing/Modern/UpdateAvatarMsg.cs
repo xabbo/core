@@ -8,8 +8,8 @@ namespace Xabbo.Core.Messages.Outgoing.Modern;
 /// <para/>
 /// Supported clients:
 /// <list type="bullet">
-/// <item>Flash (Incoming, Outgoing)</item>
-/// <item>Shockwave (Outgoing -> translates to <see cref="Origins.UpdateProfileMsg"/>)</item>
+/// <item><see cref="ClientType.Modern"/> (Intercept/Send)</item>
+/// <item><see cref="ClientType.Shockwave"/> (Send only: translates to <see cref="Origins.UpdateProfileMsg"/>)</item>
 /// </list>
 /// </summary>
 public sealed record UpdateAvatarMsg(Gender Gender, string Figure) : IMessage<UpdateAvatarMsg>

@@ -7,7 +7,9 @@ namespace Xabbo.Core.Messages.Outgoing.Modern;
 /// <summary>
 /// Sent when requesting the user's achievements.
 /// <para/>
-/// Request for <see cref="AchievementsMsg"/>.
+/// Request for <see cref="AchievementsMsg"/>. Returns <see cref="Achievements"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
 /// </summary>
 public sealed record class GetAchievementsMsg() : IRequestMessage<GetAchievementsMsg, AchievementsMsg, Achievements>
 {

@@ -5,6 +5,12 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming.Modern;
 
+/// <summary>
+/// Received when the item data of multiple floor items are updated.
+/// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>.
+/// </summary>
+/// <param name="Updates">The list of floor item data updated.</param>
 public sealed record FloorItemsDataUpdatedMsg(List<(Id Id, ItemData Data)> Updates) : IMessage<FloorItemsDataUpdatedMsg>
 {
     static ClientType IMessage<FloorItemsDataUpdatedMsg>.SupportedClients => ClientType.Modern;

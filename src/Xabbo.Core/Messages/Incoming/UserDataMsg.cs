@@ -7,7 +7,10 @@ namespace Xabbo.Core.Messages.Incoming;
 /// Received after requesting the user's data.
 /// <para/>
 /// Response for <see cref="Outgoing.GetUserDataMsg"/>.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
 /// </summary>
+/// <param name="UserData">The current user's data.</param>
 public sealed record UserDataMsg(UserData UserData) : IMessage<UserDataMsg>
 {
     static Identifier IMessage<UserDataMsg>.Identifier => In.UserObject;

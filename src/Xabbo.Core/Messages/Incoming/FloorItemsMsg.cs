@@ -6,6 +6,13 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core.Messages.Incoming;
 
+/// <summary>
+/// Represents a list of floor items.
+/// <para/>
+/// Received when floor items in the room are loaded.
+/// <para/>
+/// Supported clients: <see cref="ClientType.All"/>.
+/// </summary>
 public sealed class FloorItemsMsg : List<FloorItem>, IMessage<FloorItemsMsg>
 {
     public FloorItemsMsg() { }
