@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <DirectoryBuildPropsPath>
+      $([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))
+    </DirectoryBuildPropsPath>
+  </PropertyGroup>
+  <Import Condition="Exists('$(DirectoryBuildPropsPath)')" Project="$(DirectoryBuildPropsPath)" />
+  <ItemGroup Label="Reproducible builds">
+    <PackageReference Include="DotNet.ReproducibleBuilds" Version="1.2.25" PrivateAssets="all" />
+    <PackageReference Include="DotNet.ReproducibleBuilds.Isolated" Version="1.2.25" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
