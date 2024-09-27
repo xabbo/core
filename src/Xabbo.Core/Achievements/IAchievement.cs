@@ -18,7 +18,7 @@ public interface IAchievement
     /// <summary>
     /// The badge code of the achievement.
     /// </summary>
-    string BadgeId { get; }
+    string BadgeCode { get; }
 
     /// <summary>
     /// The current progress of the achievement.

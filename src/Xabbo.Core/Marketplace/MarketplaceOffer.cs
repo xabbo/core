@@ -16,7 +16,7 @@ public sealed class MarketplaceOffer : IMarketplaceOffer, IParserComposer<Market
     public ItemData Data { get; set; }
     IItemData IMarketplaceOffer.Data => Data;
     public int Price { get; set; }
-    public int TimeRemaining { get; set; }
+    public int MinutesRemaining { get; set; }
     public int Average { get; set; }
     public int Offers { get; set; }
 
@@ -61,7 +61,7 @@ public sealed class MarketplaceOffer : IMarketplaceOffer, IParserComposer<Market
         }
 
         Price = p.ReadInt();
-        TimeRemaining = p.ReadInt();
+        MinutesRemaining = p.ReadInt();
         Average = p.ReadInt();
         if (hasOfferCount)
             Offers = p.ReadInt();
@@ -105,7 +105,7 @@ public sealed class MarketplaceOffer : IMarketplaceOffer, IParserComposer<Market
         }
 
         p.WriteInt(Price);
-        p.WriteInt(TimeRemaining);
+        p.WriteInt(MinutesRemaining);
         p.WriteInt(Average);
 
         if (Offers > 0)

@@ -28,7 +28,7 @@ public class Achievement : IAchievement, IParserComposer<Achievement>
 {
     public int Id { get; set; }
     public int Level { get; set; }
-    public string BadgeId { get; set; } = "";
+    public string BadgeCode { get; set; } = "";
     public int BaseProgress { get; set; }
     public int MaxProgress { get; set; }
     public int LevelRewardPoints { get; set; }
@@ -49,7 +49,7 @@ public class Achievement : IAchievement, IParserComposer<Achievement>
 
         Id = p.ReadInt();
         Level = p.ReadInt();
-        BadgeId = p.ReadString();
+        BadgeCode = p.ReadString();
         BaseProgress = p.ReadInt();
         MaxProgress = p.ReadInt();
         LevelRewardPoints = p.ReadInt();
@@ -69,7 +69,7 @@ public class Achievement : IAchievement, IParserComposer<Achievement>
 
         p.WriteInt(Id);
         p.WriteInt(Level);
-        p.WriteString(BadgeId);
+        p.WriteString(BadgeCode);
         p.WriteInt(BaseProgress);
         p.WriteInt(MaxProgress);
         p.WriteInt(LevelRewardPoints);

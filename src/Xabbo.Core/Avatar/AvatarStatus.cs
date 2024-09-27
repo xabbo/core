@@ -57,9 +57,9 @@ public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnly
 
     // flatctrl
     public bool IsController => fragments.ContainsKey("flatctrl");
-    public int ControlLevel
+    public RightsLevel RightsLevel
     {
-        get => IsController ? int.Parse(fragments["flatctrl"][0]) : 0;
+        get => IsController ? (RightsLevel)int.Parse(fragments["flatctrl"][0]) : 0;
         set
         {
             if (!fragments.ContainsKey("flatctrl"))

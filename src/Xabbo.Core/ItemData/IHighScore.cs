@@ -10,10 +10,10 @@ public interface IHighScore
     /// <summary>
     /// The value of the high score.
     /// </summary>
-    int Value { get; }
+    int Score { get; }
 
     /// <summary>
     /// The list of users with this score.
     /// </summary>
-    IReadOnlyList<string> Names { get; }
+    IReadOnlyList<string> Users { get; }
 }

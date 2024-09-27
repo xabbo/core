@@ -38,7 +38,7 @@ public interface IAvatarStatus
     /// <summary>
     /// The rights level of the user.
     /// </summary>
-    int ControlLevel { get; }
+    RightsLevel RightsLevel { get; }
 
     /// <summary>
     /// Whether the user is trading.

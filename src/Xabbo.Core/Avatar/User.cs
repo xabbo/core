@@ -11,10 +11,10 @@ public class User(Id id, int index) : Avatar(AvatarType.User, id, index), IUser
     public string GroupName { get; set; } = "";
     public string FigureExtra { get; set; } = "";
     public int AchievementScore { get; set; }
-    public bool IsModerator { get; set; }
+    public bool IsStaff { get; set; }
     public string BadgeCode { get; set; } = "";
 
-    public int RightsLevel => CurrentUpdate?.ControlLevel ?? 0;
+    public RightsLevel RightsLevel => CurrentUpdate?.RightsLevel ?? RightsLevel.None;
     public bool HasRights => RightsLevel > 0;
 
     internal User(Id id, int index, in PacketReader p)
@@ -29,7 +29,7 @@ public class User(Id id, int index) : Avatar(AvatarType.User, id, index), IUser
         GroupName = p.ReadString();
         FigureExtra = p.ReadString();
         AchievementScore = p.ReadInt();
-        IsModerator = p.ReadBool();
+        IsStaff = p.ReadBool();
     }
 
     protected override void OnUpdate(AvatarStatus update) { }
@@ -47,6 +47,6 @@ public class User(Id id, int index) : Avatar(AvatarType.User, id, index), IUser
         p.WriteString(GroupName);
         p.WriteString(FigureExtra);
         p.WriteInt(AchievementScore);
-        p.WriteBool(IsModerator);
+        p.WriteBool(IsStaff);
     }
 }

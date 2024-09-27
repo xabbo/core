@@ -131,7 +131,7 @@ partial class ProfileManager
         Achievements?.Add(msg.Achievement);
 
         using (Log.MethodScope())
-            Log.LogTrace("Achievement #{Id} ({BadgeId}) updated.", msg.Achievement.Id, msg.Achievement.BadgeId);
+            Log.LogTrace("Achievement #{Id} ({BadgeId}) updated.", msg.Achievement.Id, msg.Achievement.BadgeCode);
 
         AchievementUpdated?.Invoke(new AchievementUpdatedEventArgs(msg.Achievement));
     }

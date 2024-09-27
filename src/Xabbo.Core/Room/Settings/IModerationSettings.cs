@@ -8,13 +8,13 @@ public interface IModerationSettings
     /// <summary>
     /// Specifies who is allowed to mute other users in the room.
     /// </summary>
-    ModerationPermissions WhoCanMute { get; }
+    ModerationPermissions Mute { get; }
     /// <summary>
     /// Specifies who is allowed to kick other users from the room.
     /// </summary>
-    ModerationPermissions WhoCanKick { get; }
+    ModerationPermissions Kick { get; }
     /// <summary>
     /// Specifies who is allowed to ban other users from the room.
     /// </summary>
-    ModerationPermissions WhoCanBan { get; }
+    ModerationPermissions Ban { get; }
 }

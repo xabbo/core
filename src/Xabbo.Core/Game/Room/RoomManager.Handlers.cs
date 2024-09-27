@@ -218,7 +218,7 @@ partial class RoomManager
             return;
         }
 
-        int level;
+        RightsLevel rightsLevel;
 
         if (!Interceptor.Session.Is(ClientType.Shockwave))
         {
@@ -229,14 +229,14 @@ partial class RoomManager
                     _currentRoom.Id, roomId);
                 return;
             }
-            level = e.Packet.Read<int>();
+            rightsLevel = (RightsLevel)e.Packet.Read<int>();
         }
         else
         {
-            level = 4;
+            rightsLevel = RightsLevel.Owner;
         }
 
-        UpdateRightsLevel(level);
+        UpdateRightsLevel(rightsLevel);
     }
 
     [InterceptIn(nameof(In.YouAreNotController))]
@@ -255,7 +255,7 @@ partial class RoomManager
             return;
         }
 
-        UpdateRightsLevel(0);
+        UpdateRightsLevel(RightsLevel.None);
     }
 
     [Intercept(~ClientType.Shockwave)]

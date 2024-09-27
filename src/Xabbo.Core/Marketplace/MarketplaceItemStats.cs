@@ -12,11 +12,11 @@ public sealed class MarketplaceItemStats : IMarketplaceItemStats, IParserCompose
     public ItemType Type { get; set; }
     public int Kind { get; set; }
 
-    public int Average { get; set; }
-    public int Offers { get; set; }
+    public int AverageSalePrice { get; set; }
+    public int OfferCount { get; set; }
     public int HistorySizeInDays { get; set; }
     public List<MarketplaceTradeInfo> TradeInfo { get; set; }
-    IReadOnlyList<IMarketplaceTradeInfo> IMarketplaceItemStats.TradeInfo => TradeInfo;
+    IReadOnlyList<IMarketplaceTradeInfo> IMarketplaceItemStats.History => TradeInfo;
 
     string? IItem.Identifier => null;
 
@@ -29,8 +29,8 @@ public sealed class MarketplaceItemStats : IMarketplaceItemStats, IParserCompose
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        Average = p.ReadInt();
-        Offers = p.ReadInt();
+        AverageSalePrice = p.ReadInt();
+        OfferCount = p.ReadInt();
         HistorySizeInDays = p.ReadInt();
         TradeInfo = [.. p.ParseArray<MarketplaceTradeInfo>()];
 
@@ -48,8 +48,8 @@ public sealed class MarketplaceItemStats : IMarketplaceItemStats, IParserCompose
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        p.WriteInt(Average);
-        p.WriteInt(Offers);
+        p.WriteInt(AverageSalePrice);
+        p.WriteInt(OfferCount);
         p.WriteInt(HistorySizeInDays);
 
         p.ComposeArray(TradeInfo);

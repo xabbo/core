@@ -107,11 +107,11 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
         set => Set(ref _room, value);
     }
 
-    private int _rightsLevel;
+    private RightsLevel _rightsLevel;
     /// <summary>
     /// Gets the user's rights level in the current room.
     /// </summary>
-    public int RightsLevel
+    public RightsLevel RightsLevel
     {
         get => _rightsLevel;
         private set
@@ -124,7 +124,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     /// <summary>
     /// Gets whether the user has rights in the current room.
     /// </summary>
-    public bool HasRights => RightsLevel > 0;
+    public bool HasRights => RightsLevel > RightsLevel.None;
 
     private bool _isOwner;
     /// <summary>
@@ -139,17 +139,17 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     /// <summary>
     /// Gets whether the user has permission to mute in the current room.
     /// </summary>
-    public bool CanMute => CheckPermission(Room?.Data?.Moderation.WhoCanMute);
+    public bool CanMute => CheckPermission(Room?.Data?.Moderation.Mute);
 
     /// <summary>
     /// Gets whether the user has permission to kick in the current room.
     /// </summary>
-    public bool CanKick => CheckPermission(Room?.Data?.Moderation.WhoCanKick);
+    public bool CanKick => CheckPermission(Room?.Data?.Moderation.Kick);
 
     /// <summary>
     /// Gets whether the user has permission to ban in the current room.
     /// </summary>
-    public bool CanBan => CheckPermission(Room?.Data?.Moderation.WhoCanBan);
+    public bool CanBan => CheckPermission(Room?.Data?.Moderation.Ban);
 
     /// <summary>
     /// Retrieves the room data from the cache if it is available.
@@ -244,9 +244,10 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
         RoomDataUpdated?.Invoke(new RoomDataEventArgs(roomData));
     }
 
-    private void UpdateRightsLevel(int rightsLevel)
+    private void UpdateRightsLevel(RightsLevel rightsLevel)
     {
-        Log.LogDebug("Rights level updated to {Level}.", RightsLevel);
+        RightsLevel = rightsLevel;
+        Log.LogDebug("Rights level updated to {Level}.", rightsLevel);
         RightsUpdated?.Invoke();
     }
 
@@ -582,7 +583,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
         IsInRoom = false;
         QueuePosition = 0;
 
-        RightsLevel = 0;
+        RightsLevel = RightsLevel.None;
         IsOwner = false;
 
         Room = _currentRoom = null;
@@ -599,10 +600,10 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
         return permissions switch
         {
             ModerationPermissions.OwnerOnly => IsOwner,
-            ModerationPermissions.GroupAdmins => RightsLevel >= 3,
+            ModerationPermissions.GroupAdmins => RightsLevel >= RightsLevel.GroupAdmin,
             ModerationPermissions.RightsHolders or
-            (ModerationPermissions.GroupAdmins | ModerationPermissions.RightsHolders)
-                => RightsLevel > 0,
+            ModerationPermissions.GroupAdminsAndRightsHolders
+                => RightsLevel > RightsLevel.None,
             ModerationPermissions.AllUsers => true,
             _ => false,
         };

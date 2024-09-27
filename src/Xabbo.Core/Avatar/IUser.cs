@@ -32,12 +32,12 @@ public interface IUser : IAvatar
     /// <summary>
     /// Whether the user is a staff member.
     /// </summary>
-    bool IsModerator { get; }
+    bool IsStaff { get; }
 
     /// <summary>
     /// The rights level of the user in the room.
     /// </summary>
-    int RightsLevel { get; }
+    RightsLevel RightsLevel { get; }
 
     /// <summary>
     /// Whether the user has rights in the room.

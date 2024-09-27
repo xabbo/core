@@ -25,7 +25,7 @@ public interface IMarketplaceOffer : IItem
     /// <summary>
     /// Gets the remaining time of the offer in minutes.
     /// </summary>
-    int TimeRemaining { get; }
+    int MinutesRemaining { get; }
 
     /// <summary>
     /// Gets the current average price of the item.

@@ -53,9 +53,9 @@ public class HighScoreData : ItemData, IHighScoreData, IList<HighScoreData.HighS
 
     public class HighScore : IHighScore, IParserComposer<HighScore>
     {
-        public int Value { get; set; }
+        public int Score { get; set; }
         public List<string> Names { get; set; }
-        IReadOnlyList<string> IHighScore.Names => Names;
+        IReadOnlyList<string> IHighScore.Users => Names;
 
         public HighScore()
         {
@@ -64,19 +64,19 @@ public class HighScoreData : ItemData, IHighScoreData, IList<HighScoreData.HighS
 
         public HighScore(IHighScore highScore)
         {
-            Value = highScore.Value;
-            Names = [.. highScore.Names];
+            Score = highScore.Score;
+            Names = [.. highScore.Users];
         }
 
         private HighScore(in PacketReader p)
         {
-            Value = p.ReadInt();
+            Score = p.ReadInt();
             Names = [.. p.ReadStringArray()];
         }
 
         void IComposer.Compose(in PacketWriter p)
         {
-            p.WriteInt(Value);
+            p.WriteInt(Score);
             p.WriteStringArray(Names);
         }
 

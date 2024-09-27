@@ -8,17 +8,17 @@ namespace Xabbo.Core;
 public interface IMarketplaceItemStats : IItem
 {
     /// <summary>
-    /// Gets the average sale price in the last week.
+    /// The average sale price in the last 7 days.
     /// </summary>
-    int Average { get; }
+    int AverageSalePrice { get; }
 
     /// <summary>
-    /// Gets the number of offers that are currently open.
+    /// The number of offers for this item kind that are currently open.
     /// </summary>
-    int Offers { get; }
+    int OfferCount { get; }
 
     /// <summary>
-    /// Gets the trading history data.
+    /// The trading history data.
     /// </summary>
-    IReadOnlyList<IMarketplaceTradeInfo> TradeInfo { get; }
+    IReadOnlyList<IMarketplaceTradeInfo> History { get; }
 }
