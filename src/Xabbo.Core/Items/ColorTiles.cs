@@ -1,7 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
+/// <summary>
+/// Represents the color state of a color tile.
+/// </summary>
 public enum ColorTiles
 {
     Cyan = 0,

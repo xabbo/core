@@ -1,15 +1,17 @@
 ﻿using System;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IInventoryItem"/>
 public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryItem>
 {
     public Id ItemId { get; set; }
     public ItemType Type { get; set; }
     public Id Id { get; set; }
     public int Kind { get; set; }
-    public string Identifier { get; set; } = "";
+    public string? Identifier { get; set; }
     public FurniCategory Category { get; set; }
     public ItemData Data { get; set; }
     IItemData IInventoryItem.Data => Data;
@@ -20,16 +22,14 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
     public int SecondsToExpiration { get; set; }
     public bool HasRentPeriodStarted { get; set; }
     public Id RoomId { get; set; }
-    public short _Short1 { get; set; }
     public string SlotId { get; set; } = "";
-    public int _Int3 { get; set; }
-
-    public string _String3 { get; set; } = "";
     public long Extra { get; set; }
-    public int _Int5 { get; set; }
+    public bool IsFloorItem => Type is ItemType.Floor;
+    public bool IsWallItem => Type is ItemType.Wall;
 
-    public bool IsFloorItem => Type == ItemType.Floor;
-    public bool IsWallItem => Type == ItemType.Wall;
+    public int Width { get; set; }
+    public int Length { get; set; }
+    public string Colors { get; set; } = "";
 
     public InventoryItem()
     {
@@ -44,7 +44,7 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
         Id = item.Id;
         ItemId = item.ItemId;
         Category = item.Category;
-        Data = (ItemData)item.Data; // TODO Deep copy data
+        Data = ItemData.Clone(item.Data);
     }
 
     private InventoryItem(in PacketReader p) : this()
@@ -66,7 +66,7 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
     {
         ItemId = p.ReadId();
 
-        if (p.Client == ClientType.Flash)
+        if (p.Client is ClientType.Flash)
         {
             Type = H.ToItemType(p.ReadString());
         }
@@ -87,40 +87,34 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
         HasRentPeriodStarted = p.ReadBool();
         RoomId = p.ReadId();
 
-        if (p.Client == ClientType.Unity)
+        if (p.Client is ClientType.Unity)
         {
-            // - Seems to be consistent
-            _Short1 = p.ReadShort(); // ?
-            SlotId = p.ReadString(); // string "r" / "s"
-            _Int3 = p.ReadInt(); // int 1187551480
+            // TODO Unity
+            // p.ReadShort(); // ?
+            // p.ReadString(); // string "r" / "s"
+            // p.ReadInt();
         }
 
-        if (Type == ItemType.Floor)
+        if (Type is ItemType.Floor)
         {
-            if (p.Client == ClientType.Flash)
+            if (p.Client is ClientType.Flash)
             {
                 SlotId = p.ReadString();
                 Extra = p.ReadInt();
             }
             else
             {
-                // 10 bytes ?
-                _String3 = p.ReadString();
-                Extra = p.ReadInt();
-                _Int5 = p.ReadInt();
+                // TODO Unity
             }
-        }
-        else
-        {
-            _String3 = "";
         }
     }
 
     private void ParseOrigins(in PacketReader p)
     {
         Kind = -1;
-        ItemId = p.ReadInt();
+        ItemId = p.ReadId();
         SlotId = p.ReadInt().ToString();
+
         string strItemType = p.ReadString();
         Type = strItemType switch
         {
@@ -128,36 +122,62 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
             "I" => ItemType.Wall,
             _ => throw new Exception($"Invalid item type: {strItemType}"),
         };
-        Id = p.ReadInt();
+
+        Id = p.ReadId();
         Identifier = p.ReadString();
-        if (Type == ItemType.Floor)
+        if (Type is ItemType.Floor)
         {
-            p.ReadInt(); // dimX
-            p.ReadInt(); // dimY
-            // colors
-            Data = new LegacyData { Value = p.ReadString() };
+            Width = p.ReadInt(); // dimX
+            Length = p.ReadInt(); // dimY
+            Colors = p.ReadString();
         }
-        else if (Type == ItemType.Wall)
-        {
-            // props
-            Data = new LegacyData { Value = p.ReadString() };
-        }
+
+        Data = new LegacyData { Value = p.ReadString() };
     }
 
     void IComposer.Compose(in PacketWriter p)
     {
-        // TODO origins composer
-        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
-
-        p.WriteId(ItemId);
-
-        if (p.Client == ClientType.Flash)
+        if (p.Client is ClientType.Shockwave)
         {
-            p.WriteString(Type.ToShortString().ToUpper());
+            ComposeOrigins(in p);
         }
         else
         {
-            p.WriteShort(Type.GetValue());
+            ComposeModern(in p);
+        }
+    }
+
+    private void ComposeOrigins(in PacketWriter p)
+    {
+        p.WriteId(ItemId);
+        if (!int.TryParse(SlotId, out int slot))
+            slot = -1;
+        p.WriteInt(slot);
+        p.WriteString(Type.GetClientIdentifier().ToUpper());
+        p.WriteId(Id);
+        p.WriteString(Identifier ?? "");
+
+        if (Type is ItemType.Floor)
+        {
+            p.WriteInt(Width);
+            p.WriteInt(Length);
+            p.WriteString(Colors);
+        }
+
+        p.WriteString(Data.Value);
+    }
+
+    private void ComposeModern(in PacketWriter p)
+    {
+        p.WriteId(ItemId);
+
+        if (p.Client is ClientType.Flash)
+        {
+            p.WriteString(Type.GetClientIdentifier().ToUpper());
+        }
+        else
+        {
+            p.WriteShort(Type.GetClientValue());
         }
 
         p.WriteId(Id);
@@ -172,28 +192,26 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
         p.WriteBool(HasRentPeriodStarted);
         p.WriteId(RoomId);
 
-        if (p.Client == ClientType.Unity)
-        {
-            p.WriteShort(_Short1);
-            p.WriteString(SlotId);
-            p.WriteInt(_Int3);
-        }
+        // if (p.Client is ClientType.Unity)
+        // {
+        //     p.WriteShort(_Short1);
+        //     p.WriteString(SlotId);
+        //     p.WriteInt(_Int3);
+        // }
 
-        if (Type == ItemType.Floor)
+        if (Type is ItemType.Floor)
         {
-            if (p.Client == ClientType.Flash)
+            if (p.Client is ClientType.Flash)
             {
                 p.WriteString(SlotId);
                 p.WriteInt((int)Extra);
             }
             else
             {
-                // 10 bytes ?
-                p.WriteString(_String3);
-                p.WriteLong(Extra);
-                p.WriteInt(_Int5);
+                // Unity
             }
         }
+
     }
 
     static InventoryItem IParser<InventoryItem>.Parse(in PacketReader p) => new(in p);

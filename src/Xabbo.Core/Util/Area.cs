@@ -6,7 +6,7 @@ using System.Linq;
 namespace Xabbo.Core;
 
 /// <summary>
-/// Represents an area in a 2-dimensional space.
+/// Represents an area in a room.
 /// </summary>
 public readonly struct Area : IEnumerable<Point>
 {
@@ -21,12 +21,12 @@ public readonly struct Area : IEnumerable<Point>
     public readonly int Y1;
 
     /// <summary>
-    /// The width (on the X plane) of this area.
+    /// The width (on the X axis) of this area.
     /// </summary>
     public readonly int Width;
 
     /// <summary>
-    /// The length (on the Y plane) of this area.
+    /// The length (on the Y axis) of this area.
     /// </summary>
     public readonly int Length;
 
@@ -124,7 +124,7 @@ public readonly struct Area : IEnumerable<Point>
     }
 
     /// <summary>
-    /// Gets if the specified area is contained within this area.
+    /// Gets whether the specified area is contained within this area.
     /// </summary>
     public bool Contains(Area area)
     {
@@ -136,12 +136,12 @@ public readonly struct Area : IEnumerable<Point>
     }
 
     /// <summary>
-    /// Gets if this area contains the specified floor entity.
+    /// Gets whether specified floor entity is contained within this area.
     /// </summary>
     public bool Contains(IFloorEntity e) => Contains(e.Area);
 
     /// <summary>
-    /// Gets if this area intersects with the specified area.
+    /// Gets whether the specified area intersects with this area.
     /// </summary>
     public bool Intersects(Area area)
     {
@@ -151,12 +151,12 @@ public readonly struct Area : IEnumerable<Point>
     }
 
     /// <summary>
-    /// Gets if this area intersects with the specified floor entity.
+    /// Gets whether the specified floor entity intersects with this area.
     /// </summary>
     public bool Intersects(IFloorEntity e) => Intersects(e.Area);
 
     /// <summary>
-    /// Gets all X, Y coordinates within this area.
+    /// Gets all tile coordinates contained in this area.
     /// </summary>
     private IEnumerable<Point> EnumeratePoints()
     {

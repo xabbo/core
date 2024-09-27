@@ -2,6 +2,9 @@
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents an avatar's gender.
+/// </summary>
 public enum Gender
 {
     None = -1,
@@ -24,6 +27,9 @@ public static partial class H
 
 public static partial class XabboEnumExtensions
 {
+    /// <summary>
+    /// Gets the uppercase single-character identifier of the specified gender.
+    /// </summary>
     public static string ToClientString(this Gender gender)
     {
         return gender switch

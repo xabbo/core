@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace Xabbo.Core;
+﻿namespace Xabbo.Core;
 
 /// <summary>
-/// Defines crackable state as extra data in an item.
+/// Represents a crackable furni state.
 /// </summary>
 public interface ICrackableFurniData : IItemData
 {
@@ -11,8 +9,9 @@ public interface ICrackableFurniData : IItemData
     /// The number of hits the crackable furni has taken.
     /// </summary>
     int Hits { get; }
+
     /// <summary>
-    /// The target hit number of the crackable furni.
+    /// The target hit count of the crackable furni.
     /// </summary>
     int Target { get; }
 }

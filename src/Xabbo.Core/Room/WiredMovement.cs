@@ -59,7 +59,7 @@ public abstract class WiredMovement(WiredMovementType type) : IParserComposer<Wi
 }
 
 /// <summary>
-/// Defines the parameters of a user wired movement.
+/// Defines the parameters of a user being moved by wired.
 /// </summary>
 public class UserWiredMovement : WiredMovement
 {
@@ -106,6 +106,9 @@ public class UserWiredMovement : WiredMovement
     }
 }
 
+/// <summary>
+/// Defines the parameters of a floor item being moved by wired.
+/// </summary>
 public class FloorItemWiredMovement : WiredMovement
 {
     public Tile Source { get; set; }
@@ -145,6 +148,9 @@ public class FloorItemWiredMovement : WiredMovement
     }
 }
 
+/// <summary>
+/// Defines the parameters of a wall item being moved by wired.
+/// </summary>
 public class WallItemWiredMovement : WiredMovement
 {
     public Id ItemId { get; set; }
@@ -187,6 +193,9 @@ public class WallItemWiredMovement : WiredMovement
     }
 }
 
+/// <summary>
+/// Defines the parameters of a user's direction being changed by wired.
+/// </summary>
 public class UserDirectionWiredMovement : WiredMovement
 {
     public int Index { get; set; }

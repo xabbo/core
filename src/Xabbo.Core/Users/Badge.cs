@@ -2,6 +2,9 @@
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a badge ID and code.
+/// </summary>
 public sealed class Badge : IParserComposer<Badge>
 {
     public int Id { get; set; }

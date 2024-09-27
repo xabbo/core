@@ -1,5 +1,8 @@
 ﻿namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a product in a catalog offer.
+/// </summary>
 public interface ICatalogProduct : IItem
 {
     string Variant { get; }

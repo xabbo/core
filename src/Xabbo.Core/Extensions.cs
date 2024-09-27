@@ -22,12 +22,12 @@ public static class Extensions
     private static ExternalTexts Texts => _texts ?? throw new InvalidOperationException($"{typeof(Extensions).FullName} has not been initialized.");
 
     /// <summary>
-    /// Gets if Xabbo core extensions have been initialized.
+    /// Gets whether xabbo core extensions have been initialized.
     /// </summary>
     public static bool IsInitialized { get; private set; }
 
     /// <summary>
-    /// Initializes Xabbo core extensions with the specified game data.
+    /// Initializes xabbo core extensions with the specified game data.
     /// </summary>
     public static void Initialize(FurniData furniData, ExternalTexts texts)
     {

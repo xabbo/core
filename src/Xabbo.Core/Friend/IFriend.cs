@@ -1,52 +1,62 @@
-﻿using System.ComponentModel;
-
-namespace Xabbo.Core;
+﻿namespace Xabbo.Core;
 
 /// <summary>
-/// Contains information about the user's friend.
+/// Represents a friend in the user's friend list.
 /// </summary>
 public interface IFriend
 {
     /// <summary>
-    /// Gets the ID of the friend.
+    /// The ID of the friend.
     /// </summary>
     Id Id { get; }
+
     /// <summary>
-    /// Gets the name of the friend.
+    /// The name of the friend.
     /// </summary>
     string Name { get; }
+
     /// <summary>
-    /// Gets the gender of the friend.
+    /// The gender of the friend.
     /// </summary>
     Gender Gender { get; }
+
     /// <summary>
-    /// Gets whether the friend is online or not.
+    /// Whether the friend is online.
     /// </summary>
     bool IsOnline { get; }
+
     /// <summary>
-    /// Gets whether the friend can be followed or not.
+    /// Whether the friend can currently be followed.
     /// </summary>
     bool CanFollow { get; }
+
     /// <summary>
-    /// Gets the figure string of the friend.
+    /// The figure string of the friend.
     /// </summary>
     string Figure { get; }
+
     /// <summary>
-    /// Gets the category in the friend list that the friend belongs to.
+    /// The category in the friend list that the friend belongs to.
     /// </summary>
     int CategoryId { get; }
+
     /// <summary>
-    /// Gets the motto of the friend.
+    /// The motto of the friend.
     /// </summary>
     string Motto { get; }
-    string RealName { get; }
-    string FacebookId { get; }
+
     /// <summary>
-    /// Gets whether the friend is accepting offline messages or not.
+    /// Whether the friend is accepting offline messages.
     /// </summary>
     bool IsAcceptingOfflineMessages { get; }
+
+    /// <summary>
+    /// Whether the friend is a club member.
+    /// </summary>
     bool IsVipMember { get; }
+
     bool IsPocketHabboUser { get; }
+
     /// <summary>
     /// Gets the relation of the friend.
     /// </summary>

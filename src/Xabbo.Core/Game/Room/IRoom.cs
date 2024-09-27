@@ -13,143 +13,10 @@ public interface IRoom
     Id Id { get; }
 
     /// <summary>
-    /// Gets the data of this room.
+    /// Gets the room data. The client should request room data before entering a room, however
+    /// this may be null during room teleport transitions before the game client loads
     /// </summary>
     IRoomData? Data { get; }
-
-    #region - Room data -
-    /// <summary>
-    /// Gets the name of this room.
-    /// </summary>
-    string Name => Data?.Name ?? "";
-
-    /// <summary>
-    /// Gets the description of this room.
-    /// </summary>
-    string Description => Data?.Description ?? "";
-
-    /// <summary>
-    /// Gets the owner of this room's ID.
-    /// </summary>
-    Id OwnerId => Data?.OwnerId ?? -1;
-
-    /// <summary>
-    /// Gets the owner of this room's name.
-    /// </summary>
-    string OwnerName => Data?.OwnerName ?? "";
-
-    /// <summary>
-    /// Gets the door access mode of this room.
-    /// </summary>
-    RoomAccess Access => Data?.Access ?? RoomAccess.None;
-
-    /// <summary>
-    /// Gets if this room is open.
-    /// </summary>
-    bool IsOpen => Access is RoomAccess.Open;
-
-    /// <summary>
-    /// Gets if this room is in doorbell mode.
-    /// </summary>
-    bool IsDoorbell => Access is RoomAccess.Doorbell;
-
-    /// <summary>
-    /// Gets if this room is locked with a password.
-    /// </summary>
-    bool IsLocked => Access is RoomAccess.Password;
-
-    /// <summary>
-    /// Gets if this room is invisible.
-    /// </summary>
-    bool IsInvisible => Access is RoomAccess.Invisible;
-
-    /// <summary>
-    /// Gets the maximum users allowed in this room.
-    /// </summary>
-    int MaxUsers => Data?.MaxUsers ?? 0;
-
-    /// <summary>
-    /// Gets the trading permissions of this room.
-    /// </summary>
-    TradePermissions Trading => Data?.Trading ?? TradePermissions.None;
-
-    /// <summary>
-    /// Gets the score of this room.
-    /// </summary>
-    int Score => Data?.Score ?? 0;
-
-    /// <summary>
-    /// Gets the ranking of this room.
-    /// </summary>
-    int Ranking => Data?.Ranking ?? 0;
-
-    /// <summary>
-    /// Gets the category of this room.
-    /// </summary>
-    RoomCategory Category => Data?.Category ?? RoomCategory.None;
-
-    IReadOnlyList<string> Tags => Data?.Tags ?? [];
-
-    /// <summary>
-    /// Gets the flags of this room.
-    /// </summary>
-    RoomFlags Flags => Data?.Flags ?? RoomFlags.None;
-
-    /// <summary>
-    /// Gets if this room currently has an event.
-    /// </summary>
-    bool HasEvent => Data?.HasEvent ?? false;
-
-    /// <summary>
-    /// Gets if this room is a group home room.
-    /// </summary>
-    bool IsGroupRoom => Data?.IsGroupRoom ?? false;
-
-    /// <summary>
-    /// Gets if other's pets are allowed in this room.
-    /// </summary>
-    bool AllowPets => Data?.AllowPets ?? false;
-
-    /// <summary>
-    /// Gets the ID of the group this room is home to.
-    /// </summary>
-    Id GroupId => Data?.GroupId ?? -1;
-
-    /// <summary>
-    /// Gets the name of the group this room is home to.
-    /// </summary>
-    string GroupName => Data?.GroupName ?? "";
-
-    /// <summary>
-    /// Gets the badge code of the group this room is home to.
-    /// </summary>
-    string GroupBadge => Data?.GroupBadge ?? "";
-
-    /// <summary>
-    /// Gets the event name for this room.
-    /// </summary>
-    string EventName => Data?.EventName ?? "";
-
-    /// <summary>
-    /// Gets the event description for this room.
-    /// </summary>
-    string EventDescription => Data?.EventDescription ?? "";
-
-    /// <summary>
-    /// Gets the number of minutes remaining of the event for this room.
-    /// </summary>
-    int EventMinutesRemaining => Data?.EventMinutesRemaining ?? 0;
-
-    /// <summary>
-    /// Gets the moderation settings of this room.
-    /// </summary>
-    IModerationSettings? Moderation => Data?.Moderation;
-
-    /// <summary>
-    /// Gets the chat settings of this room.
-    /// </summary>
-    IChatSettings? ChatSettings => Data?.ChatSettings;
-    #endregion
 
     /// <summary>
     /// Gets the model of this room.
@@ -157,37 +24,37 @@ public interface IRoom
     string Model { get; }
 
     /// <summary>
-    /// Gets the floor code of this room.
+    /// Gets the floor pattern of the room.
     /// </summary>
-    string? Floor { get; }
+    string? FloorPattern { get; }
 
     /// <summary>
-    /// Gets the wallpaper code of this room.
+    /// Gets the wallpaper pattern of the room.
     /// </summary>
     string? Wallpaper { get; }
 
     /// <summary>
-    /// Gets the landscape code of this room.
+    /// Gets the landscape pattern of the room.
     /// </summary>
     string? Landscape { get; }
 
     /// <summary>
-    /// Gets the location of this room's door tile.
+    /// Gets the location of the entry tile.
     /// </summary>
-    Tile DoorTile { get; }
+    Tile Entry { get; }
 
     /// <summary>
-    /// Gets the entry direction of this room.
+    /// Gets the direction of the entry tile.
     /// </summary>
     int EntryDirection { get; }
 
     /// <summary>
-    /// Gets the floor plan of this room.
+    /// Gets the floor plan of the room.
     /// </summary>
     IFloorPlan FloorPlan { get; }
 
     /// <summary>
-    /// Gets the heightmap of this room.
+    /// Gets the heightmap of the room.
     /// </summary>
     IHeightmap Heightmap { get; }
 

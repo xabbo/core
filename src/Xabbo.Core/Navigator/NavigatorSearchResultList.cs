@@ -4,6 +4,9 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a list of <see cref="RoomInfo"/>.
+/// </summary>
 public class NavigatorSearchResultList : List<RoomInfo>, IParserComposer<NavigatorSearchResultList>
 {
     public string Category { get; set; }

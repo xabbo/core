@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IModerationSettings"/>
 public class ModerationSettings : IModerationSettings, IParserComposer<ModerationSettings>
 {
     public ModerationPermissions WhoCanMute { get; set; }

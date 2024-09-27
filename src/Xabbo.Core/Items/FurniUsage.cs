@@ -1,5 +1,8 @@
 ﻿namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a furniture usage policy.
+/// </summary>
 public enum FurniUsage
 {
     /// <summary>

@@ -2,6 +2,9 @@
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Defines a room moderation permission.
+/// </summary>
 [Flags]
 public enum ModerationPermissions
 {

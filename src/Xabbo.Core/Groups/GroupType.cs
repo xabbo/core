@@ -1,7 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
+/// <summary>
+/// Represents the membership type of a group.
+/// </summary>
 public enum GroupType
 {
     Open = 0,

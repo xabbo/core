@@ -4,6 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="ICatalogOffer"/>
 public class CatalogOffer : ICatalogOffer, IParserComposer<CatalogOffer>
 {
     public int Id { get; set; }

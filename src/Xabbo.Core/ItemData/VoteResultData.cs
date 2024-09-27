@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IVoteResultData"/>
 public class VoteResultData : ItemData, IVoteResultData
 {
     public int Result { get; set; }

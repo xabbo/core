@@ -4,6 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IWallItem"/>
 public class WallItem : Furni, IWallItem, IParserComposer<WallItem>
 {
     public override ItemType Type => ItemType.Wall;

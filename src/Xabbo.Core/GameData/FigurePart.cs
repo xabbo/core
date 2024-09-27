@@ -1,5 +1,13 @@
 namespace Xabbo.Core.GameData;
 
+/// <summary>
+/// Defines information about a figure part.
+/// </summary>
+/// <param name="Type">The type of the figure part.</param>
+/// <param name="Id">The ID of the figure part.</param>
+/// <param name="IsColorable">Whether the part is colorable.</param>
+/// <param name="Index"></param>
+/// <param name="ColorIndex"></param>
 public sealed record FigurePart(
     FigurePartType Type,
     int Id,

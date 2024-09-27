@@ -5,6 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IActivityPoints"/>
 public class ActivityPoints : IActivityPoints, IParserComposer<ActivityPoints>
 {
     private readonly Dictionary<ActivityPointType, int> _dict = [];

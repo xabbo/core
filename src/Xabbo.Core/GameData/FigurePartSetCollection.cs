@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace Xabbo.Core.GameData;
 
+/// <summary>
+/// Defines a collection of figure part sets of the same <see cref="FigurePartType"/>.
+/// </summary>
 public sealed record FigurePartSetCollection(
     FigurePartType Type,
     int PaletteId,

@@ -2,6 +2,9 @@
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a sticky note.
+/// </summary>
 public sealed class Sticky : IParserComposer<Sticky>
 {
     public static readonly StickyColors Colors = new();

@@ -5,27 +5,96 @@ using Xabbo.Messages.Flash;
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Defines the settings for a room.
+/// </summary>
 public class RoomSettings : IParserComposer<RoomSettings>
 {
+    /// <summary>
+    /// The ID of the room.
+    /// </summary>
     public Id Id { get; set; }
+
+    /// <summary>
+    /// The name of the room.
+    /// </summary>
     public string Name { get; set; } = "";
+
+    /// <summary>
+    /// The description of the room.
+    /// </summary>
     public string Description { get; set; } = "";
+
+    /// <summary>
+    /// The access mode of the room.
+    /// </summary>
     public RoomAccess Access { get; set; }
+
+    /// <summary>
+    /// The password for the room if <see cref="Access"/> is <see cref="RoomAccess.Password"/>.
+    /// </summary>
     public string Password { get; set; } = "";
+
+    /// <summary>
+    /// The maximum number of users allowed in the room.
+    /// </summary>
     public int MaxVisitors { get; set; }
+
     public int AbsoluteMaxVisitors { get; set; }
+
+    /// <summary>
+    /// The category of the room in the navigator.
+    /// </summary>
     public RoomCategory Category { get; set; }
+
+    /// <summary>
+    /// A list of tags that can be used to search for the room in the navigator.
+    /// </summary>
     public List<string> Tags { get; set; }
+
+    /// <summary>
+    /// The trading permissions for the room.
+    /// </summary>
     public TradePermissions Trading { get; set; }
 
+    /// <summary>
+    /// Whether others users' pets are allowed in the room.
+    /// </summary>
     public bool AllowPets { get; set; }
+
+    /// <summary>
+    /// Whether other users' pets are allowed to eat food placed in the room.
+    /// </summary>
     public bool AllowOthersPetsToEat { get; set; }
+
+    /// <summary>
+    /// Whether to disable room blocking and allow users to walk through each other.
+    /// </summary>
     public bool DisableRoomBlocking { get; set; }
+
+    /// <summary>
+    /// Whether to hide the walls.
+    /// </summary>
     public bool HideWalls { get; set; }
+
+    /// <summary>
+    /// The thickness of the walls.
+    /// </summary>
     public Thickness WallThickness { get; set; }
+
+    /// <summary>
+    /// The thickness of the floor.
+    /// </summary>
     public Thickness FloorThickness { get; set; }
 
+    /// <summary>
+    /// The moderation settings for the room.
+    /// </summary>
     public ModerationSettings Moderation { get; set; }
+
+    /// <summary>
+    /// The chat settings for the room.
+    /// </summary>
     public ChatSettings Chat { get; set; }
 
     public bool EnlistByFurniContent { get; set; }

@@ -16,6 +16,9 @@ using Xabbo.Core.Web;
 
 namespace Xabbo.Core.GameData;
 
+/// <summary>
+/// Manages the game data for a specified hotel.
+/// </summary>
 public class GameDataManager : IGameDataManager
 {
     private static string GetDefaultCachePath()
@@ -117,6 +120,14 @@ public class GameDataManager : IGameDataManager
         }
     }
 
+    /// <summary>
+    /// Loads the specified game data types.
+    /// If no types are specified, then all types are loaded.
+    /// </summary>
+    /// <param name="hotel">The hotel to load game data for.</param>
+    /// <param name="typesToLoad">The game data types to load.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <exception cref="InvalidOperationException">If game data is currently being loaded.</exception>
     public async Task LoadAsync(Hotel hotel, GameDataType[]? typesToLoad = null, CancellationToken cancellationToken = default)
     {
         if (!_loadSemaphore.Wait(0, cancellationToken))
@@ -240,6 +251,9 @@ public class GameDataManager : IGameDataManager
         }
     }
 
+    /// <summary>
+    /// Waits for the game data to load.
+    /// </summary>
     public async Task WaitForLoadAsync(CancellationToken cancellationToken = default)
     {
         await await Task.WhenAny(_loadTask, Task.Delay(-1, cancellationToken));

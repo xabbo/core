@@ -37,6 +37,9 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     }
 
     private bool _isRingingDoorbell;
+    /// <summary>
+    /// Gets whether the user is currently ringing the doorbell to a room.
+    /// </summary>
     public bool IsRingingDoorbell
     {
         get => _isRingingDoorbell;
@@ -44,6 +47,9 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     }
 
     private bool _isInQueue;
+    /// <summary>
+    /// Gets whether the user is currently in a queue to enter a room.
+    /// </summary>
     public bool IsInQueue
     {
         get => _isInQueue;
@@ -51,6 +57,9 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     }
 
     private int _queuePosition;
+    /// <summary>
+    /// Gets the user's current position in the queue.
+    /// </summary>
     public int QueuePosition
     {
         get => _queuePosition;
@@ -58,6 +67,9 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     }
 
     private bool _isSpectating;
+    /// <summary>
+    /// Gets whether the user is currently spectating a room.
+    /// </summary>
     public bool IsSpectating
     {
         get => _isSpectating;
@@ -65,6 +77,9 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     }
 
     private bool _isLoadingRoom;
+    /// <summary>
+    /// Gets whether a room is currently being loaded.
+    /// </summary>
     public bool IsLoadingRoom
     {
         get => _isLoadingRoom;
@@ -72,6 +87,9 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     }
 
     private bool _isInRoom;
+    /// <summary>
+    /// Gets whether the user is currently in a room.
+    /// </summary>
     public bool IsInRoom
     {
         get => _isInRoom;
@@ -79,6 +97,10 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     }
 
     private IRoom? _room;
+    /// <summary>
+    /// Gets the instance of the room that the user is currently in.
+    /// Returns <c>null</c> if the user is not in a room.
+    /// </summary>
     public IRoom? Room
     {
         get => _room;
@@ -86,6 +108,9 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     }
 
     private int _rightsLevel;
+    /// <summary>
+    /// Gets the user's rights level in the current room.
+    /// </summary>
     public int RightsLevel
     {
         get => _rightsLevel;
@@ -95,17 +120,35 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
                 RaisePropertyChanged(nameof(HasRights));
         }
     }
+
+    /// <summary>
+    /// Gets whether the user has rights in the current room.
+    /// </summary>
     public bool HasRights => RightsLevel > 0;
 
     private bool _isOwner;
+    /// <summary>
+    /// Gets whether the user is the owner of the current room.
+    /// </summary>
     public bool IsOwner
     {
         get => _isOwner;
         private set => Set(ref _isOwner, value);
     }
 
+    /// <summary>
+    /// Gets whether the user has permission to mute in the current room.
+    /// </summary>
     public bool CanMute => CheckPermission(Room?.Data?.Moderation.WhoCanMute);
+
+    /// <summary>
+    /// Gets whether the user has permission to kick in the current room.
+    /// </summary>
     public bool CanKick => CheckPermission(Room?.Data?.Moderation.WhoCanKick);
+
+    /// <summary>
+    /// Gets whether the user has permission to ban in the current room.
+    /// </summary>
     public bool CanBan => CheckPermission(Room?.Data?.Moderation.WhoCanBan);
 
     /// <summary>
@@ -117,7 +160,7 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
 
     /// <summary>
     /// Ensures the user is in a room.
-    /// If the user is in a room, this method will return <c>true</c>
+    /// If so, this method will return <c>true</c>
     /// and <paramref name="room"/> will contain the current room instance.
     /// </summary>
     public bool EnsureRoom([NotNullWhen(true)] out IRoom? room)

@@ -4,21 +4,48 @@ using System.Collections.Immutable;
 
 namespace Xabbo.Core.GameData;
 
+/// <summary>
+/// Defines a map of <see cref="FigurePartSetCollection"/> and <see cref="FigureColorPalette"/>.
+/// </summary>
 public sealed class FigureData
 {
+    /// <summary>
+    /// Loads figure data in modern XML format from the specified stream.
+    /// </summary>
     public static FigureData LoadXml(Stream stream) => new(Xml.FigureData.Load(stream));
+
+    /// <summary>
+    /// Loads figure data in modern XML format from the specified file path.
+    /// </summary>
     public static FigureData LoadXml(string path)
     {
         using var stream = File.OpenRead(path);
         return LoadXml(stream);
     }
 
+    /// <summary>
+    /// Loads figure data in origins JSON format from the specified file path.
+    /// </summary>
     public static FigureData LoadJsonOrigins(string filePath) => new(Json.Origins.FigureData.Load(filePath));
 
+    /// <summary>
+    /// Defines a map of ID to <see cref="FigureColorPalette"/>.
+    /// </summary>
     public ImmutableDictionary<int, FigureColorPalette> Palettes { get; }
+
+    /// <summary>
+    /// Defines a map of <see cref="FigurePartType"/> to <see cref="FigurePartSetCollection"/>.
+    /// </summary>
     public ImmutableDictionary<FigurePartType, FigurePartSetCollection> SetCollections { get; }
 
+    /// <summary>
+    /// Gets the palette for the specified <see cref="FigurePartSetCollection"/>.
+    /// </summary>
     public FigureColorPalette GetPalette(FigurePartSetCollection setCollection) => Palettes[setCollection.PaletteId];
+
+    /// <summary>
+    /// Gets the palette for the specified <see cref="FigurePartType"/>.
+    /// </summary>
     public FigureColorPalette GetPalette(FigurePartType figurePartType) => Palettes[SetCollections[figurePartType].PaletteId];
 
     internal FigureData(Xml.FigureData proxy)

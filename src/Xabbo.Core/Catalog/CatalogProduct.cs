@@ -4,6 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="ICatalogProduct"/>
 public sealed class CatalogProduct : ICatalogProduct, IParserComposer<CatalogProduct>
 {
     public ItemType Type { get; set; }
@@ -69,8 +70,8 @@ public sealed class CatalogProduct : ICatalogProduct, IParserComposer<CatalogPro
     {
         switch (p.Client)
         {
-            case ClientType.Flash: p.WriteString(Type.ToShortString()); break;
-            case ClientType.Unity: p.WriteShort(Type.GetValue()); break;
+            case ClientType.Flash: p.WriteString(Type.GetClientIdentifier()); break;
+            case ClientType.Unity: p.WriteShort(Type.GetClientValue()); break;
             default: throw new Exception($"Unknown client protocol: {p.Client}.");
         }
 

@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-
-using Xabbo.Messages;
+﻿using System.Collections.Generic;
 
 namespace Xabbo.Core;
 
 /// <summary>
-/// Defines a high score value with a list of associated users.
+/// Associates a high score value with a list of users.
 /// </summary>
 public interface IHighScore
 {
     /// <summary>
-    /// The value of this high score.
+    /// The value of the high score.
     /// </summary>
     int Value { get; }
+
     /// <summary>
-    /// The users with this high score.
+    /// The list of users with this score.
     /// </summary>
     IReadOnlyList<string> Names { get; }
 }

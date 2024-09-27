@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Xabbo.Core;
 
 /// <summary>
-/// Defines a string to string map as extra data in an item.
+/// Represents a map of string keys and values.
 /// </summary>
 public interface IMapData : IItemData, IReadOnlyDictionary<string, string> { }

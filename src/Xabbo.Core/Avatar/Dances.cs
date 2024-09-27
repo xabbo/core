@@ -1,7 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
+/// <summary>
+/// Represents a type of avatar dance.
+/// </summary>
 public enum Dances
 {
     None = 0,

@@ -1,8 +1,9 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
-public enum SlideType
+/// <summary>
+/// Represents a type of avatar slide caused by a roller.
+/// </summary>
+public enum AvatarSlideType
 {
     None = -1,
     NoAvatar = 0,

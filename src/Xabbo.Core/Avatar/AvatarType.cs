@@ -1,7 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
+/// <summary>
+/// Represents the type of an avatar in a room.
+/// </summary>
 public enum AvatarType
 {
     User = 1,

@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IRoomData"/>
 public class RoomData : RoomInfo, IRoomData, IParserComposer<RoomData>
 {
     public bool IsEntering { get; set; }
@@ -14,9 +15,6 @@ public class RoomData : RoomInfo, IRoomData, IParserComposer<RoomData>
     public bool CanMute { get; set; }
     public ChatSettings ChatSettings { get; set; } = new();
     IChatSettings IRoomData.ChatSettings => ChatSettings;
-
-    public int _Int6 { get; set; }
-    public int _Int7 { get; set; }
 
     public RoomData()
     {
@@ -41,11 +39,11 @@ public class RoomData : RoomInfo, IRoomData, IParserComposer<RoomData>
         CanMute = p.ReadBool();
         ChatSettings = p.Parse<ChatSettings>();
 
-        if (p.Client == ClientType.Unity)
-        {
-            _Int6 = p.ReadInt();
-            _Int7 = p.ReadInt();
-        }
+        // if (p.Client == ClientType.Unity)
+        // {
+        //     p.ReadInt();
+        //     p.ReadInt();
+        // }
     }
 
     protected override void Compose(in PacketWriter p)

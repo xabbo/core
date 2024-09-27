@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
@@ -6,9 +7,6 @@ namespace Xabbo.Core;
 /// <summary>
 /// Represents a 2-dimensional location.
 /// </summary>
-/// <remarks>
-/// Creates a new point with the specified coordinates.
-/// </remarks>
 public readonly struct Point(int x, int y) : IParserComposer<Point>
 {
     public static readonly Point Zero = new(0, 0);

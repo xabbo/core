@@ -1,5 +1,8 @@
 ﻿namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a type of <see cref="ItemData"/>.
+/// </summary>
 public enum ItemDataType
 {
     Legacy = 0,

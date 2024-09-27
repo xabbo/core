@@ -1,24 +1,27 @@
 ﻿namespace Xabbo.Core;
 
+/// <summary>
+/// Represents an item.
+/// </summary>
 public interface IItem
 {
     /// <summary>
-    /// Gets the type of furni of the item.
+    /// The type of the item.
     /// </summary>
     ItemType Type { get; }
 
     /// <summary>
-    /// Gets the kind of furni of the item.
+    /// The kind of the item.
     /// </summary>
     int Kind { get; }
 
     /// <summary>
-    /// Gets the furni identifier.
+    /// The identifier of the item.
     /// </summary>
     string? Identifier { get; }
 
     /// <summary>
-    /// Gets the ID of the item.
+    /// The item's ID.
     /// </summary>
     Id Id { get; }
 }

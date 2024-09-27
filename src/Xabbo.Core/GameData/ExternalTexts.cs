@@ -6,6 +6,9 @@ using System.Collections.Immutable;
 
 namespace Xabbo.Core.GameData;
 
+/// <summary>
+/// Defines a dictionary of external texts.
+/// </summary>
 public sealed class ExternalTexts : IReadOnlyDictionary<string, string>
 {
     public static ExternalTexts Load(string path) => new(path);

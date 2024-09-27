@@ -1,7 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
+/// <summary>
+/// Represents the reason for a disconnection.
+/// </summary>
 public enum DisconnectReason
 {
     NotDisconnected = -2147483647,

@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IPet"/>
 public class Pet(Id id, int index) : Avatar(AvatarType.Pet, id, index), IPet
 {
     public int Breed { get; set; }

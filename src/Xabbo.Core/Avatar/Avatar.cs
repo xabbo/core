@@ -5,6 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IAvatar"/>
 public abstract class Avatar(AvatarType type, Id id, int index) : IAvatar, IParserComposer<Avatar>
 {
     public bool IsRemoved { get; set; }

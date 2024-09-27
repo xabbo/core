@@ -1,5 +1,8 @@
 ﻿namespace Xabbo.Core;
 
+/// <summary>
+/// Defines basic information about a group.
+/// </summary>
 public interface IGroupInfo
 {
     Id Id { get; }

@@ -4,6 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="ICatalogPage"/>
 public sealed class CatalogPage : ICatalogPage, IParserComposer<CatalogPage>
 {
     public int Id { get; set; }

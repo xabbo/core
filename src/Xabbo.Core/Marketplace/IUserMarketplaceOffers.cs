@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Xabbo.Core;
 
 /// <summary>
-/// A collection of the user's marketplace listings.
+/// Contains the user's own marketplace listings.
 /// </summary>
 public interface IUserMarketplaceOffers : IReadOnlyCollection<IMarketplaceOffer>
 {

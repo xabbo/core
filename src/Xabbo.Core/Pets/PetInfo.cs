@@ -4,6 +4,9 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Defines information about a pet.
+/// </summary>
 public sealed class PetInfo : IParserComposer<PetInfo>
 {
     public Id Id { get; set; }

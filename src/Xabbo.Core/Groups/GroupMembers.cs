@@ -4,6 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IGroupMembers"/>
 public sealed class GroupMembers : List<GroupMember>, IGroupMembers, IParserComposer<GroupMembers>
 {
     public Id GroupId { get; set; }

@@ -5,6 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IMarketplaceOffer"/>
 public sealed class MarketplaceOffer : IMarketplaceOffer, IParserComposer<MarketplaceOffer>
 {
     public Id Id => -1;

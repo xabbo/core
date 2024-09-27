@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents the in-game profile of user.
+/// </summary>
 public interface IUserProfile
 {
     Id Id { get; }

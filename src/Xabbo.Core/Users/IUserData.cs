@@ -1,7 +1,7 @@
 ﻿namespace Xabbo.Core;
 
 /// <summary>
-/// The current user's information that is sent upon requesting user data.
+/// Represents information about the current user.
 /// </summary>
 public interface IUserData
 {

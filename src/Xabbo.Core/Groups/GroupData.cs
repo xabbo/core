@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IGroupData"/>
 public sealed class GroupData : IGroupData, IParserComposer<GroupData>
 {
     public Id Id { get; set; }

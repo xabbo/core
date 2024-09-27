@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IFurni"/>
 public abstract class Furni : IFurni, IComposer
 {
     public abstract ItemType Type { get; }

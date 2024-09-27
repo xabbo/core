@@ -2,6 +2,9 @@
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a fragment of inventory items received when loading the inventory.
+/// </summary>
 public interface IInventoryFragment : IReadOnlyCollection<IInventoryItem>
 {
     /// <summary>

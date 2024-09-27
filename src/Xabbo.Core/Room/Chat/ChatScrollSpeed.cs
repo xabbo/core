@@ -1,7 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
+/// <summary>
+/// Defines the speed at which chat scrolls in a room.
+/// </summary>
 public enum ChatScrollSpeed
 {
     Fast = 0,

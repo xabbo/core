@@ -1,7 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
+/// <summary>
+/// Represents the type of a group member search.
+/// </summary>
 public enum GroupMemberSearchType
 {
     Members = 0,

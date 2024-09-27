@@ -8,6 +8,9 @@ using System.Collections.Immutable;
 
 namespace Xabbo.Core.GameData;
 
+/// <summary>
+/// Defines a map of floor and wall <see cref="FurniInfo"/>.
+/// </summary>
 public sealed class FurniData : IReadOnlyCollection<FurniInfo>
 {
     public static FurniData LoadJson(string json) => new(Json.FurniData.Load(json));

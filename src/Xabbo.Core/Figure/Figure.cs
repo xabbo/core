@@ -6,12 +6,26 @@ using System.Linq;
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents an avatar figure.
+/// </summary>
 public sealed class Figure : IEquatable<Figure>, IEnumerable<Figure.Part>
 {
     private readonly Dictionary<FigurePartType, Part> _parts = [];
+    /// <summary>
+    /// Gets the parts contained in the figure.
+    /// </summary>
     public IReadOnlyCollection<Part> Parts => _parts.Values;
+
+    /// <summary>
+    /// Gets or sets the gender of the figure.
+    /// </summary>
     public Gender Gender { get; set; } = Gender.Unisex;
 
+    /// <summary>
+    /// Gets or sets the figure part of the specified type.
+    /// </summary>
+    /// <exception cref="ArgumentException">If the specified key differs from the part type when setting the part.</exception>
     public Part this[FigurePartType key]
     {
         get => _parts[key];
@@ -43,13 +57,41 @@ public sealed class Figure : IEquatable<Figure>, IEnumerable<Figure.Part>
             Add(part);
     }
 
+    /// <summary>
+    /// Gets whether the figure has a part of the specified type.
+    /// </summary>
     public bool Has(FigurePartType type) => _parts.ContainsKey(type);
+
+    /// <summary>
+    /// Adds the specified part to the figure.
+    /// </summary>
     public void Add(Part part) => _parts.Add(part.Type, part);
+
+    /// <summary>
+    /// Adds the specified part type and ID to the figure.
+    /// </summary>
     public void Add(FigurePartType type, int id) => _parts.Add(type, new Part(type, id));
+
+    /// <summary>
+    /// Adds the specified part type, ID, and colors to the figure.
+    /// </summary>
     public void Add(FigurePartType type, int id, params int[] colors) => _parts.Add(type, new Part(type, id, colors));
+
+    /// <summary>
+    /// Attempts to get the part of the specified type in the figure.
+    /// </summary>
     public bool TryGetPart(FigurePartType type, [NotNullWhen(true)] out Part? part) => _parts.TryGetValue(type, out part);
+
+    /// <summary>
+    /// Removes the specified part type from the figure.
+    /// </summary>
+    /// <param name="partType">The part type to remove.</param>
+    /// <returns>Whether the part was removed.</returns>
     public bool Remove(FigurePartType partType) => _parts.Remove(partType);
 
+    /// <summary>
+    /// Composes the figure to a figure string.
+    /// </summary>
     public override string ToString() => string.Join('.', _parts.Values.Select(x => x.ToString()));
 
     public override int GetHashCode()
@@ -67,6 +109,9 @@ public sealed class Figure : IEquatable<Figure>, IEnumerable<Figure.Part>
         other.Gender == Gender &&
         other.Parts.SequenceEqual(Parts);
 
+    /// <summary>
+    /// Parses the specified figure string into a <see cref="Figure"/> .
+    /// </summary>
     public static Figure Parse(string figureString)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(figureString);
@@ -82,6 +127,9 @@ public sealed class Figure : IEquatable<Figure>, IEnumerable<Figure.Part>
         return figure;
     }
 
+    /// <summary>
+    /// Attempts to parse the specified figure string into a <see cref="Figure"/> .
+    /// </summary>
     public static bool TryParse(string figureString, [NotNullWhen(true)] out Figure? figure)
     {
         figure = null;
@@ -103,6 +151,12 @@ public sealed class Figure : IEquatable<Figure>, IEnumerable<Figure.Part>
         return true;
     }
 
+    /// <summary>
+    /// Attempts to get the gender from the specified figure.
+    /// </summary>
+    /// <remarks>
+    /// This works by detecting certain parts in the figure that belong to a specific gender.
+    /// </remarks>
     public static bool TryGetGender(Figure figure, out Gender gender)
     {
         foreach (var part in figure.Parts)
@@ -126,7 +180,6 @@ public sealed class Figure : IEquatable<Figure>, IEnumerable<Figure.Part>
     {
         throw new NotImplementedException();
     }
-
 
     public sealed class Part : IEquatable<Part>
     {

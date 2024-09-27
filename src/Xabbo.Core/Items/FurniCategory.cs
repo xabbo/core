@@ -1,7 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
+/// <summary>
+/// Represents a furniture category.
+/// </summary>
 public enum FurniCategory
 {
     Unknown = 0,

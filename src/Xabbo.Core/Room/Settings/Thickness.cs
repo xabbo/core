@@ -1,7 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
+/// <summary>
+/// Specifies the thickness of a room's walls or floor.
+/// </summary>
 public enum Thickness
 {
     Thinnest = -2,

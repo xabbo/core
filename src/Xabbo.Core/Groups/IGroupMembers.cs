@@ -1,8 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a list of group members.
+/// </summary>
 public interface IGroupMembers : IReadOnlyList<IGroupMember>
 {
     Id GroupId { get; }

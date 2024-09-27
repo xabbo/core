@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="ILegacyData"/>
 public class LegacyData : ItemData, ILegacyData
 {
     public LegacyData()

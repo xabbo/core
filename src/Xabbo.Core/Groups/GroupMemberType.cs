@@ -1,7 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
+/// <summary>
+/// Represents a type of group member.
+/// </summary>
 public enum GroupMemberType
 {
     Owner = 0,

@@ -2,6 +2,9 @@
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a part type in a figure.
+/// </summary>
 public enum FigurePartType
 {
     Hair,
@@ -33,6 +36,9 @@ public enum FigurePartType
 
 public static partial class XabboEnumExtensions
 {
+    /// <summary>
+    /// Converts the figure part type to its short 2-letter string representation.
+    /// </summary>
     public static string ToShortString(this FigurePartType figurePartType)
     {
         return figurePartType switch

@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IMarketplaceTradeInfo"/>
 public sealed class MarketplaceTradeInfo : IMarketplaceTradeInfo, IParserComposer<MarketplaceTradeInfo>
 {
     public int DayOffset { get; set; }

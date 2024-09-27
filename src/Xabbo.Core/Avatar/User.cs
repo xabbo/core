@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IUser"/>
 public class User(Id id, int index) : Avatar(AvatarType.User, id, index), IUser
 {
     public Gender Gender { get; set; } = Gender.Unisex;

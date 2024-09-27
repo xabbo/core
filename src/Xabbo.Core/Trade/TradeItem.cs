@@ -1,8 +1,10 @@
 ﻿using System;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="ITradeItem"/>
 public class TradeItem : ITradeItem, IParserComposer<TradeItem>
 {
     public Id ItemId { get; set; }
@@ -101,7 +103,7 @@ public class TradeItem : ITradeItem, IParserComposer<TradeItem>
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
         p.WriteId(ItemId);
-        p.WriteString(Type.ToShortString());
+        p.WriteString(Type.GetClientIdentifier());
         p.WriteId(Id);
         p.WriteInt(Kind);
         p.WriteInt((int)Category);

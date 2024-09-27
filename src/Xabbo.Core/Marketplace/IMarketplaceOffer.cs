@@ -8,12 +8,12 @@ public interface IMarketplaceOffer : IItem
     Id OfferId { get; }
 
     /// <summary>
-    /// Gets the current status of this marketplace offer.
+    /// Gets the current status of the marketplace offer.
     /// </summary>
     MarketplaceOfferStatus Status { get; }
 
     /// <summary>
-    /// Gets the item data for the marketplace offer.
+    /// Gets the item data of the marketplace offer.
     /// </summary>
     IItemData Data { get; }
 
@@ -23,18 +23,20 @@ public interface IMarketplaceOffer : IItem
     int Price { get; }
 
     /// <summary>
-    /// Gets the remaining time of this offer in minutes.
+    /// Gets the remaining time of the offer in minutes.
     /// </summary>
     int TimeRemaining { get; }
 
     /// <summary>
-    /// Gets the average price for this item.
+    /// Gets the current average price of the item.
     /// </summary>
     int Average { get; }
 
     /// <summary>
-    /// Gets the number of open offers for this item.
-    /// Not available when loaded from the user's own marketplace offers.
+    /// Gets the number of open offers for the item.
     /// </summary>
+    /// <remarks>
+    /// This is not available when the offers are loaded from the user's own marketplace listings.
+    /// </remarks>
     int Offers { get; }
 }

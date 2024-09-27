@@ -1,8 +1,10 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Defines the chat flow behavior for a room.
+/// </summary>
 public enum ChatFlow
 {
     [Description("Free flow")]

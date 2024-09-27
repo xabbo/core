@@ -6,12 +6,14 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Xabbo.Interceptor;
 using Xabbo.Messages.Flash;
-
 using Xabbo.Core.Events;
 using Xabbo.Core.Messages.Outgoing;
 
 namespace Xabbo.Core.Game;
 
+/// <summary>
+/// Manages the current user's information.
+/// </summary>
 public sealed partial class ProfileManager : GameStateManager
 {
     private readonly ILogger Log;
@@ -20,22 +22,75 @@ public sealed partial class ProfileManager : GameStateManager
 
     private bool _isLoadingProfile, _isLoadingCredits;
 
+    /// <summary>
+    /// Gets the user's current information.
+    /// </summary>
     public UserData? UserData { get; private set; }
+
+    /// <summary>
+    /// Gets the user's current achievements.
+    /// </summary>
     public Achievements? Achievements { get; private set; }
 
+    /// <summary>
+    /// Gets the user's current achievement score.
+    /// </summary>
     public int? AchievementScore { get; private set; }
+
+    /// <summary>
+    /// Gets the user's current credits.
+    /// </summary>
     public int? Credits { get; private set; }
+
+    /// <summary>
+    /// Gets the user's current activity points.
+    /// </summary>
     public ActivityPoints Points { get; private set; }
+
+    /// <summary>
+    /// Gets the user's current amount of diamonds.
+    /// </summary>
     public int? Diamonds => Points.TryGetValue(ActivityPointType.Diamond, out int value) ? (int?)value : null;
+
+    /// <summary>
+    /// Gets the user's current amount of duckets.
+    /// </summary>
     public int? Duckets => Points.TryGetValue(ActivityPointType.Ducket, out int value) ? (int?)value : null;
 
     #region - Events -
+    /// <summary>
+    /// Invoked when the user's data is first loaded.
+    /// </summary>
     public event Action? UserDataLoaded;
+
+    /// <summary>
+    /// Invoked when the user's data is updated.
+    /// </summary>
     public event Action? UserDataUpdated;
+
+    /// <summary>
+    /// Invoked when the user's achievements are loaded.
+    /// </summary>
     public event Action? AchievementsLoaded;
-    public event Action<AchievementUpdatedEventArgs>? AchievementUpdated; // TODO AchievementEventArgs
+
+    /// <summary>
+    /// Invoked when the an achievement of the user is updated.
+    /// </summary>
+    public event Action<AchievementUpdatedEventArgs>? AchievementUpdated;
+
+    /// <summary>
+    /// Invoked when the user's credits are updated.
+    /// </summary>
     public event Action<CreditsUpdatedEventArgs>? CreditsUpdated;
+
+    /// <summary>
+    /// Invoked when the user's activity points are loaded.
+    /// </summary>
     public event Action? PointsLoaded;
+
+    /// <summary>
+    /// Invoked when the user's activity points are updated.
+    /// </summary>
     public event Action<ActivityPointUpdatedEventArgs>? ActivityPointUpdated;
     #endregion
 
@@ -92,7 +147,7 @@ public sealed partial class ProfileManager : GameStateManager
     }
 
     /// <summary>
-    /// Waits for the user data to load, or returns the user's data immediately if it has already loaded.
+    /// Waits for the user data to load, or returns the user's data immediately if it has already been loaded.
     /// </summary>
     public Task<IUserData> GetUserDataAsync() => _tcsUserData.Task;
 }

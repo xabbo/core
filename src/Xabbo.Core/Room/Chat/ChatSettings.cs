@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IChatSettings"/>.
 public class ChatSettings : IChatSettings, IParserComposer<ChatSettings>
 {
     public ChatFlow Flow { get; set; }

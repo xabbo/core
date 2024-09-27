@@ -198,7 +198,7 @@ partial class RoomManager
 
         switch (key)
         {
-            case "floor": _currentRoom.Floor = value; break;
+            case "floor": _currentRoom.FloorPattern = value; break;
             case "wallpaper": _currentRoom.Wallpaper = value; break;
             case "landscape": _currentRoom.Landscape = value; break;
             default: Log.LogWarning("Unknown paint type: {Type}.", key); break;
@@ -281,7 +281,7 @@ partial class RoomManager
         int y = e.Packet.Read<int>();
         int dir = e.Packet.Read<int>();
 
-        _currentRoom.DoorTile = new Tile(x, y, 0);
+        _currentRoom.Entry = new Tile(x, y, 0);
         _currentRoom.EntryDirection = dir;
 
         Log.LogDebug("Received room entry tile. (x:{X}, y:{Y}, dir: {Dir})", x, y, dir);
@@ -538,7 +538,7 @@ partial class RoomManager
         }
 
         if (update.Avatar is not null &&
-            update.Type is SlideType.WalkingAvatar or SlideType.StandingAvatar)
+            update.AvatarSlideType is AvatarSlideType.WalkingAvatar or AvatarSlideType.StandingAvatar)
         {
             if (room.Avatars.TryGetValue(update.Avatar.Index, out Avatar? avatar))
             {

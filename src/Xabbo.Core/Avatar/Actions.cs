@@ -1,5 +1,8 @@
 ﻿namespace Xabbo.Core;
 
+/// <summary>
+/// Represents an avatar action.
+/// </summary>
 public enum Actions
 {
     None = 0,

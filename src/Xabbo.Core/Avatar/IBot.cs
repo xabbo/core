@@ -2,25 +2,25 @@
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a bot in a room.
+/// </summary>
 public interface IBot : IAvatar
 {
     /// <summary>
-    /// Gets the gender of the bot.
+    /// The gender of the bot.
     /// </summary>
     Gender Gender { get; }
 
     /// <summary>
-    /// Gets the owner of the bot's ID.
+    /// The ID of the owner of the bot.
     /// </summary>
     Id OwnerId { get; }
 
     /// <summary>
-    /// Gets the owner of the bot's name.
+    /// The name of the owner of the bot.
     /// </summary>
     string OwnerName { get; }
 
-    /// <summary>
-    /// Gets the data of the bot.
-    /// </summary>
     IReadOnlyList<short> Data { get; }
 }

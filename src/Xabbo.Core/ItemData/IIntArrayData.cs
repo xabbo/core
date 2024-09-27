@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Xabbo.Core;
 
 /// <summary>
-/// Defines an integer array as extra data in an item.
+/// Represents an array of integers.
 /// </summary>
 public interface IIntArrayData : IItemData, IReadOnlyList<int> { }

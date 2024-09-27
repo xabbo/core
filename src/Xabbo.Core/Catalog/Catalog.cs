@@ -6,6 +6,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="ICatalog"/>
 public class Catalog : ICatalog, IEnumerable<CatalogPageNode>, IParserComposer<Catalog>
 {
     public CatalogPageNode RootNode { get; set; }

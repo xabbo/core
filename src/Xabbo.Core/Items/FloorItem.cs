@@ -1,10 +1,10 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IFloorItem"/>
 public class FloorItem : Furni, IFloorItem, IParserComposer<FloorItem>
 {
     public override ItemType Type => ItemType.Floor;

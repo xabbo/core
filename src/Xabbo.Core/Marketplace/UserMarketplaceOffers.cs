@@ -5,6 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IUserMarketplaceOffers"/>
 public sealed class UserMarketplaceOffers : IUserMarketplaceOffers, ICollection<MarketplaceOffer>, IParserComposer<UserMarketplaceOffers>
 {
     private readonly List<MarketplaceOffer> _list = [];

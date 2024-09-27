@@ -23,6 +23,7 @@ namespace Xabbo.Core;
     firstLevelAchieved = level > 1 || finalLevel
  */
 
+/// <inheritdoc cref="IAchievement"/>
 public class Achievement : IAchievement, IParserComposer<Achievement>
 {
     public int Id { get; set; }

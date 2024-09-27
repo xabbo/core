@@ -6,6 +6,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IHighScoreData"/>
 public class HighScoreData : ItemData, IHighScoreData, IList<HighScoreData.HighScore>
 {
     private readonly List<HighScore> _list;

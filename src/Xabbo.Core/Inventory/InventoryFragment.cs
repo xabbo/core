@@ -6,6 +6,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IInventoryFragment"/>
 public sealed class InventoryFragment : IInventoryFragment, ICollection<InventoryItem>, IParserComposer<InventoryFragment>
 {
     private readonly List<InventoryItem> _list;

@@ -4,6 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IItemData"/>
 public abstract class ItemData : IItemData, IParserComposer<ItemData>
 {
     public ItemDataType Type { get; }

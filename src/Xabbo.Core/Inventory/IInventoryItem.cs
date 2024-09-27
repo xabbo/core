@@ -1,8 +1,8 @@
-﻿using System;
-using Xabbo.Messages;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
+/// <summary>
+/// Represents an inventory item.
+/// </summary>
 public interface IInventoryItem : IItem
 {
     /// <summary>

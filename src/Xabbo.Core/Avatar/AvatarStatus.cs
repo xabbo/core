@@ -9,6 +9,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IAvatarStatus"/>
 public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnlyList<string>>, IParserComposer<AvatarStatus>
 {
     private readonly Dictionary<string, string[]> fragments = new(StringComparer.OrdinalIgnoreCase);

@@ -7,6 +7,12 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a list of user search results.
+/// </summary>
+/// <remarks>
+/// On Shockwave, this should contain a single user in the <see cref="Others"/> list.
+/// </remarks>
 public class UserSearchResults : IReadOnlyCollection<UserSearchResult>, IParserComposer<UserSearchResults>
 {
     public IReadOnlyList<UserSearchResult> Friends { get; } = [];

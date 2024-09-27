@@ -3,6 +3,11 @@ using System.Linq;
 
 namespace Xabbo.Core.GameData;
 
+/// <summary>
+/// Defines a map of color ID to <see cref="FigurePartColor"/>.
+/// </summary>
+/// <param name="Id">The ID of the palette.</param>
+/// <param name="Colors">The figure part colors.</param>
 public sealed record FigureColorPalette(
     int Id,
     ImmutableDictionary<int, FigurePartColor> Colors

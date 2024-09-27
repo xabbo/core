@@ -1,39 +1,37 @@
-﻿using System;
-
-using Xabbo.Messages;
-
-namespace Xabbo.Core;
+﻿namespace Xabbo.Core;
 
 /// <summary>
-/// Defines extra data attached to an item.
+/// Represents extra data attached to an item.
 /// </summary>
 public interface IItemData
 {
     /// <summary>
-    /// Gets the type of this item data.
+    /// Gets the type of the item data.
     /// </summary>
     ItemDataType Type { get; }
 
     /// <summary>
-    /// Gets the flags of this item data.
+    /// Gets the flags of the item data.
     /// </summary>
     ItemDataFlags Flags { get; }
 
     /// <summary>
-    /// Gets if this item data contains limited edition rare information.
+    /// Whether the item data has limited edition rare (LTD) information.
     /// </summary>
     bool IsLimitedRare { get; }
+
     /// <summary>
     /// Gets the unique number in the limited edition rare series.
     /// </summary>
     int UniqueSerialNumber { get; }
+
     /// <summary>
     /// Gets the total number of limited edition rares in the series.
     /// </summary>
     int UniqueSeriesSize { get; }
 
     /// <summary>
-    /// Gets the legacy string value of this item data.
+    /// Gets the legacy string value of the item data.
     /// </summary>
     string Value { get; }
 

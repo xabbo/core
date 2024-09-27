@@ -5,7 +5,7 @@ using Xabbo.Messages;
 namespace Xabbo.Core;
 
 /// <summary>
-///
+/// Represents a wall item location.
 /// </summary>
 /// <param name="Wall">The wall coordinates.</param>
 /// <param name="Offset">The location coordinates.</param>

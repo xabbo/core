@@ -1,55 +1,71 @@
 ﻿namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a user achievement.
+/// </summary>
 public interface IAchievement
 {
     /// <summary>
-    /// Gets the ID.
+    /// The ID of the achievement.
     /// </summary>
     int Id { get; }
+
     /// <summary>
-    /// Gets the current level.
+    /// The current level of the achievement.
     /// </summary>
     int Level { get; }
+
     /// <summary>
-    /// Gets the badge ID.
+    /// The badge code of the achievement.
     /// </summary>
     string BadgeId { get; }
+
     /// <summary>
-    /// Gets the base progress for the current level.
-    /// </summary>
-    int BaseProgress { get; }
-    /// <summary>
-    /// Gets the maximum progress for the current level.
-    /// </summary>
-    int MaxProgress { get; }
-    /// <summary>
-    /// Gets the number of reward points that will be given upon leveling up this achievement.
-    /// </summary>
-    int LevelRewardPoints { get; }
-    /// <summary>
-    /// Gets the type of reward points that will be given upon leveling up this achievement.
-    /// </summary>
-    int LevelRewardPointType { get; }
-    /// <summary>
-    /// Gets the total current progress of this achievement.
+    /// The current progress of the achievement.
     /// </summary>
     int CurrentProgress { get; }
+
     /// <summary>
-    /// Gets if this the final level of this achievement has been reached.
+    /// The base progress for the current level of the achievement.
+    /// </summary>
+    int BaseProgress { get; }
+
+    /// <summary>
+    /// The maximum progress for the current level of the achievement.
+    /// </summary>
+    int MaxProgress { get; }
+
+    /// <summary>
+    /// The number of reward points that will be given upon leveling up the achievement.
+    /// </summary>
+    int LevelRewardPoints { get; }
+
+    /// <summary>
+    /// The type of reward points that will be given upon leveling up the achievement.
+    /// </summary>
+    int LevelRewardPointType { get; }
+
+    /// <summary>
+    /// Whether the final level of this achievement has been reached.
     /// </summary>
     bool IsComplete { get; }
+
     /// <summary>
-    /// Gets the category of this achievement.
+    /// The category of the achievement.
     /// </summary>
     string Category { get; }
+
     /// <summary>
-    /// Gets the sub-category of this achievement.
+    /// The subcategory of the achievement.
     /// </summary>
     string Subcategory { get; }
+
     /// <summary>
-    /// Gets the maximum level of this achievement.
+    /// The maximum level of the achievement.
     /// </summary>
     int MaxLevel { get; }
+
     int DisplayMethod { get; }
+
     short State { get; }
 }

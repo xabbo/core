@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,10 +31,29 @@ public sealed partial class InventoryManager(IExtension extension, ILoggerFactor
     private Inventory? _inventory;
     public IInventory? Inventory => _inventory;
 
+    /// <summary>
+    /// Invoked when the user's inventory is invalidated and needs to be reloaded.
+    /// </summary>
     public event Action? Invalidated;
+
+    /// <summary>
+    /// Invoked when the user's inventory is loaded.
+    /// </summary>
     public event Action? Loaded;
+
+    /// <summary>
+    /// Invoked when an item is added to the user's inventory.
+    /// </summary>
     public event Action<InventoryItemEventArgs>? ItemAdded;
+
+    /// <summary>
+    /// Invoked when an item in the user's inventory is updated.
+    /// </summary>
     public event Action<InventoryItemEventArgs>? ItemUpdated;
+
+    /// <summary>
+    /// Invoked when an item removed from the user's inventory.
+    /// </summary>
     public event Action<InventoryItemEventArgs>? ItemRemoved;
 
     protected override void OnDisconnected()
@@ -47,11 +65,13 @@ public sealed partial class InventoryManager(IExtension extension, ILoggerFactor
     }
 
     /// <summary>
-    /// Returns the inventory immediately if it is available
+    /// Returns the user's inventory immediately if it is available
     /// and has not been invalidated, otherwise attempts to retrieve it from the server.
-    /// Note that the user must be in a room to retrieve the inventory from the server.
-    /// If the user is not in a room and a request to load the inventory is made, this method will time out.
     /// </summary>
+    /// <remarks>
+    /// The user must be in a room to retrieve the inventory from the server.
+    /// If the user is not in a room and a request to load the inventory is made, this method will time out.
+    /// </remarks>
     public async Task<IInventory> GetInventoryAsync(int timeout = XabboConst.DefaultTimeout,
         CancellationToken cancellationToken = default)
     {

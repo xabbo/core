@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="ICrackableFurniData"/>
 public class CrackableFurniData : ItemData, ICrackableFurniData
 {
     public int Hits { get; set; }

@@ -5,9 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-/// <summary>
-/// The user's information that is sent upon requesting their profile.
-/// </summary>
+/// <inheritdoc cref="IUserProfile"/>
 public sealed class UserProfile : IUserProfile, IParserComposer<UserProfile>
 {
     public Id Id { get; set; }

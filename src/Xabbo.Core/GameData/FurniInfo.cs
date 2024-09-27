@@ -3,9 +3,44 @@
 namespace Xabbo.Core.GameData;
 
 /// <summary>
-/// Contains information of a furni.
+/// Defines information about a furniture.
 /// </summary>
+/// <param name="Type">The furniture type.</param>
+/// <param name="Kind">The furniture kind.</param>
+/// <param name="Identifier">The furniture's unique string identifier.</param>
+/// <param name="Revision">The revision number.</param>
+/// <param name="DefaultDirection">The default direction when placed in a room.</param>
+/// <param name="XDimension">The number of tiles this furniture occupies along the X-axis.</param>
+/// <param name="YDimension">The number of tiles this furniture occupies along the Y-axis.</param>
+/// <param name="PartColors"></param>
+/// <param name="Name">The name of the furniture.</param>
+/// <param name="Description">The description of the furniture.</param>
+/// <param name="AdUrl"></param>
+/// <param name="OfferId"></param>
+/// <param name="BuyOut"></param>
+/// <param name="RentOfferId"></param>
+/// <param name="RentBuyOut"></param>
+/// <param name="IsBuildersClub"></param>
+/// <param name="ExcludedDynamic"></param>
+/// <param name="CustomParams"></param>
+/// <param name="Category"></param>
+/// <param name="CategoryName"></param>
+/// <param name="CanStandOn"></param>
+/// <param name="CanSitOn"></param>
+/// <param name="CanLayOn"></param>
+/// <param name="Line"></param>
+/// <param name="Environment"></param>
+/// <param name="IsRare"></param>
+/// <remarks>
+/// <see cref="Kind"/> is the numeric identifier of a furniture.
+/// This number can be different across hotels.
+/// It is only unique for each item type - a floor and a wall item may have the same kind.
+/// <para/>
+/// <see cref="Identifier"/> is a unique string identifier, also known as its <i>class name</i>.
+/// This identifier is unique across both furniture types, and is the same across hotels.
+/// </remarks>
 public sealed record FurniInfo(
+
     ItemType Type,
     int Kind,
     string Identifier,

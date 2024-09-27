@@ -1,7 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
+/// <summary>
+/// Represents a sign held by a user in a room.
+/// </summary>
 public enum Signs
 {
     None = -1,

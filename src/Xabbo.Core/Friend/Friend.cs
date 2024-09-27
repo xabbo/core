@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IFriend"/>
 public class Friend : IFriend, IParserComposer<Friend>
 {
     public Id Id { get; set; }
@@ -19,8 +20,20 @@ public class Friend : IFriend, IParserComposer<Friend>
     public bool IsPocketHabboUser { get; set; }
     public Relation Relation { get; set; }
 
-    // Shockwave fields
+    /// <summary>
+    /// The current location of the friend.
+    /// </summary>
+    /// <remarks>
+    /// Only available on Shockwave.
+    /// </remarks>
     public string Location { get; set; } = "";
+
+    /// <summary>
+    /// The last access time of the friend.
+    /// </summary>
+    /// <remarks>
+    /// Only available on Shockwave.
+    /// </remarks>
     public string LastAccess { get; set; } = "";
 
     public Friend() { }

@@ -7,6 +7,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IAchievements"/>
 public sealed class Achievements : IAchievements, ICollection<Achievement>, IParserComposer<Achievements>
 {
     private readonly ConcurrentDictionary<int, Achievement> _dict = [];

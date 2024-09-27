@@ -1,7 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
+/// <summary>
+/// Represents a type of activity point.
+/// </summary>
 public enum ActivityPointType
 {
     Ducket = 0,

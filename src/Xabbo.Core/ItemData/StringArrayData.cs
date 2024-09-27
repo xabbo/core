@@ -5,6 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IStringArrayData"/>
 public sealed class StringArrayData : ItemData, IStringArrayData, IList<string>
 {
     private readonly List<string> _list;

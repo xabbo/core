@@ -4,6 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="ITradeOffer"/>
 public sealed class TradeOffer : ITradeOffer, IParserComposer<TradeOffer>
 {
     public Id UserId { get; set; }

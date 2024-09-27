@@ -4,9 +4,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
-/// <summary>
-/// The user's own data that is sent upon requesting user data.
-/// </summary>
+/// <inheritdoc cref="IUserData"/>
 public sealed class UserData : IUserData, IParserComposer<UserData>
 {
     public Id Id { get; set; }

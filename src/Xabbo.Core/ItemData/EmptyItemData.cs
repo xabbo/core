@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IEmptyItemData"/>
 public class EmptyItemData : ItemData, IEmptyItemData
 {
     public EmptyItemData()

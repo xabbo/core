@@ -1,7 +1,8 @@
-﻿using System;
+﻿namespace Xabbo.Core;
 
-namespace Xabbo.Core;
-
+/// <summary>
+/// Represents the category of a room in the navigator.
+/// </summary>
 public enum RoomCategory
 {
     None = -1,
@@ -15,7 +16,6 @@ public enum RoomCategory
     Trading = 14,
     Agencies = 16,
     RolePlaying = 17
-
 }
 
 public static partial class XabboEnumExtensions

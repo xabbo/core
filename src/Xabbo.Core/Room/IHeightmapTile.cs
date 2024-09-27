@@ -10,29 +10,35 @@ namespace Xabbo.Core;
 public interface IHeightmapTile
 {
     /// <summary>
-    /// Gets the X coordinate of this tile.
+    /// Gets the X coordinate of the tile.
     /// </summary>
     int X { get; }
+
     /// <summary>
-    /// Gets the Y coordinate of this tile.
+    /// Gets the Y coordinate of the tile.
     /// </summary>
     int Y { get; }
+
     /// <summary>
-    /// Gets the coordinates of this tile.
+    /// Gets the coordinates of the tile.
     /// </summary>
-    (int X, int Y) Location { get; }
+    Point Location { get; }
+
     /// <summary>
-    /// Gets if this is a floor tile.
+    /// Whether the tile is a floor tile.
     /// </summary>
     bool IsFloor { get; }
+
     /// <summary>
-    /// Gets if this tile is blocked by an existing furni.
+    /// Whether the tile is blocked by a furniture.
     /// </summary>
     bool IsBlocked { get; }
+
     /// <summary>
-    /// Gets if this is a floor tile and is not blocked by an existing furni.
+    /// Gets whether the tile is a floor tile and is not blocked by a furniture.
     /// </summary>
     bool IsFree { get; }
+
     /// <summary>
     /// Gets the height for this tile at which furni may be placed.
     /// </summary>

@@ -5,6 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IBot"/>
 public class Bot : Avatar, IBot
 {
     public bool IsPublicBot => Type == AvatarType.PublicBot;

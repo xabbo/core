@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a set of combined areas.
+/// </summary>
 public class AreaSet : ICollection<Area>
 {
     private readonly HashSet<Area> _areas = new();

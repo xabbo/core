@@ -6,6 +6,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IMapData"/>
 public sealed class MapData : ItemData, IMapData, IDictionary<string, string>
 {
     private readonly Dictionary<string, string> _map;

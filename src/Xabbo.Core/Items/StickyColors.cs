@@ -1,9 +1,11 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Defines the standard sticky note colors.
+/// </summary>
 public sealed class StickyColors : IReadOnlyList<StickyColor>
 {
     public static readonly StickyColor Blue = new("Blue", "9CCEFF");

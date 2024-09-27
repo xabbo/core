@@ -6,6 +6,9 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a collection of <see cref="NavigatorSearchResultList"/>.
+/// </summary>
 public sealed class NavigatorSearchResults : List<NavigatorSearchResultList>, IParserComposer<NavigatorSearchResults>
 {
     public string Category { get; set; }

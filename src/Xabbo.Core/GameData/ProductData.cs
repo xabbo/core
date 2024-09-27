@@ -10,6 +10,9 @@ using Xabbo.Core.Serialization;
 
 namespace Xabbo.Core.GameData;
 
+/// <summary>
+/// Defines a map of product code to <see cref="ProductInfo"/>.
+/// </summary>
 public sealed class ProductData : IReadOnlyDictionary<string, ProductInfo>
 {
     public static ProductData LoadJsonFile(string path) => LoadJson(File.ReadAllText(path));
@@ -51,6 +54,12 @@ public sealed class ProductData : IReadOnlyDictionary<string, ProductInfo>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
 
+/// <summary>
+/// Defines a product information.
+/// </summary>
+/// <param name="Code">The product code.</param>
+/// <param name="Name">The product name.</param>
+/// <param name="Description">The product description.</param>
 public sealed record ProductInfo(string Code, string Name, string Description)
 {
     internal ProductInfo(Json.ProductInfo proxy)

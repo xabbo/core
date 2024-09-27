@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Xabbo.Core.Game;
 
+/// <summary>
+/// Represents an inventory of items.
+/// </summary>
 public interface IInventory : IEnumerable<IInventoryItem>
 {
     /// <summary>
-    /// Gets if this inventory has been invalidated by the server.
+    /// Gets whether the inventory has been invalidated by the server.
     /// </summary>
     bool IsInvalidated { get; }
 

@@ -1,8 +1,13 @@
 ﻿namespace Xabbo.Core;
 
 /// <summary>
-/// Represents an item type, kind, and variant (used for posters).
+/// Represents an item type, kind, identifier, and variant.
 /// </summary>
+/// <remarks>
+/// Enables items to be grouped together by using the descriptor as a key.
+/// Identifier is included for compatibility with origins.
+/// Variant ensures different posters are separated from each other.
+/// </remarks>
 public readonly record struct ItemDescriptor(ItemType Type, int Kind = -1, string? Identifier = null, string? Variant = null) : IItem
 {
     readonly Id IItem.Id => -1;

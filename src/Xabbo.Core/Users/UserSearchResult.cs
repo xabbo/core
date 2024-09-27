@@ -2,6 +2,9 @@
 
 namespace Xabbo.Core;
 
+/// <summary>
+/// Represents a user search result.
+/// </summary>
 public sealed class UserSearchResult : IParserComposer<UserSearchResult>
 {
     public Id Id { get; set; }
@@ -14,6 +17,12 @@ public sealed class UserSearchResult : IParserComposer<UserSearchResult>
     public string Figure { get; set; } = "";
     public string RealName { get; set; } = "";
 
+    /// <summary>
+    /// The current location of the user.
+    /// </summary>
+    /// <remarks>
+    /// Only available on Shockwave.
+    /// </remarks>
     public string Location { get; set; } = "";
 
     public UserSearchResult() { }

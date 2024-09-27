@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Xabbo.Core.Game;
 
+/// <inheritdoc cref="IInventory"/>
 public class Inventory : IInventory, IEnumerable<InventoryItem>
 {
     private readonly ConcurrentDictionary<Id, InventoryItem> _items = new();

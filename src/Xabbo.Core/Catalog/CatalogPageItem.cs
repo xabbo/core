@@ -2,6 +2,7 @@
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="ICatalogPageItem"/>
 public sealed class CatalogPageItem : ICatalogPageItem, IParserComposer<CatalogPageItem>
 {
     public int Position { get; set; }

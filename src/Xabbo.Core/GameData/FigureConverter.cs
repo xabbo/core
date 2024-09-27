@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace Xabbo.Core.GameData;
 
+/// <summary>
+/// Converts origins figure strings into their modern representation.
+/// </summary>
 public sealed class FigureConverter
 {
     private static readonly Dictionary<int, int> _hairToHatMap = new()
@@ -41,6 +44,11 @@ public sealed class FigureConverter
     // Maps Origins FigurePartSet.Id -> FigurePartType.
     private readonly Dictionary<int, FigurePartType> _partSetTypeMap = [];
 
+    /// <summary>
+    /// Creates a new figure converter with the specified origins and modern figure data.
+    /// </summary>
+    /// <param name="modernFigureData">The modern figure data.</param>
+    /// <param name="originsFigureData">The origins figure data.</param>
     public FigureConverter(FigureData modernFigureData, FigureData originsFigureData)
     {
         ModernFigureData = modernFigureData;
@@ -64,6 +72,9 @@ public sealed class FigureConverter
         }
     }
 
+    /// <summary>
+    /// Converts the specified origins figure string to its modern <see cref="Figure"/> representation.
+    /// </summary>
     public Figure ToModern(string originsFigureString)
     {
         Figure figure = [];

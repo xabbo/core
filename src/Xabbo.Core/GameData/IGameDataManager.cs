@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace Xabbo.Core.GameData;
 
+/// <summary>
+/// Represents a service that manages game data for a hotel.
+/// </summary>
 public interface IGameDataManager
 {
     /// <summary>

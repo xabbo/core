@@ -5,6 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
+/// <inheritdoc cref="IRoomInfo"/>
 public class RoomInfo : IRoomInfo, IParserComposer<RoomInfo>
 {
     public Id Id { get; set; }

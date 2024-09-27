@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Xabbo.Core;
 
 /// <summary>
-/// Defines high score information as extra data in an item.
+/// Represents a list of high scores.
 /// </summary>
 public interface IHighScoreData : IItemData, IReadOnlyList<IHighScore>
 {

@@ -34,7 +34,7 @@ internal class Room : IRoom, INotifyPropertyChanged
     IRoomData? IRoom.Data => Data;
 
     private string? _floor;
-    public string? Floor
+    public string? FloorPattern
     {
         get => _floor;
         set => Set(ref _floor, value);
@@ -54,7 +54,7 @@ internal class Room : IRoom, INotifyPropertyChanged
         set => Set(ref _landscape, value);
     }
 
-    public Tile DoorTile { get; set; }
+    public Tile Entry { get; set; }
     public int EntryDirection { get; set; }
 
     public FloorPlan FloorPlan { get; set; } = null!;

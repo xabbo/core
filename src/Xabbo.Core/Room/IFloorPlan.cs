@@ -1,4 +1,4 @@
-namespace Xabbo.Core;
+﻿namespace Xabbo.Core;
 
 public interface IFloorPlan
 {
@@ -28,7 +28,7 @@ public interface IFloorPlan
     int Length { get; }
 
     /// <summary>
-    /// Gets the tile height at the specified coordinates in this floor plan.
+    /// Gets the tile height at the specified coordinates.
     /// </summary>
     int this[int x, int y] { get; }
 
