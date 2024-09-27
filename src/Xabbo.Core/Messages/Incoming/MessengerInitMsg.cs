@@ -29,7 +29,7 @@ public sealed record MessengerInitMsg : IMessage<MessengerInitMsg>
     public List<FriendRequest> Requests { get; init; } = [];
     public List<(int Id, string Name)> Categories { get; init; } = [];
 
-    public static MessengerInitMsg Parse(in PacketReader p)
+    static MessengerInitMsg IParser<MessengerInitMsg>.Parse(in PacketReader p)
     {
         if (p.Client is not ClientType.Shockwave)
         {
@@ -60,7 +60,7 @@ public sealed record MessengerInitMsg : IMessage<MessengerInitMsg>
         }
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         if (p.Client is not ClientType.Shockwave)
         {

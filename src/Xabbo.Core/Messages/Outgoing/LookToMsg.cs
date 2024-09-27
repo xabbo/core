@@ -33,7 +33,7 @@ public sealed record LookToMsg(Point Point) : IMessage<LookToMsg>
     /// </summary>
     public int Y => Point.Y;
 
-    public static LookToMsg Parse(in PacketReader p)
+    static LookToMsg IParser<LookToMsg>.Parse(in PacketReader p)
     {
         int x, y;
         if (p.Client is ClientType.Shockwave)
@@ -55,7 +55,7 @@ public sealed record LookToMsg(Point Point) : IMessage<LookToMsg>
         return new LookToMsg((x, y));
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         if (p.Client is ClientType.Shockwave)
         {

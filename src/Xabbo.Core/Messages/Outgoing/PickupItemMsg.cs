@@ -25,7 +25,7 @@ public record PickupItemMsg(ItemType Type, Id Id) : IMessage<PickupItemMsg>
 
     public static Identifier Identifier => Out.PickupObject;
 
-    public static PickupItemMsg Parse(in PacketReader p)
+    static PickupItemMsg IParser<PickupItemMsg>.Parse(in PacketReader p)
     {
         ItemType itemType = (ItemType)(-1);
         Id id = -1;
@@ -67,7 +67,7 @@ public record PickupItemMsg(ItemType Type, Id Id) : IMessage<PickupItemMsg>
         };
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         if (p.Client == ClientType.Shockwave)
         {

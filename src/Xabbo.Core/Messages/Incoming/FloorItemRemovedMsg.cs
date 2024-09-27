@@ -35,7 +35,7 @@ public sealed record FloorItemRemovedMsg(
 
     static Identifier IMessage<FloorItemRemovedMsg>.Identifier => In.ObjectRemove;
 
-    public static FloorItemRemovedMsg Parse(in PacketReader p)
+    static FloorItemRemovedMsg IParser<FloorItemRemovedMsg>.Parse(in PacketReader p)
     {
         Id id;
         FloorItem? item = null;
@@ -71,7 +71,7 @@ public sealed record FloorItemRemovedMsg(
         return new(id, item);
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         switch (p.Client)
         {

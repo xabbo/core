@@ -65,7 +65,7 @@ public sealed record UseFloorItemMsg(Id Id, int State = 0) : IMessage<UseFloorIt
         return new(id, state);
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         switch (p.Client)
         {

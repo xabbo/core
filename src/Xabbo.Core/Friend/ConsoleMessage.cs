@@ -15,7 +15,7 @@ public class ConsoleMessage : IParserComposer<ConsoleMessage>
     public string SenderFigure { get; set; } = "";
     public Gender SenderGender { get; set; } = Gender.None;
 
-    public static ConsoleMessage Parse(in PacketReader p) => p.Client switch
+    static ConsoleMessage IParser<ConsoleMessage>.Parse(in PacketReader p) => p.Client switch
     {
         ClientType.Shockwave => new()
         {
@@ -39,7 +39,7 @@ public class ConsoleMessage : IParserComposer<ConsoleMessage>
         }
     };
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         if (p.Client is ClientType.Shockwave)
         {

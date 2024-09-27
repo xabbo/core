@@ -115,7 +115,6 @@ public sealed class MarketplaceOffer : IMarketplaceOffer, IParserComposer<Market
     public override string ToString() => $"{nameof(MarketplaceOffer)}#{Id}/{Type}:{Kind}";
 
     static MarketplaceOffer IParser<MarketplaceOffer>.Parse(in PacketReader p) => Parse(in p, true);
-
     public static MarketplaceOffer Parse(in PacketReader p, bool hasOfferCount) => new(in p, hasOfferCount);
     public static IEnumerable<MarketplaceOffer> ParseAll(in PacketReader p, bool hasOfferCount = true)
     {

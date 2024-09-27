@@ -61,7 +61,7 @@ public sealed record UpdateProfileMsg : IMessage<UpdateProfileMsg>
     public bool? OfflineMessagingEnabled { get; set; }
     public string? TotpCode { get; set; }
 
-    public static UpdateProfileMsg Parse(in PacketReader p)
+    static UpdateProfileMsg IParser<UpdateProfileMsg>.Parse(in PacketReader p)
     {
         UpdateProfileMsg msg = new();
         while (p.Available > 0)
@@ -93,7 +93,7 @@ public sealed record UpdateProfileMsg : IMessage<UpdateProfileMsg>
         return msg;
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         if (ParentAgree is { } parentAgree)
         {

@@ -6,7 +6,7 @@ namespace Xabbo.Core;
 
 public readonly record struct FriendUpdate(FriendListUpdateType Type, Id Id, Friend? Friend = null) : IParserComposer<FriendUpdate>
 {
-    public static FriendUpdate Parse(in PacketReader p)
+    static FriendUpdate IParser<FriendUpdate>.Parse(in PacketReader p)
     {
         var type = (FriendListUpdateType)p.ReadInt();
         Id id = 0;
@@ -28,7 +28,7 @@ public readonly record struct FriendUpdate(FriendListUpdateType Type, Id Id, Fri
         return new(type, id, friend);
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         p.WriteInt((int)Type);
         if (Type is FriendListUpdateType.Update or FriendListUpdateType.Add)

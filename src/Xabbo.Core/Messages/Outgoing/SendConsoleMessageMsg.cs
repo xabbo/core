@@ -38,7 +38,7 @@ public sealed class SendConsoleMessageMsg : IMessage<SendConsoleMessageMsg>
 
     public int ConfirmationId { get; set; }
 
-    public static SendConsoleMessageMsg Parse(in PacketReader p) => p.Client switch
+    static SendConsoleMessageMsg IParser<SendConsoleMessageMsg>.Parse(in PacketReader p) => p.Client switch
     {
         ClientType.Shockwave => new()
         {
@@ -53,7 +53,7 @@ public sealed class SendConsoleMessageMsg : IMessage<SendConsoleMessageMsg>
         }
     };
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         if (p.Client is ClientType.Shockwave)
         {

@@ -23,7 +23,7 @@ public sealed record ClickFurniMsg(ItemType Type, Id Id, int State = 0) : IMessa
     static ClientType IMessage<ClickFurniMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<ClickFurniMsg>.Identifier => Out.ClickFurni;
 
-    public static ClickFurniMsg Parse(in PacketReader p)
+    static ClickFurniMsg IParser<ClickFurniMsg>.Parse(in PacketReader p)
     {
         // A negative ID is used to indicate a wall item.
         Id id = p.ReadId();
@@ -35,7 +35,7 @@ public sealed record ClickFurniMsg(ItemType Type, Id Id, int State = 0) : IMessa
         return new ClickFurniMsg(type, id, state);
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         if (Id < 0)
             throw new Exception($"Id cannot be negative when composing ClickFurniMsg: {Id}.");

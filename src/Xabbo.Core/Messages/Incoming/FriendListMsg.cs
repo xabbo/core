@@ -29,7 +29,7 @@ public sealed class FriendListMsg : List<Friend>, IMessage<FriendListMsg>
 
     public static Identifier Identifier => In.FriendListFragment;
 
-    public static FriendListMsg Parse(in PacketReader p)
+    static FriendListMsg IParser<FriendListMsg>.Parse(in PacketReader p)
     {
         int fragmentIndex = 0, fragmentCount = 1;
 
@@ -46,7 +46,7 @@ public sealed class FriendListMsg : List<Friend>, IMessage<FriendListMsg>
         };
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         if (p.Client is not ClientType.Shockwave)
         {

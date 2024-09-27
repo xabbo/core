@@ -25,7 +25,7 @@ public sealed record WallItemRemovedMsg(Id Id, Id PickerId = default) : IMessage
 {
     static Identifier IMessage<WallItemRemovedMsg>.Identifier => In.ItemRemove;
 
-    public static WallItemRemovedMsg Parse(in PacketReader p)
+    static WallItemRemovedMsg IParser<WallItemRemovedMsg>.Parse(in PacketReader p)
     {
         Id id, pickerId = 0;
 
@@ -46,7 +46,7 @@ public sealed record WallItemRemovedMsg(Id Id, Id PickerId = default) : IMessage
         return new(id, pickerId);
     }
 
-    public void Compose(in PacketWriter p)
+    void IComposer.Compose(in PacketWriter p)
     {
         switch (p.Client)
         {
