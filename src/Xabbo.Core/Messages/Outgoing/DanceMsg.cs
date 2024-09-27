@@ -10,7 +10,7 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// Supported clients: <see cref="ClientType.All"/>.
 /// </summary>
 /// <param name="Dance">The dance to change to.</param>
-public sealed record DanceMsg(Dances Dance = Dances.Dance) : IMessage<DanceMsg>
+public sealed record DanceMsg(AvatarDance Dance = AvatarDance.Dance) : IMessage<DanceMsg>
 {
     static Identifier IMessage<DanceMsg>.Identifier => default;
     static bool IMessage<DanceMsg>.UseTargetedIdentifiers => true;
@@ -25,7 +25,7 @@ public sealed record DanceMsg(Dances Dance = Dances.Dance) : IMessage<DanceMsg>
     {
         ClientType.Shockwave => Dance switch
         {
-            Dances.None => Xabbo.Messages.Shockwave.Out.STOP,
+            AvatarDance.None => Xabbo.Messages.Shockwave.Out.STOP,
             _ => Xabbo.Messages.Shockwave.Out.DANCE,
         },
         _ => Xabbo.Messages.Flash.Out.Dance,
@@ -44,7 +44,7 @@ public sealed record DanceMsg(Dances Dance = Dances.Dance) : IMessage<DanceMsg>
 
     static DanceMsg IParser<DanceMsg>.Parse(in PacketReader p)
     {
-        Dances dance;
+        AvatarDance dance;
 
         if (p.Client is ClientType.Shockwave)
         {
@@ -52,11 +52,11 @@ public sealed record DanceMsg(Dances Dance = Dances.Dance) : IMessage<DanceMsg>
                 throw new Exception($"Context is null when parsing {nameof(DanceMsg)}.");
 
             dance = p.Context.Messages.Is(p.Header, Xabbo.Messages.Shockwave.Out.STOP)
-                ? Dances.None : Dances.Dance;
+                ? AvatarDance.None : AvatarDance.Dance;
         }
         else
         {
-            dance = (Dances)p.ReadInt();
+            dance = (AvatarDance)p.ReadInt();
         }
 
         return new DanceMsg { Dance = dance };
@@ -68,11 +68,11 @@ public sealed record DanceMsg(Dances Dance = Dances.Dance) : IMessage<DanceMsg>
         {
             switch (Dance)
             {
-                case Dances.None:
+                case AvatarDance.None:
                     // Message identifier should be 'STOP'
                     p.WriteContent("Dance");
                     break;
-                case Dances.Dance:
+                case AvatarDance.Dance:
                     break;
                 default:
                     throw new Exception($"{Dance} is not supported on Shockwave.");

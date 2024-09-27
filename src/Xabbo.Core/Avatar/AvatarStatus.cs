@@ -20,32 +20,32 @@ public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnly
     public int Direction { get; set; }
 
     // sit, lay
-    public Stances Stance
+    public AvatarStance Stance
     {
         get
         {
             if (fragments.ContainsKey("sit"))
-                return Stances.Sit;
+                return AvatarStance.Sit;
             else if (fragments.ContainsKey("lay"))
-                return Stances.Lay;
+                return AvatarStance.Lay;
             else
-                return Stances.Stand;
+                return AvatarStance.Stand;
         }
 
         set
         {
             switch (value)
             {
-                case Stances.Stand:
+                case AvatarStance.Stand:
                     fragments.Remove("sit");
                     fragments.Remove("lay");
                     break;
-                case Stances.Sit:
+                case AvatarStance.Sit:
                     if (!fragments.ContainsKey("sit"))
                         fragments["sit"] = new string[] { "0.0", "0" };
                     fragments.Remove("lay");
                     break;
-                case Stances.Lay:
+                case AvatarStance.Lay:
                     if (!fragments.ContainsKey("lay"))
                         fragments["lay"] = new string[] { "0.0", "0" };
                     fragments.Remove("sit");
@@ -125,7 +125,7 @@ public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnly
             }
             else
             {
-                Stance = Stances.Sit;
+                Stance = AvatarStance.Sit;
                 fragments["sit"] = args = new string[] { "0.0", value ? "1" : "0" };
             }
         }
@@ -138,8 +138,8 @@ public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnly
         {
             switch (Stance)
             {
-                case Stances.Sit:
-                case Stances.Lay:
+                case AvatarStance.Sit:
+                case AvatarStance.Lay:
                     if (fragments.TryGetValue(Stance.ToString(), out string[]? args))
                     {
                         if (args.Length > 0)
@@ -157,8 +157,8 @@ public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnly
         {
             switch (Stance)
             {
-                case Stances.Sit:
-                case Stances.Lay:
+                case AvatarStance.Sit:
+                case AvatarStance.Lay:
                     if (!value.HasValue)
                         throw new ArgumentNullException("ActionHeight", "Action height cannot be null");
                     fragments[Stance.ToString()][0] = value.Value.ToString("0.0###############");
@@ -169,16 +169,16 @@ public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnly
     }
 
     // sign
-    public Signs Sign
+    public AvatarSign Sign
     {
         get
         {
-            return fragments.ContainsKey("sign") ? (Signs)int.Parse(fragments["sign"][0]) : Signs.None;
+            return fragments.ContainsKey("sign") ? (AvatarSign)int.Parse(fragments["sign"][0]) : AvatarSign.None;
         }
 
         set
         {
-            if (value == Signs.None)
+            if (value == AvatarSign.None)
                 fragments.Remove("sign");
             else
                 fragments["sign"] = new string[] { ((int)Sign).ToString() };

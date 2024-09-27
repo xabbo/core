@@ -1,7 +1,7 @@
 ﻿namespace Xabbo.Core.Events;
 
-public sealed class AvatarDanceEventArgs(IAvatar avatar, Dances previousDance)
+public sealed class AvatarDanceEventArgs(IAvatar avatar, AvatarDance previousDance)
     : AvatarEventArgs(avatar)
 {
-    public Dances PreviousDance { get; } = previousDance;
+    public AvatarDance PreviousDance { get; } = previousDance;
 }

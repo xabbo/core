@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents the stance of an avatar in a room.
 /// </summary>
-public enum Stances
+public enum AvatarStance
 {
     Stand,
     Sit,

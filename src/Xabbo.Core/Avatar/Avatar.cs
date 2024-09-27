@@ -29,7 +29,7 @@ public abstract class Avatar(AvatarType type, Id id, int index) : IAvatar, IPars
     public Area Area => new(Location.XY, 1, 1);
 
     // States
-    public Dances Dance { get; set; }
+    public AvatarDance Dance { get; set; }
     public bool IsIdle { get; set; }
     public bool IsTyping { get; set; }
     public int HandItem { get; set; }

@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents a type of avatar dance.
 /// </summary>
-public enum Dances
+public enum AvatarDance
 {
     None = 0,
     Dance = 1,

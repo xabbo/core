@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents a sign held by a user in a room.
 /// </summary>
-public enum Signs
+public enum AvatarSign
 {
     None = -1,
     Zero = 0,

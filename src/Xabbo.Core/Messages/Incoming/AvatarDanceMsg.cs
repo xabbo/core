@@ -10,12 +10,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// </summary>
 /// <param name="Index">The avatar's index.</param>
 /// <param name="Dance">The avatar's updated dance.</param>
-public sealed record AvatarDanceMsg(int Index, Dances Dance) : IMessage<AvatarDanceMsg>
+public sealed record AvatarDanceMsg(int Index, AvatarDance Dance) : IMessage<AvatarDanceMsg>
 {
     static ClientType IMessage<AvatarDanceMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<AvatarDanceMsg>.Identifier => In.Dance;
 
-    static AvatarDanceMsg IParser<AvatarDanceMsg>.Parse(in PacketReader p) => new(p.ReadInt(), (Dances)p.ReadInt());
+    static AvatarDanceMsg IParser<AvatarDanceMsg>.Parse(in PacketReader p) => new(p.ReadInt(), (AvatarDance)p.ReadInt());
     void IComposer.Compose(in PacketWriter p)
     {
         p.WriteInt(Index);

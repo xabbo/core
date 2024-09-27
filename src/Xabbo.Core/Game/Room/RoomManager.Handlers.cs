@@ -781,7 +781,7 @@ partial class RoomManager
 
         if (_currentRoom.Avatars.TryGetValue(msg.Index, out Avatar? avatar))
         {
-            Dances previousDance = avatar.Dance;
+            AvatarDance previousDance = avatar.Dance;
             avatar.Dance = msg.Dance;
 
             Log.LogTrace(

@@ -11,9 +11,9 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// </summary>
 /// <param name="Action">
 /// The action to perform.
-/// Only <see cref="Actions.Wave"/> is supported on <see cref="ClientType.Origins"/>.
+/// Only <see cref="AvatarAction.Wave"/> is supported on <see cref="ClientType.Origins"/>.
 /// </param>
-public sealed record ActionMsg(Actions Action) : IMessage<ActionMsg>
+public sealed record ActionMsg(AvatarAction Action) : IMessage<ActionMsg>
 {
     static Identifier IMessage<ActionMsg>.Identifier => default;
     static Identifier[] IMessage<ActionMsg>.Identifiers => [
@@ -30,15 +30,15 @@ public sealed record ActionMsg(Actions Action) : IMessage<ActionMsg>
 
     static ActionMsg IParser<ActionMsg>.Parse(in PacketReader p) => new(p.Client switch
     {
-        not ClientType.Shockwave => (Actions)p.ReadInt(),
-        ClientType.Shockwave => Actions.Wave,
+        not ClientType.Shockwave => (AvatarAction)p.ReadInt(),
+        ClientType.Shockwave => AvatarAction.Wave,
     });
 
     void IComposer.Compose(in PacketWriter p)
     {
         if (p.Client is not ClientType.Shockwave)
             p.WriteInt((int)Action);
-        else if (Action is not Actions.Wave)
+        else if (Action is not AvatarAction.Wave)
             throw new NotSupportedException("Only the Wave action is supported on Shockwave.");
     }
 }

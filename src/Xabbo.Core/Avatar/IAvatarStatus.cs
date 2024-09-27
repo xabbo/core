@@ -28,7 +28,7 @@ public interface IAvatarStatus
     /// <summary>
     /// The stance of the avatar.
     /// </summary>
-    Stances Stance { get; }
+    AvatarStance Stance { get; }
 
     /// <summary>
     /// Whether the user has rights.
@@ -60,5 +60,5 @@ public interface IAvatarStatus
     /// <summary>
     /// The sign currently held by the avatar.
     /// </summary>
-    Signs Sign { get; }
+    AvatarSign Sign { get; }
 }

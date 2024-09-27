@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents an avatar action.
 /// </summary>
-public enum Actions
+public enum AvatarAction
 {
     None = 0,
     Wave = 1,

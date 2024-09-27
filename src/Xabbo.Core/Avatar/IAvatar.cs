@@ -73,7 +73,7 @@ public interface IAvatar : IFloorEntity
     /// <summary>
     /// The current dance of the avatar.
     /// </summary>
-    Dances Dance { get; }
+    AvatarDance Dance { get; }
 
     /// <summary>
     /// Whether the avatar is idle or not.
