@@ -22,7 +22,6 @@ filePath="src/Xabbo.Core/Messages/${direction}"
 
 case $clientType in
   Modern|Origins)
-    clientNamespace=".$clientType"
     filePath="${filePath}/${clientType}"
     ;;
 esac
@@ -52,7 +51,7 @@ cat << EOF > $filePath
 using Xabbo.Messages;
 using Xabbo.Messages.Flash;
 
-namespace Xabbo.Core.Messages.${direction}${clientNamespace};
+namespace Xabbo.Core.Messages.${direction};
 
 public sealed record $msgName : IMessage<$msgName>
 {

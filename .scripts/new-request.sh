@@ -11,7 +11,6 @@ gum style "Client type: ${clientType}"
 
 case $clientType in
   Modern|Origins)
-    clientNamespace=".$clientType"
     dirIncoming="${dirIncoming}/${clientType}"
     dirOutgoing="${dirOutgoing}/${clientType}"
     ;;
@@ -60,9 +59,9 @@ fi
 cat << EOF > $requestMsgFile
 using Xabbo.Messages;
 using Xabbo.Messages.Flash;
-using Xabbo.Core.Messages.Incoming${clientNamespace};
+using Xabbo.Core.Messages.Incoming;
 
-namespace Xabbo.Core.Messages.Outgoing${clientNamespace};
+namespace Xabbo.Core.Messages.Outgoing;
 
 /// <summary>
 /// Request for <see cref="$responseMsg"/>.
@@ -88,10 +87,10 @@ cat << EOF > $responseMsgFile
 using Xabbo.Messages;
 using Xabbo.Messages.Flash;
 
-namespace Xabbo.Core.Messages.Incoming${clientNamespace};
+namespace Xabbo.Core.Messages.Incoming;
 
 /// <summary>
-/// Response for <see cref="Outgoing$clientNamespace.$requestMsg"/>.
+/// Response for <see cref="Outgoing.$requestMsg"/>.
 /// </summary>
 public sealed record $responseMsg($responseData $responseData) : IMessage<$responseMsg>
 {
