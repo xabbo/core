@@ -8,12 +8,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <summary>
 /// Sent when placing a floor item in a room.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Flash"/>, <see cref="ClientType.Shockwave"/>.
+/// Supported clients: <see cref="ClientType.Flash"/>, <see cref="ClientType.Shockwave"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.PlaceObject"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.PLACESTUFF"/>.</item>
+/// <item>Flash: <see cref="Out.PlaceObject"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.PLACESTUFF"/></item>
 /// </list>
 /// </summary>
 /// <param name="ItemId">The ID of the floor item to place.</param>

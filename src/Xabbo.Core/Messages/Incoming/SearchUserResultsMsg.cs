@@ -8,12 +8,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <para/>
 /// Response for <see cref="Outgoing.SearchUserMsg"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.HabboSearchResult"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.HABBO_SEARCH_RESULT"/>.</item>
+/// <item>Flash: <see cref="In.HabboSearchResult"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.HABBO_SEARCH_RESULT"/></item>
 /// </list>
 /// </summary>
 /// <param name="Results">The search results.</param>

@@ -9,11 +9,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <para/>
 /// Request for <see cref="RoomSettingsMsg"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.GetRoomSettings"/>.</item>
+/// <item>Flash: <see cref="Out.GetRoomSettings"/></item>
 /// </list>
 /// </summary>
 /// <param name="Id">The ID of the room to request settings for.</param>

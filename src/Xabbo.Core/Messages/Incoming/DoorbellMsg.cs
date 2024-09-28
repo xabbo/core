@@ -6,12 +6,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <summary>
 /// Receives when a user rings the doorbell.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.Doorbell"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.DOORBELL_RINGING"/>.</item>
+/// <item>Flash: <see cref="In.Doorbell"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.DOORBELL_RINGING"/></item>
 /// </list>
 /// </summary>
 /// <param name="Name">The name of the user who is ringing the doorbell.</param>

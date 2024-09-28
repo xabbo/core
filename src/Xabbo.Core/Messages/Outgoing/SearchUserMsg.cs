@@ -9,14 +9,14 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <para/>
 /// Request for <see cref="SearchUserResultsMsg"/>. Returns <see cref="UserSearchResults"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.HabboSearch"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.MESSENGER_HABBOSEARCH"/>.</item>
+/// <item>Flash: <see cref="Out.HabboSearch"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.MESSENGER_HABBOSEARCH"/></item>
 /// </list>
-/// </summary> <param name="Name">The name of the user to search for.</param>
+/// </summary><param name="Name">The name of the user to search for.</param>
 /// <param name="Type">
 /// The type of search to perform.
 /// Only used on <see cref="ClientType.Shockwave"/>.

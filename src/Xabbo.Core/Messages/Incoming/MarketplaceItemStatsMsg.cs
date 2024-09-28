@@ -8,11 +8,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <para/>
 /// Response for <see cref="Outgoing.GetMarketplaceItemStatsMsg"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.MarketplaceItemStats"/>.</item>
+/// <item>Flash: <see cref="In.MarketplaceItemStats"/></item>
 /// </list>
 /// </summary>
 /// <param name="Stats">The marketplace item statistics.</param>

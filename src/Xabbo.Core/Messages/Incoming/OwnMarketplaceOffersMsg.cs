@@ -8,11 +8,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <para/>
 /// Response for <see cref="Outgoing.GetOwnMarketplaceOffersMsg"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.MarketPlaceOwnOffers"/>.</item>
+/// <item>Flash: <see cref="In.MarketPlaceOwnOffers"/></item>
 /// </list>
 /// </summary>
 public sealed record OwnMarketplaceOffersMsg(UserMarketplaceOffers Offers) : IMessage<OwnMarketplaceOffersMsg>

@@ -8,12 +8,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <summary>
 /// Received when an avatar is removed from the room.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.UserRemove"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.LOGOUT"/>.</item>
+/// <item>Flash: <see cref="In.UserRemove"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.LOGOUT"/></item>
 /// </list>
 /// </summary>
 /// <param name="Index">The index of the avatar that was removed.</param>

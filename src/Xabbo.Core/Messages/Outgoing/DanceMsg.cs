@@ -7,11 +7,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <summary>
 /// Sent when starting, stopping or changing dances in a room.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Xabbo.Messages.Flash.Out.Dance"/>.</item>
+/// <item>Flash: <see cref="Xabbo.Messages.Flash.Out.Dance"/></item>
 /// <item>
 /// Shockwave:
 /// <see cref="Xabbo.Messages.Shockwave.Out.DANCE"/>,

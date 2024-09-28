@@ -6,11 +6,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <summary>
 /// Received when an avatar starts or stops idling.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.Sleep"/>.</item>
+/// <item>Flash: <see cref="In.Sleep"/></item>
 /// </list>
 /// </summary>
 /// <param name="Index">The index of the avatar.</param>

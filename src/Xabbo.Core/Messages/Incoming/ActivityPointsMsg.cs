@@ -6,9 +6,9 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <summary>
 /// Received when activity points are loaded.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
-/// Identifiers: <see cref="In.ActivityPoints"/>.
+/// Identifiers: <see cref="In.ActivityPoints"/>
 /// </summary>
 public sealed record ActivityPointsMsg(ActivityPoints ActivityPoints) : IMessage<ActivityPointsMsg>
 {

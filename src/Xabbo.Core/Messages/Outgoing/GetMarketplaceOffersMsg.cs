@@ -9,11 +9,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <para/>
 /// Request for <see cref="MarketplaceOffersMsg"/>. Returns an array of <see cref="MarketplaceOffer"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.GetMarketplaceOffers"/>.</item>
+/// <item>Flash: <see cref="Out.GetMarketplaceOffers"/></item>
 /// </list>
 /// </summary>
 /// <param name="Name">The name of the item to search for. May be left blank.</param>

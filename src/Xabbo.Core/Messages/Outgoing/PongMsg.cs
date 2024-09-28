@@ -6,12 +6,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <summary>
 /// Response to <see cref="Incoming.PingMsg"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.Pong"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.PONG"/>.</item>
+/// <item>Flash: <see cref="Out.Pong"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.PONG"/></item>
 /// </list>
 /// </summary>
 public sealed record PongMsg : IMessage<PongMsg>

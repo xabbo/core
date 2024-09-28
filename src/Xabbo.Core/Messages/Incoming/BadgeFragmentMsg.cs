@@ -8,9 +8,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <para/>
 /// A sequence of fragments are received in response to <see cref="Outgoing.GetBadgesMsg"/>.
 /// <para/>
+/// Supported clients: <see cref="ClientType.Modern"/>
+/// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.Badges"/>.</item>
+/// <item>Flash: <see cref="In.Badges"/></item>
 /// </list>
 /// </summary>
 /// <param name="Badges">The list of badges in the fragment.</param>

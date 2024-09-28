@@ -9,12 +9,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <summary>
 /// Sent when sending a message to a friend via the console.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.SendMsg"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.MESSENGER_SENDMSG"/>.</item>
+/// <item>Flash: <see cref="Out.SendMsg"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.MESSENGER_SENDMSG"/></item>
 /// </list>
 /// </summary>
 /// <remarks>

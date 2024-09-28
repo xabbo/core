@@ -8,12 +8,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <summary>
 /// Sent when looking towards a tile.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.LookTo"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.LOOKTO"/>.</item>
+/// <item>Flash: <see cref="Out.LookTo"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.LOOKTO"/></item>
 /// </list>
 /// </summary>
 /// <param name="Point">The point to look towards.</param>

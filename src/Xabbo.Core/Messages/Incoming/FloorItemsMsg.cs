@@ -11,12 +11,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <para/>
 /// Received when floor items in the room are loaded.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.Objects"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.ACTIVEOBJECTS"/>.</item>
+/// <item>Flash: <see cref="In.Objects"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.ACTIVEOBJECTS"/></item>
 /// </list>
 /// </summary>
 public sealed class FloorItemsMsg : List<FloorItem>, IMessage<FloorItemsMsg>

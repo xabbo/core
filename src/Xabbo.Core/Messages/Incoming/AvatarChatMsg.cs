@@ -73,16 +73,16 @@ public abstract record AvatarChatMsgBase(ChatType Type)
 /// <summary>
 /// Received when an avatar in the room sends a chat message.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.Chat"/>, <see cref="In.Whisper"/>, <see cref="In.Shout"/>.</item>
+/// <item>Flash: <see cref="In.Chat"/>, <see cref="In.Whisper"/>, <see cref="In.Shout"/></item>
 /// <item>
 /// Shockwave:
 /// <see cref="Xabbo.Messages.Shockwave.In.CHAT"/>,
 /// <see cref="Xabbo.Messages.Shockwave.In.CHAT_2"/>,
-/// <see cref="Xabbo.Messages.Shockwave.In.CHAT_3"/>.
+/// <see cref="Xabbo.Messages.Shockwave.In.CHAT_3"/>
 /// </item>
 /// </list>
 /// </summary>
@@ -117,12 +117,12 @@ public sealed record AvatarChatMsg : AvatarChatMsgBase, IMessage<AvatarChatMsg>
 /// <summary>
 /// Received when an avatar in the room sends a talk message.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.Chat"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.CHAT"/>.</item>
+/// <item>Flash: <see cref="In.Chat"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.CHAT"/></item>
 /// </list>
 /// </summary>
 public sealed record AvatarTalkMsg : AvatarChatMsgBase, IMessage<AvatarTalkMsg>
@@ -153,12 +153,12 @@ public sealed record AvatarTalkMsg : AvatarChatMsgBase, IMessage<AvatarTalkMsg>
 /// <summary>
 /// Received when an avatar in the room sends a shout message.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.Shout"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.CHAT_3"/>.</item>
+/// <item>Flash: <see cref="In.Shout"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.CHAT_3"/></item>
 /// </list>
 /// </summary>
 public sealed record AvatarShoutMsg : AvatarChatMsgBase, IMessage<AvatarShoutMsg>
@@ -189,12 +189,12 @@ public sealed record AvatarShoutMsg : AvatarChatMsgBase, IMessage<AvatarShoutMsg
 /// <summary>
 /// Received when an avatar in the room sends a whisper message.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.Whisper"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.CHAT_2"/>.</item>
+/// <item>Flash: <see cref="In.Whisper"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.CHAT_2"/></item>
 /// </list>
 /// </summary>
 public sealed record AvatarWhisperMsg : AvatarChatMsgBase, IMessage<AvatarWhisperMsg>

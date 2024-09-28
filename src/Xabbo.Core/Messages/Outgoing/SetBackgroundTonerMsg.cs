@@ -6,11 +6,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <summary>
 /// Sent when updating a room background toner.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.SetRoomBackgroundColorData"/>.</item>
+/// <item>Flash: <see cref="Out.SetRoomBackgroundColorData"/></item>
 /// </list>
 /// </summary>
 /// <param name="Id">The ID of the background toner.</param>

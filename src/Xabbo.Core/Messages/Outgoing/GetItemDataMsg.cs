@@ -9,12 +9,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <para/>
 /// Request for <see cref="ItemDataMsg"/>. Returns a <see cref="string"/> representing the item's data.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.GetItemData"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.G_IDATA"/>.</item>
+/// <item>Flash: <see cref="Out.GetItemData"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.G_IDATA"/></item>
 /// </list>
 /// </summary>
 public sealed record GetItemDataMsg(Id Id) : IRequestMessage<GetItemDataMsg, ItemDataMsg, string>

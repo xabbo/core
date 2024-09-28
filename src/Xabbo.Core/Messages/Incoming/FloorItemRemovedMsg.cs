@@ -8,16 +8,16 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <summary>
 /// Received when a floor item is removed from the room.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.ObjectRemove"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.ACTIVEOBJECT_REMOVE"/>.</item>
+/// <item>Flash: <see cref="In.ObjectRemove"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.ACTIVEOBJECT_REMOVE"/></item>
 /// </list>
 /// </summary>
 /// <param name="Id">The ID of the floor item that was removed.</param>
-/// <param name="Item">The instance of the floor item that was removed. Only available on <see cref="ClientType.Shockwave"/>.</param>
+/// <param name="Item">The instance of the floor item that was removed. Only available on <see cref="ClientType.Shockwave"/></param>
 /// <param name="Expired">Whether the item expired or not. Applies to <see cref="ClientType.Modern"/> clients.</param>
 /// <param name="PickerId">The ID of the user who picked up the item. Applies to <see cref="ClientType.Modern"/> clients.</param>
 /// <param name="Delay">The delay in milliseconds after which the item will be removed by the client. Applies to <see cref="ClientType.Modern"/> clients.</param>

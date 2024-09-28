@@ -8,11 +8,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <para/>
 /// Response for <see cref="Outgoing.GetProfileMsg"/> or <see cref="Outgoing.GetProfileByNameMsg"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.ExtendedProfile"/>.</item>
+/// <item>Flash: <see cref="In.ExtendedProfile"/></item>
 /// </list>
 /// </summary>
 /// <param name="Profile">The requested user's profile.</param>

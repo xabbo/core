@@ -9,11 +9,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <para/>
 /// The server may respond with <see cref="UserUnbannedMsg"/> if the user was unbanned.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.UnbanUserFromRoom"/>.</item>
+/// <item>Flash: <see cref="Out.UnbanUserFromRoom"/></item>
 /// </list>
 /// </summary>
 /// <param name="RoomId">The ID of the room to unban the user from.</param>

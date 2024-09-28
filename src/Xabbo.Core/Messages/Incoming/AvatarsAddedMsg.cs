@@ -8,12 +8,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <summary>
 /// Received when avatars are added to the room.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.Users"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.USERS"/>.</item>
+/// <item>Flash: <see cref="In.Users"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.USERS"/></item>
 /// </list>
 /// </summary>
 public sealed class AvatarsAddedMsg : List<Avatar>, IMessage<AvatarsAddedMsg>

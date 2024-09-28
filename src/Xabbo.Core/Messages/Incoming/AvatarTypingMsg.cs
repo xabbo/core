@@ -6,11 +6,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <summary>
 /// Received when an avatar in the room starts or stops typing.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.UserTyping"/>.</item>
+/// <item>Flash: <see cref="In.UserTyping"/></item>
 /// </list>
 /// </summary>
 /// <param name="Index">The index of the avatar.</param>

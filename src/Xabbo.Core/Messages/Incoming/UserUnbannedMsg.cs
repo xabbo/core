@@ -8,11 +8,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <para/>
 /// Response for <see cref="Outgoing.UnbanUserMsg"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.UserUnbannedFromRoom"/>.</item>
+/// <item>Flash: <see cref="In.UserUnbannedFromRoom"/></item>
 /// </list>
 /// </summary>
 /// <param name="RoomId">The ID of the room that the user was unbanned from.</param>

@@ -6,12 +6,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <summary>
 /// Sent when whispering in a room.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.Whisper"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.WHISPER"/>.</item>
+/// <item>Flash: <see cref="Out.Whisper"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.WHISPER"/></item>
 /// </list>
 /// </summary>
 /// <param name="Message">The chat message content.</param>

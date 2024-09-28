@@ -6,11 +6,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <summary>
 /// Received when a new friend is added to the user's friend list.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Origins"/>.
+/// Supported clients: <see cref="ClientType.Origins"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.ADD_BUDDY"/>.</item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.ADD_BUDDY"/></item>
 /// </list>
 /// </summary>
 /// <param name="Friend">The friend that was added.</param>

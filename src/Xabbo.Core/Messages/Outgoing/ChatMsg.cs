@@ -8,11 +8,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <summary>
 /// Sent when sending a chat message in a room.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.Chat"/>, <see cref="Out.Whisper"/>, <see cref="Out.Shout"/>.</item>
+/// <item>Flash: <see cref="Out.Chat"/>, <see cref="Out.Whisper"/>, <see cref="Out.Shout"/></item>
 /// <item>
 /// Shockwave:
 /// <see cref="Xabbo.Messages.Shockwave.Out.CHAT"/>,

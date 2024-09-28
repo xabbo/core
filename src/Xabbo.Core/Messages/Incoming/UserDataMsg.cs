@@ -8,12 +8,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <para/>
 /// Response for <see cref="Outgoing.GetUserDataMsg"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.UserObject"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.USER_OBJ"/>.</item>
+/// <item>Flash: <see cref="In.UserObject"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.USER_OBJ"/></item>
 /// </list>
 /// </summary>
 /// <param name="UserData">The current user's data.</param>

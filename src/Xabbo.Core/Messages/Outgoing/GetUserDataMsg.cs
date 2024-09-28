@@ -9,12 +9,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <para/>
 /// Request for <see cref="UserDataMsg"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.InfoRetrieve"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.INFORETRIEVE"/>.</item>
+/// <item>Flash: <see cref="Out.InfoRetrieve"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.INFORETRIEVE"/></item>
 /// </list>
 /// </summary>
 public sealed record GetUserDataMsg : IRequestMessage<GetUserDataMsg, UserDataMsg, UserData>

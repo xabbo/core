@@ -8,11 +8,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <summary>
 /// Received when the item data of multiple floor items are updated.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.ObjectsDataUpdate"/>.</item>
+/// <item>Flash: <see cref="In.ObjectsDataUpdate"/></item>
 /// </list>
 /// </summary>
 /// <param name="Updates">The list of floor item data updated.</param>

@@ -6,12 +6,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <summary>
 /// Sent when clicking a tile in a room to walk to.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.MoveAvatar"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.MOVE"/>.</item>
+/// <item>Flash: <see cref="Out.MoveAvatar"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.MOVE"/></item>
 /// </list>
 /// </summary>
 /// <param name="Point">The coordinates of the tile.</param>

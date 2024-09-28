@@ -8,11 +8,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <para/>
 /// Responds with a sequence of <see cref="Incoming.BadgeFragmentMsg"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.GetBadges"/>.</item>
+/// <item>Flash: <see cref="Out.GetBadges"/></item>
 /// </list>
 /// </summary>
 public sealed record GetBadgesMsg : IMessage<GetBadgesMsg>

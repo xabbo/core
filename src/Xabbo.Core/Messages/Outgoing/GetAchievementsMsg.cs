@@ -9,11 +9,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <para/>
 /// Request for <see cref="AchievementsMsg"/>. Returns <see cref="Achievements"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.GetAchievements"/>.</item>
+/// <item>Flash: <see cref="Out.GetAchievements"/></item>
 /// </list>
 /// </summary>
 public sealed record class GetAchievementsMsg() : IRequestMessage<GetAchievementsMsg, AchievementsMsg, Achievements>

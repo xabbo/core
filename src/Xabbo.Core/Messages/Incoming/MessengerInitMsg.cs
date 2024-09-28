@@ -7,12 +7,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <summary>
 /// Received when initializing the messenger.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.MessengerInit"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.FRIEND_LIST_INIT"/>.</item>
+/// <item>Flash: <see cref="In.MessengerInit"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.FRIEND_LIST_INIT"/></item>
 /// </list>
 /// </summary>
 public sealed record MessengerInitMsg : IMessage<MessengerInitMsg>

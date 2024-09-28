@@ -8,12 +8,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <para/>
 /// Response for <see cref="Outgoing.GetItemDataMsg"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.ItemDataUpdate"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.IDATA"/>.</item>
+/// <item>Flash: <see cref="In.ItemDataUpdate"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.IDATA"/></item>
 /// </list>
 /// </summary>
 public sealed record ItemDataMsg(Id Id, string Data) : IMessage<ItemDataMsg>

@@ -9,11 +9,11 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <para/>
 /// Request for <see cref="PetInfoMsg"/>. Returns a <see cref="PetInfo"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.GetPetInfo"/>.</item>
+/// <item>Flash: <see cref="Out.GetPetInfo"/></item>
 /// </list>
 /// </summary>
 /// <param name="Id">The ID of the pet to retrieve information for.</param>

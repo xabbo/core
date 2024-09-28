@@ -9,11 +9,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <para/>
 /// Response for <see cref="Outgoing.GetRightsListMsg"/>.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.FlatControllers"/>.</item>
+/// <item>Flash: <see cref="In.FlatControllers"/></item>
 /// </list>
 /// </summary>
 /// <param name="RoomId">The ID of the room.</param>

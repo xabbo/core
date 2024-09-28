@@ -8,12 +8,12 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <summary>
 /// Sent when giving rights to a user in the room.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="Out.AssignRights"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.ASSIGNRIGHTS"/>.</item>
+/// <item>Flash: <see cref="Out.AssignRights"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.ASSIGNRIGHTS"/></item>
 /// </list>
 /// </summary>
 /// <param name="Id">The ID of the user to give rights to. Applies to <see cref="ClientType.Modern"/> clients.</param>

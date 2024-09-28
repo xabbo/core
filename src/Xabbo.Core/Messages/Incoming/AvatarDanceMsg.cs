@@ -6,11 +6,11 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <summary>
 /// Received when an avatar starts or stops dancing.
 /// <para/>
-/// Supported clients: <see cref="ClientType.Modern"/>.
+/// Supported clients: <see cref="ClientType.Modern"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.Dance"/>.</item>
+/// <item>Flash: <see cref="In.Dance"/></item>
 /// </list>
 /// </summary>
 /// <param name="Index">The avatar's index.</param>

@@ -8,12 +8,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <summary>
 /// Received when a floor item's data is updated.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.ObjectDataUpdate"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.STUFFDATAUPDATE"/>.</item>
+/// <item>Flash: <see cref="In.ObjectDataUpdate"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.STUFFDATAUPDATE"/></item>
 /// </list>
 /// </summary>
 /// <param name="Id">The ID of the floor item that was updated.</param>

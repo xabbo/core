@@ -6,12 +6,12 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <summary>
 /// Received when a wall item is added to the room.
 /// <para/>
-/// Supported clients: <see cref="ClientType.All"/>.
+/// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
 /// Identifiers:
 /// <list type="bullet">
-/// <item>Flash: <see cref="In.ItemAdd"/>.</item>
-/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.ITEMS_2"/>.</item>
+/// <item>Flash: <see cref="In.ItemAdd"/></item>
+/// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.In.ITEMS_2"/></item>
 /// </list>
 /// </summary>
 /// <param name="Item">The wall item that was added.</param>
