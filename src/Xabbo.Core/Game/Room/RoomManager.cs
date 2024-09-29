@@ -147,8 +147,8 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     /// If so, this method will return <c>true</c>
     /// and <paramref name="room"/> will contain the current room instance.
     /// </summary>
-    public bool EnsureRoom([NotNullWhen(true)] out IRoom? room)
-        => (room = _currentRoom) is not null;
+    public bool EnsureInRoom([NotNullWhen(true)] out IRoom? room)
+        => (room = _currentRoom) is not null && IsInRoom;
 
     private bool EnsureRoomInternal([NotNullWhen(true)] out Room? room)
     {
