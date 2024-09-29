@@ -58,7 +58,7 @@ public class Heightmap : IHeightmap, IEnumerable<HeightmapTile>, IParserComposer
     void IComposer.Compose(in PacketWriter p)
     {
         p.WriteInt(Width);
-        p.WriteLength(Width * Length);
+        p.WriteLength((Length)(Width * Length));
         foreach (HeightmapTile tile in _tiles)
             p.Compose(tile);
     }

@@ -58,7 +58,7 @@ public abstract record AvatarChatMsgBase(ChatType Type)
         {
             p.WriteInt(Gesture);
             p.WriteInt(Style);
-            p.WriteLength(Links.Length);
+            p.WriteLength((Length)Links.Length);
             for (int i = 0; i < Links.Length; i++)
             {
                 p.WriteString(Links[i].Item1);

@@ -117,7 +117,7 @@ public sealed partial class ProfileManager : GameStateManager
             Interceptor.Send(new GetUserDataMsg());
         }
 
-        if (!Session.IsOrigins && Achievements is null)
+        if (!Session.Is(ClientType.Origins) && Achievements is null)
         {
             Log.LogInformation("Requesting achievements.");
             Interceptor.Send(Out.GetAchievements);

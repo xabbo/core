@@ -23,7 +23,7 @@ public sealed partial class GetFriendsTask(IInterceptor interceptor) : Intercept
         {
             e.Block();
 
-            if (Session.IsOrigins)
+            if (Session.Is(ClientType.Origins))
             {
                 SetResult(e.Msg.Friends);
             }

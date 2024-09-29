@@ -163,7 +163,7 @@ public class RoomInfo : IRoomInfo, IParserComposer<RoomInfo>
         p.WriteInt(Ranking);
         p.WriteInt((int)Category);
 
-        p.WriteLength(Tags.Count);
+        p.WriteLength((Length)Tags.Count);
         foreach (string tag in Tags)
             p.WriteString(tag);
 

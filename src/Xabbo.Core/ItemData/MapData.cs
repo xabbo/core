@@ -50,7 +50,7 @@ public sealed class MapData : ItemData, IMapData, IDictionary<string, string>
     {
         UnsupportedClientException.ThrowIfNoneOr(p.Client, ClientType.Shockwave);
 
-        p.WriteLength(_map.Count);
+        p.WriteLength((Length)_map.Count);
         foreach (var item in _map)
         {
             p.WriteString(item.Key);

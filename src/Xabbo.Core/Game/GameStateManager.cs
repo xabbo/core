@@ -44,13 +44,13 @@ public abstract class GameStateManager : INotifyPropertyChanged, IDisposable
         Interceptor.Disconnected += OnDisconnected;
     }
 
-    private void OnInitialized(InitializedArgs e)
+    private void OnInitialized(InitializedEventArgs e)
     {
         _hasInitialized = false;
         _connectedOnInit = e.IsGameConnected ?? false;
     }
 
-    protected virtual void OnConnected(GameConnectedArgs e)
+    protected virtual void OnConnected(ConnectedEventArgs e)
     {
         if (this is IMessageHandler handler)
             _attachment = handler.Attach(Interceptor);

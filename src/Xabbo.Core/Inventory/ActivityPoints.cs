@@ -57,7 +57,7 @@ public class ActivityPoints : IActivityPoints, IParserComposer<ActivityPoints>
     {
         UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
 
-        p.WriteLength(Count);
+        p.WriteLength((Length)Count);
         foreach (var (type, amount) in this)
         {
             p.WriteInt((int)type);

@@ -91,7 +91,7 @@ public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFacto
     public event Action<FriendMessageEventArgs>? MessageReceived;
     #endregion
 
-    protected override void OnConnected(GameConnectedArgs e)
+    protected override void OnConnected(ConnectedEventArgs e)
     {
         base.OnConnected(e);
     }

@@ -75,14 +75,14 @@ public sealed class WallItemsMsg : List<WallItem>, IMessage<WallItemsMsg>
                     val => val.OwnerName
                 );
 
-            p.WriteLength(ownerDictionary.Count);
+            p.WriteLength((Length)ownerDictionary.Count);
             foreach (var pair in ownerDictionary)
             {
                 p.WriteId(pair.Key);
                 p.WriteString(pair.Value);
             }
 
-            p.WriteLength(Count);
+            p.WriteLength((Length)Count);
             foreach (var item in this)
                 p.Compose(item);
         }

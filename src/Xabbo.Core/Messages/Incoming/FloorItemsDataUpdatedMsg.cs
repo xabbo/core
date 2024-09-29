@@ -33,7 +33,7 @@ public sealed record FloorItemsDataUpdatedMsg(List<(Id Id, ItemData Data)> Updat
 
     void IComposer.Compose(in PacketWriter p)
     {
-        p.WriteLength(Updates.Count);
+        p.WriteLength((Length)Updates.Count);
         foreach (var (id, itemData) in Updates)
         {
             p.WriteId(id);

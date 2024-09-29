@@ -63,7 +63,7 @@ public sealed class FloorItemsMsg : List<FloorItem>, IMessage<FloorItemsMsg>
                     val => val.OwnerName
                 );
 
-            p.WriteLength(ownerDictionary.Count);
+            p.WriteLength((Length)ownerDictionary.Count);
             foreach (var pair in ownerDictionary)
             {
                 p.WriteId(pair.Key);
@@ -71,7 +71,7 @@ public sealed class FloorItemsMsg : List<FloorItem>, IMessage<FloorItemsMsg>
             }
         }
 
-        p.WriteLength(Count);
+        p.WriteLength((Length)Count);
         foreach (FloorItem item in this)
             p.Compose(item);
     }

@@ -67,7 +67,7 @@ public sealed record MessengerInitMsg : IMessage<MessengerInitMsg>
             p.WriteInt(UserLimit);
             p.WriteInt(NormalLimit);
             p.WriteInt(ExtendedLimit);
-            p.WriteLength(Categories.Count);
+            p.WriteLength((Length)Categories.Count);
             foreach (var (id, name) in Categories)
             {
                 p.WriteInt(id);
