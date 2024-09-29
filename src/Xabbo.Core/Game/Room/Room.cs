@@ -23,7 +23,7 @@ internal class Room : IRoom, INotifyPropertyChanged
     }
 
     public Id Id { get; }
-    public string Model { get; set; } = null!;
+    public string? Model { get; set; }
 
     private RoomData? _roomData;
     public RoomData? Data

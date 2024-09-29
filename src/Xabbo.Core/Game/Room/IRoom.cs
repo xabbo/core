@@ -21,7 +21,7 @@ public interface IRoom
     /// <summary>
     /// Gets the model of this room.
     /// </summary>
-    string Model { get; }
+    string? Model { get; }
 
     /// <summary>
     /// Gets the floor pattern of the room.

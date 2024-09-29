@@ -119,11 +119,6 @@ partial class RoomManager
             IsInQueue = false;
             QueuePosition = 0;
         }
-        else if (IsLoadingRoom || IsInRoom)
-        {
-            // Leave current room if we are in one.
-            LeaveRoom();
-        }
 
         string model;
         Id roomId;
@@ -140,28 +135,7 @@ partial class RoomManager
             roomId = e.Packet.Read<Id>();
         }
 
-        CurrentRoomId = roomId;
-
-        if (_currentRoom is null ||
-            _currentRoom.Id != roomId)
-        {
-            if (_roomDataCache.TryGetValue(roomId, out RoomData? data))
-            {
-                Log.LogDebug("Loaded room data from cache.");
-            }
-            else
-            {
-                Log.LogWarning("Failed to load room data from cache.");
-            }
-
-            _currentRoom = new Room(roomId, data);
-        }
-
-        _currentRoom.Model = model;
-        IsLoadingRoom = true;
-
-        Log.LogDebug("Entering room. (id:{RoomId})", roomId);
-        Entering?.Invoke();
+        EnteringRoom(roomId, model);
     }
 
     [InterceptIn(nameof(In.RoomProperty))]
@@ -427,23 +401,11 @@ partial class RoomManager
         }
 
         IsOwner = e.Packet.Read<bool>();
-
-        EnterRoom(_currentRoom);
+        EnterRoom();
     }
 
     [InterceptIn(nameof(In.CloseConnection))]
-    private void HandleCloseConnection(Intercept e)
-    {
-        if (!IsInRoom) return;
-
-        if (_currentRoom is null)
-        {
-            Log.LogDebug("Current room is null.");
-            return;
-        }
-
-        LeaveRoom();
-    }
+    private void HandleCloseConnection(Intercept e) => LeaveRoom();
 
     // TODO: Check how this works on Shockwave
     [Intercept(~ClientType.Shockwave)]

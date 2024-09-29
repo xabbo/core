@@ -25,17 +25,6 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
 
     private bool _gotHeightMap, _gotUsers, _gotObjects, _gotItems;
 
-    /// <summary>
-    /// Gets the ID of the current room. The <see cref="Room"/> may not be available
-    /// even when the current room ID is set (e.g. when in the queue).
-    /// </summary>
-    private Id _currentRoomId = -1;
-    public Id CurrentRoomId
-    {
-        get => _currentRoomId;
-        private set => Set(ref _currentRoomId, value);
-    }
-
     private bool _isRingingDoorbell;
     /// <summary>
     /// Gets whether the user is currently ringing the doorbell to a room.
@@ -96,16 +85,11 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
         private set => Set(ref _isInRoom, value);
     }
 
-    private IRoom? _room;
     /// <summary>
     /// Gets the instance of the room that the user is currently in.
     /// Returns <c>null</c> if the user is not in a room.
     /// </summary>
-    public IRoom? Room
-    {
-        get => _room;
-        set => Set(ref _room, value);
-    }
+    public IRoom? Room => _currentRoom;
 
     private RightsLevel _rightsLevel;
     /// <summary>
@@ -198,11 +182,29 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
         return EnsureRoomInternal(out room);
     }
 
-    private void EnteringRoom(Id id)
+    private void EnteringRoom(Id id, string? model = null)
     {
-        Log.LogDebug("Entering room #{Id}.", id);
+        if (_currentRoom is { } currentRoom)
+        {
+            if (currentRoom.Id == id)
+            {
+                if (!IsLoadingRoom)
+                {
+                    Log.LogWarning("Entering room: current room is not null and not loading room.");
+                }
 
-        CurrentRoomId = id;
+                if (currentRoom.Model is null)
+                {
+                    currentRoom.Model = model;
+                    RaisePropertyChanged(nameof(Room));
+                }
+                return;
+            }
+
+            LeaveRoom();
+        }
+
+        Log.LogDebug("Entering room #{Id}.", id);
 
         if (_roomDataCache.TryGetValue(id, out RoomData? data))
         {
@@ -213,7 +215,11 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
             Log.LogWarning("Failed to load room data from cache.");
         }
 
-        _currentRoom = new Room(id, data);
+        _currentRoom = new Room(id, data) { Model = model! };
+        RaisePropertyChanged(nameof(Room));
+
+        IsLoadingRoom = true;
+        Entering?.Invoke();
     }
 
     // Checks the load state and enters the room on Shockwave.
@@ -224,18 +230,25 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
         if (_currentRoom is not null &&
             _gotHeightMap && _gotUsers && _gotObjects && _gotItems)
         {
-            EnterRoom(_currentRoom);
+            EnterRoom();
         }
     }
 
-    private void EnterRoom(Room room)
+    private void EnterRoom()
     {
+        if (_currentRoom is null)
+        {
+            Log.LogWarning("Enter room: current room is null.");
+            return;
+        }
+
+        IsInQueue = false;
+        IsRingingDoorbell = false;
         IsLoadingRoom = false;
         IsInRoom = true;
-        Room = room;
 
-        Log.LogInformation("Entered room. (id:{RoomId}, name:{Name})", room.Id, room.Data?.Name ?? "?");
-        Entered?.Invoke(new RoomEventArgs(room));
+        Log.LogInformation("Entered room. (id:{RoomId}, name:{Name})", _currentRoom.Id, _currentRoom.Data?.Name ?? "?");
+        Entered?.Invoke(new RoomEventArgs(_currentRoom));
     }
 
     private void UpdateRoomData(RoomData roomData)
@@ -578,6 +591,8 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
     {
         Log.LogDebug("Resetting room state.");
 
+        _gotHeightMap = _gotUsers = _gotObjects = _gotItems = false;
+
         IsInQueue =
         IsLoadingRoom =
         IsInRoom = false;
@@ -586,11 +601,8 @@ public sealed partial class RoomManager(IInterceptor interceptor, ILoggerFactory
         RightsLevel = RightsLevel.None;
         IsOwner = false;
 
-        Room = _currentRoom = null;
-
-        CurrentRoomId = -1;
-
-        _gotHeightMap = _gotUsers = _gotObjects = _gotItems = false;
+        _currentRoom = null;
+        RaisePropertyChanged(nameof(Room));
     }
 
     private bool CheckPermission(ModerationPermissions? permissions)
