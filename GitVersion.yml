@@ -4,3 +4,4 @@ assembly-informational-format: '{FullSemVer}'
 branches:
   develop:
     regex: ^dev
+    label: beta
