@@ -9,6 +9,7 @@
     <EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
     <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
     <IsAotCompatible>true</IsAotCompatible>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <Target Name="CleanSourceGeneratedFiles" BeforeTargets="Clean" DependsOnTargets="$(BeforeBuildDependsOn)">
@@ -39,10 +40,6 @@
   <PropertyGroup Label="Rename paths">
     <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
     <PathMap>$(AppOutputBase)=Xabbo.Core\</PathMap>
-  </PropertyGroup>
-
-  <PropertyGroup Label="Include documentation">
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName).xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup Label="Resources">
