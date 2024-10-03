@@ -45,6 +45,8 @@ partial class ProfileManager
 
         using (Log.MethodScope())
             Log.LogTrace("User data updated.");
+
+        RaisePropertyChanged(nameof(UserData));
         UserDataUpdated?.Invoke();
     }
 
@@ -62,6 +64,8 @@ partial class ProfileManager
 
             using (Log.MethodScope())
                 Log.LogTrace("User data updated.");
+
+            RaisePropertyChanged(nameof(UserData));
             UserDataUpdated?.Invoke();
         }
     }
@@ -95,6 +99,8 @@ partial class ProfileManager
     private void HandleActivityPoints(Modern.ActivityPointsMsg msg)
     {
         Points = msg.ActivityPoints;
+        RaisePropertyChanged(nameof(Duckets));
+        RaisePropertyChanged(nameof(Diamonds));
 
         using (Log.MethodScope())
             Log.LogTrace("Activity points loaded.");
@@ -110,6 +116,17 @@ partial class ProfileManager
         using (Log.MethodScope())
             Log.LogTrace("Activity points updated: {ActivityPointType} {Change:+0;-#} = {Amount}.",
                 msg.Type, msg.Change, msg.Amount);
+
+        RaisePropertyChanged(nameof(ActivityPoints));
+        switch (msg.Type)
+        {
+            case ActivityPointType.Ducket:
+                RaisePropertyChanged(nameof(Duckets));
+                break;
+            case ActivityPointType.Diamond:
+                RaisePropertyChanged(nameof(Diamonds));
+                break;
+        }
 
         ActivityPointUpdated?.Invoke(new ActivityPointUpdatedEventArgs(msg.Type, msg.Amount, msg.Change));
     }
@@ -128,7 +145,11 @@ partial class ProfileManager
     [Intercept]
     private void HandleAchievement(Modern.AchievementMsg msg)
     {
-        Achievements?.Add(msg.Achievement);
+        if (Achievements is { } achievements)
+        {
+            achievements.Add(msg.Achievement);
+            RaisePropertyChanged(nameof(Achievements));
+        }
 
         using (Log.MethodScope())
             Log.LogTrace("Achievement #{Id} ({BadgeId}) updated.", msg.Achievement.Id, msg.Achievement.BadgeCode);

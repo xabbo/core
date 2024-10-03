@@ -22,30 +22,55 @@ public sealed partial class ProfileManager : GameStateManager
 
     private bool _isLoadingProfile, _isLoadingCredits;
 
+    private UserData? _userData;
     /// <summary>
     /// Gets the user's current information.
     /// </summary>
-    public UserData? UserData { get; private set; }
+    public UserData? UserData
+    {
+        get => _userData;
+        set => Set(ref _userData, value);
+    }
 
+    private Achievements? _achievements;
     /// <summary>
     /// Gets the user's current achievements.
     /// </summary>
-    public Achievements? Achievements { get; private set; }
+    public Achievements? Achievements
+    {
+        get => _achievements;
+        set => Set(ref _achievements, value);
+    }
 
+    private int? _achievementScore;
     /// <summary>
     /// Gets the user's current achievement score.
     /// </summary>
-    public int? AchievementScore { get; private set; }
+    public int? AchievementScore
+    {
+        get => _achievementScore;
+        set => Set(ref _achievementScore, value);
+    }
 
+    private int? _credits;
     /// <summary>
     /// Gets the user's current credits.
     /// </summary>
-    public int? Credits { get; private set; }
+    public int? Credits
+    {
+        get => _credits;
+        set => Set(ref _credits, value);
+    }
 
+    private ActivityPoints _points;
     /// <summary>
     /// Gets the user's current activity points.
     /// </summary>
-    public ActivityPoints Points { get; private set; }
+    public ActivityPoints Points
+    {
+        get => _points;
+        set => Set(ref _points, value);
+    }
 
     /// <summary>
     /// Gets the user's current amount of diamonds.
