@@ -21,6 +21,12 @@ public sealed record MuteUserMsg(Id Id, Id RoomId, int Minutes) : IMessage<MuteU
     static ClientType IMessage<MuteUserMsg>.SupportedClients => ClientType.Modern;
     static Identifier IMessage<MuteUserMsg>.Identifier => Out.MuteUser;
 
+    /// <summary>
+    /// Constructs a new <see cref="MuteUserMsg"/> with the specified user, room ID and duration.
+    /// </summary>
+    /// <param name="user">The user to mute.</param>
+    /// <param name="roomId"><inheritdoc cref="MuteUserMsg" path="/param[@name='RoomId']"/></param>
+    /// <param name="minutes"><inheritdoc cref="MuteUserMsg" path="/param[@name='Minutes']"/></param>
     public MuteUserMsg(IUser user, Id roomId, int minutes) : this(user.Id, roomId, minutes) { }
 
     static MuteUserMsg IParser<MuteUserMsg>.Parse(in PacketReader p) => new(p.ReadId(), p.ReadId(), p.ReadInt());

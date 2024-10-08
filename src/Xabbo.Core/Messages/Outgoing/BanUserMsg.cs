@@ -17,13 +17,28 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// </list>
 /// </summary>
 /// <param name="Id">The ID of the user to ban. Applies to <see cref="ClientType.Modern"/> clients.</param>
-/// <param name="RoomId">The ID of the room to ban the user from. Applies to <see cref="ClientType.Modern"/> clients.</param>
 /// <param name="Name">The name of the user to ban. Applies to the <see cref="ClientType.Origins"/> client.</param>
+/// <param name="RoomId">The ID of the room to ban the user from. Applies to <see cref="ClientType.Modern"/> clients.</param>
 /// <param name="Duration">The duration of the ban.</param>
-public sealed record BanUserMsg(Id? Id = null, Id? RoomId = null, string? Name = null, BanDuration Duration = BanDuration.Permanent) : IMessage<BanUserMsg>
+public sealed record BanUserMsg(Id? Id, string? Name, Id? RoomId, BanDuration Duration) : IMessage<BanUserMsg>
 {
+    /// <summary>
+    /// Constructs a new <see cref="BanUserMsg"/> with the specified user, room ID and duration.
+    /// </summary>
+    /// <param name="user">The user to ban.</param>
+    /// <param name="roomId"><inheritdoc cref="BanUserMsg" path="/param[@name='RoomId']"/></param>
+    /// <param name="duration"><inheritdoc cref="BanUserMsg" path="/param[@name='Duration']"/></param>
     public BanUserMsg(IUser user, Id roomId, BanDuration duration = BanDuration.Permanent)
-        : this(user.Id, roomId, user.Name, duration) { }
+        : this(user.Id, user.Name, roomId, duration) { }
+
+    /// <summary>
+    /// Constructs a new <see cref="BanUserMsg"/> with the specified user/ID pair, room ID and duration.
+    /// </summary>
+    /// <param name="user">The ID and name of the user to ban.</param>
+    /// <param name="roomId"><inheritdoc cref="BanUserMsg" path="/param[@name='RoomId']"/></param>
+    /// <param name="duration"><inheritdoc cref="BanUserMsg" path="/param[@name='Duration']"/></param>
+    public BanUserMsg(IdName user, Id roomId, BanDuration duration = BanDuration.Permanent)
+        : this(user.Id, user.Name, roomId, duration) { }
 
     static Identifier IMessage<BanUserMsg>.Identifier => Out.BanUserWithDuration;
 
@@ -52,13 +67,7 @@ public sealed record BanUserMsg(Id? Id = null, Id? RoomId = null, string? Name =
             string s => throw new Exception($"Unknown {p.Client} ban duration: '{s}'.")
         };
 
-        return new BanUserMsg
-        {
-            Id = id,
-            RoomId = roomId,
-            Name = name,
-            Duration = duration
-        };
+        return new BanUserMsg(id, name, roomId, duration);
     }
 
     void IComposer.Compose(in PacketWriter p)

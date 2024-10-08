@@ -13,4 +13,6 @@ public sealed record IdName(Id Id, string Name) : IParserComposer<IdName>
         p.WriteId(Id);
         p.WriteString(Name);
     }
+
+    public static implicit operator IdName((Id id, string name) idName) => new(idName.id, idName.name);
 }
