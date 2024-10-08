@@ -47,38 +47,40 @@ public class Friend : IFriend, IParserComposer<Friend>
             Gender = H.ToGender(p.ReadInt());
             Motto = p.ReadString();
             IsOnline = p.ReadBool();
-            Location = p.ReadString();
+            CanFollow = p.ReadBool();
             LastAccess = p.ReadString();
             Figure = p.ReadString();
-            return;
+            CategoryId = p.ReadInt();
         }
-
-        Id = p.ReadId();
-        Name = p.ReadString();
-        Gender = H.ToGender(p.ReadInt());
-        IsOnline = p.ReadBool();
-        CanFollow = p.ReadBool();
-        Figure = p.ReadString();
-        CategoryId = p.ReadInt();
-        Motto = p.ReadString();
-
-        if (p.Client is ClientType.Flash)
+        else
         {
-            RealName = p.ReadString();
-            FacebookId = p.ReadString();
+            Id = p.ReadId();
+            Name = p.ReadString();
+            Gender = H.ToGender(p.ReadInt());
+            IsOnline = p.ReadBool();
+            CanFollow = p.ReadBool();
+            Figure = p.ReadString();
+            CategoryId = p.ReadInt();
+            Motto = p.ReadString();
+
+            if (p.Client is ClientType.Flash)
+            {
+                RealName = p.ReadString();
+                FacebookId = p.ReadString();
+            }
+
+            IsAcceptingOfflineMessages = p.ReadBool();
+            IsVipMember = p.ReadBool();
+            IsPocketHabboUser = p.ReadBool();
+
+            if (p.Client is ClientType.Unity)
+            {
+                RealName = p.ReadString();
+                FacebookId = p.ReadString();
+            }
+
+            Relation = (Relation)p.ReadShort();
         }
-
-        IsAcceptingOfflineMessages = p.ReadBool();
-        IsVipMember = p.ReadBool();
-        IsPocketHabboUser = p.ReadBool();
-
-        if (p.Client is ClientType.Unity)
-        {
-            RealName = p.ReadString();
-            FacebookId = p.ReadString();
-        }
-
-        Relation = (Relation)p.ReadShort();
     }
 
     void IComposer.Compose(in PacketWriter p)
@@ -93,23 +95,24 @@ public class Friend : IFriend, IParserComposer<Friend>
             p.WriteString(Location);
             p.WriteString(LastAccess);
             p.WriteString(Figure);
-            return;
         }
-
-        p.WriteId(Id);
-        p.WriteString(Name);
-        p.WriteInt(Gender.ToClientValue());
-        p.WriteBool(IsOnline);
-        p.WriteBool(CanFollow);
-        p.WriteString(Figure);
-        p.WriteInt(CategoryId);
-        p.WriteString(Motto);
-        p.WriteString(RealName);
-        p.WriteString(FacebookId);
-        p.WriteBool(IsAcceptingOfflineMessages);
-        p.WriteBool(IsVipMember);
-        p.WriteBool(IsPocketHabboUser);
-        p.WriteShort((short)Relation);
+        else
+        {
+            p.WriteId(Id);
+            p.WriteString(Name);
+            p.WriteInt(Gender.ToClientValue());
+            p.WriteBool(IsOnline);
+            p.WriteBool(CanFollow);
+            p.WriteString(Figure);
+            p.WriteInt(CategoryId);
+            p.WriteString(Motto);
+            p.WriteString(RealName);
+            p.WriteString(FacebookId);
+            p.WriteBool(IsAcceptingOfflineMessages);
+            p.WriteBool(IsVipMember);
+            p.WriteBool(IsPocketHabboUser);
+            p.WriteShort((short)Relation);
+        }
     }
 
     public override string ToString() => Name;
