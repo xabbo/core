@@ -12,9 +12,10 @@ public class GameDataTests(ITestOutputHelper output)
     [InlineData("ous")]
     public async Task TestGameData(string hotelIdentifier)
     {
-        var gameDataManager = new GameDataManager(".cache") {
+        var loader = new GameDataLoader() {
             CacheOnly = Environment.GetEnvironmentVariable("XABBO_TEST_GAMEDATA_FETCH") is null
         };
+        var gameDataManager = new GameDataManager(loader);
 
         await gameDataManager.LoadAsync(Hotel.FromIdentifier(hotelIdentifier));
     }
@@ -22,12 +23,13 @@ public class GameDataTests(ITestOutputHelper output)
     [ConditionalFact("XABBO_TEST_GAMEDATA")]
     public async Task TestFigureConverter()
     {
-        var modernManager = new GameDataManager(".cache") { CacheOnly = true };
-        var originsManager = new GameDataManager(".cache") { CacheOnly = true };
+        var loader = new GameDataLoader() { CacheOnly = true };
+        var modernManager = new GameDataManager(loader);
+        var originsManager = new GameDataManager(loader);
 
         await Task.WhenAll(
-            modernManager.LoadAsync(Hotel.FromIdentifier("us"), [GameDataType.Figure]),
-            originsManager.LoadAsync(Hotel.FromIdentifier("ous"), [GameDataType.Figure])
+            modernManager.LoadAsync(Hotel.FromIdentifier("us"), [GameDataType.FigureData]),
+            originsManager.LoadAsync(Hotel.FromIdentifier("ous"), [GameDataType.FigureData])
         );
 
         var converter = new FigureConverter(modernManager.Figure!, originsManager.Figure!);
