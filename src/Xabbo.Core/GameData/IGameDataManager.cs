@@ -10,11 +10,6 @@ namespace Xabbo.Core.GameData;
 public interface IGameDataManager
 {
     /// <summary>
-    /// Gets the cache path where game data is stored.
-    /// </summary>
-    string CachePath { get; }
-
-    /// <summary>
     /// Gets the figure data if it is available.
     /// </summary>
     FigureData? Figure { get; }

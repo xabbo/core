@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Xabbo.Core.Web;
+namespace Xabbo.Core.GameData.Json;
 
 public class GameDataHashesContainer
 {

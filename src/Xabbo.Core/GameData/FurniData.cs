@@ -16,6 +16,9 @@ public sealed class FurniData : IReadOnlyCollection<FurniInfo>
     public static FurniData LoadJson(string json) => new(Json.FurniData.Load(json));
     public static FurniData LoadJsonFile(string path) => LoadJson(File.ReadAllText(path));
 
+    public static FurniData LoadJsonOrigins(string json) => new(Json.Origins.FurniData.Load(json));
+    public static FurniData LoadJsonOriginsFile(string path) => LoadJsonOrigins(File.ReadAllText(path));
+
     public static FurniData LoadXml(Stream stream) => new(Xml.FurniData.Load(stream));
     public static FurniData LoadXmlFile(string path)
     {
@@ -77,6 +80,37 @@ public sealed class FurniData : IReadOnlyCollection<FurniInfo>
         _identifierMap = this.ToImmutableDictionary(furniInfo => furniInfo.Identifier, StringComparer.InvariantCultureIgnoreCase);
         _floorItemMap = FloorItems.ToImmutableDictionary(furniInfo => furniInfo.Kind);
         _wallItemMap = WallItems.ToImmutableDictionary(wallItem => wallItem.Kind);
+    }
+
+    internal FurniData(Json.Origins.FurniData proxy)
+    {
+        List<FurniInfo>
+            floorItems = [],
+            wallItems = [];
+
+        foreach (var furniInfoProxy in proxy)
+        {
+            FurniInfo info = new(furniInfoProxy);
+            if (info.Type is ItemType.Floor)
+                floorItems.Add(info);
+            else if (info.Type is ItemType.Wall)
+                wallItems.Add(info);
+        }
+
+        FloorItems = [.. floorItems];
+        WallItems = [.. wallItems];
+
+        _identifierMap = this
+            .DistinctBy(x => x.Identifier)
+            .ToImmutableDictionary(furniInfo => furniInfo.Identifier, StringComparer.InvariantCultureIgnoreCase);
+
+        _floorItemMap = FloorItems
+            .DistinctBy(x => x.Kind)
+            .ToImmutableDictionary(furniInfo => furniInfo.Kind);
+
+        _wallItemMap = WallItems
+            .DistinctBy(x => x.Kind)
+            .ToImmutableDictionary(wallItem => wallItem.Kind);
     }
 
     internal FurniData(ExternalTexts texts)
@@ -306,7 +340,7 @@ public sealed class FurniData : IReadOnlyCollection<FurniInfo>
         _ => false
     };
 
-    private static string? GetVariantInternal(IItem item) => item switch
+    private static string? GetVariantInternal(IItem item) => (item switch
     {
         ItemDescriptor x => x.Variant,
         IFloorItem x => x.Data.Value,
@@ -315,7 +349,7 @@ public sealed class FurniData : IReadOnlyCollection<FurniInfo>
         IMarketplaceOffer x => x.Data.Value,
         ICatalogProduct x => x.Variant,
         _ => null
-    };
+    })?.Trim();
 
     /// <summary>
     /// Gets the item's variant, or null if the specified item does not have a variant.

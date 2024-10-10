@@ -8,7 +8,7 @@ namespace Xabbo.Core.GameData.Json;
 
 public class FurniData
 {
-    public static FurniData Load(string json) => JsonSerializer.Deserialize(json, JsonContext.Default.FurniData)
+    public static FurniData Load(string json) => JsonSerializer.Deserialize(json, GameDataJsonContext.Default.FurniData)
         ?? throw new Exception("Failed to deserialize furni data.");
 
     public FurniInfoContainer RoomItemTypes { get; set; } = new();

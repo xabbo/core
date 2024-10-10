@@ -106,7 +106,7 @@ public sealed record FurniInfo(
         DefaultDirection: proxy.DefaultDir,
         XDimension: proxy.XDim,
         YDimension: proxy.YDim,
-        PartColors: proxy.PartColors.Colors.ToImmutableArray(),
+        PartColors: [.. proxy.PartColors.Colors],
         Name: proxy.Name ?? "",
         Description: proxy.Description ?? "",
         AdUrl: proxy.AdUrl ?? "",
@@ -125,6 +125,23 @@ public sealed record FurniInfo(
         Line: proxy.FurniLine ?? "",
         Environment: proxy.Environment ?? "",
         IsRare: proxy.Rare
+    )
+    { }
+
+    internal FurniInfo(Json.Origins.FurniInfo proxy) : this(
+        Type: proxy.Type,
+        Kind: proxy.Kind,
+        Identifier: proxy.Identifier,
+        Revision: proxy.Revision,
+        DefaultDirection: proxy.DefaultDir,
+        XDimension: proxy.XDim,
+        YDimension: proxy.YDim,
+        PartColors: [.. proxy.PartColors.Split(',')],
+        Name: proxy.Name,
+        Description: proxy.Description,
+        AdUrl: proxy.AdUrl,
+        CustomParams: proxy.CustomParams,
+        Category: (FurniCategory)proxy.SpecialType
     )
     { }
 

@@ -16,7 +16,7 @@ public sealed class FigureData
         byte[] data = File.ReadAllBytes(filePath);
         FixBuffer(data);
 
-        return JsonSerializer.Deserialize(Encoding.ASCII.GetString(data), JsonOriginsContext.Default.FigureData)
+        return JsonSerializer.Deserialize(Encoding.ASCII.GetString(data), OriginsGameDataJsonContext.Default.FigureData)
             ?? throw new Exception("Failed to deserialize figure data.");
     }
 

@@ -19,7 +19,7 @@ public sealed class ProductData : IReadOnlyDictionary<string, ProductInfo>
     public static ProductData LoadJson(string json)
     {
         return new ProductData(
-            JsonSerializer.Deserialize(json, JsonProductContext.Default.ProductData)
+            JsonSerializer.Deserialize(json, GameDataJsonContext.Default.ProductData)
             ?? throw new Exception("Failed to deserialize product data.")
         );
     }

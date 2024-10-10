@@ -1,18 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Runtime.InteropServices;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-
-using Xabbo.Core.Serialization;
-using Xabbo.Core.Web;
 
 namespace Xabbo.Core.GameData;
 
@@ -21,27 +14,12 @@ namespace Xabbo.Core.GameData;
 /// </summary>
 public class GameDataManager : IGameDataManager
 {
-    private static string GetDefaultCachePath()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return @"%APPDATA%\xabbo\cache\gamedata";
-        }
-        else
-        {
-            return "%HOME%/.cache/xabbo/gamedata";
-        }
-    }
+    private readonly ILogger _logger;
+    private readonly IGameDataLoader _loader;
 
-    private readonly ILogger Log;
     private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
-
     private TaskCompletionSource? _tcsLoad;
     private Task _loadTask;
-
-    public string CachePath { get; }
-    public TimeSpan MaxAge { get; set; } = TimeSpan.FromHours(3);
-    public bool CacheOnly { get; set; }
 
     public FigureData? Figure { get; private set; }
     public FurniData? Furni { get; private set; }
@@ -52,15 +30,15 @@ public class GameDataManager : IGameDataManager
     public event Action? Loaded;
     public event Action<Exception>? LoadFailed;
 
-    public GameDataManager(string? cachePath = null, ILoggerFactory? loggerFactory = null)
+    public GameDataManager(
+        IGameDataLoader? loader = null,
+        ILoggerFactory? loggerFactory = null)
     {
-        cachePath ??= GetDefaultCachePath();
-        Log = (ILogger?)loggerFactory?.CreateLogger<GameDataManager>() ?? NullLogger.Instance;
+        _loader = loader ?? new GameDataLoader(loggerFactory: loggerFactory);
+        _logger = (ILogger?)loggerFactory?.CreateLogger<GameDataManager>() ?? NullLogger.Instance;
 
         _tcsLoad = new(TaskCreationOptions.RunContinuationsAsynchronously);
         _loadTask = _tcsLoad.Task;
-
-        CachePath = Path.GetFullPath(Environment.ExpandEnvironmentVariables(cachePath));
     }
 
     private void Reset()
@@ -69,55 +47,6 @@ public class GameDataManager : IGameDataManager
         Furni = null;
         Products = null;
         Texts = null;
-    }
-
-    private async Task LoadDataAsync(HttpClient http,
-        Hotel hotel, GameDataType gameDataType,
-        string url, string? hash,
-        CancellationToken cancellationToken)
-    {
-        string cacheFolderPath = Path.Combine(CachePath, hotel.Identifier, gameDataType.ToString().ToLower());
-        Directory.CreateDirectory(cacheFolderPath);
-
-        string filePath = Path.Combine(cacheFolderPath, hash ?? "1");
-
-        FileInfo file = new(filePath);
-
-        if (!file.Exists || (!CacheOnly && hash is null && (DateTime.Now - file.LastWriteTime) >= MaxAge))
-        {
-            if (CacheOnly)
-                throw new Exception($"{gameDataType} data not found in cache-only mode.");
-
-            url = $"{url}/{hash ?? "1"}";
-
-            Log.LogDebug("Loading {GamedataType} data from '{Url}'.", gameDataType, url);
-
-            HttpResponseMessage response = await http.GetAsync(url, cancellationToken);
-            response.EnsureSuccessStatusCode();
-
-            using var outs = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite);
-            await response.Content.CopyToAsync(outs, cancellationToken);
-        }
-        else
-        {
-            Log.LogDebug("Loading {GamedataType} data from disk cache.", gameDataType);
-        }
-
-        switch (gameDataType)
-        {
-            case GameDataType.Furni: Furni = FurniData.LoadJsonFile(filePath); break;
-            case GameDataType.Product: Products = ProductData.LoadJsonFile(filePath); break;
-            case GameDataType.Texts: Texts = ExternalTexts.Load(filePath); break;
-            case GameDataType.Figure:
-                if (hotel.IsOrigins)
-                    Figure = FigureData.LoadJsonOrigins(filePath);
-                else
-                    Figure = FigureData.LoadXml(filePath);
-                break;
-            default:
-                Log.LogWarning("Unknown game data type: {GamedataType}.", gameDataType);
-                break;
-        }
     }
 
     /// <summary>
@@ -135,7 +64,7 @@ public class GameDataManager : IGameDataManager
 
         try
         {
-            Log.LogInformation("Loading game data for {Hotel}.", hotel.Name);
+            _logger.LogInformation("Loading game data for {Hotel}.", hotel.Name);
 
             if (_tcsLoad is null)
             {
@@ -146,98 +75,58 @@ public class GameDataManager : IGameDataManager
             Reset();
             Loading?.Invoke();
 
-            string hotelCachePath = Path.Combine(CachePath, hotel.Identifier);
-            Log.LogDebug("Using cache path '{CachePath}'.", hotelCachePath);
-            Directory.CreateDirectory(hotelCachePath);
+            GameDataHashes hashes = await _loader.LoadHashesAsync(hotel, cancellationToken);
 
-            using var http = new HttpClient();
-            http.DefaultRequestHeaders.Add("User-Agent", H.UserAgent);
+            Dictionary<GameDataType, Task<string>> loadTasks = [];
 
-            List<GameDataHash>? hashes = null;
-
-            if (hotel.IsOrigins)
+            foreach (var (type, hash) in hashes)
             {
-                string baseUrl = $"https://{hotel.Subdomain}-gamedata.habbo.{hotel.Domain}";
-                hashes = [
-                    new GameDataHash
-                    {
-                        Name = "external_texts",
-                        Url = $"{baseUrl}/external_texts"
-                    },
-                    new GameDataHash
-                    {
-                        Name = "figurepartlist",
-                        Url = $"{baseUrl}/figuredata"
-                    }
-                ];
+                if (typesToLoad?.Contains(type) == false)
+                    continue;
+
+                loadTasks[type] = _loader.DownloadAsync(hotel, type, hash, cancellationToken);
             }
-            else
+
+            await Task.WhenAll(loadTasks.Values);
+            _logger.LogDebug("All load tasks completed.");
+
+            foreach (var (type, task) in loadTasks)
             {
-                GameDataHashesContainer? container = null;
-                FileInfo hashesFile = new(Path.Combine(hotelCachePath, "hashes.json"));
-                if (!hashesFile.Exists || (!CacheOnly && (DateTime.Now - hashesFile.LastWriteTime) >= MaxAge))
+                var filePath = await task;
+
+                switch (type)
                 {
-                    if (CacheOnly)
-                        throw new Exception("Game data hashes not found in cache-only mode.");
-
-                    Log.LogDebug("Loading game data hashes...");
-                    string json = await http.GetStringAsync(
-                        $"https://{hotel.WebHost}/gamedata/hashes2",
-                        cancellationToken
-                    );
-                    container = JsonSerializer.Deserialize(json, JsonContext.Default.GameDataHashesContainer);
-
-                    await File.WriteAllTextAsync(hashesFile.FullName, json, cancellationToken);
+                    case GameDataType.FigureData:
+                        if (hotel.IsOrigins)
+                            Figure = FigureData.LoadJsonOrigins(filePath);
+                        else
+                            Figure = FigureData.LoadXml(filePath);
+                        break;
+                    case GameDataType.FurniData:
+                        if (hotel.IsOrigins)
+                            Furni = FurniData.LoadJsonOriginsFile(filePath);
+                        else
+                            Furni = FurniData.LoadJsonFile(filePath);
+                        break;
+                    case GameDataType.ExternalTexts:
+                        Texts = ExternalTexts.Load(filePath);
+                        break;
+                    case GameDataType.ProductData:
+                        Products = ProductData.LoadJsonFile(filePath);
+                        break;
                 }
-                else
-                {
-                    Log.LogDebug("Loading game data hashes from disk cache.");
-                    container = JsonSerializer.Deserialize(
-                        await File.ReadAllTextAsync(hashesFile.FullName, cancellationToken),
-                        JsonContext.Default.GameDataHashesContainer
-                    );
-                }
-
-                if (container is not null)
-                    hashes = container.Hashes;
             }
 
-            if (hashes is null)
-                throw new Exception("Failed to deserialize game data hashes.");
+            // if (hotel.IsOrigins && Texts is not null && typesToLoad?.Contains(GameDataType.FurniData) != false)
+            //     Furni = FurniData.FromOriginsTexts(Texts);
 
-            List<Task> loadTasks = [];
-
-            foreach (GameDataHash entry in hashes)
-            {
-                GameDataType type = entry.Name switch
-                {
-                    "furnidata" => GameDataType.Furni,
-                    "productdata" => GameDataType.Product,
-                    "external_texts" => GameDataType.Texts,
-                    "figurepartlist" => GameDataType.Figure,
-                    _ => (GameDataType)(-1)
-                };
-
-                if (!Enum.IsDefined(type)) continue;
-
-                if (typesToLoad?.Contains(type) == false) continue;
-
-                loadTasks.Add(LoadDataAsync(http, hotel, type, entry.Url, entry.Hash, cancellationToken));
-            }
-
-            await Task.WhenAll(loadTasks);
-            Log.LogDebug("All load tasks completed.");
-
-            if (hotel.IsOrigins && Texts is not null && typesToLoad?.Contains(GameDataType.Furni) != false)
-                Furni = FurniData.FromOriginsTexts(Texts);
-
-            Log.LogInformation("Game data loaded.");
+            _logger.LogInformation("Game data loaded.");
             Loaded?.Invoke();
             _tcsLoad.TrySetResult();
         }
         catch (Exception ex)
         {
-            Log.LogError(ex, "Failed to load game data: {Message}", ex.Message);
+            _logger.LogError(ex, "Failed to load game data: {Message}", ex.Message);
 
             Reset();
             LoadFailed?.Invoke(ex);

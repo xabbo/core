@@ -8,7 +8,7 @@ namespace Xabbo.Core.GameData.Json;
 
 public class ProductData
 {
-    public static ProductData? Load(string json) => JsonSerializer.Deserialize(json, JsonProductContext.Default.ProductData);
+    public static ProductData? Load(string json) => JsonSerializer.Deserialize(json, GameDataJsonContext.Default.ProductData);
 
     [JsonPropertyName("productdata")]
     public ProductInfoContainer Container { get; set; } = new();

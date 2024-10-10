@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Xabbo.Core.Web;
+namespace Xabbo.Core.GameData.Json;
 
 public class GameDataHash
 {
@@ -11,5 +11,5 @@ public class GameDataHash
     public string Url { get; set; } = "";
 
     [JsonPropertyName("hash")]
-    public string? Hash { get; set; }
+    public string Hash { get; set; } = "";
 }
