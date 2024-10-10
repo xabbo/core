@@ -164,7 +164,7 @@ public static class Extensions
     /// <summary>
     /// Gets the identifier of this item.
     /// </summary>
-    public static string GetIdentifier(this IItem item) => GetInfo(item).Identifier;
+    public static string GetIdentifier(this IItem item) => item.Identifier ?? GetInfo(item).Identifier;
 
     /// <summary>
     /// Gets the identifier of this item.
@@ -216,25 +216,24 @@ public static class Extensions
 
         switch (item.Type)
         {
-            case ItemType.Floor:
-            case ItemType.Wall:
-                if (FurniData.TryGetInfo(item, out FurniInfo? info))
+            case ItemType.Floor or ItemType.Wall:
+                FurniData.TryGetInfo(item, out FurniInfo? info);
+                if ((item.Identifier == "poster" || info?.Identifier == "poster") &&
+                    item.TryGetVariant(out variant))
                 {
-                    if (TryGetVariant(item, out variant))
+                    if (Texts.TryGetPosterName(variant, out string? posterName))
                     {
-                        if (Texts.TryGetPosterName(variant, out string? posterName))
-                        {
-                            name = posterName;
-                        }
-                        else
-                        {
-                            name = $"poster_{variant}";
-                        }
+                        name = posterName;
                     }
                     else
                     {
-                        name = string.IsNullOrWhiteSpace(info.Name) ? info.Identifier : info.Name;
+                        name = $"poster_{variant}";
                     }
+                    return true;
+                }
+                else if (info is not null)
+                {
+                    name = string.IsNullOrWhiteSpace(info.Name) ? info.Identifier : info.Name;
                     return true;
                 }
                 break;
@@ -267,6 +266,56 @@ public static class Extensions
         }
 
         name = null;
+        return false;
+    }
+
+    public static bool TryGetDescription(this IItem item, out string? description)
+    {
+        if (!IsInitialized)
+        {
+            description = null;
+            return false;
+        }
+
+        string? variant;
+
+        switch (item.Type)
+        {
+            case ItemType.Floor or ItemType.Wall:
+                FurniData.TryGetInfo(item, out FurniInfo? info);
+                if ((item.Identifier == "poster" ||
+                    info?.Identifier == "poster") &&
+                    item.TryGetVariant(out variant))
+                {
+                    if (Texts.TryGetPosterDescription(variant, out description))
+                    {
+                        return !string.IsNullOrWhiteSpace(description);
+                    }
+                }
+                else if (info is not null)
+                {
+                    description = info.Description;
+                    return !string.IsNullOrWhiteSpace(description);
+                }
+                break;
+            case ItemType.Badge:
+                if (TryGetVariant(item, out variant) &&
+                    Texts.TryGetBadgeDescription(variant, out description))
+                {
+                    return !string.IsNullOrWhiteSpace(description);
+                }
+                break;
+            case ItemType.Effect:
+                if (TryGetVariant(item, out variant) &&
+                    int.TryParse(variant, out int effectId) &&
+                    Texts.TryGetEffectDescription(effectId, out description))
+                {
+                    return !string.IsNullOrWhiteSpace(description);
+                }
+                break;
+        }
+
+        description = null;
         return false;
     }
 
