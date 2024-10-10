@@ -1,5 +1,8 @@
 ﻿namespace Xabbo.Core;
 
+/// <summary>
+/// Represents an offer for an item in the marketplace.
+/// </summary>
 public interface IMarketplaceOffer : IItem
 {
     /// <summary>
