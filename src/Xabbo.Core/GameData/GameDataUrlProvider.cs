@@ -39,10 +39,10 @@ public class GameDataUrlProvider : IGameDataUrlProvider
             string? path = type switch
             {
                 GameDataType.FigureData => "gamedata/figuredata",
-                GameDataType.FurniData => "gamedata/furnidata",
+                GameDataType.FurniData => "gamedata/furnidata_json",
                 GameDataType.ExternalTexts => "gamedata/external_flash_texts",
                 GameDataType.ExternalVariables => "gamedata/external_flash_texts",
-                GameDataType.ProductData => "gamedata/productdata",
+                GameDataType.ProductData => "gamedata/productdata_json",
                 _ => null,
             };
 

@@ -19,5 +19,5 @@ public interface IGameDataLoader
     /// Downloads game data for the specified hotel, game data type and hash, then returns the updated
     /// hash and the file path to the downloaded data.
     /// </summary>
-    Task<string> DownloadAsync(Hotel hotel, GameDataType type, string hash, CancellationToken cancellationToken = default);
+    Task<GameDataDownloadResult> DownloadAsync(Hotel hotel, GameDataType type, string hash, CancellationToken cancellationToken = default);
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -68,7 +69,38 @@ public class GameDataLoader(
 
         using var stream = fileInfo.Open(FileMode.Create);
         await JsonSerializer.SerializeAsync(stream, hashes, XabboJsonContext.Default.GameDataHashes);
+
     }
+
+    private static bool TryGetHashFromETag(HttpResponseMessage response, [NotNullWhen(true)] out string? hash)
+    {
+        if (response.Headers.TryGetValues("etag", out var values))
+        {
+            string? etag = values.FirstOrDefault();
+            if (etag is not null && etag.StartsWith('"') && etag.EndsWith('"'))
+            {
+                hash = etag[1..^1];
+                return true;
+            }
+        }
+
+        hash = null;
+        return false;
+    }
+
+    private static bool TryGetHashFromLocation(HttpResponseMessage response, [NotNullWhen(true)] out string? hash)
+    {
+        if (response.Headers.Location?.PathAndQuery.Split('/') is [ .., string { Length: 32 or 40 } segment ] &&
+            segment.All(char.IsAsciiHexDigit))
+        {
+            hash = segment;
+            return true;
+        }
+
+        hash = null;
+        return false;
+    }
+
 
     private async Task<string> FetchHashAsync(Hotel hotel, GameDataType type, CancellationToken cancellationToken)
     {
@@ -89,21 +121,10 @@ public class GameDataLoader(
         switch (res.StatusCode)
         {
             case HttpStatusCode.OK:
-                if (res.Headers.TryGetValues("etag", out var values))
-                {
-                    string? etag = values.FirstOrDefault();
-                    if (etag is not null && etag.StartsWith('"') && etag.EndsWith('"'))
-                    {
-                        return etag[1..^1];
-                    }
-                }
+                if (TryGetHashFromETag(res, out string? hash))
+                    return hash;
                 throw new Exception($"Failed to get hash from ETag for {type} on {hotel} hotel.");
             case HttpStatusCode.TemporaryRedirect:
-                string? path = res.Headers.Location?.PathAndQuery;
-                if (path is not null)
-                {
-                    return path.Split('/')[^1];
-                }
                 throw new Exception($"Failed to get hash from Location header for {type} on {hotel} hotel.");
             default:
                 throw new Exception(
@@ -200,7 +221,7 @@ public class GameDataLoader(
         return fetchedHashes;
     }
 
-    public async Task<string> DownloadAsync(
+    public async Task<GameDataDownloadResult> DownloadAsync(
         Hotel hotel, GameDataType type, string hash, CancellationToken cancellationToken = default)
     {
         string cacheFolderPath = Path.Combine(
@@ -224,6 +245,17 @@ public class GameDataLoader(
             _logger.LogDebug("Fetching {GamedataType} data from '{Url}'.", type, url);
 
             var res = await _http.GetAsync(url, cancellationToken);
+            if (res.StatusCode == HttpStatusCode.TemporaryRedirect &&
+                res.Headers.Location is not null)
+            {
+                if (!TryGetHashFromLocation(res, out string? updatedHash))
+                    throw new Exception($"Failed to get updated hash from redirect location: '{res.Headers.Location}'.");
+
+                _logger.LogInformation("Updated {GameDataHash} hash '{OldHash}' -> '{NewHash}'.", type, hash, updatedHash);
+
+                hash = updatedHash;
+                res = await _http.GetAsync(res.Headers.Location, cancellationToken);
+            }
             res.EnsureSuccessStatusCode();
 
             using var outs = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite);
@@ -234,6 +266,10 @@ public class GameDataLoader(
             _logger.LogDebug("Using {GamedataType} from disk cache.", type);
         }
 
-        return file.FullName;
+        return new GameDataDownloadResult(
+            Type: type,
+            Hash: hash,
+            FilePath: filePath
+        );
     }
 }

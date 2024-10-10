@@ -77,22 +77,30 @@ public class GameDataManager : IGameDataManager
 
             GameDataHashes hashes = await _loader.LoadHashesAsync(hotel, cancellationToken);
 
-            Dictionary<GameDataType, Task<string>> loadTasks = [];
+            List<Task<GameDataDownloadResult>> loadTasks = [];
 
             foreach (var (type, hash) in hashes)
             {
                 if (typesToLoad?.Contains(type) == false)
                     continue;
 
-                loadTasks[type] = _loader.DownloadAsync(hotel, type, hash, cancellationToken);
+                loadTasks.Add(_loader.DownloadAsync(hotel, type, hash, cancellationToken));
             }
 
-            await Task.WhenAll(loadTasks.Values);
+            await Task.WhenAll(loadTasks);
             _logger.LogDebug("All load tasks completed.");
 
-            foreach (var (type, task) in loadTasks)
+            bool updateHashes = false;
+
+            foreach (var task in loadTasks)
             {
-                var filePath = await task;
+                var (type, updatedHash, filePath) = await task;
+
+                if (hashes[type] != updatedHash)
+                {
+                    hashes[type] = updatedHash;
+                    updateHashes = true;
+                }
 
                 switch (type)
                 {
@@ -119,6 +127,9 @@ public class GameDataManager : IGameDataManager
 
             // if (hotel.IsOrigins && Texts is not null && typesToLoad?.Contains(GameDataType.FurniData) != false)
             //     Furni = FurniData.FromOriginsTexts(Texts);
+
+            if (updateHashes)
+                await _loader.UpdateHashesAsync(hotel, hashes);
 
             _logger.LogInformation("Game data loaded.");
             Loaded?.Invoke();
