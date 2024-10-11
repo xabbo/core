@@ -29,15 +29,12 @@ public static class Extensions
     /// <summary>
     /// Initializes xabbo core extensions with the specified game data.
     /// </summary>
-    public static void Initialize(FurniData furniData, ExternalTexts texts)
+    public static void Initialize(FurniData? furniData, ExternalTexts? texts)
     {
-        if (furniData is null) throw new ArgumentNullException(nameof(furniData));
-        if (texts is null) throw new ArgumentNullException(nameof(texts));
-
         _furniData = furniData;
         _texts = texts;
 
-        IsInitialized = true;
+        IsInitialized = furniData is not null && texts is not null;
     }
 
     #region - Texts -

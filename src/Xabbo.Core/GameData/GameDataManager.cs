@@ -30,6 +30,8 @@ public class GameDataManager : IGameDataManager
     public event Action? Loaded;
     public event Action<Exception>? LoadFailed;
 
+    public bool AutoInitCoreExtensions { get; set; } = true;
+
     public GameDataManager(
         IGameDataLoader? loader = null,
         ILoggerFactory? loggerFactory = null)
@@ -130,6 +132,9 @@ public class GameDataManager : IGameDataManager
 
             if (updateHashes)
                 await _loader.UpdateHashesAsync(hotel, hashes);
+
+            if (AutoInitCoreExtensions)
+                Extensions.Initialize(Furni, Texts);
 
             _logger.LogInformation("Game data loaded.");
             Loaded?.Invoke();
