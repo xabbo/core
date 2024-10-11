@@ -183,6 +183,13 @@ partial class RoomManager
         }
     }
 
+    [InterceptIn(nameof(In.YouAreOwner))]
+    private void HandleYouAreOwner(Intercept e)
+    {
+        IsOwner = true;
+        UpdateRightsLevel(RightsLevel.Owner);
+    }
+
     [InterceptIn(nameof(In.YouAreController))]
     private void HandleYouAreController(Intercept e)
     {
@@ -207,9 +214,10 @@ partial class RoomManager
         }
         else
         {
-            rightsLevel = RightsLevel.Owner;
+            rightsLevel = RightsLevel.Standard;
         }
 
+        IsOwner = RightsLevel == RightsLevel.Owner;
         UpdateRightsLevel(rightsLevel);
     }
 
@@ -229,6 +237,7 @@ partial class RoomManager
             return;
         }
 
+        IsOwner = false;
         UpdateRightsLevel(RightsLevel.None);
     }
 
