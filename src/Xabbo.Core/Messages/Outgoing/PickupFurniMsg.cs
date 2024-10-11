@@ -6,7 +6,7 @@ using Xabbo.Messages.Flash;
 namespace Xabbo.Core.Messages.Outgoing;
 
 /// <summary>
-/// Sent when picking up an item from a room.
+/// Sent when picking up or ejecting a furni from a room.
 /// <para/>
 /// Supported clients: <see cref="ClientType.All"/>
 /// <para/>
@@ -16,16 +16,22 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <item>Shockwave: <see cref="Xabbo.Messages.Shockwave.Out.ADDSTRIPITEM"/></item>
 /// </list>
 /// </summary>
-/// <param name="Type">The type of the item to pick up.</param>
-/// <param name="Id">The ID of the item to pick up.</param>
-public record PickupItemMsg(ItemType Type, Id Id) : IMessage<PickupItemMsg>
+/// <param name="Type">The type of the furni to pick up.</param>
+/// <param name="Id">The ID of the furni to pick up.</param>
+public record PickupFurniMsg(ItemType Type, Id Id) : IMessage<PickupFurniMsg>
 {
     const int ExpectedFieldCount = 3;
     const string ExpectedField0 = "new";
 
     public static Identifier Identifier => Out.PickupObject;
 
-    static PickupItemMsg IParser<PickupItemMsg>.Parse(in PacketReader p)
+    /// <summary>
+    /// Constructs a new <see cref="PickupFurniMsg"/> with the specified furni.
+    /// </summary>
+    /// <param name="furni">The furni to pick up.</param>
+    public PickupFurniMsg(IFurni furni) : this(furni.Type, furni.Id) { }
+
+    static PickupFurniMsg IParser<PickupFurniMsg>.Parse(in PacketReader p)
     {
         ItemType itemType = (ItemType)(-1);
         Id id = -1;
@@ -61,8 +67,8 @@ public record PickupItemMsg(ItemType Type, Id Id) : IMessage<PickupItemMsg>
 
         return itemType switch
         {
-            ItemType.Wall => new PickupItemMsg(ItemType.Floor, id),
-            ItemType.Floor => new PickupItemMsg(ItemType.Wall, id),
+            ItemType.Wall => new PickupFurniMsg(ItemType.Floor, id),
+            ItemType.Floor => new PickupFurniMsg(ItemType.Wall, id),
             _ => throw new Exception("Unknown item type when parsing PickupItemMsg.")
         };
     }
