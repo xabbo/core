@@ -28,10 +28,14 @@ tasks:
       - dotnet clean
       - dotnet build-server shutdown
       - dotnet build
+  pkg:clean:
+    cmds:
+      - rm -r ./pkg
   pkg:
+    deps: [ pkg:clean ]
     cmds:
       - dotnet pack src/Xabbo.Core -c Release -o pkg
   pkg:push:
-    deps: [ pack ]
+    deps: [ pkg ]
     cmds:
       - dotnet nuget push pkg/*.nupkg --api-key $(op read 'op://xabbo/nuget/credential') --source https://api.nuget.org/v3/index.json --skip-duplicate
