@@ -39,3 +39,5 @@ tasks:
     deps: [ pkg ]
     cmds:
       - dotnet nuget push pkg/*.nupkg --api-key $(op read 'op://xabbo/nuget/credential') --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - git tag "v$(dotnet-gitversion /showvariable semver)"
+      - git push --tags
