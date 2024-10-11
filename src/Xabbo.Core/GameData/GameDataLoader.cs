@@ -118,13 +118,16 @@ public class GameDataLoader(
             RequestUri = new Uri(url)
         }, cancellationToken);
 
+        string? hash;
         switch (res.StatusCode)
         {
             case HttpStatusCode.OK:
-                if (TryGetHashFromETag(res, out string? hash))
+                if (TryGetHashFromETag(res, out hash))
                     return hash;
                 throw new Exception($"Failed to get hash from ETag for {type} on {hotel} hotel.");
             case HttpStatusCode.TemporaryRedirect:
+                if (TryGetHashFromLocation(res, out hash))
+                    return hash;
                 throw new Exception($"Failed to get hash from Location header for {type} on {hotel} hotel.");
             default:
                 throw new Exception(
