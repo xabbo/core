@@ -13,7 +13,7 @@ public class WallItem : Furni, IWallItem, IParserComposer<WallItem>
 
     public override int State => int.TryParse(Data, out int state) ? state : -1;
 
-    public WallLocation Location { get; set; }
+    public WallLocation Location { get; set; } = WallLocation.Zero;
 
     public int WX => Location.Wall.X;
     public int WY => Location.Wall.Y;
@@ -21,19 +21,13 @@ public class WallItem : Furni, IWallItem, IParserComposer<WallItem>
     public int LY => Location.Offset.Y;
     public WallOrientation Orientation => Location.Orientation;
 
-    public WallItem()
-    {
-        OwnerId = -1;
-        OwnerName = "(unknown)";
-
-        Data = "";
-        SecondsToExpiration = -1;
-        Usage = FurniUsage.None;
-        Location = WallLocation.Zero;
-    }
+    /// <summary>
+    /// Constructs a new empty wall item.
+    /// </summary>
+    public WallItem() { }
 
     /// <summary>
-    /// Creates a copy of the specified wall item.
+    /// Constructs a new copy of the specified wall item.
     /// </summary>
     public WallItem(IWallItem item)
     {

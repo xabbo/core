@@ -41,6 +41,14 @@ public class FloorItem : Furni, IFloorItem, IParserComposer<FloorItem>
     public string Colors { get; set; } = "";
     public string RuntimeData { get; set; } = "";
 
+    /// <summary>
+    /// Constructs a new empty floor item.
+    /// </summary>
+    public FloorItem() { }
+
+    /// <summary>
+    /// Constructs a new copy of the specified floor item.
+    /// </summary>
     public FloorItem(IFloorItem item)
     {
         Id = item.Id;
