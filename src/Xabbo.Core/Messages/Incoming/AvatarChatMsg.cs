@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+
 using Xabbo.Messages;
 using Xabbo.Messages.Flash;
 
@@ -8,9 +9,9 @@ namespace Xabbo.Core.Messages.Incoming;
 [EditorBrowsable(EditorBrowsableState.Advanced)]
 public abstract record AvatarChatMsgBase(ChatType Type)
 {
-    public int Index { get; init; }
+    public int AvatarIndex { get; init; }
     public string Message { get; init; } = "";
-    public int Style { get; init; }
+    public int BubbleStyle { get; init; }
     public int Gesture { get; init; }
     public (string, string Url, bool)[] Links { get; init; } = [];
     public int TrackingId { get; init; }
@@ -33,13 +34,13 @@ public abstract record AvatarChatMsgBase(ChatType Type)
                 throw new Exception("Failed to get chat type from parser context.");
         }
 
-        Index = p.ReadInt();
+        AvatarIndex = p.ReadInt();
         Message = p.ReadString();
 
         if (p.Client is not ClientType.Shockwave)
         {
             Gesture = p.ReadInt();
-            Style = p.ReadInt();
+            BubbleStyle = p.ReadInt();
 
             int n = p.ReadLength();
             Links = new (string, string, bool)[n];
@@ -52,12 +53,12 @@ public abstract record AvatarChatMsgBase(ChatType Type)
 
     protected void Compose(in PacketWriter p)
     {
-        p.WriteInt(Index);
+        p.WriteInt(AvatarIndex);
         p.WriteString(Message);
         if (p.Client is not ClientType.Shockwave)
         {
             p.WriteInt(Gesture);
-            p.WriteInt(Style);
+            p.WriteInt(BubbleStyle);
             p.WriteLength((Length)Links.Length);
             for (int i = 0; i < Links.Length; i++)
             {
@@ -98,12 +99,12 @@ public sealed record AvatarChatMsg : AvatarChatMsgBase, IMessage<AvatarChatMsg>
         _ => throw new Exception($"Unknown chat type: {Type}.")
     };
 
-    public AvatarChatMsg(ChatType type, int index, string message, int style = 0)
-        : base(type)
+    public AvatarChatMsg(ChatType Type, string Message, int AvatarIndex = -1, int BubbleStyle = 0)
+        : base(Type)
     {
-        Index = index;
-        Message = message;
-        Style = style;
+        base.AvatarIndex = AvatarIndex;
+        base.Message = Message;
+        base.BubbleStyle = BubbleStyle;
     }
 
     private AvatarChatMsg(in PacketReader p)
@@ -134,12 +135,12 @@ public sealed record AvatarTalkMsg : AvatarChatMsgBase, IMessage<AvatarTalkMsg>
         : base(ChatType.Talk)
     { }
 
-    public AvatarTalkMsg(int index, string message, int style = 0)
+    public AvatarTalkMsg(string Message, int AvatarIndex = -1, int BubbleStyle = 0)
         : this()
     {
-        Index = index;
-        Message = message;
-        Style = style;
+        base.Message = Message;
+        base.AvatarIndex = AvatarIndex;
+        base.BubbleStyle = BubbleStyle;
     }
 
     private AvatarTalkMsg(in PacketReader p)
@@ -170,12 +171,12 @@ public sealed record AvatarShoutMsg : AvatarChatMsgBase, IMessage<AvatarShoutMsg
         : base(ChatType.Shout)
     { }
 
-    public AvatarShoutMsg(int index, string message, int style = 0)
+    public AvatarShoutMsg(string Message, int AvatarIndex = -1, int BubbleStyle = 0)
         : this()
     {
-        Index = index;
-        Message = message;
-        Style = style;
+        base.Message = Message;
+        base.AvatarIndex = AvatarIndex;
+        base.BubbleStyle = BubbleStyle;
     }
 
     private AvatarShoutMsg(in PacketReader p)
@@ -206,12 +207,12 @@ public sealed record AvatarWhisperMsg : AvatarChatMsgBase, IMessage<AvatarWhispe
         : base(ChatType.Whisper)
     { }
 
-    public AvatarWhisperMsg(int index, string message, int style = 0)
+    public AvatarWhisperMsg(string Message, int AvatarIndex = -1, int BubbleStyle = 0)
         : this()
     {
-        Index = index;
-        Message = message;
-        Style = style;
+        base.Message = Message;
+        base.AvatarIndex = AvatarIndex;
+        base.BubbleStyle = BubbleStyle;
     }
 
     private AvatarWhisperMsg(in PacketReader p)

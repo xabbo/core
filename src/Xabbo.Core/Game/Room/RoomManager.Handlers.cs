@@ -890,18 +890,18 @@ partial class RoomManager
 
         var chat = e.Msg;
 
-        if (!_currentRoom.Avatars.TryGetValue(chat.Index, out Avatar? avatar))
+        if (!_currentRoom.Avatars.TryGetValue(chat.AvatarIndex, out Avatar? avatar))
         {
-            Log.LogWarning("Failed to find avatar with index {Index}.", chat.Index);
+            Log.LogWarning("Failed to find avatar with index {Index}.", chat.AvatarIndex);
             return;
         }
 
         Log.LogTrace(
             "{Type}({Bubble}) {Avatar} {Message}",
-            chat.Type, chat.Style, avatar, chat.Message
+            chat.Type, chat.BubbleStyle, avatar, chat.Message
         );
 
-        AvatarChatEventArgs chatEventArgs = new(avatar, chat.Type, chat.Message, chat.Style);
+        AvatarChatEventArgs chatEventArgs = new(avatar, chat.Type, chat.Message, chat.BubbleStyle);
         AvatarChat?.Invoke(chatEventArgs);
 
         if (chatEventArgs.IsBlocked || avatar.IsHidden) e.Block();
