@@ -67,8 +67,8 @@ public record PickupFurniMsg(ItemType Type, Id Id) : IMessage<PickupFurniMsg>
 
         return itemType switch
         {
-            ItemType.Wall => new PickupFurniMsg(ItemType.Floor, id),
-            ItemType.Floor => new PickupFurniMsg(ItemType.Wall, id),
+            ItemType.Wall => new PickupFurniMsg(ItemType.Wall, id),
+            ItemType.Floor => new PickupFurniMsg(ItemType.Floor, id),
             _ => throw new Exception("Unknown item type when parsing PickupItemMsg.")
         };
     }
