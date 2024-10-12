@@ -25,10 +25,11 @@ public abstract class Avatar(AvatarType type, Id id, int index) : IAvatar, IPars
     [JsonIgnore] public int Y => Location.Y;
     [JsonIgnore] public Point XY => Location.XY;
     [JsonIgnore] public float Z => Location.Z;
-    public int Direction { get; set; } = 0;
+    public int Direction { get; set; }
     public Area Area => new(Location.XY, 1, 1);
 
     // States
+    public int HeadDirection { get; set; }
     public AvatarDance Dance { get; set; }
     public bool IsIdle { get; set; }
     public bool IsTyping { get; set; }
@@ -47,6 +48,7 @@ public abstract class Avatar(AvatarType type, Id id, int index) : IAvatar, IPars
 
         Location = update.Location;
         Direction = update.Direction;
+        HeadDirection = update.HeadDirection;
 
         OnUpdate(update);
 
@@ -149,6 +151,7 @@ public abstract class Avatar(AvatarType type, Id id, int index) : IAvatar, IPars
         avatar.Figure = figure;
         avatar.Location = tile;
         avatar.Direction = dir;
+        avatar.HeadDirection = dir;
 
         return avatar;
     }
