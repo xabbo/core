@@ -596,17 +596,53 @@ partial class RoomManager
         {
             switch (movement)
             {
-                case UserWiredMovement m:
-                    if (_currentRoom.Avatars.TryGetValue(m.UserIndex, out Avatar? avatar))
-                        avatar.Location = m.Destination;
+                case AvatarWiredMovement m:
+                    {
+                        if (_currentRoom.Avatars.TryGetValue(m.AvatarIndex, out Avatar? avatar))
+                        {
+                            Tile previousLocation = avatar.Location;
+                            int previousDirection = avatar.Direction;
+                            int previousHeadDirection = avatar.HeadDirection;
+                            avatar.Location = m.Destination;
+                            avatar.Direction = m.BodyDirection;
+                            avatar.HeadDirection = m.HeadDirection;
+                            AvatarWiredMovement?.Invoke(new AvatarWiredMovementEventArgs(
+                                avatar, previousLocation, previousDirection, previousHeadDirection, m));
+                        }
+                    }
+                    break;
+                case AvatarDirectionWiredMovement m:
+                    {
+                        if (_currentRoom.Avatars.TryGetValue(m.AvatarIndex, out Avatar? avatar))
+                        {
+                            int previousDirection = avatar.Direction;
+                            int previousHeadDirection = avatar.HeadDirection;
+                            avatar.Direction = m.BodyDirection;
+                            avatar.HeadDirection = m.HeadDirection;
+                            AvatarDirectionWiredMovement?.Invoke(new AvatarDirectionWiredMovementEventArgs(
+                                avatar, previousDirection, previousHeadDirection, m));
+                        }
+                    }
                     break;
                 case FloorItemWiredMovement m:
-                    if (_currentRoom.FloorItems.TryGetValue(m.FurniId, out FloorItem? item))
+                    if (_currentRoom.FloorItems.TryGetValue(m.ItemId, out FloorItem? item))
+                    {
+                        Tile previousLocation = item.Location;
+                        int previousDirection = item.Direction;
                         item.Location = m.Destination;
+                        item.Direction = m.Rotation;
+                        FloorItemWiredMovement?.Invoke(new FloorItemWiredMovementEventArgs(
+                            item, previousLocation, previousDirection, m));
+                    }
                     break;
                 case WallItemWiredMovement m:
                     if (_currentRoom.WallItems.TryGetValue(m.ItemId, out WallItem? wallItem))
+                    {
+                        WallLocation previousLocation = wallItem.Location;
                         wallItem.Location = m.Destination;
+                        WallItemWiredMovement?.Invoke(new WallItemWiredMovementEventArgs(
+                            wallItem, previousLocation, m));
+                    }
                     break;
             }
         }

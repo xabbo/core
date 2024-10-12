@@ -73,6 +73,11 @@ public sealed partial class RoomManager
     public event Action<FloorItemDataUpdatedEventArgs>? FloorItemDataUpdated;
 
     /// <summary>
+    /// Occurs when a floor item is moved by wired.
+    /// </summary>
+    public event Action<FloorItemWiredMovementEventArgs>? FloorItemWiredMovement;
+
+    /// <summary>
     /// Occurs when a dice value is updated.
     /// </summary>
     public event Action<DiceUpdatedEventArgs>? DiceUpdated;
@@ -117,6 +122,11 @@ public sealed partial class RoomManager
     public event Action<WallItemUpdatedEventArgs>? WallItemUpdated;
 
     /// <summary>
+    /// Occurs when a wall item is moved by wired.
+    /// </summary>
+    public event Action<WallItemWiredMovementEventArgs>? WallItemWiredMovement;
+
+    /// <summary>
     /// Occurs when a wall item is removed from the room.
     /// </summary>
     public event Action<WallItemEventArgs>? WallItemRemoved;
@@ -152,6 +162,16 @@ public sealed partial class RoomManager
     /// Occurs when an avatar slides along a roller.
     /// </summary>
     public event Action<AvatarSlideEventArgs>? AvatarSlide;
+
+    /// <summary>
+    /// Occurs when an avatar is moved by wired.
+    /// </summary>
+    public event Action<AvatarWiredMovementEventArgs>? AvatarWiredMovement;
+
+    /// <summary>
+    /// Occurs when an avatar's direction is changed by wired.
+    /// </summary>
+    public event Action<AvatarDirectionWiredMovementEventArgs>? AvatarDirectionWiredMovement;
 
     /// <summary>
     /// Occurs when an avatar's figure, gender, motto or achievement score changes.

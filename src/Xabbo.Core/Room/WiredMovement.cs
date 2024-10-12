@@ -10,9 +10,9 @@ namespace Xabbo.Core;
 public enum WiredMovementType
 {
     /// <summary>
-    /// Used when a user is moved by wired.
+    /// Used when an avatar is moved by wired.
     /// </summary>
-    User = 0,
+    Avatar = 0,
     /// <summary>
     /// Used when a floor item is moved by wired.
     /// </summary>
@@ -22,9 +22,9 @@ public enum WiredMovementType
     /// </summary>
     WallItem = 2,
     /// <summary>
-    /// Used when a user's direction is updated by wired.
+    /// Used when an avatar's direction is updated by wired.
     /// </summary>
-    UserDirection
+    AvatarDirection = 3
 }
 
 /// <summary>
@@ -49,30 +49,30 @@ public abstract class WiredMovement(WiredMovementType type) : IParserComposer<Wi
         var type = (WiredMovementType)p.ReadInt();
         return type switch
         {
-            WiredMovementType.User => new UserWiredMovement(in p),
+            WiredMovementType.Avatar => new AvatarWiredMovement(in p),
             WiredMovementType.FloorItem => new FloorItemWiredMovement(in p),
             WiredMovementType.WallItem => new WallItemWiredMovement(in p),
-            WiredMovementType.UserDirection => new UserDirectionWiredMovement(in p),
+            WiredMovementType.AvatarDirection => new AvatarDirectionWiredMovement(in p),
             _ => throw new Exception($"Unknown wired movement type: {type}."),
         };
     }
 }
 
 /// <summary>
-/// Defines the parameters of a user being moved by wired.
+/// Defines the parameters of an avatar being moved by wired.
 /// </summary>
-public class UserWiredMovement : WiredMovement
+public class AvatarWiredMovement : WiredMovement
 {
     public Tile Source { get; set; }
     public Tile Destination { get; set; }
-    public int UserIndex { get; set; }
-    public bool Slide { get; set; }
+    public int AvatarIndex { get; set; }
+    public bool IsSlide { get; set; }
     public int BodyDirection { get; set; }
     public int HeadDirection { get; set; }
 
-    public UserWiredMovement() : base(WiredMovementType.User) { }
+    public AvatarWiredMovement() : base(WiredMovementType.Avatar) { }
 
-    internal UserWiredMovement(in PacketReader p) : this()
+    internal AvatarWiredMovement(in PacketReader p) : this()
     {
         int srcX = p.ReadInt();
         int srcY = p.ReadInt();
@@ -82,8 +82,8 @@ public class UserWiredMovement : WiredMovement
         float dstZ = p.ReadFloat();
         Source = new Tile(srcX, srcY, srcZ);
         Destination = new Tile(dstX, dstY, dstZ);
-        UserIndex = p.ReadInt();
-        Slide = p.ReadInt() != 0;
+        AvatarIndex = p.ReadInt();
+        IsSlide = p.ReadInt() != 0;
         AnimationTime = p.ReadInt();
         BodyDirection = p.ReadInt();
         HeadDirection = p.ReadInt();
@@ -98,8 +98,8 @@ public class UserWiredMovement : WiredMovement
         p.WriteInt(Destination.Y);
         p.WriteFloat(Source.Z);
         p.WriteFloat(Destination.Z);
-        p.WriteInt(UserIndex);
-        p.WriteInt(Slide ? 1 : 0);
+        p.WriteInt(AvatarIndex);
+        p.WriteInt(IsSlide ? 1 : 0);
         p.WriteInt(AnimationTime);
         p.WriteInt(BodyDirection);
         p.WriteInt(HeadDirection);
@@ -113,7 +113,7 @@ public class FloorItemWiredMovement : WiredMovement
 {
     public Tile Source { get; set; }
     public Tile Destination { get; set; }
-    public Id FurniId { get; set; }
+    public Id ItemId { get; set; }
     public int Rotation { get; set; }
 
     public FloorItemWiredMovement() : base(WiredMovementType.FloorItem) { }
@@ -128,7 +128,7 @@ public class FloorItemWiredMovement : WiredMovement
         float dstZ = p.ReadFloat();
         Source = new Tile(srcX, srcY, srcZ);
         Destination = new Tile(dstX, dstY, dstZ);
-        FurniId = p.ReadId();
+        ItemId = p.ReadId();
         AnimationTime = p.ReadInt();
         Rotation = p.ReadInt();
     }
@@ -142,7 +142,7 @@ public class FloorItemWiredMovement : WiredMovement
         p.WriteInt(Destination.Y);
         p.WriteFloat(Source.Z);
         p.WriteFloat(Destination.Z);
-        p.WriteId(FurniId);
+        p.WriteId(ItemId);
         p.WriteInt(AnimationTime);
         p.WriteInt(Rotation);
     }
@@ -194,19 +194,19 @@ public class WallItemWiredMovement : WiredMovement
 }
 
 /// <summary>
-/// Defines the parameters of a user's direction being changed by wired.
+/// Defines the parameters of an avatar's direction being changed by wired.
 /// </summary>
-public class UserDirectionWiredMovement : WiredMovement
+public class AvatarDirectionWiredMovement : WiredMovement
 {
-    public int Index { get; set; }
+    public int AvatarIndex { get; set; }
     public int BodyDirection { get; set; }
     public int HeadDirection { get; set; }
 
-    public UserDirectionWiredMovement() : base(WiredMovementType.WallItem) { }
+    public AvatarDirectionWiredMovement() : base(WiredMovementType.WallItem) { }
 
-    internal UserDirectionWiredMovement(in PacketReader p) : this()
+    internal AvatarDirectionWiredMovement(in PacketReader p) : this()
     {
-        Index = p.ReadInt();
+        AvatarIndex = p.ReadInt();
         BodyDirection = p.ReadInt();
         HeadDirection = p.ReadInt();
     }
@@ -214,7 +214,7 @@ public class UserDirectionWiredMovement : WiredMovement
     protected override void Compose(in PacketWriter p)
     {
         base.Compose(p);
-        p.WriteInt(Index);
+        p.WriteInt(AvatarIndex);
         p.WriteInt(BodyDirection);
         p.WriteInt(HeadDirection);
     }
