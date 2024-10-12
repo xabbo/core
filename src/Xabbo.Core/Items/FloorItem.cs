@@ -131,7 +131,7 @@ public class FloorItem : Furni, IFloorItem, IParserComposer<FloorItem>
             p.WriteString(Identifier ?? "");
             p.WriteInt(X);
             p.WriteInt(Y);
-            p.Compose(Dimensions ?? default);
+            p.Compose(Dimensions ?? (1, 1));
             p.WriteInt(Direction);
             p.WriteFloat((float)Z);
             p.WriteString(Colors);
