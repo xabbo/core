@@ -32,7 +32,7 @@ tasks:
     cmds:
       - rm -r ./pkg
   pkg:
-    deps: [ pkg:clean ]
+    deps: [ pkg:clean, test ]
     cmds:
       - dotnet pack src/Xabbo.Core -c Release -o pkg
   pkg:push:
