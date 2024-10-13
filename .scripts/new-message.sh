@@ -15,16 +15,10 @@ case $direction in
     ;;
 esac
 
-clientType=$(gum choose --header="Client type?" Any Modern Origins)
+clientType=$(gum choose --header="Client type?" All Modern Origins)
 gum style "Client type: ${clientType}"
 
 filePath="src/Xabbo.Core/Messages/${direction}"
-
-case $clientType in
-  Modern|Origins)
-    filePath="${filePath}/${clientType}"
-    ;;
-esac
 
 msgName=$(gum input --header="Message name:")
 if [[ $msgName != *Msg ]]; then
