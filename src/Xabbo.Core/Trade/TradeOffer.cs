@@ -1,30 +1,28 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
 
 /// <inheritdoc cref="ITradeOffer"/>
-public sealed class TradeOffer : ITradeOffer, IParserComposer<TradeOffer>
+public sealed class TradeOffer : List<TradeItem>, ITradeOffer, IParserComposer<TradeOffer>
 {
-    public Id UserId { get; set; }
+    public Id? UserId { get; set; }
     public string? UserName { get; set; }
-    public bool Accepted { get; set; }
-    public List<TradeItem> Items { get; set; }
-    IReadOnlyList<ITradeItem> ITradeOffer.Items => Items;
+    public bool? Accepted { get; set; }
     public int FurniCount { get; set; }
     public int CreditCount { get; set; }
 
-    public TradeOffer()
-    {
-        Items = [];
-    }
+    ITradeItem IReadOnlyList<ITradeItem>.this[int index] => this[index];
+    IEnumerator<ITradeItem> IEnumerable<ITradeItem>.GetEnumerator() => GetEnumerator();
+
+    public TradeOffer() { }
 
     private TradeOffer(in PacketReader p) : this()
     {
-        if (p.Client == ClientType.Shockwave)
+        if (p.Client is ClientType.Shockwave)
         {
-            UserId = -1;
             UserName = p.ReadString();
             Accepted = p.ReadBool();
         }
@@ -33,9 +31,9 @@ public sealed class TradeOffer : ITradeOffer, IParserComposer<TradeOffer>
             UserId = p.ReadId();
         }
 
-        Items = [.. p.ParseArray<TradeItem>()];
+        AddRange(p.ParseArray<TradeItem>());
 
-        if (p.Client != ClientType.Shockwave)
+        if (p.Client is not ClientType.Shockwave)
         {
             FurniCount = p.ReadInt();
             CreditCount = p.ReadInt();
@@ -44,19 +42,19 @@ public sealed class TradeOffer : ITradeOffer, IParserComposer<TradeOffer>
 
     void IComposer.Compose(in PacketWriter p)
     {
-        if (p.Client == ClientType.Shockwave)
+        if (p.Client is ClientType.Shockwave)
         {
-            p.WriteString(UserName ?? "");
-            p.WriteBool(Accepted);
+            p.WriteString(UserName ?? throw new Exception($"{nameof(UserName)} is required on {p.Client}."));
+            p.WriteBool(Accepted ?? throw new Exception($"{nameof(Accepted)} is required on {p.Client}."));
         }
         else
         {
-            p.WriteId(UserId);
+            p.WriteId(UserId ?? throw new Exception($"{nameof(UserId)} is required on {p.Client}."));
         }
 
-        p.ComposeArray(Items);
+        p.ComposeArray<TradeItem>(this);
 
-        if (p.Client != ClientType.Shockwave)
+        if (p.Client is not ClientType.Shockwave)
         {
             p.WriteInt(FurniCount);
             p.WriteInt(CreditCount);
