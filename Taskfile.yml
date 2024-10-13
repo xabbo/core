@@ -7,23 +7,26 @@ tasks:
     cmds:
       - git config --local core.hooksPath .githooks/
   new-message:
-    silent: true
+    desc: Creates a new message
     interactive: true
     cmds:
       - .scripts/new-message.sh
   new-request:
-    silent: true
+    desc: Creates a new request message
     interactive: true
     cmds:
       - .scripts/new-request.sh
   test:
+    desc: Tests the library
     deps: [build]
     cmds:
       - dotnet test --no-build
   build:
+    desc: Builds the library
     cmds:
       - dotnet build
   rebuild:
+    desc: Rebuilds the library
     cmds:
       - dotnet clean
       - dotnet build-server shutdown
@@ -32,10 +35,12 @@ tasks:
     cmds:
       - rm -r ./pkg
   pkg:
+    desc: Creates a NuGet package
     deps: [ pkg:clean, test ]
     cmds:
       - dotnet pack src/Xabbo.Core -c Release -o pkg
   pkg:push:
+    desc: Publishes a NuGet package
     deps: [ pkg ]
     cmds:
       - dotnet nuget push pkg/*.nupkg --api-key $(op read 'op://xabbo/nuget/credential') --source https://api.nuget.org/v3/index.json --skip-duplicate
