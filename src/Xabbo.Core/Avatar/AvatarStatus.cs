@@ -13,6 +13,7 @@ namespace Xabbo.Core;
 public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnlyList<string>>, IParserComposer<AvatarStatus>
 {
     private readonly Dictionary<string, string[]> fragments = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly char[] separator = ['/'];
 
     public int Index { get; set; }
     public Tile Location { get; set; }
@@ -42,12 +43,12 @@ public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnly
                     break;
                 case AvatarStance.Sit:
                     if (!fragments.ContainsKey("sit"))
-                        fragments["sit"] = new string[] { "0.0", "0" };
+                        fragments["sit"] = ["0.0", "0"];
                     fragments.Remove("lay");
                     break;
                 case AvatarStance.Lay:
                     if (!fragments.ContainsKey("lay"))
-                        fragments["lay"] = new string[] { "0.0", "0" };
+                        fragments["lay"] = ["0.0", "0"];
                     fragments.Remove("sit");
                     break;
                 default: break;
@@ -75,14 +76,9 @@ public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnly
         set
         {
             if (value)
-            {
-                if (!fragments.ContainsKey("trd"))
-                    fragments.Add("trd", new string[0]);
-            }
+                fragments.TryAdd("trd", []);
             else
-            {
                 fragments.Remove("trd");
-            }
         }
     }
 
@@ -92,14 +88,10 @@ public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnly
         get => fragments.TryGetValue("mv", out string[]? args) ? Tile.ParseString(args[0]) : (Tile?)null;
         set
         {
-            if (value == null)
-            {
-                fragments.Remove("mv");
-            }
+            if (value is { } tile)
+                fragments["mv"] = [$"{tile.X},{tile.Y},{(FloatString)tile.Z}"];
             else
-            {
-                fragments["mv"] = new string[] { value.ToString() ?? "" };
-            }
+                fragments.Remove("mv");
         }
     }
 
@@ -117,53 +109,54 @@ public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnly
         {
             if (fragments.TryGetValue("sit", out string[]? args))
             {
-                if (args.Length < 2)
+                if (args.Length == 0)
                 {
-                    // TODO
+                    fragments["sit"] = ["0.0", value ? "1" : "0"];
                 }
-                args[1] = value ? "1" : "0";
+                else if (args.Length == 1)
+                {
+                    fragments["sit"] = [args[0], value ? "1" : "0"];
+                }
+                else
+                {
+                    args[1] = value ? "1" : "0";
+                }
             }
             else
             {
                 Stance = AvatarStance.Sit;
-                fragments["sit"] = args = new string[] { "0.0", value ? "1" : "0" };
+                fragments["sit"] = ["0.0", value ? "1" : "0"];
             }
         }
     }
 
     // sit, lay
-    public double? ActionHeight
+    public float? StanceHeight
     {
         get
         {
-            switch (Stance)
+            if (Stance is AvatarStance.Sit or AvatarStance.Lay)
             {
-                case AvatarStance.Sit:
-                case AvatarStance.Lay:
-                    if (fragments.TryGetValue(Stance.ToString(), out string[]? args))
-                    {
-                        if (args.Length > 0)
-                            return double.Parse(args[0]);
-                    }
-                    break;
-                default:
-                    break;
+                if (fragments.TryGetValue(Stance.ToString(), out string[]? args))
+                {
+                    if (args.Length > 0)
+                        return float.Parse(args[0]);
+                }
             }
-
             return null;
         }
 
         set
         {
-            switch (Stance)
+            if (Stance is AvatarStance.Sit or AvatarStance.Lay)
             {
-                case AvatarStance.Sit:
-                case AvatarStance.Lay:
-                    if (!value.HasValue)
-                        throw new ArgumentNullException("ActionHeight", "Action height cannot be null");
-                    fragments[Stance.ToString()][0] = value.Value.ToString("0.0###############");
-                    break;
-                default: throw new InvalidOperationException($"Cannot set action height for stance: {Stance}");
+                if (value is not { } height)
+                    throw new ArgumentNullException(nameof(StanceHeight), "Stance height cannot be set to null.");
+                fragments[Stance.ToString()][0] = FloatString.Format(height);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Cannot set action height for stance: {Stance}.");
             }
         }
     }
@@ -171,17 +164,16 @@ public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnly
     // sign
     public AvatarSign Sign
     {
-        get
-        {
-            return fragments.ContainsKey("sign") ? (AvatarSign)int.Parse(fragments["sign"][0]) : AvatarSign.None;
-        }
+        get => fragments.TryGetValue("sign", out var value)
+            ? (AvatarSign)int.Parse(value[0])
+            : AvatarSign.None;
 
         set
         {
-            if (value == AvatarSign.None)
+            if (value is AvatarSign.None)
                 fragments.Remove("sign");
             else
-                fragments["sign"] = new string[] { ((int)Sign).ToString() };
+                fragments["sign"] = [((int)value).ToString()];
         }
     }
 
@@ -230,12 +222,12 @@ public class AvatarStatus : IAvatarStatus, IReadOnlyDictionary<string, IReadOnly
     {
         fragments.Clear();
 
-        string[] parts = status.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] parts = status.Split(separator, StringSplitOptions.RemoveEmptyEntries);
 
         foreach (string part in parts)
         {
             string type;
-            string[] args = Array.Empty<string>();
+            string[] args = [];
 
             int spaceIndex = part.IndexOf(' ');
             if (spaceIndex > 0)

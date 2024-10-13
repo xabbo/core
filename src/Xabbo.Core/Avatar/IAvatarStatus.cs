@@ -55,7 +55,10 @@ public interface IAvatarStatus
     /// </summary>
     bool SittingOnFloor { get; }
 
-    double? ActionHeight { get; }
+    /// <summary>
+    /// The height of the sit or lay stance.
+    /// </summary>
+    float? StanceHeight { get; }
 
     /// <summary>
     /// The sign currently held by the avatar.
