@@ -36,7 +36,12 @@ public class FloorItem : Furni, IFloorItem, IParserComposer<FloorItem>
     public ItemData Data { get; set; } = new EmptyItemData();
     IItemData IFloorItem.Data => Data;
 
-    public override int State => double.TryParse(Data.Value, out double state) ? (int)state : -1;
+    public override int State => Data.Value switch
+    {
+        "FALSE" or "OFF" or "C" => 0,
+        "TRUE" or "ON" or "O" => 1,
+        _ => double.TryParse(Data.Value, out double state) ? (int)state : -1
+    };
 
     public string Colors { get; set; } = "";
     public string RuntimeData { get; set; } = "";
