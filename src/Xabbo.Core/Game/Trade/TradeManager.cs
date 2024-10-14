@@ -198,7 +198,15 @@ public sealed partial class TradeManager(
             PartnerOffer = second;
         }
 
-        _logger.LogDebug("Trade updated.");
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            _logger.LogDebug("Trade updated.\n"
+                + "{SelfName}: {SelfItemCount} items\n"
+                + "{PartnerName}: {PartnerItemCount} items",
+                Self?.Name, SelfOffer.Count, Partner?.Name, PartnerOffer.Count
+            );
+        }
+
         Updated?.Invoke(new TradeUpdatedEventArgs(SelfOffer, PartnerOffer));
     }
 
