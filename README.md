@@ -54,6 +54,7 @@ ext.Intercept<AvatarChatMsg>((e, chat) => {
 });
 
 // Modifying messages: replacing "apple" with "orange" in incoming chat messages.
+// By returning an IMessage, the packet will be replaced with that message.
 ext.Intercept<AvatarChatMsg>(chat => chat with {
     Message = chat.Message.Replace("apple", "orange")
 });
