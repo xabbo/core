@@ -14,10 +14,10 @@ namespace Xabbo.Core.Messages.Incoming;
 /// <item>Flash: <see cref="In.TradingConfirmation"/></item>
 /// </list>
 /// </summary>
-public sealed class AwaitingTradeConfirmationMsg : IMessage<AwaitingTradeConfirmationMsg>
+public sealed class TradeAwaitingConfirmationMsg : IMessage<TradeAwaitingConfirmationMsg>
 {
-    static ClientType IMessage<AwaitingTradeConfirmationMsg>.SupportedClients => ClientType.Modern;
-    static Identifier IMessage<AwaitingTradeConfirmationMsg>.Identifier => In.TradingConfirmation;
-    static AwaitingTradeConfirmationMsg IParser<AwaitingTradeConfirmationMsg>.Parse(in PacketReader p) => new();
+    static ClientType IMessage<TradeAwaitingConfirmationMsg>.SupportedClients => ClientType.Modern;
+    static Identifier IMessage<TradeAwaitingConfirmationMsg>.Identifier => In.TradingConfirmation;
+    static TradeAwaitingConfirmationMsg IParser<TradeAwaitingConfirmationMsg>.Parse(in PacketReader p) => new();
     void IComposer.Compose(in PacketWriter p) { }
 }

@@ -34,7 +34,7 @@ partial class TradeManager
     }
 
     [Intercept]
-    private void HandleTradingConfirmation(Intercept<AwaitingTradeConfirmationMsg> e)
+    private void HandleTradingConfirmation(Intercept<TradeAwaitingConfirmationMsg> e)
     {
         using (_logger.MethodScope())
             SetAwaitingConfirmation();
