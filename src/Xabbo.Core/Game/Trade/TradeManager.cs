@@ -344,6 +344,10 @@ public sealed partial class TradeManager(
 
                 _logger.LogInformation("Trade closed by '{UserName}', reason: {Reason}.", closer.Name, reason);
             }
+            else
+            {
+                _logger.LogInformation("Trade closed.");
+            }
         }
         finally
         {
