@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -127,11 +127,15 @@ public class GameDataManager : IGameDataManager
                 }
             }
 
-            // if (hotel.IsOrigins && Texts is not null && typesToLoad?.Contains(GameDataType.FurniData) != false)
-            //     Furni = FurniData.FromOriginsTexts(Texts);
-
             if (updateHashes)
                 await _loader.UpdateHashesAsync(hotel, hashes);
+
+            // Merge furni data with external texts for Origins.
+            if (hotel.IsOrigins && Furni is not null && Texts is not null &&
+                typesToLoad?.Contains(GameDataType.FurniData) != false)
+            {
+                Furni = new FurniData(Furni, Texts);
+            }
 
             if (AutoInitCoreExtensions)
                 Extensions.Initialize(this);

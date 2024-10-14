@@ -113,6 +113,102 @@ public sealed class FurniData : IReadOnlyCollection<FurniInfo>
             .ToImmutableDictionary(wallItem => wallItem.Kind);
     }
 
+    /// <summary>
+    /// Merges the base furni data with furni names and
+    /// descriptions from the provided external texts.
+    /// </summary>
+    internal FurniData(FurniData baseFurniData, ExternalTexts externalTexts)
+    {
+        List<FurniInfo>
+            additionalFloorItems = [],
+            additionalWallItems = [];
+
+        // Merge additional items that don't exist in the base furni data.
+        foreach (var (key, value) in externalTexts)
+        {
+            if (!key.EndsWith("_name"))
+                continue;
+
+            ItemType type = ItemType.None;
+            string? identifier = null;
+
+            if (key.StartsWith("furni_"))
+            {
+                type = ItemType.Floor;
+                identifier = key[6..^5];
+            }
+            else if (key.StartsWith("wallitem_"))
+            {
+                type = ItemType.Wall;
+                identifier = key[9..^5];
+            }
+            else
+            {
+                continue;
+            }
+
+            if (baseFurniData.TryGetInfo(identifier, out _))
+                continue;
+
+            externalTexts.TryGetValue(
+                $"{(type is ItemType.Floor ? "furni" : "wallitem")}_{identifier}_desc",
+                out string? description
+            );
+
+            var info = new FurniInfo(type, 0, identifier)
+            {
+                Name = value,
+                Description = description ?? ""
+            };
+
+            (type is ItemType.Floor ? additionalFloorItems : additionalWallItems).Add(info);
+        }
+
+        // Update existing furni names and descriptions from the external texts.
+
+        FloorItems = baseFurniData.FloorItems
+            .Where(info => externalTexts.ContainsKey($"furni_{info.Identifier}_name"))
+            .Select(info => {
+                if (externalTexts.TryGetValue($"furni_{info.Identifier}_name", out string? name))
+                {
+                    info = info with { Name = name };
+                }
+                if (externalTexts.TryGetValue($"furni_{info.Identifier}_desc", out string? desc))
+                {
+                    info = info with { Description = desc };
+                }
+                return info;
+            })
+            .Concat(additionalFloorItems)
+            .ToImmutableArray();
+
+        WallItems = baseFurniData.WallItems
+            .Where(info => externalTexts.ContainsKey($"wallitem_{info.Identifier}_name"))
+            .Select(info => {
+                if (externalTexts.TryGetValue($"wallitem_{info.Identifier}_name", out string? name))
+                    info = info with { Name = name };
+                if (externalTexts.TryGetValue($"wallitem_{info.Identifier}_desc", out string? desc))
+                    info = info with { Description = desc };
+                return info;
+            })
+            .Concat(additionalWallItems)
+            .ToImmutableArray();
+
+        _identifierMap = this
+            .DistinctBy(x => x.Identifier)
+            .ToImmutableDictionary(furniInfo => furniInfo.Identifier, StringComparer.InvariantCultureIgnoreCase);
+
+        _floorItemMap = FloorItems
+            .Where(x => x.Kind > 0)
+            .DistinctBy(x => x.Kind)
+            .ToImmutableDictionary(furniInfo => furniInfo.Kind);
+
+        _wallItemMap = WallItems
+            .Where(x => x.Kind > 0)
+            .DistinctBy(x => x.Kind)
+            .ToImmutableDictionary(wallItem => wallItem.Kind);
+    }
+
     internal FurniData(ExternalTexts texts)
     {
         Dictionary<string, FurniInfo> infos = [];
