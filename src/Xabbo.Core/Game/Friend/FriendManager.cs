@@ -248,6 +248,7 @@ public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFacto
 
     private void ReceiveFriendRequest(Id id, string name, string? figureString)
     {
+        _logger.LogInformation("Received friend request from #{Id} '{Name}'.", id, name);
         FriendRequestReceived?.Invoke(new FriendRequestEventArgs(id, name, figureString));
     }
 
