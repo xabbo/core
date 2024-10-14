@@ -1,13 +1,15 @@
 ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Xabbo.Core?style=for-the-badge) ![Nuget](https://img.shields.io/nuget/dt/Xabbo.Core?style=for-the-badge)
 
 # xabbo/core
-Provides data structures, parsers, composers, messages, game state, and game data management for xabbo based extensions.
+Provides data structures, parsers, composers, messages, game state, and game data management for
+xabbo based extensions.
 
 ## Features
 
 ### Parsers and composers
 
-Provides various parsers and composers for structures sent between the game client and server.\
+Provides various parsers and composers for structures sent between the game client and server.
+
 These work by implementing `IComposer` and `IParser<T>` from [xabbo/common](https://github.com/xabbo/common).
 
 ```cs
@@ -32,9 +34,10 @@ ext.Send(In.Users, count, new User(id, index)
 
 ### Messages
 
-Various messages are provided which allow you to send structured messages to the client/server without specifying the message name.
-These are also designed to be client-agnostic where possible, meaning that they work on both the Flash and Shockwave clients, and are structured correctly depending on the current session.
-These work by implementing `IMessage<T>` from xabbo/common.
+Various messages are provided which allow you to send structured messages to the client/server
+without specifying the message name. These are also designed to be client-agnostic where possible,
+meaning that they work on both the Flash and Shockwave clients, and are structured correctly
+depending on the current session. These work by implementing `IMessage<T>` from xabbo/common.
 
 ```cs
 // Sending messages: walking to a tile.
@@ -66,8 +69,10 @@ Request messages are a pair of request/response messages with a response data ty
 This allows you to easily request data and receive its response asynchronously.
 These work by implementing `IRequestMessage<TReq, TRes, TData>` from xabbo/common.
 
-Let's take a look at the `GetUserDataMsg` which gets the user's own data.\
-It implements `IRequestMessage<GetUserDataMsg, UserDataMsg, UserData>`, which means it sends a `GetUserDataMsg`, receives a `UserDataMsg` and returns a `UserData` object.
+Let's take a look at the `GetUserDataMsg` which gets the user's own data.
+
+It implements `IRequestMessage<GetUserDataMsg, UserDataMsg, UserData>`, which means it sends a
+`GetUserDataMsg`, receives a `UserDataMsg` and returns a `UserData` object.
 
 ```cs
 // In an async method...
@@ -80,8 +85,9 @@ Console.WriteLine($"Received user data for: {userData.Name}");
 
 ### Game state managers
 
-Game state managers such as the `RoomManager` intercept packets to track the state of the game.\
-This allows you to easily implement higher-level logic without needing to manually intercept and parse packets.
+Game state managers such as the `RoomManager` intercept packets to track the state of the game. This
+allows you to easily implement higher-level logic without needing to manually intercept and parse
+packets.
 
 ```cs
 // Log users who enter and leave the room, as well as chat messages.
@@ -96,7 +102,8 @@ roomManager.AvatarChat += (e) => Console.WriteLine($"{e.Avatar.Name}: {e.Message
 
 ### Game data management
 
-A game data manager is provided which loads various resources such as the external texts, furni, figure, and product data.
+A game data manager is provided which loads various resources such as the external texts, furni,
+figure, and product data.
 
 ```cs
 var gameDataManager = new GameDataManager();
@@ -125,9 +132,11 @@ Loaded 15146 furni
 
 ### Core extensions
 
-Various [extension methods](https://github.com/xabbo/core/blob/dev/src/Xabbo.Core/Extensions.cs) are provided for convenience.\
-For example, once game data has been loaded via the `GameDataManager`, you can easily get the name of any item with the `GetName()` extension method.\
-This works for any item as the extension is for the `IItem` interface, which is implemented by `Furni`, `InventoryItem`, `TradeItem`, `MarketplaceItemInfo`, `CatalogProduct` etc.
+Various [extension methods](https://github.com/xabbo/core/blob/dev/src/Xabbo.Core/Extensions.cs) are
+provided for convenience. For example, once game data has been loaded via the `GameDataManager`, you
+can easily get the name of any item with the `GetName()` extension method. This works for any item
+that implements the `IItem` interface, such as `Furni`, `InventoryItem`, `TradeItem`,
+`MarketplaceItemInfo`, `CatalogProduct` etc.
 
 ```cs
 // Log the name of all items in the room.
