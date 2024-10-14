@@ -152,7 +152,7 @@ public sealed partial class TradeManager(
 
         IsTrading = true;
 
-        _logger.LogInformation("Trade opened with {UserName}.", Partner.Name);
+        _logger.LogInformation("Trade opened with '{UserName}'.", Partner.Name);
         Opened?.Invoke(new TradeOpenedEventArgs(IsTrader, Self, Partner));
 
         return true;
@@ -201,8 +201,8 @@ public sealed partial class TradeManager(
         if (_logger.IsEnabled(LogLevel.Debug))
         {
             _logger.LogDebug("Trade updated.\n"
-                + "{SelfName}: {SelfItemCount} items\n"
-                + "{PartnerName}: {PartnerItemCount} items",
+                + "'{SelfName}' offers {SelfItemCount} item(s).\n"
+                + "'{PartnerName}' offers {PartnerItemCount} item(s).",
                 Self?.Name, SelfOffer.Count, Partner?.Name, PartnerOffer.Count
             );
         }
