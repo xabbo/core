@@ -7,28 +7,8 @@ namespace Xabbo.Core.GameData;
 /// <summary>
 /// Represents a service that manages game data for a hotel.
 /// </summary>
-public interface IGameDataManager
+public interface IGameDataManager : IGameDataProvider
 {
-    /// <summary>
-    /// Gets the figure data if it is available.
-    /// </summary>
-    FigureData? Figure { get; }
-
-    /// <summary>
-    /// Gets the furni data if it is available.
-    /// </summary>
-    FurniData? Furni { get; }
-
-    /// <summary>
-    /// Gets the product data if it is available.
-    /// </summary>
-    ProductData? Products { get; }
-
-    /// <summary>
-    /// Gets the external texts if they are available.
-    /// </summary>
-    ExternalTexts? Texts { get; }
-
     /// <summary>
     /// Occurs when game data begins loading.
     /// </summary>

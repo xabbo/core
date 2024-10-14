@@ -27,14 +27,14 @@ public static class Extensions
     public static bool IsInitialized { get; private set; }
 
     /// <summary>
-    /// Initializes xabbo core extensions with the specified game data.
+    /// Initializes xabbo core extensions with the specified game data provider.
     /// </summary>
-    public static void Initialize(FurniData? furniData, ExternalTexts? texts)
+    public static void Initialize(IGameDataProvider provider)
     {
-        _furniData = furniData;
-        _texts = texts;
+        _furniData = provider.Furni;
+        _texts = provider.Texts;
 
-        IsInitialized = furniData is not null && texts is not null;
+        IsInitialized = _furniData is not null && _texts is not null;
     }
 
     #region - Texts -

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -134,7 +134,7 @@ public class GameDataManager : IGameDataManager
                 await _loader.UpdateHashesAsync(hotel, hashes);
 
             if (AutoInitCoreExtensions)
-                Extensions.Initialize(Furni, Texts);
+                Extensions.Initialize(this);
 
             _logger.LogInformation("Game data loaded.");
             Loaded?.Invoke();
