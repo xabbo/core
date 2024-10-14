@@ -10,7 +10,11 @@ public sealed class TradeOffer : List<TradeItem>, ITradeOffer, IParserComposer<T
 {
     public Id? UserId { get; set; }
     public string? UserName { get; set; }
-    public bool? Accepted { get; set; }
+    /// <remarks>
+    /// This appears to be an unused field in the Origins packet structure as users will
+    /// automatically unaccept the trade whenever a trade offer updates.
+    /// </remarks>
+    public bool Accepted { get; set; }
     public int FurniCount { get; set; }
     public int CreditCount { get; set; }
 
@@ -45,7 +49,7 @@ public sealed class TradeOffer : List<TradeItem>, ITradeOffer, IParserComposer<T
         if (p.Client is ClientType.Shockwave)
         {
             p.WriteString(UserName ?? throw new Exception($"{nameof(UserName)} is required on {p.Client}."));
-            p.WriteBool(Accepted ?? throw new Exception($"{nameof(Accepted)} is required on {p.Client}."));
+            p.WriteBool(Accepted);
         }
         else
         {

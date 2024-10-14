@@ -5,7 +5,7 @@
 /// </summary>
 /// <param name="reason">The reason that the trade failed to start.</param>
 /// <param name="name">The name of the user that the trade failed to start with.</param>
-public sealed class TradeStartFailEventArgs(int reason, string name)
+public sealed class TradeOpenFailedEventArgs(int reason, string name)
 {
     /// <summary>
     /// Gets reason that the trade failed to start.

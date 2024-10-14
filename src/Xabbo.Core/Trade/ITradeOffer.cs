@@ -23,14 +23,6 @@ public interface ITradeOffer : IReadOnlyList<ITradeItem>
     string? UserName { get; }
 
     /// <summary>
-    /// Whether the user has accepted the trade.
-    /// </summary>
-    /// <remarks>
-    /// Used on Origins.
-    /// </remarks>
-    bool? Accepted { get; }
-
-    /// <summary>
     /// The number of furni in the trade offer.
     /// </summary>
     /// <remarks>

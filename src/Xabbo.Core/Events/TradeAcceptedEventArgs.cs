@@ -5,7 +5,7 @@
 /// </summary>
 /// <param name="user">The user who accepted or unaccepted.</param>
 /// <param name="accepted">Whether the user accepted.</param>
-public sealed class TradeAcceptEventArgs(IUser user, bool accepted)
+public sealed class TradeAcceptedEventArgs(IUser user, bool accepted)
     : RoomUserEventArgs(user)
 {
     /// <summary>
