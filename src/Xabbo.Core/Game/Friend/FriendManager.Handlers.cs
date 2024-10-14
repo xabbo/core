@@ -132,6 +132,13 @@ partial class FriendManager
     }
 
     [Intercept]
+    private void HandleFriendRequest(FriendRequestMsg request)
+    {
+        using (_logger.MethodScope())
+            ReceiveFriendRequest(request.Id, request.Name, request.FigureString);
+    }
+
+    [Intercept]
     private void HandleConsoleMessage(ConsoleMessageMsg msg)
     {
         using (_logger.MethodScope())

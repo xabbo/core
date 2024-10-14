@@ -246,6 +246,11 @@ public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFacto
         FriendRemoved?.Invoke(new FriendEventArgs(friend));
     }
 
+    private void ReceiveFriendRequest(Id id, string name, string? figureString)
+    {
+        FriendRequestReceived?.Invoke(new FriendRequestEventArgs(id, name, figureString));
+    }
+
     private void ReceiveMessage(ConsoleMessage message)
     {
         if (!_friends.TryGetValue(message.SenderId, out Friend? friend))
