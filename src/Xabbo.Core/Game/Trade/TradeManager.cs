@@ -19,7 +19,7 @@ public sealed partial class TradeManager(
 )
     : GameStateManager(extension)
 {
-    private readonly ILogger _logger = (ILogger?)loggerFactory?.CreateLogger<ProfileManager>() ?? NullLogger.Instance;
+    private readonly ILogger _logger = (ILogger?)loggerFactory?.CreateLogger<TradeManager>() ?? NullLogger.Instance;
 
     private readonly ProfileManager _profileManager = profileManager;
     private readonly RoomManager _roomManager = roomManager;
