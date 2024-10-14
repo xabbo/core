@@ -138,7 +138,10 @@ public class GameDataManager : IGameDataManager
             }
 
             if (AutoInitCoreExtensions)
+            {
+                _logger.LogInformation("Initializing core extensions with {Hotel} hotel game data.", hotel.Name);
                 Extensions.Initialize(this);
+            }
 
             _logger.LogInformation("Game data loaded.");
             Loaded?.Invoke();

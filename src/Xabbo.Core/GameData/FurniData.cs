@@ -167,7 +167,6 @@ public sealed class FurniData : IReadOnlyCollection<FurniInfo>
         // Update existing furni names and descriptions from the external texts.
 
         FloorItems = baseFurniData.FloorItems
-            .Where(info => externalTexts.ContainsKey($"furni_{info.Identifier}_name"))
             .Select(info => {
                 if (externalTexts.TryGetValue($"furni_{info.Identifier}_name", out string? name))
                 {
@@ -183,7 +182,6 @@ public sealed class FurniData : IReadOnlyCollection<FurniInfo>
             .ToImmutableArray();
 
         WallItems = baseFurniData.WallItems
-            .Where(info => externalTexts.ContainsKey($"wallitem_{info.Identifier}_name"))
             .Select(info => {
                 if (externalTexts.TryGetValue($"wallitem_{info.Identifier}_name", out string? name))
                     info = info with { Name = name };
