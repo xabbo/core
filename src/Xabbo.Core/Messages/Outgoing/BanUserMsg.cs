@@ -20,7 +20,15 @@ namespace Xabbo.Core.Messages.Outgoing;
 /// <param name="Name">The name of the user to ban. Applies to the <see cref="ClientType.Origins"/> client.</param>
 /// <param name="RoomId">The ID of the room to ban the user from. Applies to <see cref="ClientType.Modern"/> clients.</param>
 /// <param name="Duration">The duration of the ban.</param>
-public sealed record BanUserMsg(Id? Id, string? Name, Id? RoomId, BanDuration Duration) : IMessage<BanUserMsg>
+/// <param name="DurationString">A custom ban duration string. Used when <see cref="Duration"/> is -1.</param>
+public sealed record BanUserMsg(
+    Id? Id,
+    string? Name,
+    Id? RoomId,
+    BanDuration Duration,
+    string? DurationString = null
+)
+    : IMessage<BanUserMsg>
 {
     /// <summary>
     /// Constructs a new <see cref="BanUserMsg"/> with the specified user, room ID and duration.
@@ -59,15 +67,17 @@ public sealed record BanUserMsg(Id? Id, string? Name, Id? RoomId, BanDuration Du
             roomId = p.ReadId();
         }
 
-        duration = p.ReadString() switch
+        string durationString = p.ReadString();
+
+        duration = durationString switch
         {
             string s when s.Equals(BanDuration.Hour.ToClientString(p.Client)) => BanDuration.Day,
             string s when s.Equals(BanDuration.Day.ToClientString(p.Client)) => BanDuration.Day,
             string s when s.Equals(BanDuration.Permanent.ToClientString(p.Client)) => BanDuration.Permanent,
-            string s => throw new Exception($"Unknown {p.Client} ban duration: '{s}'.")
+            _ => (BanDuration)(-1)
         };
 
-        return new BanUserMsg(id, name, roomId, duration);
+        return new BanUserMsg(id, name, roomId, duration, duration == (BanDuration)(-1) ? durationString : null);
     }
 
     void IComposer.Compose(in PacketWriter p)
@@ -88,6 +98,9 @@ public sealed record BanUserMsg(Id? Id, string? Name, Id? RoomId, BanDuration Du
             p.WriteId(roomId);
         }
 
-        p.WriteString(Duration.ToClientString(p.Client));
+        if (Duration == (BanDuration)(-1))
+            p.WriteString(DurationString ?? "");
+        else
+            p.WriteString(Duration.ToClientString(p.Client));
     }
 }
