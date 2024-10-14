@@ -64,6 +64,8 @@ public class GameDataLoader(
 
     public async Task UpdateHashesAsync(Hotel hotel, GameDataHashes hashes)
     {
+        _logger.LogInformation("Saving hashes.");
+
         FileInfo fileInfo = new FileInfo(GetHashesFilePath(hotel));
         fileInfo.Directory?.Create();
 
@@ -101,7 +103,6 @@ public class GameDataLoader(
         return false;
     }
 
-
     private async Task<string> FetchHashAsync(Hotel hotel, GameDataType type, CancellationToken cancellationToken)
     {
         string? url = _urlProvider.GetGameDataUrl(hotel, type);
@@ -110,7 +111,7 @@ public class GameDataLoader(
             throw new Exception($"No game data URL for {type} on {hotel.Name} hotel.");
         }
 
-        _logger.LogInformation("Fetching hash for {GameDataType}...", type);
+        _logger.LogDebug("Fetching hash for {GameDataType}...", type);
 
         var res = await _http.SendAsync(new HttpRequestMessage
         {
@@ -122,18 +123,21 @@ public class GameDataLoader(
         switch (res.StatusCode)
         {
             case HttpStatusCode.OK:
-                if (TryGetHashFromETag(res, out hash))
-                    return hash;
-                throw new Exception($"Failed to get hash from ETag for {type} on {hotel} hotel.");
+                if (!TryGetHashFromETag(res, out hash))
+                    throw new Exception($"Failed to get hash from ETag for {type} on {hotel} hotel.");
+                break;
             case HttpStatusCode.TemporaryRedirect:
-                if (TryGetHashFromLocation(res, out hash))
-                    return hash;
-                throw new Exception($"Failed to get hash from Location header for {type} on {hotel} hotel.");
+                if (!TryGetHashFromLocation(res, out hash))
+                    throw new Exception($"Failed to get hash from Location header for {type} on {hotel} hotel.");
+                break;
             default:
                 throw new Exception(
                     $"Server responded {(int)res.StatusCode} {res.ReasonPhrase} when attempting to"
                     + $" fetch hash for {type} on {hotel} hotel.");
         }
+
+        _logger.LogInformation("Obtained hash '{Hash}' for {GameDataType}.", hash, type);
+        return hash;
     }
 
     public async Task<GameDataHashes> LoadHashesAsync(Hotel hotel, CancellationToken cancellationToken = default)
@@ -216,11 +220,7 @@ public class GameDataLoader(
             }
         }
 
-        if (!fetchedHashes.Equals(cachedHashes))
-        {
-            await UpdateHashesAsync(hotel, fetchedHashes);
-        }
-
+        await UpdateHashesAsync(hotel, fetchedHashes);
         return fetchedHashes;
     }
 
