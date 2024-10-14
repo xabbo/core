@@ -24,10 +24,13 @@ public sealed record MessengerInitMsg : IMessage<MessengerInitMsg>
     public int NormalLimit { get; init; }
     public int ExtendedLimit { get; init; }
     public List<Friend> Friends { get; init; } = [];
-    public List<ConsoleMessage> Messages { get; init; } = [];
     public List<CampaignMessage> CampaignMessages { get; init; } = [];
-    public List<FriendRequest> Requests { get; init; } = [];
     public List<(int Id, string Name)> Categories { get; init; } = [];
+
+    public int RequestLimit { get; set; }
+    public int RequestCount { get; set; }
+    public int MessageLimit { get; set; }
+    public int MessageCount { get; set; }
 
     static MessengerInitMsg IParser<MessengerInitMsg>.Parse(in PacketReader p)
     {
@@ -53,9 +56,11 @@ public sealed record MessengerInitMsg : IMessage<MessengerInitMsg>
                 NormalLimit = p.ReadInt(),
                 ExtendedLimit = p.ReadInt(),
                 Friends = [.. p.ParseArray<Friend>()],
-                Messages = [.. p.ParseArray<ConsoleMessage>()],
-                CampaignMessages = [.. p.ParseArray<CampaignMessage>()],
-                Requests = [.. p.ParseArray<FriendRequest>()],
+                RequestLimit = p.ReadInt(),
+                RequestCount = p.ReadInt(),
+                MessageLimit = p.ReadInt(),
+                MessageCount = p.ReadInt(),
+                CampaignMessages = [.. p.ParseArray<CampaignMessage>()]
             };
         }
     }
@@ -81,9 +86,11 @@ public sealed record MessengerInitMsg : IMessage<MessengerInitMsg>
             p.WriteInt(NormalLimit);
             p.WriteInt(ExtendedLimit);
             p.ComposeArray(Friends);
-            p.ComposeArray(Messages);
+            p.WriteInt(RequestLimit);
+            p.WriteInt(RequestCount);
+            p.WriteInt(MessageLimit);
+            p.WriteInt(MessageCount);
             p.ComposeArray(CampaignMessages);
-            p.ComposeArray(Requests);
         }
     }
 }

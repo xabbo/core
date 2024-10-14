@@ -24,7 +24,7 @@ public class ConsoleMessage : IParserComposer<ConsoleMessage>
             SenderGender = (Gender)p.ReadInt(),
             SenderFigure = p.ReadString(),
             Time = p.ReadString(),
-            Content = p.ReadString(),
+            Content = p.ReadString().Replace('\r', '\n'),
         },
         not ClientType.Shockwave => new()
         {
@@ -48,7 +48,7 @@ public class ConsoleMessage : IParserComposer<ConsoleMessage>
             p.WriteInt((int)SenderGender);
             p.WriteString(SenderFigure);
             p.WriteString(Time ?? "");
-            p.WriteString(Content);
+            p.WriteString(Content.Replace('\n', '\r'));
         }
         else
         {

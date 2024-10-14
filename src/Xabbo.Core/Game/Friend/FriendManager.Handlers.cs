@@ -1,19 +1,17 @@
+using System;
 using Microsoft.Extensions.Logging;
-using Xabbo.Core.Events;
 
+using Xabbo.Core.Events;
 using Xabbo.Core.Messages.Incoming;
 
 namespace Xabbo.Core.Game;
-
-using ModernIncoming = Messages.Incoming;
-using OriginsIncoming = Messages.Incoming;
 
 partial class FriendManager
 {
     [Intercept]
     private void HandleMessengerInit(Intercept<MessengerInitMsg> e)
     {
-        using var scope = Log.MethodScope();
+        using var scope = _logger.MethodScope();
 
         _receivedMessengerInit = true;
         if (_isLoading)
@@ -21,12 +19,11 @@ partial class FriendManager
             if (_isForceLoading)
                 e.Block();
 
-            if (Interceptor.Session.Client.Type is ClientType.Shockwave)
+            if (Session.Is(ClientType.Origins))
             {
-                // Friends list is available here
+                // Friends list is available here.
                 AddFriends(e.Msg.Friends);
-                if (_isLoading)
-                    CompleteLoadingFriends();
+                CompleteLoadingFriends();
             }
         }
     }
@@ -34,36 +31,42 @@ partial class FriendManager
     [Intercept]
     private void HandleFriendList(Intercept<FriendListMsg> e)
     {
+        if (Session.Is(ClientType.Origins))
+        {
+            UpdateFriendsOrigins(e.Msg);
+            return;
+        }
+
         if (!_isLoading)
             return;
 
-        using var scope = Log.MethodScope();
+        using var scope = _logger.MethodScope();
 
         int total = e.Msg.FragmentCount;
         int current = e.Msg.FragmentIndex;
 
         if (current != _currentFragment)
         {
-            Log.LogWarning("Fragment index mismatch. (expected: {Expected}, actual: {Actual})",
+            _logger.LogWarning("Fragment index mismatch. (expected: {Expected}, actual: {Actual})",
                 _currentFragment, current);
             return;
         }
         if (_totalFragments == -1) _totalFragments = total;
         else if (_totalFragments != total)
         {
-            Log.LogWarning("Fragment count mismatch. (expected: {Expected}, actual: {Actual})",
+            _logger.LogWarning("Fragment count mismatch. (expected: {Expected}, actual: {Actual})",
                 _totalFragments, total);
             return;
         }
 
-        Log.LogTrace(
+        _logger.LogTrace(
             "Received friend list fragment {FragmentIndex}/{TotalFragments} ({FragmentCount})",
             _currentFragment, total, e.Msg.Count
         );
 
         if (_isForceLoading)
         {
-            Log.LogTrace("Blocking packet.");
+            _logger.LogTrace("Blocking packet.");
             e.Block();
         }
 
@@ -78,18 +81,30 @@ partial class FriendManager
     }
 
     [Intercept]
-    private void HandleFriendListUpdate(ModernIncoming.FriendListUpdateMsg msg)
+    private void HandleFriendsUpdated(FriendsUpdatedMsg msg)
     {
-        using var scope = Log.MethodScope();
+        using var scope = _logger.MethodScope();
+
+        _logger.LogDebug("Processing {Count} friend update(s).", msg.Updates.Count);
 
         foreach (var update in msg.Updates)
         {
             switch (update.Type)
             {
-                case FriendListUpdateType.Add when update.Friend is not null:
+                case FriendListUpdateType.Add:
+                    if (update.Friend is null)
+                    {
+                        _logger.LogWarning("Friend #{Id} was null when attempting to add.", update.Id);
+                        continue;
+                    }
                     AddFriend(update.Friend);
                     break;
-                case FriendListUpdateType.Update when update.Friend is not null:
+                case FriendListUpdateType.Update:
+                    if (update.Friend is null)
+                    {
+                        _logger.LogWarning("Friend #{Id} was null when attempting to update.", update.Id);
+                        continue;
+                    }
                     UpdateFriend(update.Friend);
                     break;
                 case FriendListUpdateType.Remove:
@@ -100,16 +115,16 @@ partial class FriendManager
     }
 
     [Intercept]
-    private void HandleFriendAdded(OriginsIncoming.FriendAddedMsg msg)
+    private void HandleFriendAdded(FriendAddedMsg msg)
     {
-        using (Log.MethodScope())
+        using (_logger.MethodScope())
             AddFriend(msg.Friend);
     }
 
     [Intercept]
-    private void HandleFriendsRemoved(OriginsIncoming.FriendsRemovedMsg msg)
+    private void HandleFriendsRemoved(FriendsRemovedMsg msg)
     {
-        using (Log.MethodScope())
+        using (_logger.MethodScope())
         {
             foreach (var id in msg)
                 RemoveFriend(id);
@@ -117,20 +132,16 @@ partial class FriendManager
     }
 
     [Intercept]
+    private void HandleConsoleMessage(ConsoleMessageMsg msg)
+    {
+        using (_logger.MethodScope())
+            ReceiveMessage(msg.Message);
+    }
+
+    [Intercept]
     private void HandleConsoleMessages(ConsoleMessagesMsg messages)
     {
-        using var scope = Log.MethodScope();
-
-        foreach (var message in messages)
-        {
-            if (!_friends.TryGetValue(message.SenderId, out Friend? friend))
-            {
-                Log.LogWarning("Failed to get friend #{Id} from ID map.", message.SenderId);
-                continue;
-            }
-
-            Log.LogInformation("Received message from '{Name}': '{Message}'.", friend.Name, message.Content);
-            MessageReceived?.Invoke(new FriendMessageEventArgs(friend, message));
-        }
+        using (_logger.MethodScope())
+            ReceiveMessages(messages);
     }
 }

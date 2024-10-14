@@ -20,7 +20,7 @@ namespace Xabbo.Core.Game;
 [Intercept]
 public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFactory? loggerFactory = null) : GameStateManager(interceptor)
 {
-    private readonly ILogger Log = (ILogger?)loggerFactory?.CreateLogger<FriendManager>() ?? NullLogger.Instance;
+    private readonly ILogger _logger = (ILogger?)loggerFactory?.CreateLogger<FriendManager>() ?? NullLogger.Instance;
 
     private readonly ConcurrentDictionary<Id, Friend> _friends = new();
     private readonly ConcurrentDictionary<string, Friend> _nameMap = new(StringComparer.OrdinalIgnoreCase);
@@ -86,6 +86,11 @@ public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFacto
     public event Action<FriendUpdatedEventArgs>? FriendUpdated;
 
     /// <summary>
+    /// Occurs when a friend request is received.
+    /// </summary>
+    public event Action<FriendRequestEventArgs>? FriendRequestReceived;
+
+    /// <summary>
     /// Occurs when a message is received from a friend.
     /// </summary>
     public event Action<FriendMessageEventArgs>? MessageReceived;
@@ -130,7 +135,7 @@ public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFacto
 
     private void CompleteLoadingFriends()
     {
-        Log.LogInformation("Loaded {Count} friends.", _friends.Count);
+        _logger.LogInformation("Loaded {Count} friends.", _friends.Count);
 
         _isLoading = false;
         _isForceLoading = false;
@@ -144,23 +149,23 @@ public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFacto
     {
         if (!_friends.TryAdd(friend.Id, friend))
         {
-            Log.LogWarning("Failed to add friend #{Id} '{Name}'.", friend.Id, friend.Name);
+            _logger.LogWarning("Failed to add friend #{Id} '{Name}'.", friend.Id, friend.Name);
             return;
         }
 
         if (_isLoading)
         {
-            Log.LogTrace("Loaded friend #{Id} '{Name}'.", friend.Id, friend.Name);
+            _logger.LogTrace("Loaded friend #{Id} '{Name}'.", friend.Id, friend.Name);
         }
         else
         {
-            Log.LogInformation("Added friend #{Id} '{Name}'.", friend.Id, friend.Name);
+            _logger.LogInformation("Added friend #{Id} '{Name}'.", friend.Id, friend.Name);
             FriendAdded?.Invoke(new FriendEventArgs(friend));
         }
 
         if (!_nameMap.TryAdd(friend.Name, friend))
         {
-            Log.LogWarning("Failed to add friend #{Id} '{Name}' to name map.", friend.Id, friend.Name);
+            _logger.LogWarning("Failed to add friend #{Id} '{Name}' to name map.", friend.Id, friend.Name);
         }
     }
 
@@ -170,23 +175,56 @@ public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFacto
             AddFriend(friend);
     }
 
+    private void UpdateFriendsOrigins(IEnumerable<Friend> friends)
+    {
+        if (_isLoading)
+        {
+            AddFriends(friends);
+            CompleteLoadingFriends();
+        }
+        else
+        {
+            foreach (var friend in friends)
+                AddOrUpdateFriend(friend);
+        }
+    }
+
+    private void AddOrUpdateFriend(Friend friend)
+    {
+        var previousValue = _friends.AddOrUpdate(friend.Id, friend, (_, _) => friend, out bool added);
+        if (added)
+        {
+            FriendAdded?.Invoke(new FriendEventArgs(friend));
+        }
+        else
+        {
+            if (previousValue is null)
+            {
+                _logger.LogWarning("Previous value is null when friend was updated.");
+                return;
+            }
+
+            FriendUpdated?.Invoke(new FriendUpdatedEventArgs(previousValue, friend));
+        }
+    }
+
     private void UpdateFriend(Friend friend)
     {
         if (!_friends.TryGetValue(friend.Id, out Friend? previous) ||
             !_friends.TryUpdate(friend.Id, friend, previous))
         {
-            Log.LogWarning("Failed to get friend #{Id} '{Name}' from ID map to update.", friend.Id, friend.Name);
+            _logger.LogWarning("Failed to get friend #{Id} '{Name}' from ID map to update.", friend.Id, friend.Name);
             return;
         }
 
-        Log.LogTrace("Updated friend #{Id} '{Name}'.", friend.Id, friend.Name);
+        _logger.LogDebug("Updated friend #{Id} '{Name}'.", friend.Id, friend.Name);
 
         if (previous.Name != friend.Name)
         {
             if (!_nameMap.TryRemove(previous.Name, out _) ||
                 !_nameMap.TryAdd(friend.Name, friend))
             {
-                Log.LogWarning("Failed to update friend #{Id} '{Name}' in name map.", friend.Id, friend.Name);
+                _logger.LogWarning("Failed to update friend #{Id} '{Name}' in name map.", friend.Id, friend.Name);
             }
         }
 
@@ -197,14 +235,32 @@ public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFacto
     {
         if (!_friends.TryRemove(id, out Friend? friend))
         {
-            Log.LogWarning("Failed to remove friend #{Id} from ID map.", id);
+            _logger.LogWarning("Failed to remove friend #{Id} from ID map.", id);
             return;
         }
 
         if (!_nameMap.TryRemove(friend.Name, out _))
-            Log.LogWarning("Failed to remove friend #{Id} '{Name}' from name map.", id, friend.Name);
+            _logger.LogWarning("Failed to remove friend #{Id} '{Name}' from name map.", id, friend.Name);
 
-        Log.LogInformation("Removed friend #{Id} '{Name}'.", friend.Id, friend.Name);
+        _logger.LogInformation("Removed friend #{Id} '{Name}'.", friend.Id, friend.Name);
         FriendRemoved?.Invoke(new FriendEventArgs(friend));
+    }
+
+    private void ReceiveMessage(ConsoleMessage message)
+    {
+        if (!_friends.TryGetValue(message.SenderId, out Friend? friend))
+        {
+            _logger.LogWarning("Failed to get friend #{Id} from ID map.", message.SenderId);
+            return;
+        }
+
+        _logger.LogInformation("Received message from '{Name}': '{Message}'.", friend.Name, message.Content);
+        MessageReceived?.Invoke(new FriendMessageEventArgs(friend, message));
+    }
+
+    private void ReceiveMessages(IEnumerable<ConsoleMessage> messages)
+    {
+        foreach (var message in messages)
+            ReceiveMessage(message);
     }
 }

@@ -25,7 +25,7 @@ public class Inventory : IInventory, IEnumerable<InventoryItem>
 
     public bool TryAdd(InventoryItem item) => _items.TryAdd(item.ItemId, item);
 
-    public InventoryItem AddOrUpdate(InventoryItem item, out bool added)
+    public InventoryItem? AddOrUpdate(InventoryItem item, out bool added)
     {
         return _items.AddOrUpdate(item.ItemId, item, (id, existingItem) => item, out added);
     }

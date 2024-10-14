@@ -5,7 +5,12 @@ namespace Xabbo.Core;
 
 internal static class InternalExtensions
 {
-    public static TValue AddOrUpdate<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dictionary,
+    /// <summary>
+    /// Adds or updates the specified item in the dictionary, and returns whether the item was added
+    /// via the '<paramref name="added"/>' out parameter.
+    /// Returns the previous value if the item was updated, or the default value if it was added.
+    /// </summary>
+    public static TValue? AddOrUpdate<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dictionary,
         TKey key, TValue addValue, Func<TKey, TValue, TValue> updateValue, out bool added) where TKey : notnull
     {
         while (true)
@@ -13,7 +18,7 @@ internal static class InternalExtensions
             if (dictionary.TryAdd(key, addValue))
             {
                 added = true;
-                return addValue;
+                return default;
             }
             else if (dictionary.TryGetValue(key, out TValue? existingValue))
             {
@@ -21,7 +26,7 @@ internal static class InternalExtensions
                 if (dictionary.TryUpdate(key, newValue, existingValue))
                 {
                     added = false;
-                    return newValue;
+                    return existingValue;
                 }
             }
         }
