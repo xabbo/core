@@ -36,12 +36,12 @@ tasks:
       - rm -rf ./pkg
   pack:
     desc: Creates a NuGet package
-    deps: [ pkg:clean, test ]
+    deps: [ pack:clean, test ]
     cmds:
       - dotnet pack src/Xabbo.Core -c Release -o pkg
   pack:publish:
     desc: Publishes a NuGet package
-    deps: [ pkg ]
+    deps: [ pack ]
     cmds:
       - dotnet nuget push pkg/*.nupkg --api-key $(op read 'op://xabbo/nuget/credential') --source https://api.nuget.org/v3/index.json --skip-duplicate
       - git tag "v$(dotnet-gitversion /showvariable semver)"
