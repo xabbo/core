@@ -31,15 +31,15 @@ tasks:
       - dotnet clean
       - dotnet build-server shutdown
       - dotnet build
-  pkg:clean:
+  pack:clean:
     cmds:
-      - rm -r ./pkg
-  pkg:
+      - rm -rf ./pkg
+  pack:
     desc: Creates a NuGet package
     deps: [ pkg:clean, test ]
     cmds:
       - dotnet pack src/Xabbo.Core -c Release -o pkg
-  pkg:push:
+  pack:publish:
     desc: Publishes a NuGet package
     deps: [ pkg ]
     cmds:
