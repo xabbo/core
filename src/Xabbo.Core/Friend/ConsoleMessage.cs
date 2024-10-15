@@ -13,7 +13,6 @@ public class ConsoleMessage : IParserComposer<ConsoleMessage>
     public Id SenderId { get; set; }
     public string? SenderName { get; set; }
     public string SenderFigure { get; set; } = "";
-    public Gender SenderGender { get; set; } = Gender.None;
 
     static ConsoleMessage IParser<ConsoleMessage>.Parse(in PacketReader p) => p.Client switch
     {
@@ -21,8 +20,6 @@ public class ConsoleMessage : IParserComposer<ConsoleMessage>
         {
             MessageId = p.ReadString(),
             SenderId = p.ReadId(),
-            SenderGender = (Gender)p.ReadInt(),
-            SenderFigure = p.ReadString(),
             Time = p.ReadString(),
             Content = p.ReadString().Replace('\r', '\n'),
         },
@@ -45,8 +42,6 @@ public class ConsoleMessage : IParserComposer<ConsoleMessage>
         {
             p.WriteString(MessageId);
             p.WriteId(SenderId);
-            p.WriteInt((int)SenderGender);
-            p.WriteString(SenderFigure);
             p.WriteString(Time ?? "");
             p.WriteString(Content.Replace('\n', '\r'));
         }
