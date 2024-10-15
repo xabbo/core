@@ -17,6 +17,7 @@ namespace Xabbo.Core.Messages.Incoming;
 /// </summary>
 public sealed class ConsoleMessagesMsg : List<ConsoleMessage>, IMessage<ConsoleMessagesMsg>
 {
+    static ClientType IMessage<ConsoleMessagesMsg>.SupportedClients => ClientType.Origins;
     static Identifier IMessage<ConsoleMessagesMsg>.Identifier => In.MESSENGER_MESSAGES;
     static ConsoleMessagesMsg IParser<ConsoleMessagesMsg>.Parse(in PacketReader p) => [.. p.ParseArray<ConsoleMessage>()];
     void IComposer.Compose(in PacketWriter p) => p.ComposeArray(this);
