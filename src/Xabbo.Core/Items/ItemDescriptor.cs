@@ -1,14 +1,14 @@
-﻿namespace Xabbo.Core;
+namespace Xabbo.Core;
 
 /// <summary>
 /// Represents an item type, kind, identifier, and variant.
 /// </summary>
 /// <remarks>
 /// Enables items to be grouped together by using the descriptor as a key.
-/// Identifier is included for compatibility with origins.
+/// Identifier is included for compatibility with Origins.
 /// Variant ensures different posters are separated from each other.
 /// </remarks>
-public readonly record struct ItemDescriptor(ItemType Type, int Kind = -1, string? Identifier = null, string? Variant = null) : IItem
+public readonly record struct ItemDescriptor(ItemType Type, int Kind, string? Identifier, string? Variant) : IItem
 {
     readonly Id IItem.Id => -1;
 
@@ -19,6 +19,7 @@ public readonly record struct ItemDescriptor(ItemType Type, int Kind = -1, strin
         _ => $"{Type}:{Kind}:{Variant ?? "?"}"
     };
 
-    public static implicit operator ItemDescriptor((ItemType Type, int Kind, string Variant) tuple) => new(tuple.Type, tuple.Kind, tuple.Variant);
-    public static implicit operator ItemDescriptor((ItemType Type, int Kind) tuple) => new(tuple.Type, tuple.Kind);
+    public static implicit operator ItemDescriptor((ItemType Type, int Kind, string Variant) tuple) => new(tuple.Type, tuple.Kind, null, tuple.Variant);
+    public static implicit operator ItemDescriptor((ItemType Type, string Identifier, string Variant) tuple) => new(tuple.Type, 0, tuple.Identifier, tuple.Variant);
+    public static implicit operator ItemDescriptor((ItemType Type, int Kind) tuple) => new(tuple.Type, tuple.Kind, null, null);
 }
