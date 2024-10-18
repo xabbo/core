@@ -44,6 +44,7 @@ public class Pet(Id id, int index) : Avatar(AvatarType.Pet, id, index), IPet
 
         p.WriteInt(Breed);
         p.WriteId(OwnerId);
+        p.WriteString(OwnerName);
         p.WriteInt(RarityLevel);
         p.WriteBool(HasSaddle);
         p.WriteBool(IsRiding);
