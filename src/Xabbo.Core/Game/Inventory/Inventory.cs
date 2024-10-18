@@ -13,6 +13,8 @@ public class Inventory : IInventory, IEnumerable<InventoryItem>
 
     public bool IsInvalidated { get; set; }
 
+    public int Count => _items.Count;
+
     public Inventory() { }
 
     public Inventory(IEnumerable<InventoryItem> items)

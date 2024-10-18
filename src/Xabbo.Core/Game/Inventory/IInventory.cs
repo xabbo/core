@@ -9,6 +9,11 @@ namespace Xabbo.Core.Game;
 public interface IInventory : IEnumerable<IInventoryItem>
 {
     /// <summary>
+    /// Gets the number of items in the inventory.
+    /// </summary>
+    int Count { get; }
+
+    /// <summary>
     /// Gets whether the inventory has been invalidated by the server.
     /// </summary>
     bool IsInvalidated { get; }
