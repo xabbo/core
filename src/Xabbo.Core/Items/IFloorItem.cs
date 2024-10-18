@@ -28,6 +28,14 @@ public interface IFloorItem : IFurni, IFloorEntity
     double Z { get; }
 
     /// <summary>
+    /// Gets the dimensions of the floor item.
+    /// </summary>
+    /// <remarks>
+    /// Only available on Origins.
+    /// </remarks>
+    Point? Dimensions { get; }
+
+    /// <summary>
     /// The height of the floor item.
     /// </summary>
     float Height { get; }
