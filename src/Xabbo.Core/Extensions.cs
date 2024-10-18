@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -266,7 +266,7 @@ public static class Extensions
         return false;
     }
 
-    public static bool TryGetDescription(this IItem item, out string? description)
+    public static bool TryGetDescription(this IItem item, [NotNullWhen(true)] out string? description)
     {
         if (!IsInitialized)
         {
