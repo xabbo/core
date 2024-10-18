@@ -198,7 +198,7 @@ public static class Extensions
         if (!TryGetVariant(item, out string? variant))
             variant = null;
 
-        return new ItemDescriptor(item.Type, item.Kind, variant);
+        return new ItemDescriptor(item.Type, item.Kind, item.Identifier, variant);
     }
 
     public static bool TryGetName(this IItem item, [NotNullWhen(true)] out string? name)
