@@ -71,6 +71,11 @@ public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFacto
     public event Action? Loaded;
 
     /// <summary>
+    /// Occurs then the game has disconnected and the friend list is cleared.
+    /// </summary>
+    public event Action? Cleared;
+
+    /// <summary>
     /// Occurs when a friend is added.
     /// </summary>
     public event Action<FriendEventArgs>? FriendAdded;
@@ -112,6 +117,8 @@ public sealed partial class FriendManager(IInterceptor interceptor, ILoggerFacto
         _isLoading = true;
         _isForceLoading = false;
         _receivedMessengerInit = false;
+
+        Cleared?.Invoke();
     }
 
     /// <summary>
