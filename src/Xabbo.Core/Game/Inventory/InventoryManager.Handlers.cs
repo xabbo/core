@@ -5,15 +5,16 @@ using Microsoft.Extensions.Logging;
 
 using Xabbo.Messages.Flash;
 using Xabbo.Core.Events;
+using Xabbo.Core.Messages.Incoming;
 
 namespace Xabbo.Core.Game;
 
 partial class InventoryManager
 {
-    [InterceptIn(nameof(In.FurniListInvalidate))]
-    private void HandleFurniListInvalidate(Intercept e)
+    [Intercept]
+    private void HandleInventoryInvalidated(InventoryInvalidatedMsg _)
     {
-        Log.LogTrace("Inventory invalidated.");
+        _logger.LogDebug("Inventory invalidated.");
 
         if (_inventory is not null)
         {
@@ -23,96 +24,91 @@ partial class InventoryManager
         Invalidated?.Invoke();
     }
 
+    [Intercept(ClientType.Modern)]
     [InterceptIn(nameof(In.FurniList))]
     private void HandleFurniList(Intercept e)
     {
-        if (_forceLoadingInventory) e.Block();
-
-        InventoryFragment fragment = e.Packet.Read<InventoryFragment>();
-
-        if (fragment.Index == 0)
+        _loadSemaphore.Wait();
+        try
         {
-            Log.LogTrace("Resetting inventory load state.");
+            if (_loadInventoryItemsTcs is not { } loadTcs)
+                return;
 
-            _currentPacketIndex = 0;
-            _totalPackets = fragment.Total;
-            _fragments.Clear();
-        }
-        else if (_currentPacketIndex != fragment.Index ||
-            _totalPackets != fragment.Total)
-        {
-            Log.LogWarning(
-                "Inventory load state mismatch!"
-                + " Expected {expectedIndex}/{expectedTotal};"
-                + " received {actualIndex}/{actualTotal} (index/total).",
-                _currentPacketIndex, _totalPackets,
-                fragment.Index, fragment.Total
-            );
-            return;
-        }
+            InventoryFragment fragment = e.Packet.Read<InventoryFragment>();
 
-        Log.LogTrace("Received inventory fragment {n} of {total}.", fragment.Index + 1, fragment.Total);
+            e.Block();
 
-        _currentPacketIndex++;
-        _fragments.Add(fragment);
-
-        if (fragment.Index == (fragment.Total - 1))
-        {
-            Log.LogTrace("All inventory fragments received.");
-
-            _inventory ??= new Inventory();
-            _inventory.Clear();
-            _inventory.IsInvalidated = false;
-
-            foreach (InventoryItem item in _fragments.SelectMany(fragment => (ICollection<InventoryItem>)fragment))
+            if (fragment.Index == 0)
             {
-                if (!_inventory.TryAdd(item))
-                {
-                    Log.LogWarning("Failed to add inventory item {itemId}!", item.ItemId);
-                }
+                _logger.LogDebug("Resetting inventory load state.");
+
+                _currentFragmentIndex = 0;
+                _totalFragments = fragment.Total;
+                _fragments.Clear();
+            }
+            else if (_currentFragmentIndex != fragment.Index || _totalFragments != fragment.Total)
+            {
+                _logger.LogWarning(
+                    "Inventory load state mismatch!"
+                    + " Expected {expectedIndex}/{expectedTotal};"
+                    + " received {actualIndex}/{actualTotal} (index/total).",
+                    _currentFragmentIndex, _totalFragments,
+                    fragment.Index, fragment.Total
+                );
+                return;
             }
 
-            _forceLoadingInventory = false;
+            _logger.LogDebug("Received inventory fragment {FragmentNumber} of {TotalFragments}.", fragment.Index + 1, fragment.Total);
 
-            SetLoadTaskResult(_inventory);
-            Loaded?.Invoke();
+            _currentFragmentIndex++;
+            _fragments.Add(fragment);
+
+            CurrentProgress = _currentFragmentIndex;
+            MaxProgress = _totalFragments;
+
+            if (fragment.Index == (fragment.Total - 1))
+            {
+                _currentFragmentIndex = 0;
+                _totalFragments = 0;
+                _logger.LogDebug("All inventory fragments received.");
+                loadTcs.TrySetResult(_fragments.SelectMany(fragment => (ICollection<InventoryItem>)fragment));
+            }
         }
+        finally { _loadSemaphore.Release(); }
     }
 
-    [InterceptIn(nameof(In.FurniListAddOrUpdate))]
-    private void HandleInventoryAddOrUpdateFurni(Intercept e)
+    [Intercept]
+    private void HandleInventoryItemAddedOrUpdated(InventoryItemAddedOrUpdatedMsg msg)
     {
-        if (_inventory is null) return;
+        if (_inventory is not { } inventory) return;
 
-        InventoryItem item = e.Packet.Read<InventoryItem>();
-        _inventory.AddOrUpdate(item, out bool added);
+        inventory.AddOrUpdate(msg.Item, out bool added);
 
         if (added)
         {
-            Log.LogTrace("Added inventory item {id}.", item.Id);
-            ItemAdded?.Invoke(new InventoryItemEventArgs(item));
+            _logger.LogDebug("Added inventory item #{ItemId}.", msg.Item.ItemId);
+            ItemAdded?.Invoke(new InventoryItemEventArgs(msg.Item));
         }
         else
         {
-            Log.LogTrace("Updated inventory item {id}.", item.Id);
-            ItemUpdated?.Invoke(new InventoryItemEventArgs(item));
+            _logger.LogDebug("Updated inventory item #{ItemId}.", msg.Item.ItemId);
+            ItemUpdated?.Invoke(new InventoryItemEventArgs(msg.Item));
         }
     }
 
-    [InterceptIn(nameof(In.FurniListRemove))]
-    private void HandleFurniListRemove(Intercept e)
+    [Intercept]
+    private void HandleInventoryItemRemoved(InventoryItemRemovedMsg msg)
     {
-        if (_inventory is null) return;
+        if (_inventory is not { } inventory) return;
 
-        Id itemId = e.Packet.Read<Id>();
-        if (_inventory.TryRemove(itemId, out InventoryItem? item))
+        if (inventory.TryRemove(msg.ItemId, out InventoryItem? item))
         {
-            Log.LogTrace("Inventory item {id} removed.", itemId);
+            _logger.LogDebug("Inventory item #{ItemId} removed.", msg.ItemId);
             ItemRemoved?.Invoke(new InventoryItemEventArgs(item));
         }
         else
         {
-            Log.LogWarning("Failed to find inventory item {id} to remove!", itemId);
+            _logger.LogWarning("Failed to find inventory item #{ItemId} to remove.", msg.ItemId);
         }
     }
 }

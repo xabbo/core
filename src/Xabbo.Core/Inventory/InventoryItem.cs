@@ -111,7 +111,6 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
 
     private void ParseOrigins(in PacketReader p)
     {
-        Kind = -1;
         ItemId = p.ReadId();
         SlotId = p.ReadInt().ToString();
 
@@ -131,8 +130,10 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
             Length = p.ReadInt(); // dimY
             Colors = p.ReadString();
         }
-
-        Data = new LegacyData { Value = p.ReadString() };
+        else if (Type is ItemType.Wall)
+        {
+            Data = new LegacyData { Value = p.ReadString() };
+        }
     }
 
     void IComposer.Compose(in PacketWriter p)
@@ -151,7 +152,7 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
     {
         p.WriteId(ItemId);
         if (!int.TryParse(SlotId, out int slot))
-            slot = -1;
+            slot = 0;
         p.WriteInt(slot);
         p.WriteString(Type.GetClientIdentifier().ToUpper());
         p.WriteId(Id);
@@ -163,8 +164,10 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
             p.WriteInt(Length);
             p.WriteString(Colors);
         }
-
-        p.WriteString(Data.Value);
+        else if (Type is ItemType.Wall)
+        {
+            p.WriteString(Data.Value);
+        }
     }
 
     private void ComposeModern(in PacketWriter p)
@@ -216,5 +219,5 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
 
     static InventoryItem IParser<InventoryItem>.Parse(in PacketReader p) => new(in p);
 
-    public override string ToString() => $"{nameof(InventoryItem)}#{ItemId}/{Type}:{Kind}";
+    public override string ToString() => $"{nameof(InventoryItem)}#{ItemId}";
 }

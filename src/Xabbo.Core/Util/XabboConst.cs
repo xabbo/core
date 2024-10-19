@@ -5,6 +5,7 @@ namespace Xabbo.Core;
 internal static class XabboConst
 {
     public const int DefaultTimeout = 10000;
+    public const int DefaultOriginsInventoryScanInterval = 1000;
     public const float DefaultEpsilon = 0.0015f;
 
     public const string DefaultUserAgent =
