@@ -22,7 +22,7 @@
 
   <PropertyGroup Label="Package">
     <PackageId>Xabbo.Core</PackageId>
-    <PackageProjectUrl>https://xabbo.b7c.io/core</PackageProjectUrl>
+    <PackageProjectUrl>https://xabbo.io</PackageProjectUrl>
     <Description>Provides data structures, parsers, composers &amp; game state management for Xabbo.</Description>
     <RepositoryUrl>https://github.com/xabbo/core.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
