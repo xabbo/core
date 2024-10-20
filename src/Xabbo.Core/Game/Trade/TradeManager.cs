@@ -24,58 +24,108 @@ public sealed partial class TradeManager(
     private readonly ProfileManager _profileManager = profileManager;
     private readonly RoomManager _roomManager = roomManager;
 
+    private bool _isTrading;
     /// <summary>
     /// Gets whether the user is currently trading.
     /// </summary>
-    public bool IsTrading { get; private set; }
+    public bool IsTrading
+    {
+        get => _isTrading;
+        set => Set(ref _isTrading, value);
+    }
 
+    private bool _isTrader;
     /// <summary>
     /// Gets whether the user initiated the current trade.
     /// </summary>
-    public bool IsTrader { get; private set; }
+    public bool IsTrader
+    {
+        get => _isTrader;
+        set => Set(ref _isTrader, value);
+    }
 
+    private bool _isCompleted;
     /// <summary>
     /// Gets whether the trade has completed.
     /// </summary>
-    public bool IsCompleted { get; private set; }
+    public bool IsCompleted
+    {
+        get => _isCompleted;
+        set => Set(ref _isCompleted, value);
+    }
 
+    private IUser? _self;
     /// <summary>
     /// Gets the user's own room instance.
     /// </summary>
-    public IUser? Self { get; private set; }
+    public IUser? Self
+    {
+        get => _self;
+        set => Set(ref _self, value);
+    }
 
+    private IUser? _partner;
     /// <summary>
     /// Gets the trading parter's room user instance.
     /// </summary>
-    public IUser? Partner { get; private set; }
+    public IUser? Partner
+    {
+        get => _partner;
+        set => Set(ref _partner, value);
+    }
 
+    private ITradeOffer? _selfOffer;
     /// <summary>
     /// Gets the user's own trade offer.
     /// </summary>
-    public ITradeOffer? SelfOffer { get; private set; }
+    public ITradeOffer? SelfOffer
+    {
+        get => _selfOffer;
+        set => Set(ref _selfOffer, value);
+    }
 
+    private ITradeOffer? _partnerOffer;
     /// <summary>
     /// Gets the trading partner's offer.
     /// </summary>
-    public ITradeOffer? PartnerOffer { get; private set; }
+    public ITradeOffer? PartnerOffer
+    {
+        get => _partnerOffer;
+        set => Set(ref _partnerOffer, value);
+    }
 
+    private bool _hasAccepted;
     /// <summary>
     /// Gets whether the user has accepted the current trade.
     /// </summary>
-    public bool HasAccepted { get; private set; }
+    public bool HasAccepted
+    {
+        get => _hasAccepted;
+        set => Set(ref _hasAccepted, value);
+    }
 
+    private bool _hasPartnerAccepted;
     /// <summary>
     /// Gets whether the trading partner has accepted the current trade.
     /// </summary>
-    public bool HasPartnerAccepted { get; private set; }
+    public bool HasPartnerAccepted
+    {
+        get => _hasPartnerAccepted;
+        set => Set(ref _hasPartnerAccepted, value);
+    }
 
+    private bool _isAwaitingConfirmation;
     /// <summary>
     /// Gets whether the trade is awaiting confirmation of both users.
     /// </summary>
     /// <remarks>
     /// Used on modern clients.
     /// </remarks>
-    public bool IsAwaitingConfirmation { get; private set; }
+    public bool IsAwaitingConfirmation
+    {
+        get => _isAwaitingConfirmation;
+        set => Set(ref _isAwaitingConfirmation, value);
+    }
 
     private bool TryStartTradeOrigins(IRoom room, TradeOffer traderOffer, TradeOffer tradeeOffer)
     {
