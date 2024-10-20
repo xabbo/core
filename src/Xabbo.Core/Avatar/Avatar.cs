@@ -26,7 +26,8 @@ public abstract class Avatar(AvatarType type, Id id, int index) : IAvatar, IPars
     [JsonIgnore] public Point XY => Location.XY;
     [JsonIgnore] public float Z => Location.Z;
     public int Direction { get; set; }
-    public Area Area => new(Location.XY, 1, 1);
+    public Point? Size => (1, 1);
+    public Area? Area => new(Location.XY, 1, 1);
 
     // States
     public int HeadDirection { get; set; }

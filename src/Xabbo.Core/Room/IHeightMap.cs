@@ -35,4 +35,17 @@ public interface IHeightmap : IEnumerable<IHeightmapTile>
     /// Gets the heightmap tile at the specified coordinates.
     /// </summary>
     IHeightmapTile this[Point point] { get; }
+
+    /// <summary>
+    /// Gets whether a furni can be placed at the specified area.
+    /// </summary>
+    bool CanPlaceAt(Area area);
+
+    /// <summary>
+    /// Attempts to find a point where a furniture of the specified size can be placed.
+    /// </summary>
+    /// <param name="size">The size of the furniture to place.</param>
+    /// <param name="entry">The room entry tile. This tile will be ignored if specified.</param>
+    /// <returns></returns>
+    Point? FindPlaceablePoint(Point size, Point? entry = null);
 }

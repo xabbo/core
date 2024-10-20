@@ -10,8 +10,7 @@ namespace Xabbo.Core.GameData;
 /// <param name="Identifier">The furniture's unique string identifier.</param>
 /// <param name="Revision">The revision number.</param>
 /// <param name="DefaultDirection">The default direction when placed in a room.</param>
-/// <param name="XDimension">The number of tiles this furniture occupies along the X-axis.</param>
-/// <param name="YDimension">The number of tiles this furniture occupies along the Y-axis.</param>
+/// <param name="Size">The size of the furniture.</param>
 /// <param name="PartColors"></param>
 /// <param name="Name">The name of the furniture.</param>
 /// <param name="Description">The description of the furniture.</param>
@@ -46,8 +45,7 @@ public sealed record FurniInfo(
     string Identifier,
     int Revision = 0,
     int DefaultDirection = 0,
-    int XDimension = 0,
-    int YDimension = 0,
+    Point? Size = null,
     ImmutableArray<string> PartColors = default,
     string Name = "",
     string Description = "",
@@ -77,8 +75,7 @@ public sealed record FurniInfo(
         Identifier: proxy.ClassName ?? "",
         Revision: proxy.Revision,
         DefaultDirection: proxy.DefaultDirection,
-        XDimension: proxy.XDimension,
-        YDimension: proxy.YDimension,
+        Size: type is ItemType.Floor ? (proxy.XDimension, proxy.YDimension) : null,
         PartColors: [.. proxy.PartColors],
         Name: proxy.Name ?? "",
         Description: proxy.Description ?? "",
@@ -104,8 +101,7 @@ public sealed record FurniInfo(
         Identifier: proxy.ClassName ?? "",
         Revision: proxy.Revision,
         DefaultDirection: proxy.DefaultDir,
-        XDimension: proxy.XDim,
-        YDimension: proxy.YDim,
+        Size: type is ItemType.Floor ? (proxy.XDim, proxy.YDim) : null,
         PartColors: [.. proxy.PartColors.Colors],
         Name: proxy.Name ?? "",
         Description: proxy.Description ?? "",
@@ -134,8 +130,7 @@ public sealed record FurniInfo(
         Identifier: proxy.Identifier,
         Revision: proxy.Revision,
         DefaultDirection: proxy.DefaultDir,
-        XDimension: proxy.XDim,
-        YDimension: proxy.YDim,
+        Size: proxy.Type is ItemType.Floor ? (proxy.XDim, proxy.YDim) : null,
         PartColors: [.. proxy.PartColors.Split(',')],
         Name: proxy.Name,
         Description: proxy.Description,

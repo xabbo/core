@@ -689,18 +689,72 @@ public static class Extensions
     #endregion
 
     #region - Furni -
+    public static Point? GetSize<TItem>(this TItem item)
+        where TItem : IItem
+    {
+        if (item is IFloorEntity { Size: Point size })
+        {
+            return size;
+        }
+
+        if (_furniData?.TryGetInfo(item, out var info) == true &&
+            info is { Size: Point furniInfoSize })
+        {
+            return furniInfoSize;
+        }
+
+        return null;
+    }
+
+    public static bool TryGetSize<TItem>(this TItem item, out Point size)
+        where TItem : IItem
+    {
+        if (item.Type is ItemType.Floor)
+        {
+            if (item is IFloorItem { Size: Point floorItemSize })
+            {
+                size = floorItemSize;
+                return true;
+            }
+
+            if (item is IInventoryItem { Size: Point inventoryItemSize })
+            {
+                size = inventoryItemSize;
+                return true;
+            }
+
+            if (item is ITradeItem { Size: Point tradeItemSize })
+            {
+                size = tradeItemSize;
+                return true;
+            }
+
+            if (_furniData?.TryGetInfo(item, out var info) == true &&
+                info is { Size: Point furniInfoSize })
+            {
+                size = furniInfoSize;
+                return true;
+            }
+        }
+
+        size = default;
+        return false;
+    }
+
     /// <summary>
     /// Gets the area occupied by a floor item.
     /// </summary>
-    public static Area GetArea<TFloorItem>(this TFloorItem item)
+    public static Area? GetArea<TFloorItem>(this TFloorItem item)
         where TFloorItem : IFloorItem
     {
-        FurniInfo info = FurniData.GetInfo(item);
+        Point? size = GetSize(item);
+        if (size is null)
+            return null;
         bool flip = item.Direction % 4 == 2;
         return new(
             item.XY,
-            flip ? info.YDimension : info.XDimension,
-            flip ? info.XDimension : info.YDimension
+            flip ? size.Value.Y : size.Value.X,
+            flip ? size.Value.X : size.Value.Y
         );
     }
 
@@ -804,10 +858,10 @@ public static class Extensions
     /// Gets floor items intersecting the specified area.
     /// Includes items contained inside, and items partially intersecting the area.
     /// </summary>
-    public static IEnumerable<TFloorItem> Intersecting<TFloorItem>(this IEnumerable<TFloorItem> items, Area area)
+    public static IEnumerable<TFloorItem> Intersecting<TFloorItem>(this IEnumerable<TFloorItem> items, Area? area)
         where TFloorItem : IFloorItem
     {
-        return items.Where(item => GetArea(item).Intersects(area));
+        return items.Where(item => GetArea(item)?.Intersects(area) ?? false);
     }
 
     /// <summary>
@@ -1005,7 +1059,7 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Gets avatars at the specified X, Y location and optionally direction.
+    /// Gets floor entities at the specified X, Y location and optionally direction.
     /// </summary>
     public static IEnumerable<TFloorAvatar> At<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars,
         Point location, int? dir = null) where TFloorAvatar : IFloorEntity
@@ -1014,7 +1068,7 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Gets avatars not at the specified X, Y location and optionally direction.
+    /// Gets floor entities not at the specified X, Y location and optionally direction.
     /// </summary>
     public static IEnumerable<TFloorAvatar> NotAt<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars,
         Point location, int? dir = null) where TFloorAvatar : IFloorEntity
@@ -1023,7 +1077,7 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Gets avatars at the specified X, Y, Z location and optionally direction.
+    /// Gets floor entities at the specified X, Y, Z location and optionally direction.
     /// </summary>
     public static IEnumerable<TFloorAvatar> At<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars,
         Tile location, int? dir = null,
@@ -1033,7 +1087,7 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Gets avatars not at the specified X, Y, Z location and optionally direction.
+    /// Gets floor entities not at the specified X, Y, Z location and optionally direction.
     /// </summary>
     public static IEnumerable<TFloorAvatar> NotAt<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars,
         Tile location, int? dir = null,
@@ -1044,8 +1098,8 @@ public static class Extensions
 
     /// <summary>
     /// Gets floor entities contained inside the specified area.
-    /// Avatars partially intersecting the area will not be included.
-    /// To include these, use <see cref="Intersecting{TFloorItem}(IEnumerable{TFloorItem}, Area)" />.
+    /// Entities partially intersecting the area are not considered to be inside.
+    /// To include these, use <see cref="Intersecting{TFloorItem}(IEnumerable{TFloorItem}, Area?)" />.
     /// </summary>
     public static IEnumerable<TFloorAvatar> Inside<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars, Area area)
         where TFloorAvatar : IFloorEntity
@@ -1059,11 +1113,7 @@ public static class Extensions
     public static IEnumerable<TFloorAvatar> InsideAny<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars, AreaSet areas)
         where TFloorAvatar : IFloorEntity
     {
-        return avatars.Where(x =>
-        {
-            Area a = x.Area;
-            return areas.Any(area => area.Contains(a));
-        });
+        return avatars.Where(x => x.Area is { } area && areas.Any(area => area.Contains(area)));
     }
 
     /// <summary>
@@ -1072,15 +1122,12 @@ public static class Extensions
     public static IEnumerable<TFloorAvatar> InsideAll<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars, AreaSet areas)
         where TFloorAvatar : IFloorEntity
     {
-        return avatars.Where(x =>
-        {
-            Area a = x.Area;
-            return areas.All(area => area.Contains(a));
-        });
+        return avatars.Where(x => x.Area is { } area && areas.All(area => area.Contains(x.Area)));
     }
 
     /// <summary>
     /// Gets floor entities outside the specified area.
+    /// Entities partially intersecting the area are not considered to be outside.
     /// </summary>
     public static IEnumerable<TFloorAvatar> Outside<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars, Area area)
         where TFloorAvatar : IFloorEntity
@@ -1090,11 +1137,12 @@ public static class Extensions
 
     /// <summary>
     /// Gets floor entities outside the specified areas.
+    /// Entities partially intersecting any of the areas are not considered to be outside.
     /// </summary>
     public static IEnumerable<TFloorAvatar> Outside<TFloorAvatar>(this IEnumerable<TFloorAvatar> avatars, AreaSet areas)
         where TFloorAvatar : IFloorEntity
     {
-        return avatars.Where(x => !areas.Contains(x.Area));
+        return avatars.Where(x => x.Area is { } area && !areas.Any(area => area.Intersects(area)));
     }
     #endregion
 }

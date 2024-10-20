@@ -150,15 +150,6 @@ public static partial class H
             return -110;
     }
 
-    public static char GetCharacterFromHeight(int height)
-    {
-        if (height is >= 0 and < 10)
-            return (char)('0' + height);
-        else if (height is >= 10 and < 36)
-            return (char)('a' + (height - 10));
-        else
-            return 'x';
-    }
     #endregion
 
     #region - Text -

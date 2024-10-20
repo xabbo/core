@@ -8,57 +8,22 @@ namespace Xabbo.Core;
 /// <summary>
 /// Represents an area in a room.
 /// </summary>
-public readonly struct Area : IEnumerable<Point>
+public readonly record struct Area : IEnumerable<Point>
 {
     /// <summary>
-    /// Gets the X coordinate of the origin.
+    /// Gets the point with the minimum X and Y coordinates of the area.
     /// </summary>
-    public readonly int X1;
+    public Point Min { get; }
 
     /// <summary>
-    /// Gets the Y coordinate of the origin.
+    /// Gets the point with the maximum X and Y coordinates of the area.
     /// </summary>
-    public readonly int Y1;
-
-    /// <summary>
-    /// The width (on the X axis) of this area.
-    /// </summary>
-    public readonly int Width;
-
-    /// <summary>
-    /// The length (on the Y axis) of this area.
-    /// </summary>
-    public readonly int Length;
+    public Point Max { get; }
 
     /// <summary>
     /// Gets the size of this area.
     /// </summary>
-    public Point Size => (Width, Length);
-
-    /// <summary>
-    /// The origin point of this area.
-    /// </summary>
-    public Point Origin => new(X1, Y1);
-
-    /// <summary>
-    /// The point opposite the origin of this area.
-    /// </summary>
-    public Point Opposite => new(X2, Y2);
-
-    /// <summary>
-    /// Gets the X coordinate of the corner opposite the origin.
-    /// </summary>
-    public int X2 => Origin.X + Width - 1;
-
-    /// <summary>
-    /// Gets the Y coordinate of the corner opposite the origin.
-    /// </summary>
-    public int Y2 => Origin.Y + Length - 1;
-
-    /// <summary>
-    /// Gets the corner opposite the origin point of this area.
-    /// </summary>
-    public Point Endpoint => Origin + (Width, Length);
+    public Point Size => (Max.X - Min.X + 1, Max.Y - Min.Y + 1);
 
     /// <summary>
     /// Constructs a new area at the specified point with the specified size.
@@ -66,13 +31,11 @@ public readonly struct Area : IEnumerable<Point>
     /// <exception cref="ArgumentOutOfRangeException">The width or length is less than 1.</exception>
     public Area(Point origin, int width, int length)
     {
-        if (width < 1) throw new ArgumentOutOfRangeException(nameof(width));
-        if (length < 1) throw new ArgumentOutOfRangeException(nameof(length));
+        ArgumentOutOfRangeException.ThrowIfLessThan(width, 1);
+        ArgumentOutOfRangeException.ThrowIfLessThan(length, 1);
 
-        X1 = origin.X;
-        Y1 = origin.Y;
-        Width = width;
-        Length = length;
+        Min = origin;
+        Max = (origin.X + width - 1, origin.Y + length - 1);
     }
 
     /// <summary>
@@ -83,10 +46,8 @@ public readonly struct Area : IEnumerable<Point>
         if (x1 > x2) (x2, x1) = (x1, x2);
         if (y1 > y2) (y2, y1) = (y1, y2);
 
-        X1 = x1;
-        Y1 = y1;
-        Width = x2 - x1 + 1;
-        Length = y2 - y1 + 1;
+        Min = (x1, y1);
+        Max = (x2, y2);
     }
 
     /// <summary>
@@ -97,21 +58,38 @@ public readonly struct Area : IEnumerable<Point>
     { }
 
     /// <summary>
-    /// Constructs a new area with the specified dimensions.
+    /// Constructs a new area with the specified size.
     /// </summary>
     public Area(int width, int length)
         : this((0, 0), width, length)
     { }
 
     /// <summary>
+    /// Constructs a new area with the specified size.
+    /// </summary>
+    public Area(Point size)
+        : this((0, 0), size.X, size.Y)
+    { }
+
+    /// <summary>
+    /// Returns a new area translated to the specified coordinates.
+    /// </summary>
+    public Area At(int x, int y) => new((x, y), Size.X, Size.Y);
+
+    /// <summary>
+    /// Returns a new area translated to the specified coordinates.
+    /// </summary>
+    public Area At(Point location) => new(location, Size.X, Size.Y);
+
+    /// <summary>
     /// Returns a new area with the width and length reversed.
     /// </summary>
-    public Area Flip() => new(Origin, Length, Width);
+    public Area Flip() => new(Min, Size.Y, Size.X);
 
     /// <summary>
     /// Checks if this area contains the specified point.
     /// </summary>
-    public bool Contains(Point point) => Contains(point.X, point.Y);
+    public bool Contains(Point? point) => point is { X: int x, Y: int y } && Contains(x, y);
 
     /// <summary>
     /// Checks if this area contains the specified point.
@@ -119,20 +97,19 @@ public readonly struct Area : IEnumerable<Point>
     public bool Contains(int x, int y)
     {
         return
-            X1 <= x && x <= X2 &&
-            Y1 <= y && y <= Y2;
+            Min.X <= x && x <= Max.X &&
+            Min.Y <= y && y <= Max.Y;
     }
 
     /// <summary>
-    /// Gets whether the specified area is contained within this area.
+    /// Gets whether another area is contained within this area.
     /// </summary>
-    public bool Contains(Area area)
+    public bool Contains(Area? other)
     {
         return
-            area.X1 >= X1 &&
-            area.X2 <= X2 &&
-            area.Y1 >= Y1 &&
-            area.Y2 <= Y2;
+            other is { Min: Point otherMin, Max: Point otherMax } &&
+            otherMin.X >= Min.X && otherMax.X <= Max.X &&
+            otherMin.Y >= Min.Y && otherMax.Y <= Max.Y;
     }
 
     /// <summary>
@@ -143,11 +120,12 @@ public readonly struct Area : IEnumerable<Point>
     /// <summary>
     /// Gets whether the specified area intersects with this area.
     /// </summary>
-    public bool Intersects(Area area)
+    public bool Intersects(Area? other)
     {
         return
-            X1 <= area.X2 && Y1 <= area.Y2 &&
-            X2 >= area.X1 && Y2 >= area.Y1;
+            other is { Min: Point otherMin, Max: Point otherMax } &&
+            otherMax.X >= Min.X && otherMin.X <= Max.X &&
+            otherMax.Y >= Min.Y && otherMin.Y <= Max.Y;
     }
 
     /// <summary>
@@ -160,32 +138,14 @@ public readonly struct Area : IEnumerable<Point>
     /// </summary>
     private IEnumerable<Point> EnumeratePoints()
     {
-        for (int y = Y1; y <= Y2; y++)
-            for (int x = X1; x <= X2; x++)
+        for (int y = Min.Y; y <= Max.Y; y++)
+            for (int x = Min.X; x <= Max.X; x++)
                 yield return new(x, y);
     }
 
     public IEnumerator<Point> GetEnumerator() => EnumeratePoints().GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    public override int GetHashCode() => (X1, Y1, X2, Y2).GetHashCode();
-    public override bool Equals(object? obj)
-    {
-        return obj is Area other && Equals(other);
-    }
-
-    public bool Equals(Area other)
-    {
-        return
-            other.X1 == X1 &&
-            other.Y1 == Y1 &&
-            other.X2 == X2 &&
-            other.Y2 == Y2;
-    }
-
-    public static bool operator ==(Area a, Area b) => a.Equals(b);
-    public static bool operator !=(Area a, Area b) => !(a == b);
 
     /// <summary>
     /// Implicitly casts the specified corner points to an area.
@@ -197,8 +157,8 @@ public readonly struct Area : IEnumerable<Point>
     /// <summary>
     /// Implicitly casts the specified points to an area.
     /// </summary>
-    public static implicit operator Area((int X1, int Y1, int X2, int Y2) points)
-        => new(points.X1, points.Y1, points.X2, points.Y2);
+    public static implicit operator Area((int X1, int Y1, int X2, int Y2) coords)
+        => new(coords.X1, coords.Y1, coords.X2, coords.Y2);
 
     /// <summary>
     /// Implicitly casts the specified origin point, width, and length to an area.
@@ -228,5 +188,5 @@ public readonly struct Area : IEnumerable<Point>
     /// <summary>
     /// Gets a string representation of this area.
     /// </summary>
-    public override string ToString() => $"({X1}, {Y1}, {X2}, {Y2})";
+    public override string ToString() => $"({Min.X}, {Min.Y}, {Max.X}, {Max.Y})";
 }

@@ -62,4 +62,12 @@ public interface IInventoryItem : IItem
     /// consumable state, linked teleporter ID, etc.
     /// </summary>
     long Extra { get; }
+
+    /// <summary>
+    /// Gets the size of the item.
+    /// </summary>
+    /// <remarks>
+    /// Used on Origins.
+    /// </remarks>
+    Point? Size { get; }
 }

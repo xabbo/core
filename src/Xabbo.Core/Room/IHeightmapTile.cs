@@ -42,5 +42,5 @@ public interface IHeightmapTile
     /// <summary>
     /// Gets the height for this tile at which furni may be placed.
     /// </summary>
-    double Height { get; }
+    float Height { get; }
 }

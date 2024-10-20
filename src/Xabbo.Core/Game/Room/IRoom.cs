@@ -165,4 +165,12 @@ public interface IRoom
     bool TryGetBotById(Id id, [NotNullWhen(true)] out IBot? bot) => TryGetAvatarById(id, out bot);
     bool TryGetBotByName(string name, [NotNullWhen(true)] out IBot? bot) => TryGetAvatarByName(name, out bot);
     #endregion
+
+    /// <summary>
+    /// Attempts to find a point where a furniture of the specified size can be placed.
+    /// </summary>
+    /// <param name="size">The size of the furniture to place.</param>
+    /// <param name="allowEntryTile">Whether to allow placement on the room entry tile.</param>
+    /// <returns>A point where a furni of the specified size can probably be placed successfully.</returns>
+    Point? FindPlaceablePoint(Point size, bool allowEntryTile = false);
 }

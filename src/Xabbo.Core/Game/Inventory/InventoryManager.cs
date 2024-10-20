@@ -284,7 +284,7 @@ public sealed partial class InventoryManager : GameStateManager
             return;
 
         // Add the item back into the inventory.
-        if (furni is not IFloorItem { Dimensions: { X: int width, Y: int length } })
+        if (furni is not IFloorItem { Size: { X: int width, Y: int length } })
         {
             width = 1;
             length = 1;
@@ -296,8 +296,7 @@ public sealed partial class InventoryManager : GameStateManager
             ItemId = furni.Type is ItemType.Floor ? -furni.Id : furni.Id,
             Identifier = identifier,
             Colors = furni is IFloorItem { Colors: string colors } ? colors : "",
-            Width = width,
-            Length = length,
+            Size = furni is IFloorItem { Size: Point size } ? size : null,
             Data = new LegacyData() {
                 Value = furni is IWallItem { Data: string wallItemData } ? wallItemData : ""
             }

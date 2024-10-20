@@ -22,7 +22,7 @@ public class TradeItem : ITradeItem, IParserComposer<TradeItem>
     public int CreationMonth { get; set; }
     public int CreationYear { get; set; }
     public long Extra { get; set; }
-
+    public Point? Size { get; set; }
     public int SlotIndex { get; set; }
 
     bool IInventoryItem.IsRecyclable => true;
@@ -84,23 +84,42 @@ public class TradeItem : ITradeItem, IParserComposer<TradeItem>
         Id = p.ReadInt();
         Identifier = p.ReadString();
         if (Type == ItemType.Floor)
-        {
-            p.ReadInt(); // dimX
-            p.ReadInt(); // dimY
-            // colors
-            Data = new LegacyData { Value = p.ReadString() };
-        }
-        else if (Type == ItemType.Wall)
-        {
-            // props
-            Data = new LegacyData { Value = p.ReadString() };
-        }
+            Size = (p.ReadInt(), p.ReadInt());
+
+        // Colors (FloorItem), Props (WallItem)
+        Data = new LegacyData { Value = p.ReadString() };
     }
 
     void IComposer.Compose(in PacketWriter p)
     {
-        // TODO: implement Shockwave composer
-        UnsupportedClientException.ThrowIf(p.Client, ClientType.Shockwave);
+        if (p.Client is ClientType.Shockwave)
+            ComposeOrigins(in p);
+        else
+            ComposeModern(in p);
+    }
+
+    void ComposeOrigins(in PacketWriter p)
+    {
+        p.WriteId(ItemId);
+        p.WriteInt(SlotIndex);
+        p.WriteString(Type switch
+        {
+            ItemType.Floor => "S",
+            ItemType.Wall => "I",
+            _ => throw new Exception($"Invalid item type: {Type}.")
+        });
+        p.WriteId(Id);
+        p.WriteString(Identifier);
+        if (Type == ItemType.Floor)
+        {
+            p.WriteInt(Size?.X ?? 1);
+            p.WriteInt(Size?.Y ?? 1);
+        }
+        p.WriteString(Data.Value);
+    }
+
+    void ComposeModern(in PacketWriter p)
+    {
 
         p.WriteId(ItemId);
         p.WriteString(Type.GetClientIdentifier());

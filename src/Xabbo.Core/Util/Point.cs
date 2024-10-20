@@ -14,6 +14,11 @@ public readonly struct Point(int x, int y) : IParserComposer<Point>
     public readonly int X = x;
     public readonly int Y = y;
 
+    /// <summary>
+    /// Returns a new point with the X and Y coordinates flipped.
+    /// </summary>
+    public Point Flip() => new(Y, X);
+
     public override string ToString() => $"({X}, {Y})";
 
     public override int GetHashCode() => (X, Y).GetHashCode();

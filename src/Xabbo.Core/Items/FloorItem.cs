@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-
+using Xabbo.Core.Messages.Incoming;
 using Xabbo.Messages;
 
 namespace Xabbo.Core;
@@ -10,25 +10,49 @@ public class FloorItem : Furni, IFloorItem, IParserComposer<FloorItem>
     public override ItemType Type => ItemType.Floor;
 
     public Tile Location { get; set; }
-    public Point? Dimensions { get; set; }
-    public Area Area
+
+    private Point? _size;
+    public Point? Size
     {
         get
         {
-            if (Dimensions is { } dimensions)
+            if (_size is not null)
             {
-                Area area = new((X, Y), dimensions.X, dimensions.Y);
+                return _size;
+            }
+
+            if (Extensions.TryGetInfo(this, out var info) &&
+                info is { Size: Point size })
+            {
+                return size;
+            }
+
+            return null;
+        }
+
+        set => _size = value;
+    }
+
+    public Area? Area
+    {
+        get
+        {
+            if (Size is { } size)
+            {
+                var area = new Area(size).At(Location);
                 if (Direction == 2 || Direction == 6)
                     area = area.Flip();
                 return area;
             }
-            return Extensions.GetArea(this);
+            return null;
         }
     }
+
     [JsonIgnore] public int X => Location.X;
     [JsonIgnore] public int Y => Location.Y;
     [JsonIgnore] public Point XY => Location.XY;
     [JsonIgnore] public double Z => Location.Z;
+
     public int Direction { get; set; }
     public float Height { get; set; }
     public long Extra { get; set; }
@@ -115,7 +139,7 @@ public class FloorItem : Furni, IFloorItem, IParserComposer<FloorItem>
         Identifier = p.ReadString();
         int x = p.ReadInt();
         int y = p.ReadInt();
-        Dimensions = new Point(p.ReadInt(), p.ReadInt());
+        Size = new Point(p.ReadInt(), p.ReadInt());
         Direction = p.ReadInt();
         float z = p.ReadFloat();
         Location = new Tile(x, y, z);
@@ -136,7 +160,7 @@ public class FloorItem : Furni, IFloorItem, IParserComposer<FloorItem>
             p.WriteString(Identifier ?? "");
             p.WriteInt(X);
             p.WriteInt(Y);
-            p.Compose(Dimensions ?? (1, 1));
+            p.Compose(Size ?? (1, 1));
             p.WriteInt(Direction);
             p.WriteFloat((float)Z);
             p.WriteString(Colors);

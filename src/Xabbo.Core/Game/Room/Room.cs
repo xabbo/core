@@ -196,4 +196,56 @@ internal class Room : IRoom, INotifyPropertyChanged
         return false;
     }
     #endregion
+
+    private IEnumerable<Point?> FindPlacablePoints(Point size)
+    {
+        if (FloorPlan is not { } floorPlan)
+            yield break;
+
+        HashSet<Point> occupiedTiles = [];
+
+        var floorPlanArea = new Area(floorPlan.Size);
+
+        foreach (var point in floorPlanArea)
+            if (!floorPlan.IsWalkable(point))
+                occupiedTiles.Add(point);
+
+        foreach (var avatar in Avatars.Select(x => x.Value))
+            occupiedTiles.Add(avatar.Location);
+
+        foreach (var floorItem in FloorItems.Select(x => x.Value))
+        {
+            if (floorItem.Area is { } area)
+                foreach (var tile in area)
+                    occupiedTiles.Add(tile);
+        }
+
+        for (int y = 1; y < (floorPlan.Size.Y - size.Y + 1); y++)
+        {
+            for (int x = 1; x < (floorPlan.Size.X - size.X + 1); x++)
+            {
+                var placementArea = new Area(size).At(x, y);
+                if (placementArea.All(p => !occupiedTiles.Contains(p)))
+                    yield return (x, y);
+            }
+        }
+    }
+
+    public Point? FindPlaceablePoint(Point size, bool allowEntryTile = false)
+    {
+        if (Heightmap is { } heightmap)
+        {
+            Console.WriteLine("heightmap not null");
+            var area = new Area(size).At(size);
+            return heightmap
+                .FindPlaceablePoints(size, allowEntryTile ? null : Entry)
+                .Where(p => {
+                    Area area = new Area(size).At(p);
+                    return !Avatars.Select(x => x.Value).Any(avatar => area.Contains(avatar));
+                })
+                .FirstOrDefault();
+        }
+
+        return FindPlacablePoints(size).FirstOrDefault();
+    }
 }

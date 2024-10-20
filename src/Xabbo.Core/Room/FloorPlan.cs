@@ -15,8 +15,7 @@ public class FloorPlan : IFloorPlan, IParserComposer<FloorPlan>
     public bool UseLegacyScale { get; set; }
     public int Scale => UseLegacyScale ? 32 : 64;
     public int WallHeight { get; set; }
-    public int Width { get; set; }
-    public int Length { get; set; }
+    public Point Size { get; }
 
     private readonly int[] _tiles;
     public IReadOnlyList<int> Tiles => _tiles;
@@ -35,12 +34,10 @@ public class FloorPlan : IFloorPlan, IParserComposer<FloorPlan>
 
     public FloorPlan(int width, int length)
     {
-        if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width));
-        if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
+        ArgumentOutOfRangeException.ThrowIfLessThan(width, 0);
+        ArgumentOutOfRangeException.ThrowIfLessThan(length, 0);
 
-        Width = width;
-        Length = length;
-
+        Size = (width, length);
         _tiles = new int[width * length];
     }
 
@@ -52,18 +49,17 @@ public class FloorPlan : IFloorPlan, IParserComposer<FloorPlan>
         WallHeight = -1;
 
         _tiles = ParseString(map, out int width, out int length);
-        Width = width;
-        Length = length;
+        Size = (width, length);
     }
 
     public int GetHeight(int x, int y)
     {
-        if (x < 0 || x >= Width)
+        if (x < 0 || x >= Size.X)
             throw new ArgumentOutOfRangeException(nameof(x));
-        if (y < 0 || y >= Length)
+        if (y < 0 || y >= Size.Y)
             throw new ArgumentOutOfRangeException(nameof(y));
 
-        return _tiles[y * Width + x];
+        return _tiles[y * Size.X + x];
     }
 
     public int GetHeight((int X, int Y) location) => GetHeight(location.X, location.Y);
@@ -72,23 +68,24 @@ public class FloorPlan : IFloorPlan, IParserComposer<FloorPlan>
 
     public void SetHeight(int x, int y, int height)
     {
-        if (x < 0 || x >= Width)
+        if (x < 0 || x >= Size.X)
             throw new ArgumentOutOfRangeException(nameof(x));
-        if (y < 0 || y >= Length)
+        if (y < 0 || y >= Size.Y)
             throw new ArgumentOutOfRangeException(nameof(y));
-        if (height < -1)
-            throw new ArgumentOutOfRangeException(nameof(height));
+        ArgumentOutOfRangeException.ThrowIfLessThan(height, -1);
 
-        _tiles[y * Width + x] = height;
+        _tiles[y * Size.X + x] = height;
     }
 
     public void SetHeight((int X, int Y) location, int height) => SetHeight(location.X, location.Y, height);
 
     public void SetHeight(Tile location, int height) => SetHeight(location.X, location.Y, height);
 
+    public bool IsWalkable(Point point) => IsWalkable(point.X, point.Y);
+
     public bool IsWalkable(int x, int y)
     {
-        if (x < 0 || x >= Width || y < 0 || y >= Length)
+        if (x < 0 || x >= Size.X || y < 0 || y >= Size.Y)
             return false;
 
         return GetHeight(x, y) >= 0;
@@ -102,12 +99,12 @@ public class FloorPlan : IFloorPlan, IParserComposer<FloorPlan>
     {
         var sb = new StringBuilder();
 
-        for (int y = 0; y < Length; y++)
+        for (int y = 0; y < Size.Y; y++)
         {
             if (y > 0) sb.Append('\r');
-            for (int x = 0; x < Width; x++)
+            for (int x = 0; x < Size.X; x++)
             {
-                sb.Append(H.GetCharacterFromHeight(_tiles[y * Width + x]));
+                sb.Append(GetCharacterFromHeight(_tiles[y * Size.X + x]));
             }
         }
 
@@ -182,5 +179,15 @@ public class FloorPlan : IFloorPlan, IParserComposer<FloorPlan>
         }
 
         return tiles;
+    }
+
+    public static char GetCharacterFromHeight(int height)
+    {
+        if (height is >= 0 and < 10)
+            return (char)('0' + height);
+        else if (height is >= 10 and < 36)
+            return (char)('a' + (height - 10));
+        else
+            return 'x';
     }
 }

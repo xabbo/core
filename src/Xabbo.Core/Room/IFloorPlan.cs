@@ -18,14 +18,9 @@ public interface IFloorPlan
     int WallHeight { get; }
 
     /// <summary>
-    /// Gets the width of this floor plan.
+    /// Gets the size of the floor plan.
     /// </summary>
-    int Width { get; }
-
-    /// <summary>
-    /// Gets the length of this floor plan.
-    /// </summary>
-    int Length { get; }
+    Point Size { get; }
 
     /// <summary>
     /// Gets the tile height at the specified coordinates.
@@ -36,6 +31,11 @@ public interface IFloorPlan
     /// Gets the tile height at the specified coordinates.
     /// </summary>
     int this[Point point] { get; }
+
+    /// <summary>
+    /// Gets if the tile at the specified coordinates in this floor plan is walkable.
+    /// </summary>
+    bool IsWalkable(Point point);
 
     /// <summary>
     /// Gets if the tile at the specified coordinates in this floor plan is walkable.

@@ -50,6 +50,42 @@ public class Heightmap : IHeightmap, IEnumerable<HeightmapTile>, IParserComposer
         }
     }
 
+    public bool CanPlaceAt(Area area)
+    {
+        float? surfaceHeight = null;
+        foreach (Point p in area)
+        {
+            if (p.X < 0 || p.Y < 0 || p.X >= Width || p.Y >= Length)
+                return false;
+            var tile = this[p.X, p.Y];
+            if (!tile.IsFree)
+                return false;
+            if (surfaceHeight is null)
+                surfaceHeight = tile.Height;
+            else if (!Tile.CompareZ(surfaceHeight.Value, tile.Height))
+                return false;
+        }
+        return false;
+    }
+
+    public IEnumerable<Point> FindPlaceablePoints(Point size, Point? entry = null)
+    {
+        for (int y = 0; y < Length; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                if (entry == (x, y))
+                    continue;
+                var area = new Area(size).At(x, y);
+                if (!area.Contains(entry) && CanPlaceAt(area))
+                    yield return (x, y);
+            }
+        }
+    }
+
+    public Point? FindPlaceablePoint(Point size, Point? entry = null)
+        => FindPlaceablePoints(size, entry).FirstOrDefault();
+
     public IEnumerator<HeightmapTile> GetEnumerator() => _tiles.GetEnumerator();
 
     IEnumerator<IHeightmapTile> IEnumerable<IHeightmapTile>.GetEnumerator() => _tiles.Cast<IHeightmapTile>().GetEnumerator();

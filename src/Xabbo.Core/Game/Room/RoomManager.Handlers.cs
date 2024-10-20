@@ -344,7 +344,7 @@ partial class RoomManager
         FloorPlan floorPlan = e.Packet.Read<FloorPlan>();
         _currentRoom.FloorPlan = floorPlan;
 
-        Log.LogDebug("Received floor heightmap. (size:{Width}x{Length})", floorPlan.Width, floorPlan.Length);
+        Log.LogDebug("Received floor heightmap. (size:{Width}x{Length})", floorPlan.Size.X, floorPlan.Size.Y);
 
         if (Interceptor.Session.Is(ClientType.Shockwave))
         {

@@ -35,7 +35,7 @@ public readonly struct Tile(int x, int y, float z) : IParserComposer<Tile>
         X == point.X && Y == point.Y;
 
     public readonly bool Equals(Tile tile, float epsilon = XabboConst.DefaultEpsilon) =>
-        X == tile.X && Y == tile.Y && Math.Abs(tile.Z - Z) < epsilon;
+        X == tile.X && Y == tile.Y && CompareZ(tile.Z, Z, epsilon);
 
     public readonly override string ToString() => $"({X}, {Y}, {Z:0.0#######})";
 
@@ -77,6 +77,12 @@ public readonly struct Tile(int x, int y, float z) : IParserComposer<Tile>
 
         return tile;
     }
+
+    /// <summary>
+    /// Compares two Z coordinates and returns whether they are close enough to each other to be
+    /// considered equivalent when two furni are placed at either coordinate.
+    /// </summary>
+    public static bool CompareZ(float z1, float z2, float epsilon = XabboConst.DefaultEpsilon) => Math.Abs(z1 - z2) < epsilon;
 
     public static bool operator ==(Tile a, Tile b) => a.Equals(b);
     public static bool operator !=(Tile a, Tile b) => !(a == b);

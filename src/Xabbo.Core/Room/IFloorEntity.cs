@@ -16,7 +16,12 @@ public interface IFloorEntity
     int Direction { get; }
 
     /// <summary>
-    /// Gets the area occupied by the entity.
+    /// Gets the size of the entity, if it is available.
     /// </summary>
-    Area Area { get; }
+    Point? Size { get; }
+
+    /// <summary>
+    /// Gets the area occupied by the entity, if it is available.
+    /// </summary>
+    Area? Area { get; }
 }

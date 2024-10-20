@@ -27,8 +27,7 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
     public bool IsFloorItem => Type is ItemType.Floor;
     public bool IsWallItem => Type is ItemType.Wall;
 
-    public int Width { get; set; }
-    public int Length { get; set; }
+    public Point? Size { get; set; }
     public string Colors { get; set; } = "";
 
     public InventoryItem()
@@ -126,8 +125,7 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
         Identifier = p.ReadString();
         if (Type is ItemType.Floor)
         {
-            Width = p.ReadInt(); // dimX
-            Length = p.ReadInt(); // dimY
+            Size = (p.ReadInt(), p.ReadInt());
             Colors = p.ReadString();
         }
         else if (Type is ItemType.Wall)
@@ -160,8 +158,8 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
 
         if (Type is ItemType.Floor)
         {
-            p.WriteInt(Width);
-            p.WriteInt(Length);
+            p.WriteInt(Size?.X ?? 1);
+            p.WriteInt(Size?.Y ?? 1);
             p.WriteString(Colors);
         }
         else if (Type is ItemType.Wall)
