@@ -71,7 +71,6 @@ public class TradeItem : ITradeItem, IParserComposer<TradeItem>
 
     private void ParseOrigins(in PacketReader p)
     {
-        Kind = -1;
         ItemId = p.ReadInt();
         SlotIndex = p.ReadInt();
         string strItemType = p.ReadString();
