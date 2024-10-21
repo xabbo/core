@@ -153,34 +153,59 @@ public static partial class H
     #endregion
 
     #region - Text -
-    private static readonly Dictionary<char, string> _altCharacterMap = new()
+    private static readonly Dictionary<char, string> _characterMap = new()
     {
-        { '‡', "🚫" },
-        { '|', "❤️" },
-        { '¥', "★" },
-        { 'ƒ', "🖤" },
-        { '—', "🎵" },
-        { 'ª', "💀" },
-        { 'º', "⚡" },
-        { 'µ', "☕" },
-        { '±', "📱" },
-        { '÷', "👎" },
-        { '•', "👍" },
-        { '¶', "💡" },
-        { '‘', "🔒" },
-        { '†', "💣" },
-        { '¬', "🐟" },
-        { '»', "♣️" }
+        { '\x7c', "♥️" },
+        { '\x80', "€" },
+        { '\x82', "‚" },
+        { '\x83', "❤️" },
+        { '\x84', "♦️" },
+        { '\x85', "♠️" },
+        { '\x86', "💣" },
+        { '\x87', "🚫" },
+        { '\x88', "ˆ" },
+        { '\x8a', "Š" },
+        { '\x8b', "‹" },
+        { '\x8c', "Œ" },
+        { '\x8e', "Ž" },
+        { '\x91', "🔒" },
+        { '\x92', "’" },
+        { '\x93', "“" },
+        { '\x94', "”" },
+        { '\x95', "👍" },
+        { '\x96', "—" },
+        { '\x97', "🎵" },
+        { '\x98', "~" },
+        { '\x99', "™" },
+        { '\x9a', "š" },
+        { '\x9b', "›" },
+        { '\x9c', "œ" },
+        { '\x9e', "ž" },
+        { '\x9f', "Ÿ" },
+        { '\xa3', "€" },
+        { '\xa5', "⭐" },
+        { '\xaa', "💀" },
+        { '\xac', "🐟" },
+        { '\xb1', "📱" },
+        { '\xb5', "☕" },
+        { '\xb6', "💡" },
+        { '\xb9', "𖦹" },
+        { '\xba', "⚡" },
+        { '\xbb', "♣️" },
+        { '\xbc', "≤" },
+        { '\xbd', "≥" },
+        { '\xbe', "🔒" },
+        { '\xf7', "👎" },
     };
 
-    public static IReadOnlyDictionary<char, string> GetAltCharacterMap() => _altCharacterMap.ToDictionary(x => x.Key, x => x.Value);
+    public static IReadOnlyDictionary<char, string> GetAltCharacterMap() => _characterMap.ToDictionary(x => x.Key, x => x.Value);
 
     public static string RenderText(string text)
     {
         var sb = new StringBuilder();
         foreach (char c in text)
         {
-            if (_altCharacterMap.TryGetValue(c, out string? value))
+            if (_characterMap.TryGetValue(c, out string? value))
                 sb.Append(value);
             else
                 sb.Append(c);
