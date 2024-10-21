@@ -28,7 +28,6 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
     public bool IsWallItem => Type is ItemType.Wall;
 
     public Point? Size { get; set; }
-    public string Colors { get; set; } = "";
 
     public InventoryItem()
     {
@@ -124,14 +123,9 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
         Id = p.ReadId();
         Identifier = p.ReadString();
         if (Type is ItemType.Floor)
-        {
             Size = (p.ReadInt(), p.ReadInt());
-            Colors = p.ReadString();
-        }
-        else if (Type is ItemType.Wall)
-        {
-            Data = new LegacyData { Value = p.ReadString() };
-        }
+
+        Data = new LegacyData { Value = p.ReadString() };
     }
 
     void IComposer.Compose(in PacketWriter p)
@@ -160,7 +154,7 @@ public sealed class InventoryItem : IInventoryItem, IParserComposer<InventoryIte
         {
             p.WriteInt(Size?.X ?? 1);
             p.WriteInt(Size?.Y ?? 1);
-            p.WriteString(Colors);
+            p.WriteString(Data.Value);
         }
         else if (Type is ItemType.Wall)
         {

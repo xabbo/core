@@ -84,6 +84,8 @@ public sealed partial class InventoryManager : GameStateManager
 
         _roomManager.FloorItemRemoved += OnFloorItemRemoved;
         _roomManager.WallItemRemoved += OnWallItemRemoved;
+
+        _tradeManager.Completed += OnTradeCompleted;
     }
 
     public IInventory? Inventory => _inventory;
@@ -295,10 +297,13 @@ public sealed partial class InventoryManager : GameStateManager
             Id = furni.Id,
             ItemId = furni.Type is ItemType.Floor ? -furni.Id : furni.Id,
             Identifier = identifier,
-            Colors = furni is IFloorItem { Colors: string colors } ? colors : "",
             Size = furni is IFloorItem { Size: Point size } ? size : null,
             Data = new LegacyData() {
-                Value = furni is IWallItem { Data: string wallItemData } ? wallItemData : ""
+                Value = furni switch {
+                    IFloorItem { Data.Value: string data } => data,
+                    IWallItem { Data: string data } => data,
+                    _ => ""
+                }
             }
         };
 
@@ -312,6 +317,41 @@ public sealed partial class InventoryManager : GameStateManager
         else
         {
             _logger.LogWarning("Failed to add item #{ItemId}.", item.ItemId);
+        }
+    }
+
+    private void OnTradeCompleted(TradeCompletedEventArgs e)
+    {
+        if (!Session.Is(ClientType.Origins) ||
+            _inventory is not { } inventory)
+        {
+            return;
+        }
+
+        // On Origins we must add trade items to our inventory after a successful trade.
+        foreach (var item in e.PartnerOffer)
+        {
+            var inventoryItem = new InventoryItem {
+                Type = item.Type,
+                Id = item.Id,
+                ItemId = item.ItemId,
+                SlotId = item.SlotId,
+                Identifier = item.Identifier,
+                Size = item.Size,
+                Data = new LegacyData() {
+                    Value = item.Data.Value
+                }
+            };
+
+            if (inventory.TryAdd(inventoryItem))
+            {
+                _logger.LogDebug("Added item #{ItemId}.", inventoryItem.ItemId);
+                ItemAdded?.Invoke(new InventoryItemEventArgs(inventoryItem));
+            }
+            else
+            {
+                _logger.LogWarning("Failed to add item #{ItemId}.", inventoryItem.ItemId);
+            }
         }
     }
 }

@@ -23,7 +23,7 @@ public class TradeItem : ITradeItem, IParserComposer<TradeItem>
     public int CreationYear { get; set; }
     public long Extra { get; set; }
     public Point? Size { get; set; }
-    public int SlotIndex { get; set; }
+    public string SlotId { get; set; } = "";
 
     bool IInventoryItem.IsRecyclable => true;
     bool IInventoryItem.IsTradeable => true;
@@ -72,7 +72,7 @@ public class TradeItem : ITradeItem, IParserComposer<TradeItem>
     private void ParseOrigins(in PacketReader p)
     {
         ItemId = p.ReadInt();
-        SlotIndex = p.ReadInt();
+        SlotId = p.ReadInt().ToString();
         string strItemType = p.ReadString();
         Type = strItemType switch
         {
@@ -100,7 +100,7 @@ public class TradeItem : ITradeItem, IParserComposer<TradeItem>
     void ComposeOrigins(in PacketWriter p)
     {
         p.WriteId(ItemId);
-        p.WriteInt(SlotIndex);
+        p.WriteInt(int.TryParse(SlotId, out int slotId) ? slotId : 0);
         p.WriteString(Type switch
         {
             ItemType.Floor => "S",
