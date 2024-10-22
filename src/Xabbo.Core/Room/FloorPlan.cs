@@ -135,6 +135,10 @@ public class FloorPlan : IFloorPlan, IParserComposer<FloorPlan>
             useLegacyScale = p.ReadBool();
             wallHeight = p.ReadInt();
         }
+        else
+        {
+            useLegacyScale = true;
+        }
 
         string map = p.Client switch
         {
