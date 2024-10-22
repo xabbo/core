@@ -10,15 +10,17 @@ namespace Xabbo.Core;
 /// </summary>
 public readonly record struct Area : IEnumerable<Point>
 {
+    public static readonly Area Empty = new() { Min = Point.MaxValue, Max = Point.MinValue };
+
     /// <summary>
     /// Gets the point with the minimum X and Y coordinates of the area.
     /// </summary>
-    public Point Min { get; }
+    public Point Min { get; private init; }
 
     /// <summary>
     /// Gets the point with the maximum X and Y coordinates of the area.
     /// </summary>
-    public Point Max { get; }
+    public Point Max { get; private init; }
 
     /// <summary>
     /// Gets the size of this area.
@@ -41,13 +43,24 @@ public readonly record struct Area : IEnumerable<Point>
     /// <summary>
     /// Constructs a new area from the specified corner points.
     /// </summary>
-    public Area(int x1, int y1, int x2, int y2)
+    public Area(int x1, int y1, int x2, int y2, bool normalize = true)
     {
-        if (x1 > x2) (x2, x1) = (x1, x2);
-        if (y1 > y2) (y2, y1) = (y1, y2);
+        if (normalize)
+        {
+            if (x1 > x2) (x2, x1) = (x1, x2);
+            if (y1 > y2) (y2, y1) = (y1, y2);
+        }
 
-        Min = (x1, y1);
-        Max = (x2, y2);
+        if (x1 > x2 || y1 > y2)
+        {
+            Min = Empty.Min;
+            Max = Empty.Max;
+        }
+        else
+        {
+            Min = (x1, y1);
+            Max = (x2, y2);
+        }
     }
 
     /// <summary>
@@ -129,6 +142,18 @@ public readonly record struct Area : IEnumerable<Point>
     }
 
     /// <summary>
+    /// Gets whether the specified area contains this area.
+    /// </summary>
+    /// <param name="other">The containing area to check whether this area is inside.</param>
+    public bool IsInside(Area? other)
+    {
+        return
+            other is { Min: Point otherMin, Max: Point otherMax } &&
+            Min.X >= otherMin.X && Max.X <= otherMax.X &&
+            Min.Y >= otherMin.Y && Max.Y <= otherMax.Y;
+    }
+
+    /// <summary>
     /// Gets whether the specified floor entity intersects with this area.
     /// </summary>
     public bool Intersects(IFloorEntity e) => Intersects(e.Area);
@@ -189,4 +214,18 @@ public readonly record struct Area : IEnumerable<Point>
     /// Gets a string representation of this area.
     /// </summary>
     public override string ToString() => $"({Min.X}, {Min.Y}, {Max.X}, {Max.Y})";
+
+    /// <summary>
+    /// Gets the intersection of two areas.
+    /// </summary>
+    /// <param name="a">The first area.</param>
+    /// <param name="b">The second area.</param>
+    /// <returns>The intersection of the two areas.</returns>
+    public static Area Intersection(Area a, Area b) => new(
+        Math.Max(a.Min.X, b.Min.X),
+        Math.Max(a.Min.Y, b.Min.Y),
+        Math.Min(a.Max.X, b.Max.X),
+        Math.Min(a.Max.Y, b.Max.Y),
+        false
+    );
 }

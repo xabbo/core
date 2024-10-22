@@ -291,7 +291,7 @@ partial class RoomManager
         Heightmap heightmap = e.Packet.Read<Heightmap>();
         _currentRoom.Heightmap = heightmap;
 
-        Log.LogDebug("Received stacking heightmap. (size:{Width}x{Length})", heightmap.Width, heightmap.Length);
+        Log.LogDebug("Received stacking heightmap. (size:{Width}x{Length})", heightmap.Size.X, heightmap.Size.Y);
     }
 
     // TODO: maybe unrelated to Shockwave's HeightMapUpdate, removing client target for now.

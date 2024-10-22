@@ -23,6 +23,11 @@ public interface IFloorPlan
     Point Size { get; }
 
     /// <summary>
+    /// Gets the area of the floor plan.
+    /// </summary>
+    Area Area { get; }
+
+    /// <summary>
     /// Gets the tile height at the specified coordinates.
     /// </summary>
     int this[int x, int y] { get; }

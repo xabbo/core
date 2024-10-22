@@ -11,20 +11,14 @@ namespace Xabbo.Core;
 public interface IHeightmap : IEnumerable<IHeightmapTile>
 {
     /// <summary>
-    /// Gets the width of the heightmap.
+    /// Gets the size of the heightmap.
     /// </summary>
-    /// <remarks>
-    /// Width spans the X axis of the room.
-    /// </remarks>
-    int Width { get; }
+    Point Size { get; }
 
     /// <summary>
-    /// Gets the length of the heightmap.
+    /// Gets the area of the heightmap.
     /// </summary>
-    /// <remarks>
-    /// Length spans the Y axis of the room.
-    /// </remarks>
-    int Length { get; }
+    Area Area { get; }
 
     /// <summary>
     /// Gets the heightmap tile at the specified coordinates.

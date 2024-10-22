@@ -10,6 +10,8 @@ namespace Xabbo.Core;
 public readonly struct Point(int x, int y) : IParserComposer<Point>
 {
     public static readonly Point Zero = new(0, 0);
+    public static readonly Point MinValue = new(int.MinValue, int.MinValue);
+    public static readonly Point MaxValue = new(int.MaxValue, int.MaxValue);
 
     public readonly int X = x;
     public readonly int Y = y;

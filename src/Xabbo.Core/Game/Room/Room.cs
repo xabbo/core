@@ -197,7 +197,7 @@ internal class Room : IRoom, INotifyPropertyChanged
     }
     #endregion
 
-    private IEnumerable<Point?> FindPlacablePoints(Point size)
+    private IEnumerable<Point> FindPlaceablePointsFloorPlan(Area area, Point size, bool allowEntryTile)
     {
         if (FloorPlan is not { } floorPlan)
             yield break;
@@ -215,14 +215,14 @@ internal class Room : IRoom, INotifyPropertyChanged
 
         foreach (var floorItem in FloorItems.Select(x => x.Value))
         {
-            if (floorItem.Area is { } area)
-                foreach (var tile in area)
+            if (floorItem.Area is { } floorItemArea)
+                foreach (var tile in floorItemArea)
                     occupiedTiles.Add(tile);
         }
 
-        for (int y = 1; y < (floorPlan.Size.Y - size.Y + 1); y++)
+        for (int y = area.Min.Y; y <= (area.Max.Y - size.Y + 1) && y < floorPlan.Size.Y; y++)
         {
-            for (int x = 1; x < (floorPlan.Size.X - size.X + 1); x++)
+            for (int x = area.Min.X; x <= (area.Max.X - size.X + 1) && x < floorPlan.Size.X; x++)
             {
                 var placementArea = new Area(size).At(x, y);
                 if (placementArea.All(p => !occupiedTiles.Contains(p)))
@@ -231,21 +231,33 @@ internal class Room : IRoom, INotifyPropertyChanged
         }
     }
 
-    public Point? FindPlaceablePoint(Point size, bool allowEntryTile = false)
+    public IEnumerable<Point> FindPlaceablePoints(Area area, Point size, bool allowEntryTile)
     {
         if (Heightmap is { } heightmap)
         {
-            Console.WriteLine("heightmap not null");
-            var area = new Area(size).At(size);
             return heightmap
-                .FindPlaceablePoints(size, allowEntryTile ? null : Entry)
+                .FindPlaceablePoints(area, size, allowEntryTile ? null : Entry)
                 .Where(p => {
                     Area area = new Area(size).At(p);
                     return !Avatars.Select(x => x.Value).Any(avatar => area.Contains(avatar));
-                })
-                .FirstOrDefault();
+                });
         }
+        else
+        {
+            return FindPlaceablePointsFloorPlan(area, size, allowEntryTile);
+        }
+    }
 
-        return FindPlacablePoints(size).FirstOrDefault();
+    public Point? FindPlaceablePoint(Area area, Point size, bool allowEntryTile = false)
+    {
+        Point p = FindPlaceablePoints(area, size, allowEntryTile).FirstOrDefault(Point.MinValue);
+        if (p == Point.MinValue)
+            return null;
+        return p;
+    }
+
+    public Point? FindPlaceablePoint(Point size, bool allowEntryTile = false)
+    {
+        return FindPlaceablePoint(FloorPlan.Area, size, allowEntryTile);
     }
 }

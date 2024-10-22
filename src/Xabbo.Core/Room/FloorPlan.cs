@@ -16,6 +16,7 @@ public class FloorPlan : IFloorPlan, IParserComposer<FloorPlan>
     public int Scale => UseLegacyScale ? 32 : 64;
     public int WallHeight { get; set; }
     public Point Size { get; }
+    public Area Area => new(Size);
 
     private readonly int[] _tiles;
     public IReadOnlyList<int> Tiles => _tiles;

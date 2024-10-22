@@ -5,9 +5,9 @@ namespace Xabbo.Core;
 /// <inheritdoc cref="IHeightmapTile"/>
 public class HeightmapTile : IHeightmapTile, IComposer
 {
-    public int X { get; }
-    public int Y { get; }
-    public Point Location => (X, Y);
+    public Point Location { get; }
+    public int X => Location.X;
+    public int Y => Location.Y;
     public bool IsFloor { get; set; }
     public bool IsBlocked { get; set; }
     public bool IsFree => IsFloor && !IsBlocked;
@@ -16,14 +16,11 @@ public class HeightmapTile : IHeightmapTile, IComposer
     /// <summary>
     /// Constructs a new heightmap tile with the specified coordinates and encoded value.
     /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
+    /// <param name="location">The location of the tile.</param>
     /// <param name="value">The encoded value.</param>
-    public HeightmapTile(int x, int y, short value)
+    public HeightmapTile(Point location, short value)
     {
-        X = x;
-        Y = y;
-
+        Location = location;
         Update(value);
     }
 

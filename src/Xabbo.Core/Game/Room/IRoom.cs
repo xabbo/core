@@ -167,10 +167,31 @@ public interface IRoom
     #endregion
 
     /// <summary>
-    /// Attempts to find a point where a furniture of the specified size can be placed.
+    /// Finds locations within the specified area where a furniture of the specified size can likely
+    /// be placed successfully.
+    /// </summary>
+    /// <param name="area">The area to place furniture inside.</param>
+    /// <param name="size">The size of the furniture to place.</param>
+    /// <param name="allowEntryTile">Whether to allow placement on the room entry tile.</param>
+    /// <returns>Locations where a furni of the specified size can likely be placed successfully.</returns>
+    IEnumerable<Point> FindPlaceablePoints(Area area, Point size, bool allowEntryTile);
+
+    /// <summary>
+    /// Attempts to find a location within the specified area where a furniture of the specified
+    /// size can likely be placed successfully.
+    /// </summary>
+    /// <param name="area">The area to place furniture inside.</param>
+    /// <param name="size">The size of the furniture to place.</param>
+    /// <param name="allowEntryTile">Whether to allow placement on the room entry tile.</param>
+    /// <returns>A point where a furni of the specified size can likely be placed successfully.</returns>
+    Point? FindPlaceablePoint(Area area, Point size, bool allowEntryTile = false);
+
+    /// <summary>
+    /// Attempts to find a location where a furniture of the specified size can likely be placed
+    /// successfully.
     /// </summary>
     /// <param name="size">The size of the furniture to place.</param>
     /// <param name="allowEntryTile">Whether to allow placement on the room entry tile.</param>
-    /// <returns>A point where a furni of the specified size can probably be placed successfully.</returns>
+    /// <returns>A point where a furni of the specified size can likely be placed successfully.</returns>
     Point? FindPlaceablePoint(Point size, bool allowEntryTile = false);
 }
