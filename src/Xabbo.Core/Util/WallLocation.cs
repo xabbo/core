@@ -184,4 +184,5 @@ public readonly record struct WallLocation(Point Wall, Point Offset, WallOrienta
     public static WallLocation operator -(WallLocation location, (int X, int Y) offset) => location.Add((-offset.X, -offset.Y), Point.Zero);
 
     public static implicit operator WallLocation(string s) => ParseString(s);
+    public static implicit operator WallLocation((Point Wall, Point Offset, WallOrientation Orientation) x) => new(x.Wall, x.Offset, x.Orientation);
 }
